@@ -9,7 +9,7 @@ export type DbProduct = { slug: string; name: string; category: string; brand: s
 export async function getCategories(): Promise<DbCategory[]> {
   try {
     if (!supabase) throw new Error('no supabase env');
-    const { data, error } = await supabase.from('categories').select('id,parent_id,level,name,slug').order('sort_order').limit(1000);
+    const { data, error } = await supabase.from('categories').select('id,parent_id,level,name,slug').order('sort_order').limit(5000);
     if (error || !data || data.length === 0) throw new Error('no db categories');
     const byId = new Map(data.map((c: any) => [c.id, c.slug]));
     return data.map((c: any) => ({ ...c, parent: c.parent_id ? byId.get(c.parent_id) : undefined }));
@@ -22,15 +22,15 @@ export async function getProducts(): Promise<DbProduct[]> {
   try {
     if (!supabase) throw new Error('no supabase env');
     const [prods, brands, variants, pcs, cols] = await Promise.all([
-      supabase.from('products').select('id,slug,name,category_id,brand_id').eq('status', 'published').limit(1000),
-      supabase.from('brands').select('id,name').limit(1000),
-      supabase.from('product_variants').select('product_id,price,is_active').eq('is_active', true).limit(1000),
-      supabase.from('product_collections').select('product_id,collection_id').limit(1000),
-      supabase.from('collections').select('id,slug').limit(1000),
+      supabase.from('products').select('id,slug,name,category_id,brand_id').eq('status', 'published').limit(5000),
+      supabase.from('brands').select('id,name').limit(5000),
+      supabase.from('product_variants').select('product_id,price,is_active').eq('is_active', true).limit(5000),
+      supabase.from('product_collections').select('product_id,collection_id').limit(5000),
+      supabase.from('collections').select('id,slug').limit(5000),
     ]);
     if (prods.error || !prods.data || prods.data.length === 0) throw new Error('no db products');
     const brandById = new Map((brands.data ?? []).map((b: any) => [b.id, b.name]));
-    const catById = new Map((await supabase!.from('categories').select('id,slug').limit(1000)).data?.map((c: any) => [c.id, c.slug]) ?? []);
+    const catById = new Map((await supabase!.from('categories').select('id,slug').limit(5000)).data?.map((c: any) => [c.id, c.slug]) ?? []);
     const priceByProduct = new Map((variants.data ?? []).map((v: any) => [v.product_id, Number(v.price)]));
     const colById = new Map((cols.data ?? []).map((c: any) => [c.id, c.slug]));
     const colsByProduct = new Map<string, string[]>();
@@ -56,4 +56,57 @@ export function descendantsOf(categories: DbCategory[], slug: string): string[] 
   const out = [slug];
   for (const c of categories.filter((c) => c.parent === slug)) out.push(...descendantsOf(categories, c.slug));
   return out;
+}
+
+export type DbVariant = { id: string; sku: string; size: string | null; color: string | null; price: number; compare_at_price: number | null; is_active: boolean };
+export type DbProductDetail = {
+  slug: string; name: string; description: string | null;
+  brand: string | null; category_path: { name: string; slug: string; level: number }[];
+  collections: string[]; variants: DbVariant[];
+  price_min: number | null; price_max: number | null;
+};
+
+export async function getProductDetail(slug: string): Promise<DbProductDetail | null> {
+  try {
+    if (!supabase) throw new Error('no supabase env');
+    const { data: p, error }: { data: any; error: any } = await supabase.from('products')
+      .select('id,slug,name,description,category_id,brand_id').eq('slug', slug).eq('status', 'published').single();
+    if (error || !p) throw new Error('no db product');
+    const prod = p as any;
+    const [brands, cats, variants, pcs, cols] = await Promise.all([
+      prod.brand_id ? supabase.from('brands').select('name').eq('id', prod.brand_id).single() : Promise.resolve({ data: null } as any),
+      supabase.from('categories').select('id,parent_id,name,slug,level').limit(5000),
+      supabase.from('product_variants').select('id,sku,size,color,price,compare_at_price,is_active').eq('product_id', prod.id).eq('is_active', true).order('price').limit(5000),
+      supabase.from('product_collections').select('collection_id').eq('product_id', prod.id).limit(5000),
+      supabase.from('collections').select('id,slug').limit(5000),
+    ]);
+    const byId = new Map((cats.data ?? []).map((c: any) => [c.id, c]));
+    const path: { name: string; slug: string; level: number }[] = [];
+    let cur = prod.category_id ? byId.get(prod.category_id) : undefined;
+    while (cur) { path.unshift({ name: cur.name, slug: cur.slug, level: cur.level }); cur = cur.parent_id ? byId.get(cur.parent_id) : undefined; }
+    const colById = new Map((cols.data ?? []).map((c: any) => [c.id, c.slug]));
+    const vlist: DbVariant[] = (variants.data ?? []).map((v: any) => ({
+      id: v.id, sku: v.sku, size: v.size, color: v.color,
+      price: Number(v.price), compare_at_price: v.compare_at_price == null ? null : Number(v.compare_at_price),
+      is_active: v.is_active,
+    }));
+    const prices = vlist.map((v) => v.price);
+    return {
+      slug: prod.slug, name: prod.name, description: prod.description,
+      brand: brands.data?.name ?? null, category_path: path,
+      collections: (pcs.data ?? []).map((pc: any) => colById.get(pc.collection_id)).filter(Boolean) as string[],
+      variants: vlist,
+      price_min: prices.length ? Math.min(...prices) : null,
+      price_max: prices.length ? Math.max(...prices) : null,
+    };
+  } catch {
+    const seed = SEED_PRODUCTS.find((x) => x.slug === slug);
+    if (!seed) return null;
+    return {
+      slug: seed.slug, name: seed.name, description: null, brand: seed.brand,
+      category_path: [{ name: seed.category, slug: seed.category, level: 3 }],
+      collections: seed.collections, variants: [{ id: seed.slug, sku: seed.slug, size: null, color: null, price: seed.price, compare_at_price: null, is_active: true }],
+      price_min: seed.price, price_max: seed.price,
+    };
+  }
 }
