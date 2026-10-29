@@ -67,6 +67,71 @@ export async function getProducts(): Promise<DbProduct[]> {
   }
 }
 
+
+export type SupplierProduct = { id: string; slug: string; name: string; brand: string; price: number; category: string; variant_count: number };
+
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+}
+
+export async function getSupplierProducts(limit = 5000): Promise<SupplierProduct[]> {
+  try {
+    if (!supabase) throw new Error('no supabase env');
+    const { data, error } = await supabase
+      .from('supplier_catalog_products')
+      .select('id,name,brand_name,category_id,variant_count,supplier_catalog_variants(price_snapshot)')
+      .limit(limit);
+    if (error || !data) throw new Error('no supplier products');
+    const catById = new Map((await fetchAllCategories('id,slug')).map((c: any) => [c.id, c.slug]));
+    return data.map((p: any) => {
+      const variants = p.supplier_catalog_variants ?? [];
+      const prices = variants.map((v: any) => Number(v.price_snapshot)).filter((n: number) => n > 0);
+      const price = prices.length ? Math.min(...prices) : 0;
+      return {
+        id: p.id,
+        slug: `sp-${p.id.slice(0, 8)}-${slugify(p.name)}`,
+        name: p.name,
+        brand: p.brand_name ?? 'Supplier',
+        price,
+        category: catById.get(p.category_id) ?? '',
+        variant_count: p.variant_count ?? variants.length,
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
+
+export async function getSupplierProductDetail(slug: string): Promise<any | null> {
+  try {
+    if (!supabase) throw new Error('no supabase env');
+    // Slug format: sp-<id8>-<name>
+    if (!slug.startsWith('sp-')) return null;
+    const idPart = slug.slice(3, 11);
+    const { data, error } = await supabase
+      .from('supplier_catalog_products')
+      .select('id,name,brand_name,category_id,supplier_catalog_variants(id,external_id,name,size,color,price_snapshot)')
+      .ilike('id', idPart + '%')
+      .limit(1)
+      .single();
+    if (error || !data) return null;
+    const d: any = data;
+    const variants = (d.supplier_catalog_variants ?? []).map((v: any) => ({
+      id: v.id, sku: v.external_id, size: v.size, color: v.color,
+      price: Number(v.price_snapshot ?? 0), compare_at_price: null, is_active: true,
+    }));
+    const prices = variants.map((v: any) => v.price).filter((n: number) => n > 0);
+    return {
+      slug, name: d.name, description: null, brand: d.brand_name ?? 'Supplier',
+      category: d.category_id, variants,
+      price_min: prices.length ? Math.min(...prices) : 0,
+      price_max: prices.length ? Math.max(...prices) : 0,
+      category_path: [],
+    };
+  } catch { return null; }
+}
+
 export function descendantsOf(categories: DbCategory[], slug: string): string[] {
   const out = [slug];
   for (const c of categories.filter((c) => c.parent === slug)) out.push(...descendantsOf(categories, c.slug));

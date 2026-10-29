@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { getCategories, getProducts, descendantsOf } from '@/lib/catalog-db';
+import { getCategories, getProducts, getSupplierProducts, descendantsOf } from '@/lib/catalog-db';
 import CategorySidebar from '@/components/CategorySidebar';
 export const revalidate = 3600;
 
 export default async function ShopPage({ params }: { params: { slug?: string[] } }) {
   const categories = await getCategories();
-  const products = await getProducts();
+  const products = await getSupplierProducts(5000);
   const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort();
   const slug = params.slug?.[params.slug.length - 1];
   const cat = categories.find((c) => c.slug === slug);

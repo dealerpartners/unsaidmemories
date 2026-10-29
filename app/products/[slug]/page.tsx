@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import { getProductDetail } from '@/lib/catalog-db';
+import { getProductDetail, getSupplierProductDetail } from '@/lib/catalog-db';
 import VariantSelector from '@/components/VariantSelector';
 export const revalidate = 3600;
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const p = await getProductDetail(params.slug);
+  const p = (await getProductDetail(params.slug)) ?? (await getSupplierProductDetail(params.slug));
   if (!p) {
     return (
       <div className="wrap" style={{ padding: '48px 0' }}>
@@ -26,7 +26,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
     <div className="wrap" style={{ padding: '24px 0 64px' }}>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 16 }}>
         <Link href="/shop">Shop</Link>
-        {p.category_path.map((c) => (
+        {p.category_path.map((c: any) => (
           <span key={c.slug}>&nbsp;›&nbsp;<Link href={`/shop/${c.slug}`}>{c.name}</Link></span>
         ))}
         &nbsp;›&nbsp; {p.name}
@@ -52,13 +52,13 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
           <VariantSelector variants={p.variants} />
 
-          {p.collections.length > 0 && (
+          {(p.collections ?? []).length > 0 && (
             <div style={{ marginTop: 24, fontSize: 14 }}>
               <span style={{ color: 'var(--muted)' }}>Collections: </span>
-              {p.collections.map((c, i) => (
+              {p.collections.map((c: any, i: number) => (
                 <span key={c}>
                   <Link href={`/collections/${c}`}>{c}</Link>
-                  {i < p.collections.length - 1 ? ', ' : ''}
+                  {i < (p.collections ?? []).length - 1 ? ', ' : ''}
                 </span>
               ))}
             </div>
