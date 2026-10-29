@@ -7,6 +7,7 @@ export default function VariantSelector({ variants }: { variants: DbVariant[] })
   const colors = useMemo(() => [...new Set(variants.map((v) => v.color).filter(Boolean))], [variants]);
   const [size, setSize] = useState<string | null>(sizes[0] ?? null);
   const [color, setColor] = useState<string | null>(colors[0] ?? null);
+  const [quantity, setQuantity] = useState(1);
 
   const match = variants.find(
     (v) => (sizes.length === 0 || v.size === size) && (colors.length === 0 || v.color === color),
@@ -54,8 +55,30 @@ export default function VariantSelector({ variants }: { variants: DbVariant[] })
         )}
       </div>
       <p style={{ fontSize: 13, color: 'var(--muted)' }}>SKU: {match.sku}</p>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 8 }}>Quantity</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            style={{ ...chip(false), minWidth: 40, fontWeight: 700 }}
+            aria-label="Decrease quantity"
+          >
+            −
+          </button>
+          <span style={{ fontSize: 18, fontWeight: 600, minWidth: 32, textAlign: 'center' }}>{quantity}</span>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+            style={{ ...chip(false), minWidth: 40, fontWeight: 700 }}
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
+      </div>
       <a
-        href={`/checkout?variant=${encodeURIComponent(match.sku)}`}
+        href={`/checkout?variant=${encodeURIComponent(match.sku)}&qty=${quantity}`}
         style={{
           display: 'inline-block', padding: '12px 28px', borderRadius: 'var(--radius)',
           background: 'var(--purple)', color: '#fff', fontWeight: 600, textDecoration: 'none',

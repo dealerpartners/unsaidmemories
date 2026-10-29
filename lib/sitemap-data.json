@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-29T06:42:34.410Z",
+  "generatedAt": "2026-10-29T09:11:26.446Z",
   "source": "supabase",
   "products": [
     "collage-photo-frame",
@@ -46,7 +46,10 @@
     "accessories-4",
     "all-products-277",
     "apparel",
+    "books-magazines",
     "brands-159",
+    "business-commercial",
+    "cards-stationery",
     "celebrations",
     "collections-116",
     "digital-and-memory",
@@ -72,6 +75,15 @@
     "men-s-clothing-1",
     "office",
     "office",
+    "prints-posters",
+    "relationships",
+    "sample-packs",
+    "sports-games",
+    "sportswear-2",
+    "stickers",
+    "technology",
+    "unsaid-holidays",
+    "wall-art-2",
     "wellness",
     "women-s-clothing-2"
   ]
