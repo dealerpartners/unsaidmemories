@@ -12,7 +12,9 @@ export default async function ShopPage({ params }: { params: { slug?: string[] }
   const children = categories.filter((c) => c.parent === (slug ?? undefined) || (!slug && c.level === 1));
   const l1 = categories.filter((c) => c.level === 1);
   const allowed = slug ? new Set(descendantsOf(categories, slug)) : new Set<string>();
-  const shown = slug ? products.filter((p) => allowed.has(p.category)) : [];
+  const matched = slug ? products.filter((p) => allowed.has(p.category)) : [];
+  // If category filter yields nothing, show all products rather than an empty page
+  const shown = slug && matched.length === 0 ? products.slice(0, 48) : matched;
 
   if (!slug) {
     return (
