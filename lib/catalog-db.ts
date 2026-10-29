@@ -77,17 +77,23 @@ function slugify(s: string): string {
 export async function getSupplierProducts(limit = 5000): Promise<SupplierProduct[]> {
   try {
     if (!supabase) throw new Error('no supabase env');
-    const [prods, vars] = await Promise.all([
-      supabase.from('supplier_catalog_products').select('id,name,brand_name,category_id,variant_count').limit(limit),
-      supabase.from('supplier_catalog_variants').select('supplier_catalog_product_id,price_snapshot').limit(limit * 5),
-    ]);
+    const prods = await supabase.from('supplier_catalog_products').select('id,name,brand_name,category_id,variant_count').limit(limit);
     if (prods.error || !prods.data) throw new Error('no supplier products');
+    const pids = (prods.data as any[]).map((p: any) => p.id);
     const priceByPid = new Map<string, number[]>();
-    for (const v of (vars.data ?? []) as any[]) {
-      const pid = v.supplier_catalog_product_id;
-      if (!priceByPid.has(pid)) priceByPid.set(pid, []);
-      const n = Number(v.price_snapshot);
-      if (n > 0) priceByPid.get(pid)!.push(n);
+    // Fetch variants in batches for these specific products
+    for (let i = 0; i < pids.length; i += 500) {
+      const batch = pids.slice(i, i + 500);
+      const { data: vdata } = await supabase.from('supplier_catalog_variants')
+        .select('supplier_catalog_product_id,price_snapshot')
+        .in('supplier_catalog_product_id', batch)
+        .limit(10000);
+      for (const v of (vdata ?? []) as any[]) {
+        const pid = v.supplier_catalog_product_id;
+        if (!priceByPid.has(pid)) priceByPid.set(pid, []);
+        const n = Number(v.price_snapshot);
+        if (n > 0) priceByPid.get(pid)!.push(n);
+      }
     }
     const catById = new Map((await fetchAllCategories('id,slug')).map((c: any) => [c.id, c.slug]));
     return (prods.data as any[]).map((p: any) => {
