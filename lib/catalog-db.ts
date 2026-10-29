@@ -77,15 +77,21 @@ function slugify(s: string): string {
 export async function getSupplierProducts(limit = 5000): Promise<SupplierProduct[]> {
   try {
     if (!supabase) throw new Error('no supabase env');
-    const { data, error } = await supabase
-      .from('supplier_catalog_products')
-      .select('id,name,brand_name,category_id,variant_count,supplier_catalog_variants(price_snapshot)')
-      .limit(limit);
-    if (error || !data) throw new Error('no supplier products');
+    const [prods, vars] = await Promise.all([
+      supabase.from('supplier_catalog_products').select('id,name,brand_name,category_id,variant_count').limit(limit),
+      supabase.from('supplier_catalog_variants').select('supplier_catalog_product_id,price_snapshot').limit(limit * 5),
+    ]);
+    if (prods.error || !prods.data) throw new Error('no supplier products');
+    const priceByPid = new Map<string, number[]>();
+    for (const v of (vars.data ?? []) as any[]) {
+      const pid = v.supplier_catalog_product_id;
+      if (!priceByPid.has(pid)) priceByPid.set(pid, []);
+      const n = Number(v.price_snapshot);
+      if (n > 0) priceByPid.get(pid)!.push(n);
+    }
     const catById = new Map((await fetchAllCategories('id,slug')).map((c: any) => [c.id, c.slug]));
-    return data.map((p: any) => {
-      const variants = p.supplier_catalog_variants ?? [];
-      const prices = variants.map((v: any) => Number(v.price_snapshot)).filter((n: number) => n > 0);
+    return (prods.data as any[]).map((p: any) => {
+      const prices = priceByPid.get(p.id) ?? [];
       const price = prices.length ? Math.min(...prices) : 0;
       return {
         id: p.id,
@@ -94,7 +100,7 @@ export async function getSupplierProducts(limit = 5000): Promise<SupplierProduct
         brand: p.brand_name ?? 'Supplier',
         price,
         category: catById.get(p.category_id) ?? '',
-        variant_count: p.variant_count ?? variants.length,
+        variant_count: p.variant_count ?? 0,
       };
     });
   } catch {
