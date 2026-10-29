@@ -7,8 +7,8 @@ export function getAlgoliaClient() {
   if (!appId || !apiKey) return null;
   return algoliasearch(appId, apiKey);
 }
-export async function searchAlgolia(query: string, indexName = 'unsaid_products') {
+export async function searchAlgolia(query: string, indexName = 'unsaid_products', hitsPerPage = 25) {
   const client = getAlgoliaClient(); if (!client) return null;
-  const res = await client.search({ requests: [{ indexName, query }] });
+  const res = await client.search({ requests: [{ indexName, query, hitsPerPage }] });
   return (res.results[0] as any)?.hits ?? [];
 }
