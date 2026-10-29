@@ -10,7 +10,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       <div className="wrap" style={{ padding: '48px 0' }}>
         <h1>Product not found</h1>
         <p style={{ color: 'var(--muted)' }}>This product is not published yet.</p>
-        <Link href="/shop-live">Back to shop</Link>
+        <Link href="/shop">Back to shop</Link>
       </div>
     );
   }
@@ -25,9 +25,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
   return (
     <div className="wrap" style={{ padding: '24px 0 64px' }}>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 16 }}>
-        <Link href="/shop-live">Shop</Link>
+        <Link href="/shop">Shop</Link>
         {p.category_path.map((c) => (
-          <span key={c.slug}>&nbsp;›&nbsp;<Link href={`/shop-live/${c.slug}`}>{c.name}</Link></span>
+          <span key={c.slug}>&nbsp;›&nbsp;<Link href={`/shop/${c.slug}`}>{c.name}</Link></span>
         ))}
         &nbsp;›&nbsp; {p.name}
       </nav>

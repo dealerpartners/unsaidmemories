@@ -39,7 +39,7 @@ const STATIC_ROUTES = [
 
 // Dynamic Next.js pages (not in the static 32). /checkout, /admin/*, /api/* are
 // intentionally excluded — see robots.ts.
-const DYNAMIC_PAGES = ['/how', '/seller', '/shop-live'];
+const DYNAMIC_PAGES = ['/how', '/seller', '/shop'];
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://unsaid-memories.vercel.app';
 
@@ -60,7 +60,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     urls.push({ url: `${BASE}/collections/${slug}`, lastModified: now, priority: 0.7 });
   }
   for (const slug of data.categories ?? []) {
-    urls.push({ url: `${BASE}/shop-live/${slug}`, lastModified: now, priority: 0.7 });
+    urls.push({ url: `${BASE}/shop/${slug}`, lastModified: now, priority: 0.7 });
   }
   return urls;
 }

@@ -58,7 +58,7 @@ export default function CheckoutForm({ publishableKey, configured }: { publishab
       <div>
         <h1>Checkout</h1>
         <p><strong>Payments are not configured yet.</strong> The store owner still needs to add the Stripe keys, so checkout can't take payment right now. Your cart and the catalog are unaffected.</p>
-        <p><a href="/shop-live">Back to the shop</a></p>
+        <p><a href="/shop">Back to the shop</a></p>
       </div>
     );
   }
@@ -84,7 +84,7 @@ export default function CheckoutForm({ publishableKey, configured }: { publishab
     setStage('pay');
   }
 
-  if (stage === 'done') return (<div><h1>Thank you!</h1><p>Your payment succeeded. Order <code>{orderId.slice(0, 8)}</code> is confirmed — check your email for the receipt.</p><p><a href="/shop-live">Keep shopping</a></p></div>);
+  if (stage === 'done') return (<div><h1>Thank you!</h1><p>Your payment succeeded. Order <code>{orderId.slice(0, 8)}</code> is confirmed — check your email for the receipt.</p><p><a href="/shop">Keep shopping</a></p></div>);
   if (stage === 'unavailable') return (<div><h1>Order saved</h1><p>Your order <code>{orderId.slice(0, 8)}</code> was recorded, but live payments aren't configured yet, so it can't be charged. We'll be in touch at {email}.</p></div>);
   if (stage === 'pay' && clientSecret && stripePromise) {
     return (<div><h1>Payment</h1><Elements stripe={stripePromise} options={{ clientSecret }}><PayForm orderId={orderId} total={total} onDone={() => setStage('done')} /></Elements></div>);
@@ -111,7 +111,7 @@ export default function CheckoutForm({ publishableKey, configured }: { publishab
         <input key={k} placeholder={k} value={address[k]} onChange={(e) => setAddress({ ...address, [k]: e.target.value })} style={{ display: 'block', marginBottom: 6 }} />
       ))}
       <button onClick={startPayment} style={{ marginTop: 12 }}>Continue to payment</button>
-      <p><a href="/shop-live">Back to the shop</a></p>
+      <p><a href="/shop">Back to the shop</a></p>
     </div>
   );
 }
