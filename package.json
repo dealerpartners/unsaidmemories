@@ -2,14 +2,25 @@
   "name": "unsaid-memories",
   "private": true,
   "version": "0.1.0",
-  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
+    "@stripe/stripe-js": "^10.2.0",
     "@supabase/supabase-js": "^2.45.0",
+    "algoliasearch": "^5.60.0",
     "konva": "^9.3.0",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
-    "react-konva": "^18.2.0"
+    "react-konva": "^18.2.0",
+    "stripe": "^23.0.1"
   },
-  "devDependencies": { "@types/node": "^20.0.0", "@types/react": "^18.3.0", "typescript": "^5.5.0" }
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
 }
