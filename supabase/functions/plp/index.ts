@@ -53,13 +53,27 @@ serve(async (req) => {
       .from("tenants").select("id").eq("slug", PLATFORM_SLUG).single();
     if (tErr || !tenant) return json({ error: "platform tenant not found" }, 500);
 
-    const [prodRes, catRes, brandRes, varRes, pcRes, colRes] = await Promise.all([
+    // PostgREST caps single responses (default max-rows 1000); page the category tree.
+    const catRows: any[] = [];
+    {
+      let from = 0;
+      for (;;) {
+        const { data, error } = await supabase.from("categories")
+          .select("id,parent_id,name,slug,level").order("sort_order").range(from, from + 999);
+        if (error || !data || data.length === 0) break;
+        catRows.push(...data);
+        if (data.length < 1000) break;
+        from += 1000;
+      }
+    }
+    const catRes = { data: catRows };
+
+    const [prodRes, brandRes, varRes, pcRes, colRes] = await Promise.all([
       supabase.from("products")
         .select("id,slug,name,description,status,category_id,brand_id,tenant_id,created_at")
         .eq("status", "published")
         .or(`tenant_id.eq.${tenant.id},tenant_id.is.null`)
         .limit(5000),
-      supabase.from("categories").select("id,parent_id,name,slug,level").limit(5000),
       supabase.from("brands").select("id,name,slug").limit(1000),
       supabase.from("product_variants")
         .select("product_id,price,is_active").eq("is_active", true).limit(20000),

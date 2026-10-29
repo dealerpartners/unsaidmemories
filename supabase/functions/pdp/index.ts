@@ -42,7 +42,21 @@ serve(async (req) => {
       .or(tFilter).single();
     if (pErr || !product) return json({ error: "product not found" }, 404);
 
-    const [varRes, brandRes, catRes, pcRes, colRes] = await Promise.all([
+    // Category breadcrumb path (root -> leaf) — page the tree past PostgREST max-rows.
+    const catRows: any[] = [];
+    {
+      let from = 0;
+      for (;;) {
+        const { data, error } = await supabase.from("categories")
+          .select("id,parent_id,name,slug,level").order("sort_order").range(from, from + 999);
+        if (error || !data || data.length === 0) break;
+        catRows.push(...data);
+        if (data.length < 1000) break;
+        from += 1000;
+      }
+    }
+    const catRes = { data: catRows };
+    const [varRes, brandRes, pcRes, colRes] = await Promise.all([
       supabase.from("product_variants")
         .select("id,sku,size,color,price,compare_at_price,is_active")
         .eq("product_id", product.id).eq("is_active", true)
@@ -50,7 +64,6 @@ serve(async (req) => {
       product.brand_id
         ? supabase.from("brands").select("id,name,slug").eq("id", product.brand_id).single()
         : Promise.resolve({ data: null }),
-      supabase.from("categories").select("id,parent_id,name,slug,level").limit(5000),
       supabase.from("product_collections").select("collection_id").eq("product_id", product.id).limit(1000),
       supabase.from("collections").select("id,slug,name,type").limit(1000),
     ]);

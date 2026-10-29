@@ -6,11 +6,26 @@ import { CATEGORIES as SEED_CATEGORIES, PRODUCTS as SEED_PRODUCTS } from './cata
 export type DbCategory = { id: string; parent_id: string | null; level: number; name: string; slug: string; parent?: string };
 export type DbProduct = { slug: string; name: string; category: string; brand: string; price: number; collections: string[] };
 
+// PostgREST caps single responses (default max-rows 1000); page through the
+// category tree so the full taxonomy is always available to the storefront.
+async function fetchAllCategories(cols: string): Promise<any[]> {
+  const out: any[] = [];
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase!.from('categories').select(cols).order('sort_order').range(from, from + 999);
+    if (error || !data || data.length === 0) break;
+    out.push(...data);
+    if (data.length < 1000) break;
+    from += 1000;
+  }
+  return out;
+}
+
 export async function getCategories(): Promise<DbCategory[]> {
   try {
     if (!supabase) throw new Error('no supabase env');
-    const { data, error } = await supabase.from('categories').select('id,parent_id,level,name,slug').order('sort_order').limit(5000);
-    if (error || !data || data.length === 0) throw new Error('no db categories');
+    const data = await fetchAllCategories('id,parent_id,level,name,slug');
+    if (data.length === 0) throw new Error('no db categories');
     const byId = new Map(data.map((c: any) => [c.id, c.slug]));
     return data.map((c: any) => ({ ...c, parent: c.parent_id ? byId.get(c.parent_id) : undefined }));
   } catch {
@@ -30,7 +45,7 @@ export async function getProducts(): Promise<DbProduct[]> {
     ]);
     if (prods.error || !prods.data || prods.data.length === 0) throw new Error('no db products');
     const brandById = new Map((brands.data ?? []).map((b: any) => [b.id, b.name]));
-    const catById = new Map((await supabase!.from('categories').select('id,slug').limit(5000)).data?.map((c: any) => [c.id, c.slug]) ?? []);
+    const catById = new Map((await fetchAllCategories('id,slug')).map((c: any) => [c.id, c.slug]));
     const priceByProduct = new Map((variants.data ?? []).map((v: any) => [v.product_id, Number(v.price)]));
     const colById = new Map((cols.data ?? []).map((c: any) => [c.id, c.slug]));
     const colsByProduct = new Map<string, string[]>();
@@ -75,7 +90,7 @@ export async function getProductDetail(slug: string): Promise<DbProductDetail | 
     const prod = p as any;
     const [brands, cats, variants, pcs, cols] = await Promise.all([
       prod.brand_id ? supabase.from('brands').select('name').eq('id', prod.brand_id).single() : Promise.resolve({ data: null } as any),
-      supabase.from('categories').select('id,parent_id,name,slug,level').limit(5000),
+      fetchAllCategories('id,parent_id,name,slug,level').then((data) => ({ data })),
       supabase.from('product_variants').select('id,sku,size,color,price,compare_at_price,is_active').eq('product_id', prod.id).eq('is_active', true).order('price').limit(5000),
       supabase.from('product_collections').select('collection_id').eq('product_id', prod.id).limit(5000),
       supabase.from('collections').select('id,slug').limit(5000),
