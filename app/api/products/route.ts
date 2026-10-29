@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProducts, getCategories, descendantsOf } from '@/lib/catalog-db';
+import { getSupplierProducts, getCategories, descendantsOf } from '@/lib/catalog-db';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get('page') ?? '1', 10));
   const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get('per_page') ?? '48', 10)));
 
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const [products, categories] = await Promise.all([getSupplierProducts(20000), getCategories()]);
 
   let filtered = products;
   if (category) {
