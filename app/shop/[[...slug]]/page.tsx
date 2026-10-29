@@ -32,7 +32,9 @@ export default async function ShopPage({ params }: { params: { slug?: string[] }
   }
 
   return (
-    <div className="wrap" style={{ padding: '24px 0 64px' }}>
+    <div className="wrap" style={{ padding: '24px 0 64px', display: 'flex', gap: 32 }}>
+      <CategorySidebar categories={categories} brands={brands} activeSlug={slug} />
+      <div style={{ flex: 1 }}>
       <nav aria-label="Breadcrumb" style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 12 }}>
         <Link href="/shop">Shop</Link>
         {cat && <> &nbsp;›&nbsp; {cat.name}</>}
@@ -86,6 +88,7 @@ export default async function ShopPage({ params }: { params: { slug?: string[] }
           )}
         </>
       }
+      </div>
     </div>
   );
 }
