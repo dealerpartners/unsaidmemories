@@ -1,0 +1,4616 @@
+[
+  {
+    "code": "D1",
+    "name": "Identity & Social Graph",
+    "owner": "Identity Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/auth/register",
+        "method": "POST",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ email, password, displayName }",
+        "response_schema": "{ userId, token, profile }"
+      },
+      {
+        "endpoint": "/v1/auth/login",
+        "method": "POST",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ email, password }",
+        "response_schema": "{ token, user }"
+      },
+      {
+        "endpoint": "/v1/auth/refresh",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ refreshToken }",
+        "response_schema": "{ token }"
+      },
+      {
+        "endpoint": "/v1/profiles",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: ProfileSummary[], pagination }"
+      },
+      {
+        "endpoint": "/v1/profiles/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Owner",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "Profile"
+      },
+      {
+        "endpoint": "/v1/profiles/me",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ProfileUpdate",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/profiles/{id}/followers/me",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ following: boolean, count: number }"
+      },
+      {
+        "endpoint": "/v1/profiles/{id}/followers/me",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ count: number }"
+      },
+      {
+        "endpoint": "/v1/profiles/{id}/connections",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ message: string }",
+        "response_schema": "{ requestId: string }"
+      },
+      {
+        "endpoint": "/v1/connections/pending",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: ConnectionRequest[], pagination }"
+      },
+      {
+        "endpoint": "/v1/connections/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ approved: boolean }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/relationships/{profileId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ level: string, progress: number, nextTier: string }"
+      },
+      {
+        "endpoint": "/v1/relationships/hierarchy",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "RelationshipHierarchy"
+      },
+      {
+        "endpoint": "/v1/relationships/hierarchy",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "RelationshipHierarchy",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/relationships/perks",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "PerkConfig[]"
+      },
+      {
+        "endpoint": "/v1/relationships/perks",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "PerkConfig[]",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/badges/{userId}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ badges: Badge[] }"
+      },
+      {
+        "endpoint": "/v1/verification/requests",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ legalName, artistName, taxId, documents: File[] }",
+        "response_schema": "{ requestId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/verification/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ status: string, verified: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Creator, Admin",
+      "authorization": "Profile owner for writes; public for reads",
+      "tenant_scope": "Personal account",
+      "primary_entities": "User, Profile, Organization, Membership, Follow, Connection, RelationshipTier",
+      "database\n____references": "users, profiles, organizations, memberships, follows, connections, relationship_tiers",
+      "async_jobs": "Follower count updates, badge calculation",
+      "events\n____emitted": "user.registered, profile.updated, user.followed, connection.requested",
+      "audit_events": "profile.updated, verification.requested",
+      "privacy_classification": "Public profile data; private account settings protected"
+    }
+  },
+  {
+    "code": "D2",
+    "name": "Feed & Discovery",
+    "owner": "Discovery Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/feed/for-you",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "100/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: FeedItem[], pagination }"
+      },
+      {
+        "endpoint": "/v1/feed/following",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "100/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: FeedItem[], pagination }"
+      },
+      {
+        "endpoint": "/v1/feed/friends-activity",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: ActivityItem[], pagination }"
+      },
+      {
+        "endpoint": "/v1/discover/genres",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "50/min",
+        "request_schema": "\\-",
+        "response_schema": "{ genres: Genre[] }"
+      },
+      {
+        "endpoint": "/v1/discover/genre/{id}/content",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "50/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: FeedItem[], pagination }"
+      },
+      {
+        "endpoint": "/v1/discover/trending",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "50/min",
+        "request_schema": "?timeframe=daily&limit=25",
+        "response_schema": "{ data: TrendingItem[] }"
+      },
+      {
+        "endpoint": "/v1/discover/new-releases",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "50/min",
+        "request_schema": "?daysAgo=7&limit=25",
+        "response_schema": "{ data: ReleaseSummary[], pagination }"
+      },
+      {
+        "endpoint": "/v1/discover/local",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?lat=float&lng=float&radius=50",
+        "response_schema": "{ artists: LocalArtist[], events: Event[] }"
+      },
+      {
+        "endpoint": "/v1/discover/live-now",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=10",
+        "response_schema": "{ streams: LiveStreamSummary[] }"
+      },
+      {
+        "endpoint": "/v1/recommendations/personalized",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25",
+        "response_schema": "{ data: FeedItem[] }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Anonymous",
+      "authorization": "Feed content respects visibility settings",
+      "tenant_scope": "Personal account",
+      "primary_entities": "FeedItem, TrendingItem, ActivityItem, Recommendation",
+      "database\n____references": "posts, tracks, follows, activities, playlists",
+      "async_jobs": "Feed ranking (cron), activity aggregation",
+      "events_emitted": "feed.refreshed, content.interacted",
+      "privacy_classification": "Public content; following relationships visible"
+    }
+  },
+  {
+    "code": "D3",
+    "name": "Content & Media Publishing",
+    "owner": "Publishing Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/posts",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "CreatePostRequest",
+        "response": "{ postId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/posts/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Owner",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response": "Post"
+      },
+      {
+        "endpoint": "/v1/posts/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "UpdatePostRequest",
+        "response": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/posts/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Creator/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/posts/drafts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response": "{ data: Draft[], pagination }"
+      },
+      {
+        "endpoint": "/v1/posts/drafts/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "DraftUpdate",
+        "response": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/posts/{id}/schedule",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ publishAt: string }",
+        "response": "{ scheduled: boolean }"
+      },
+      {
+        "endpoint": "/v1/polls",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "PollCreateRequest",
+        "response": "{ pollId: string }"
+      },
+      {
+        "endpoint": "/v1/polls/{pollId}/votes/me",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ optionIndex: number }",
+        "response": "{ success: boolean, counts: number[] }"
+      },
+      {
+        "endpoint": "/v1/countdowns",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ targetDate: string, timezone: string, style: string }",
+        "response": "{ countdownId: string, embed: string }"
+      },
+      {
+        "endpoint": "/v1/posts/schedule",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ post: CreatePostRequest, schedule: ScheduleConfig }",
+        "response": "{ scheduledId: string }"
+      },
+      {
+        "endpoint": "/v1/interactions/like",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "100/min",
+        "request_schema": "{ contentId: string }",
+        "response": "{ liked: boolean, count: number }"
+      },
+      {
+        "endpoint": "/v1/interactions/unlike",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "100/min",
+        "request_schema": "{ contentId: string }",
+        "response": "{ count: number }"
+      },
+      {
+        "endpoint": "/v1/interactions/comment",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "CreateCommentRequest",
+        "response": "Comment"
+      },
+      {
+        "endpoint": "/v1/interactions/comments/{contentId}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response": "{ data: Comment[], pagination }"
+      },
+      {
+        "endpoint": "/v1/interactions/reaction",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ contentId: string, reaction: string }",
+        "response": "{ count: number }"
+      },
+      {
+        "endpoint": "/v1/interactions/repost",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ contentId: string, commentary?: string }",
+        "response": "{ reposted: boolean, count: number }"
+      },
+      {
+        "endpoint": "/v1/interactions/unrepost",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ contentId: string }",
+        "response": "{ count: number }"
+      },
+      {
+        "endpoint": "/v1/embed/{contentId}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response": "{ embedCode: string, preview: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Creator, User, Admin",
+      "authorization": "Content owner for writes; public for reads",
+      "tenant_scope": "Personal account / Creator profile",
+      "primary_entities": "Post, Draft, Poll, Countdown, ScheduledPost",
+      "database\n____references": "posts, drafts, polls, countdowns, scheduled_posts",
+      "async_jobs": "Media processing, notification delivery, feed updates",
+      "events\n____emitted": "post.created, post.scheduled, post.published, content.interacted",
+      "audit_events": "post.created, post.deleted, post.scheduled",
+      "privacy_classification": "Visibility settings control access"
+    }
+  },
+  {
+    "code": "D4",
+    "name": "Relational Mechanics & Messaging",
+    "owner": "Messaging Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/conversations",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Conversation[], pagination }"
+      },
+      {
+        "endpoint": "/v1/conversations/{id}/messages",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Participant",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?limit=50&cursor=string",
+        "response_schema": "{ data: Message[], pagination }"
+      },
+      {
+        "endpoint": "/v1/messages",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ conversationId: string, text: string, attachments: Attachment[] }",
+        "response_schema": "{ message: Message }"
+      },
+      {
+        "endpoint": "/v1/messages/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Sender/Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/messages/broadcast",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "5/day (Free), 20/day (Pro)",
+        "request_schema": "{ segmentId: string, text: string, media: Attachment[] }",
+        "response_schema": "{ broadcastId: string, delivered: number }"
+      },
+      {
+        "endpoint": "/v1/messages/auto-responder",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ triggers: Trigger[], message: string, delay: number }",
+        "response_schema": "{ configId: string }"
+      },
+      {
+        "endpoint": "/v1/messages/auto-responder",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "AutoResponderConfig"
+      },
+      {
+        "endpoint": "/v1/messages/auto-responder",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "AutoResponderConfig",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?filter=all&limit=25&cursor=string",
+        "response_schema": "{ data: Notification[], pagination }"
+      },
+      {
+        "endpoint": "/v1/notifications/read",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ notificationIds: string[] }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications/preferences",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "NotificationPreferences"
+      },
+      {
+        "endpoint": "/v1/notifications/preferences",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "NotificationPreferences",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/users/block",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ userId: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/users/block",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ userId: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/users/blocked",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: UserSummary[], pagination }"
+      },
+      {
+        "endpoint": "/v1/users/mute",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ userId: string }",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "Fan, Creator, Subscriber, Moderator",
+      "authorization": "Messaging requires relationship; broadcast requires Creator unlock",
+      "tenant_scope": "Personal account",
+      "primary_entities": "Conversation, Message, Broadcast, AutoResponder, Notification",
+      "database\n____references": "conversations, messages, broadcasts, auto_responders, notifications",
+      "async_jobs": "Push notification delivery, email delivery",
+      "events\n____emitted": "message.sent, message.read, broadcast.sent, notification.delivered",
+      "audit_events": "message.sent (timing/recipient metadata only)",
+      "privacy_classification": "Private messages; E2E encryption for sensitive content"
+    }
+  },
+  {
+    "code": "D5",
+    "name": "Live Broadcasting & Streaming",
+    "owner": "Live Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/live-streams",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=active&limit=25&cursor=string",
+        "response_schema": "{ data: LiveStream[], pagination }"
+      },
+      {
+        "endpoint": "/v1/live-streams",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ title, description, type, monetization }",
+        "response_schema": "{ streamId: string, streamKey: string, ingestUrl: string }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Ticket",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "LiveStream"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/end",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/chat",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Viewer",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?cursor=string&limit=50",
+        "response_schema": "{ data: ChatMessage[], pagination }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/chat",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Viewer",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ text: string, reaction: string }",
+        "response_schema": "{ message: ChatMessage }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/tips",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Viewer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ amount: number, message: string }",
+        "response_schema": "{ transactionId: string }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/ticket-checkouts",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Viewer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ tierId: string, quantity: number, paymentMethodId: string }",
+        "response_schema": "{ checkoutId: string, status: string, clientSecret: string }"
+      },
+      {
+        "endpoint": "/v1/live-streams/{id}/monetization",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ ticketRequired: boolean, ticketPrice: number, tippingEnabled: boolean, merchEnabled: boolean }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/meet-greet/sessions",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ streamId: string, slots: Slot[] }",
+        "response_schema": "{ sessionId: string }"
+      },
+      {
+        "endpoint": "/v1/meet-greet/sessions/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Ticket Holder",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "MeetGreetSession"
+      },
+      {
+        "endpoint": "/v1/checkout/ticket",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ eventId: string, tier: string, quantity: number }",
+        "response_schema": "{ orderId: string, tickets: Ticket[] }"
+      }
+    ],
+    "contract": {
+      "actors": "Listener, Creator, Admin",
+      "authorization": "Viewing public; hosting requires Creator; paid requires ticket",
+      "tenant_scope": "Personal account (creator)",
+      "primary_entities": "LiveStream, ChatMessage, Tip, Ticket, MeetGreetSlot",
+      "database\n____references": "live_streams, chat_messages, tips, tickets, meet_greet_slots",
+      "async_jobs": "Transcoding (HLS), recording archiving, chat moderation",
+      "events\n____emitted": "live_stream.started, live_stream.ended, ticket.purchased, tip.sent",
+      "audit\n____events": "live_stream.created, live_stream.ended, ticket.purchased",
+      "privacy_classification": "Public for non-ticketed; ticketed streams require purchase"
+    }
+  },
+  {
+    "code": "D6",
+    "name": "Governance & Enforcement",
+    "owner": "Governance Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/governance/visibility/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "VisibilityConfig"
+      },
+      {
+        "endpoint": "/v1/governance/visibility/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "VisibilityConfig",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/delivery/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "DeliveryRules"
+      },
+      {
+        "endpoint": "/v1/governance/delivery/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "DeliveryRules",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/downloads/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ enabled: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/downloads/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ enabled: boolean }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/regional/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ territories: string[], windows: WindowConfig[] }"
+      },
+      {
+        "endpoint": "/v1/governance/regional/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ territories: string[], windows: WindowConfig[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/interactions/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "InteractionSettings"
+      },
+      {
+        "endpoint": "/v1/governance/interactions/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "InteractionSettings",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/remix/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ permissions: string[] }"
+      },
+      {
+        "endpoint": "/v1/governance/remix/{assetId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ permissions: string[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/governance/moderation",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "ModerationSettings"
+      },
+      {
+        "endpoint": "/v1/governance/moderation",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ModerationSettings",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/comments/flagged",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Moderator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?assetId=uuid&limit=25&cursor=string",
+        "response_schema": "{ data: FlaggedComment[], pagination }"
+      },
+      {
+        "endpoint": "/v1/comments/{id}/moderate",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Creator/Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ action: \\\"approve\\\" \\| \\\"reject\\\" \\| \\\"delete\\\" }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/content/{id}/transitions",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ targetState: string, reason: string }",
+        "response_schema": "{ success: boolean, newState: string }"
+      },
+      {
+        "endpoint": "/v1/content/{id}/deletion-requests",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ reason: string }",
+        "response_schema": "{ status: string, deletionRequestedAt: string, purgeScheduledAt: string, canRestoreUntil: string }"
+      },
+      {
+        "endpoint": "/v1/content/{id}/deletion-requests/cancel",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean, status: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Creator, Label Manager, Admin, Moderator",
+      "authorization": "Creator Studio requires Creator unlock; admin actions require role",
+      "tenant_scope": "Personal creator account",
+      "primary_entities": "ContentGovernance, ModerationRule, CommentFlag, TakedownRequest",
+      "database\n____references": "governance_settings, moderation_rules, flagged_comments, takedown_requests",
+      "async_jobs": "Content moderation queue, audit log archival",
+      "events\n____emitted": "content.visibility_changed, content.takedown_requested, content.deletion_requested",
+      "audit_events": "All governance changes are audit-logged",
+      "privacy_classification": "Public/private settings control access"
+    }
+  },
+  {
+    "code": "D7",
+    "name": "Wallet & Consumer Commerce",
+    "owner": "Commerce Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/commerce/products",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?category=apparel&status=published&limit=25&cursor=string",
+        "response_schema": "{ data: Product[], pagination }"
+      },
+      {
+        "endpoint": "/v1/commerce/products",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ProductCreateRequest",
+        "response_schema": "{ productId: string }"
+      },
+      {
+        "endpoint": "/v1/commerce/products/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ProductUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/commerce/storefront",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ sections: StorefrontSection[] }"
+      },
+      {
+        "endpoint": "/v1/commerce/storefront",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ sections: StorefrontSection[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/commerce/pod",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ artwork: File, product: Product }",
+        "response_schema": "{ productId: string, podJobId: string }"
+      },
+      {
+        "endpoint": "/v1/commerce/digital",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "DigitalProductCreateRequest",
+        "response_schema": "{ productId: string }"
+      },
+      {
+        "endpoint": "/v1/commerce/pre-order",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ productId: string, launchDate: string, limit: number }",
+        "response_schema": "{ campaignId: string }"
+      },
+      {
+        "endpoint": "/v1/commerce/orders",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=paid&limit=25&cursor=string",
+        "response_schema": "{ data: Order[], pagination }"
+      },
+      {
+        "endpoint": "/v1/checkout/merch",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ items: CartItem[], shipping: Address, paymentMethodId: string }",
+        "response_schema": "{ orderId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/payments/tip",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ recipientId: string, amount: number, message: string }",
+        "response_schema": "{ transactionId: string }"
+      },
+      {
+        "endpoint": "/v1/payments/subscription",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ creatorId: string, tier: string, paymentMethodId: string }",
+        "response_schema": "{ subscriptionId: string }"
+      },
+      {
+        "endpoint": "/v1/payments/subscription/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/playlists",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Playlist[], pagination }"
+      },
+      {
+        "endpoint": "/v1/playlists",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, description: string, isPublic: boolean }",
+        "response_schema": "{ playlist: Playlist }"
+      },
+      {
+        "endpoint": "/v1/playlists/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, description: string, items: string[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/playlists/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Owner",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/playlists/{id}/collaborate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ participants: string[], permissions: Permissions }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/playlists/{playlistId}/items",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Collaborator",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ contentId: string }",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "Creator, Label Manager, User",
+      "authorization": "Commerce requires Business account; Pro tier or higher",
+      "tenant_scope": "Business account / Personal account",
+      "primary_entities": "Order, Cart, Product, ProductVariant, Tip, Subscription, Playlist, PlaylistItem",
+      "database\n____references": "orders, carts, products, variants, tips, subscriptions, playlists, playlist_items",
+      "async_jobs": "Inventory sync, POD fulfillment, order processing",
+      "events\n____emitted": "product.created, order.placed, order.fulfilled, subscription.created",
+      "audit\n____events": "product.created, order.refunded, subscription.cancelled",
+      "privacy_classification": "Customer orders are private; product listings public"
+    }
+  },
+  {
+    "code": "D8",
+    "name": "Catalog & Distribution",
+    "owner": "Catalog Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/releases",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label/Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ReleaseCreateRequest",
+        "response_schema": "{ releaseId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/releases/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "Release"
+      },
+      {
+        "endpoint": "/v1/releases/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ReleaseUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/releases/{id}/submit",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ submissionId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/releases/calendar",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?month=8&year=2026",
+        "response_schema": "{ events: ReleaseEvent[] }"
+      },
+      {
+        "endpoint": "/v1/assets",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ file: File, metadata: AssetMetadata }",
+        "response_schema": "{ assetId: string, url: string, processingStatus: string }"
+      },
+      {
+        "endpoint": "/v1/assets/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "Asset"
+      },
+      {
+        "endpoint": "/v1/metadata/{releaseId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "ReleaseMetadata"
+      },
+      {
+        "endpoint": "/v1/metadata/{releaseId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ReleaseMetadata",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/metadata/batch/analyze",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ assetIds: string[] }",
+        "response_schema": "{ analysis: BatchAnalysis }"
+      },
+      {
+        "endpoint": "/v1/metadata/batch/apply",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ assetIds: string[], tags: string[] }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/identifiers",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?type=isrc",
+        "response_schema": "{ identifiers: string[] }"
+      },
+      {
+        "endpoint": "/v1/identifiers/issue",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ type: \\\"isrc\\\" \\| \\\"upc\\\" \\| \\\"grid\\\", count: number }",
+        "response_schema": "{ identifiers: string[] }"
+      },
+      {
+        "endpoint": "/v1/barcodes/generate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ type: \\\"upc\\\" \\| \\\"ean\\\", productId: string }",
+        "response_schema": "{ barcode: string, image: string }"
+      },
+      {
+        "endpoint": "/v1/distribution/submit",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ releaseId: string, targets: DSPTarget[] }",
+        "response_schema": "{ distributionId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/distribution/{id}/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "DistributionStatus"
+      },
+      {
+        "endpoint": "/v1/distribution/territory/{releaseId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "TerritoryConfig"
+      },
+      {
+        "endpoint": "/v1/distribution/territory/{releaseId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "TerritoryConfig",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/distribution/physical",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ releaseId: string, type: \\\"vinyl\\\" \\| \\\"cd\\\" \\| \\\"cassette\\\" \\| \\\"usb\\\", quantity: number }",
+        "response_schema": "{ orderId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/lyrics/{releaseId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Lyrics"
+      },
+      {
+        "endpoint": "/v1/lyrics/{releaseId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "Lyrics",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/lyrics/{releaseId}/publish",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "Label Manager, Creator, Admin",
+      "authorization": "Creator can manage own releases; label manager can manage label releases",
+      "tenant_scope": "Business account (label)",
+      "primary_entities": "Release, Asset, Metadata, Split, Distribution, Identifier",
+      "database\n____references": "releases, assets, metadata, splits, distributions, identifiers",
+      "async_jobs": "Audio processing, metadata validation, DDEX packaging, distribution delivery",
+      "events\n____emitted": "release.created, release.submitted, release.distributed, release.live",
+      "audit_events": "All release lifecycle changes are audit-logged",
+      "privacy_classification": "Release metadata public; financial splits private"
+    }
+  },
+  {
+    "code": "D9",
+    "name": "Royalties, Splits & Finance",
+    "owner": "Finance Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/finance/statements",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ file: File, format: string, period: Period }",
+        "response_schema": "{ statementId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/finance/statements/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "RoyaltyStatement"
+      },
+      {
+        "endpoint": "/v1/finance/splits/{releaseId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label/Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Split[]"
+      },
+      {
+        "endpoint": "/v1/finance/splits/{releaseId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Label/Creator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ splits: Split[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/finance/payouts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=pending&limit=25&cursor=string",
+        "response_schema": "{ data: Payout[], pagination }"
+      },
+      {
+        "endpoint": "/v1/finance/payouts/{id}/approve",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ level: 1 \\| 2, notes: string }",
+        "response_schema": "{ success: boolean, status: string }"
+      },
+      {
+        "endpoint": "/v1/finance/payouts/{id}/hold",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Compliance Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ reason: string, duration: string, notes: string }",
+        "response_schema": "{ success: boolean, status: string }"
+      },
+      {
+        "endpoint": "/v1/finance/disbursements",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ payoutIds: string[] }",
+        "response_schema": "{ batchId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/finance/tax/forms",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?recipientId=uuid",
+        "response_schema": "{ forms: TaxForm[] }"
+      },
+      {
+        "endpoint": "/v1/finance/tax/forms",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ type: string, recipientId: string, documents: File[] }",
+        "response_schema": "{ formId: string }"
+      },
+      {
+        "endpoint": "/v1/finance/compliance/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Compliance Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "ComplianceStatus"
+      },
+      {
+        "endpoint": "/v1/finance/capital/eligibility",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "CapitalEligibility"
+      },
+      {
+        "endpoint": "/v1/finance/capital/request",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Label",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ amount: number, type: \\\"advance\\\" \\| \\\"loan\\\" \\| \\\"revenue\\\" }",
+        "response_schema": "{ requestId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/finance/recipient/statements",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?period=Q3-2026",
+        "response_schema": "{ statements: RoyaltySummary[] }"
+      },
+      {
+        "endpoint": "/v1/finance/reconciliation",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Finance Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ period: Period }",
+        "response_schema": "{ reconciliationId: string, status: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Label Manager, Finance Admin, Compliance Admin",
+      "authorization": "Finance module requires Finance scope; admin actions require Finance Admin role",
+      "tenant_scope": "Business account (label)",
+      "primary_entities": "RoyaltyStatement, Split, Payout, TaxForm, ComplianceCase",
+      "database\n____references": "royalty_statements, splits, payouts, tax_forms, compliance_cases",
+      "async_jobs": "Statement processing (daily), payout batch processing (daily), tax form generation (year-end)",
+      "events\n____emitted": "royalty.statement_processed, payout.approved, payout.completed, payout.failed",
+      "audit_events": "All financial transactions are audit-logged",
+      "privacy_classification": "Financial data is highly sensitive and encrypted"
+    }
+  },
+  {
+    "code": "D10",
+    "name": "Roster, Team & Org (RBAC/IAM)",
+    "owner": "Org Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/roster/team",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ members: TeamMember[] }"
+      },
+      {
+        "endpoint": "/v1/roster/team/invite",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ email: string, role: string, scopes: string[] }",
+        "response_schema": "{ invitationId: string }"
+      },
+      {
+        "endpoint": "/v1/roster/team/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/roster/team/{id}/role",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ role: string, scopes: string[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/roster/iam",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "IAMConfig"
+      },
+      {
+        "endpoint": "/v1/roster/iam",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "IAMConfig",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/roster/audit",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?filter=contract&limit=25&cursor=string",
+        "response_schema": "{ data: AuditLog[], pagination }"
+      },
+      {
+        "endpoint": "/v1/roster/contracts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=active&limit=25&cursor=string",
+        "response_schema": "{ data: Contract[], pagination }"
+      },
+      {
+        "endpoint": "/v1/roster/contracts",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ContractCreateRequest",
+        "response_schema": "{ contractId: string }"
+      },
+      {
+        "endpoint": "/v1/roster/contracts/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ContractUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/roster/contracts/{id}/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ status: string, alerts: string[] }"
+      },
+      {
+        "endpoint": "/v1/roster/ar/talent",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "A&R",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=scouted&limit=25&cursor=string",
+        "response_schema": "{ data: Talent[], pagination }"
+      },
+      {
+        "endpoint": "/v1/roster/ar/demo",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "A&R",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ files: File[], metadata: DemoMetadata }",
+        "response_schema": "{ demoId: string }"
+      },
+      {
+        "endpoint": "/v1/roster/workflows",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?status=pending&limit=25",
+        "response_schema": "{ data: Workflow[], pagination }"
+      },
+      {
+        "endpoint": "/v1/roster/workflows/{id}/approve",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ note: string }",
+        "response_schema": "{ success: boolean, status: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Label Manager, A&R, Admin",
+      "authorization": "Roster module requires Roster scope; admin actions require role",
+      "tenant_scope": "Business account (label)",
+      "primary_entities": "TeamMember, Contract, TalentPipeline, WorkflowApproval",
+      "database\n____references": "team_members, contracts, talent_pipeline, workflows",
+      "async_jobs": "Contract expiration alerts",
+      "events\n____emitted": "team.member_added, contract.created, workflow.approved",
+      "audit_events": "All team, contract, and financial actions are audit-logged",
+      "privacy_classification": "Roster data is internal/private; contracts are confidential"
+    }
+  },
+  {
+    "code": "D11",
+    "name": "Live Events & Tour Ops",
+    "owner": "Tour Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/tours",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?artistId=uuid&status=active&limit=25&cursor=string",
+        "response_schema": "{ data: Tour[], pagination }"
+      },
+      {
+        "endpoint": "/v1/tours",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, artistId: string }",
+        "response_schema": "{ tourId: string }"
+      },
+      {
+        "endpoint": "/v1/tours/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "TourUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/tours/{id}/bookings",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ bookings: Booking[] }"
+      },
+      {
+        "endpoint": "/v1/tours/{id}/bookings",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ offer: BookingOffer }",
+        "response_schema": "{ bookingId: string }"
+      },
+      {
+        "endpoint": "/v1/tours/{id}/logistics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ logistics: TourLogistics }"
+      },
+      {
+        "endpoint": "/v1/tours/{id}/logistics",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ logistics: TourLogistics }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/tours/ticketing",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?tourId=uuid",
+        "response_schema": "{ sales: TicketSales[] }"
+      },
+      {
+        "endpoint": "/v1/tours/portal/offer",
+        "method": "POST",
+        "auth": "Optional",
+        "authorization": "Promoter/Venue",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ eventId: string, offer: BookingOffer }",
+        "response_schema": "{ offerId: string }"
+      },
+      {
+        "endpoint": "/v1/events/virtual",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Admin",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ name: string, date: string, capacity: number, price: number }",
+        "response_schema": "{ eventId: string }"
+      },
+      {
+        "endpoint": "/v1/events/in-person",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Admin",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ name: string, date: string, venue: string, capacity: number, price: number }",
+        "response_schema": "{ eventId: string }"
+      },
+      {
+        "endpoint": "/v1/checkout/ticket",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ eventId: string, tier: string, quantity: number }",
+        "response_schema": "{ orderId: string, tickets: Ticket[] }"
+      }
+    ],
+    "contract": {
+      "actors": "Label Manager, Agent, Venue, Promoter, User",
+      "authorization": "Tour management requires Label tier or higher",
+      "tenant_scope": "Business account (label)",
+      "primary_entities": "Tour, Booking, Venue, Ticket (event), Settlement",
+      "database\n____references": "tours, bookings, venues, tickets, settlements",
+      "async_jobs": "Tour settlement calculation, ticket sync",
+      "events_emitted": "tour.confirmed, ticket.sold, booking.confirmed",
+      "audit_events": "tour.created, ticket.sold, booking.confirmed",
+      "privacy_classification": "Tour data is internal/private; ticket sales are customer data"
+    }
+  },
+  {
+    "code": "D12",
+    "name": "Editorial & Marketing CMS",
+    "owner": "CMS Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/cms/epk",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "EPKAssets",
+        "response_schema": "{ epkId: string, url: string }"
+      },
+      {
+        "endpoint": "/v1/cms/epk/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "EPK"
+      },
+      {
+        "endpoint": "/v1/cms/epk/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "EPKAssets",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/cms/web/site",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Site"
+      },
+      {
+        "endpoint": "/v1/cms/web/site",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "SiteUpdate",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/cms/web/assets",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ files: File[], metadata: AssetMetadata }",
+        "response_schema": "{ assetIds: string[] }"
+      },
+      {
+        "endpoint": "/v1/cms/brand",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "BrandIdentity"
+      },
+      {
+        "endpoint": "/v1/cms/brand",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "BrandIdentity",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/cms/bio",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ bio: string, languages: string[] }"
+      },
+      {
+        "endpoint": "/v1/cms/bio",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ bio: string, languages: string[], defaultLanguage: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/cms/bio/syndicate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ platforms: string[] }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/cms/landing-pages",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ template: string, content: PageContent }",
+        "response_schema": "{ pageId: string, url: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Marketer, Label Manager, Creator",
+      "authorization": "CMS requires Pro tier or higher",
+      "tenant_scope": "Business account",
+      "primary_entities": "EPK, WebAsset, BrandIdentity, LandingPage",
+      "database\n____references": "epks, web_assets, brand_identities, landing_pages",
+      "async_jobs": "Page rendering, asset optimization",
+      "events_emitted": "epk.generated, page.published",
+      "audit_events": "epk.generated, page.published, brand.updated",
+      "privacy_classification": "EPK/public content is public; brand settings are private"
+    }
+  },
+  {
+    "code": "D13",
+    "name": "Social Distribution & Syndication",
+    "owner": "Syndication Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/syndication/social/publish",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ platforms: string[], content: SocialContent, schedule: string }",
+        "response_schema": "{ postId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/syndication/social/analytics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?platform=instagram&dateRange=30d",
+        "response_schema": "{ analytics: PlatformAnalytics }"
+      },
+      {
+        "endpoint": "/v1/syndication/social/accounts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ accounts: SocialAccount[] }"
+      },
+      {
+        "endpoint": "/v1/syndication/social/accounts",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ platform: string, credentials: any }",
+        "response_schema": "{ accountId: string }"
+      },
+      {
+        "endpoint": "/v1/syndication/smart-links",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ destination: string, type: string, utm: UTM }",
+        "response_schema": "{ link: SmartLink }"
+      },
+      {
+        "endpoint": "/v1/syndication/smart-links/{id}/performance",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ clicks: number, conversions: number, conversionRate: number }"
+      },
+      {
+        "endpoint": "/v1/syndication/pre-save",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ releaseId: string, destinations: string[] }",
+        "response_schema": "{ link: string, page: string }"
+      },
+      {
+        "endpoint": "/v1/syndication/pre-save/{id}/performance",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ preSaves: number, conversions: number }"
+      },
+      {
+        "endpoint": "/v1/syndication/dsp-profiles/update",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ platform: string, updates: ProfileUpdate }",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "Marketer, Label Manager",
+      "authorization": "Syndication requires Pro tier or higher",
+      "tenant_scope": "Business account",
+      "primary_entities": "SocialPost, ScheduledPost, SmartLink, PreSave",
+      "database\n____references": "social_posts, smart_links, pre_saves, social_accounts",
+      "async_jobs": "Scheduled posting, link tracking",
+      "events_emitted": "social.post_published, link.clicked",
+      "audit_events": "social.post_published, link.generated",
+      "privacy_classification": "Social content is public; analytics are aggregated"
+    }
+  },
+  {
+    "code": "D14",
+    "name": "Search & Indexing Infra",
+    "owner": "Search Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/search",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?q=string&type=all&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<MultiTypeResult\\>"
+      },
+      {
+        "endpoint": "/v1/search/artists",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?q=string&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<ArtistResult\\>"
+      },
+      {
+        "endpoint": "/v1/search/catalog",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?q=string&type=track&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<CatalogResult\\>"
+      },
+      {
+        "endpoint": "/v1/search/fingerprint",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ audio: binary, duration: number }",
+        "response_schema": "{ matches: TrackMatch[] }"
+      },
+      {
+        "endpoint": "/v1/search/lyrics",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?q=string&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<LyricMatch\\>"
+      },
+      {
+        "endpoint": "/v1/search/playlists",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?q=string&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<PlaylistResult\\>"
+      },
+      {
+        "endpoint": "/v1/search/events",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?q=string&dateRange=upcoming&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<EventResult\\>"
+      },
+      {
+        "endpoint": "/v1/search/metadata",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?q=string&limit=25&cursor=string",
+        "response_schema": "SearchResult\\<MetadataResult\\>"
+      },
+      {
+        "endpoint": "/v1/index/rebuild",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "1/hour",
+        "request_schema": "{ entity: string }",
+        "response_schema": "{ jobId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/index/synonyms",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ synonyms: Synonym[] }"
+      },
+      {
+        "endpoint": "/v1/index/synonyms",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ synonyms: Synonym[] }",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Admin",
+      "authorization": "Public search; admin for index management",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "SearchIndex, SynonymMapping, IndexJob",
+      "database_references": "Elasticsearch indices",
+      "async_jobs": "Index updates (asynchronous), synonym reloading",
+      "events_emitted": "search.performed (analytics only)",
+      "audit_events": "index.rebuilt, synonym.updated",
+      "privacy_classification": "Public search results only; private content excluded"
+    }
+  },
+  {
+    "code": "D15",
+    "name": "Analytics & Telemetry",
+    "owner": "Analytics Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/analytics/streaming",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?dateRange=30d&assetId=uuid",
+        "response_schema": "StreamingData"
+      },
+      {
+        "endpoint": "/v1/analytics/streaming/demographics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&assetId=uuid",
+        "response_schema": "DemographicsData"
+      },
+      {
+        "endpoint": "/v1/analytics/streaming/geo",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&assetId=uuid",
+        "response_schema": "GeoData"
+      },
+      {
+        "endpoint": "/v1/analytics/streaming/completion",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&assetId=uuid",
+        "response_schema": "CompletionData"
+      },
+      {
+        "endpoint": "/v1/analytics/fans/growth",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "FanGrowthData"
+      },
+      {
+        "endpoint": "/v1/analytics/fans/conversion",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "ConversionData"
+      },
+      {
+        "endpoint": "/v1/analytics/revenue",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Label",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "RevenueData"
+      },
+      {
+        "endpoint": "/v1/analytics/engagement",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&postId=uuid",
+        "response_schema": "EngagementData"
+      },
+      {
+        "endpoint": "/v1/analytics/bi",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "BIData"
+      },
+      {
+        "endpoint": "/v1/analytics/retention",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Label Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&assetId=uuid",
+        "response_schema": "RetentionData"
+      },
+      {
+        "endpoint": "/v1/analytics/reports",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ metrics: string[], dateRange: string, dimensions: string[] }",
+        "response_schema": "{ reportId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/analytics/reports/{id}/export",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Marketer",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?format=csv",
+        "response_schema": "{ url: string }"
+      },
+      {
+        "endpoint": "/v1/analytics/podcast",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Podcast Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d&showId=uuid",
+        "response_schema": "PodcastAnalytics"
+      },
+      {
+        "endpoint": "/v1/analytics/export",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ dateRange: string, format: string, dataType: string }",
+        "response_schema": "{ exportId: string, status: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Creator, Label Manager, Marketer, Admin",
+      "authorization": "Creator can view own analytics; label manager can view label analytics",
+      "tenant_scope": "Personal creator account / Business label",
+      "primary_entities": "AnalyticsEvent, StreamEvent, FanEvent, RevenueEvent",
+      "database\n____references": "analytics_events, stream_events, fan_events, revenue_events",
+      "async_jobs": "Analytics aggregation (hourly), report generation (daily)",
+      "events_emitted": "(internal consumption only)",
+      "privacy_classification": "Aggregated analytics; personal data anonymized"
+    }
+  },
+  {
+    "code": "D16",
+    "name": "AI & Audio Intelligence",
+    "owner": "AI Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/studio/mix",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ sessionId: string, tracks: Track[] }",
+        "response_schema": "{ mixId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/mix/{sessionId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ session: MixSession }"
+      },
+      {
+        "endpoint": "/v1/studio/master",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ audio: Blob, profile: MasteringProfile }",
+        "response_schema": "{ jobId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/studio/mastering/profiles",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ profiles: MasteringProfile[] }"
+      },
+      {
+        "endpoint": "/v1/studio/mastering/profiles",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "MasteringProfile",
+        "response_schema": "{ profileId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/stem-separate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ audio: Blob }",
+        "response_schema": "{ jobId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/studio/stem-separate/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ status: string, stems?: Stems }"
+      },
+      {
+        "endpoint": "/v1/studio/restore",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ audio: Blob, algorithms: string[] }",
+        "response_schema": "{ restoredId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/effects",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?category=reverb",
+        "response_schema": "{ effects: Effect[] }"
+      },
+      {
+        "endpoint": "/v1/studio/effects/apply",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ audio: Blob, effects: Effect[] }",
+        "response_schema": "{ resultId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/ai/compose",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ prompt: string, genre: string, duration: number }",
+        "response_schema": "{ compositionId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/ai/lyrics",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ prompt: string, style: string, theme: string }",
+        "response_schema": "{ lyricsId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/ai/pitch",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ trackId: string, targets: string[] }",
+        "response_schema": "{ pitchId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/beats/match",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ audio: Blob, count: number }",
+        "response_schema": "{ matches: Beat[] }"
+      },
+      {
+        "endpoint": "/v1/studio/samples",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?category=drums&search=808",
+        "response_schema": "{ samples: Sample[] }"
+      },
+      {
+        "endpoint": "/v1/studio/canvas",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ artwork: File, animation: string, format: string }",
+        "response_schema": "{ canvasId: string, video: string }"
+      },
+      {
+        "endpoint": "/v1/studio/video/promo",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ audio: File, template: string, visuals: VisualConfig }",
+        "response_schema": "{ videoId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/video/ai",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "5/min",
+        "request_schema": "{ audio: File, style: string, duration: number }",
+        "response_schema": "{ videoId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/ai/enterprise",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ action: string, config: any }",
+        "response_schema": "{ jobId: string }"
+      },
+      {
+        "endpoint": "/v1/studio/ai/enterprise/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Creator/Producer",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?jobId=string",
+        "response_schema": "{ status: string, result?: any }"
+      }
+    ],
+    "contract": {
+      "actors": "Creator, Producer, Label Manager",
+      "authorization": "Production tools require Pro tier or higher; enterprise tools require Enterprise",
+      "tenant_scope": "Personal creator account / Business label",
+      "primary_entities": "MasteringJob, StemJob, TranscriptionJob, CompositionJob",
+      "database\n____references": "mastering_jobs, stem_jobs, transcription_jobs, composition_jobs",
+      "async_jobs": "Audio processing (long-running), AI model inference, video rendering",
+      "events\n____emitted": "mastering.completed, stem.separation_completed, video.rendered",
+      "audit_events": "job.created, job.completed, job.failed",
+      "privacy_classification": "Audio assets are private to creator until released"
+    }
+  },
+  {
+    "code": "D17",
+    "name": "Media Processing & Streaming Infra",
+    "owner": "Media Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/uploads",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ purpose: string, contentType: string, filename: string, size: number }",
+        "response_schema": "{ uploadId: string, presignedUrl: string, requiredHeaders: any, expiration: string }"
+      },
+      {
+        "endpoint": "/v1/uploads/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Uploader",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ status: string, progress: number, assetId?: string }"
+      },
+      {
+        "endpoint": "/v1/uploads/{id}/complete",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Uploader",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ assetId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/uploads/{id}/abort",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Uploader",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/streaming/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Viewer",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?format=hls&resolution=720p",
+        "response_schema": "{ playlist: string, segments: string[] }"
+      },
+      {
+        "endpoint": "/v1/transcoding/{jobId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ status: string, progress: number, formats: string[] }"
+      },
+      {
+        "endpoint": "/v1/media/validate/{assetId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ valid: boolean, issues: string[] }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Creator, Admin",
+      "authorization": "Uploader for own uploads; admin for system",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "UploadJob, TranscodingJob, MediaAsset",
+      "database_references": "uploads, transcoding_jobs, media_assets",
+      "async_jobs": "Upload processing, transcoding, virus scanning",
+      "events_emitted": "upload.completed, transcoding.completed",
+      "audit_events": "upload.created, upload.completed",
+      "privacy_classification": "Media assets are private until published"
+    }
+  },
+  {
+    "code": "D18",
+    "name": "Payments & Payouts Infra",
+    "owner": "Payment Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/payments/methods",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ methods: PaymentMethod[] }"
+      },
+      {
+        "endpoint": "/v1/payments/methods",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "{ type: string, details: any }",
+        "response_schema": "{ methodId: string }"
+      },
+      {
+        "endpoint": "/v1/payments/methods/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/payments/charges",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request": "{ amount: number, currency: string, methodId: string, metadata: any }",
+        "response_schema": "{ chargeId: string, status: string, clientSecret: string }"
+      },
+      {
+        "endpoint": "/v1/payments/charges/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request": "\\-",
+        "response_schema": "{ charge: Charge }"
+      },
+      {
+        "endpoint": "/v1/payments/refunds",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "{ chargeId: string, amount: number, reason: string }",
+        "response_schema": "{ refundId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/payments/webhooks",
+        "method": "POST",
+        "auth": "Optional",
+        "authorization": "Service",
+        "idempotent": "N/A",
+        "rate": "100/min",
+        "request": "{ type: string, data: any }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/payments/balance",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ balance: Money }"
+      },
+      {
+        "endpoint": "/v1/payments/withdraw",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "{ amount: number, method: string }",
+        "response_schema": "{ withdrawalId: string, status: string }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Creator, Label, Admin",
+      "authorization": "Payment methods require user ownership; admin for reconciliation",
+      "tenant_scope": "Personal account / Business account",
+      "primary_entities": "PaymentMethod, Transaction, Disbursement",
+      "database\n____references": "payment_methods, transactions, disbursements",
+      "async_jobs": "Payment processing, reconciliation",
+      "events\n____emitted": "payment.succeeded, payment.failed, payout.completed",
+      "audit_events": "All payment transactions are audit-logged",
+      "privacy_classification": "Payment data is highly sensitive; store provider references only"
+    }
+  },
+  {
+    "code": "D19",
+    "name": "Notifications",
+    "owner": "Notification Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/notifications",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?filter=all&limit=25&cursor=string",
+        "response_schema": "{ data: Notification[], pagination }"
+      },
+      {
+        "endpoint": "/v1/notifications/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Notification"
+      },
+      {
+        "endpoint": "/v1/notifications/read",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "60/min",
+        "request_schema": "{ notificationIds: string[] }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications/read-all",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications/preferences",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "NotificationPreferences"
+      },
+      {
+        "endpoint": "/v1/notifications/preferences",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "NotificationPreferences",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications/tokens",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ platform: string, token: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/notifications/tokens/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Creator, Admin",
+      "authorization": "User can view own notifications; admin for system broadcasts",
+      "tenant_scope": "Personal account",
+      "primary_entities": "Notification, PushToken, EmailLog",
+      "database_references": "notifications, push_tokens, email_logs",
+      "async_jobs": "Push notification delivery, email delivery",
+      "events_emitted": "notification.delivered",
+      "audit_events": "notification.sent (timing only)",
+      "privacy_classification": "Notifications may contain sensitive metadata"
+    }
+  },
+  {
+    "code": "D20",
+    "name": "Entitlements & Feature Flags",
+    "owner": "Entitlement Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/entitlements/me",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request": "\\-",
+        "response_schema": "{ entitlements: Entitlement[] }"
+      },
+      {
+        "endpoint": "/v1/entitlements/{userId}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ entitlements: Entitlement[] }"
+      },
+      {
+        "endpoint": "/v1/entitlements/{userId}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "{ features: string[], tier: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/entitlements/tiers",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ tiers: TierPlan[] }"
+      },
+      {
+        "endpoint": "/v1/entitlements/tiers",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "TierPlan",
+        "response_schema": "{ tierId: string }"
+      },
+      {
+        "endpoint": "/v1/entitlements/tiers/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "TierPlan",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/entitlements/feature-flags",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ flags: FeatureFlag[] }"
+      },
+      {
+        "endpoint": "/v1/entitlements/feature-flags",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "FeatureFlag",
+        "response_schema": "{ flagId: string }"
+      },
+      {
+        "endpoint": "/v1/entitlements/feature-flags/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "FeatureFlag",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/entitlements/experiments",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request": "\\-",
+        "response_schema": "{ experiments: Experiment[] }"
+      },
+      {
+        "endpoint": "/v1/entitlements/experiments",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request": "Experiment",
+        "response_schema": "{ experimentId: string }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Admin",
+      "authorization": "Users can view own entitlements; admin for management",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "FeatureFlag, Entitlement, TierPlan",
+      "database_references": "feature_flags, entitlements, tier_plans",
+      "async_jobs": "None",
+      "events_emitted": "entitlement.granted, entitlement.revoked",
+      "audit_events": "All entitlement changes are audit-logged",
+      "privacy_classification": "Entitlements are internal/private"
+    }
+  },
+  {
+    "code": "D21",
+    "name": "Developer Platform & Webhooks",
+    "owner": "Developer Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/developer/keys",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ keys: APIKey[] }"
+      },
+      {
+        "endpoint": "/v1/developer/keys",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ name: string, scopes: string[] }",
+        "response_schema": "{ key: APIKey }"
+      },
+      {
+        "endpoint": "/v1/developer/keys/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/developer/webhooks",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ subscriptions: WebhookSubscription[] }"
+      },
+      {
+        "endpoint": "/v1/developer/webhooks",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ name: string, url: string, events: string[] }",
+        "response_schema": "{ subscriptionId: string }"
+      },
+      {
+        "endpoint": "/v1/developer/webhooks/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/developer/webhooks/{id}/test",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean, response: any }"
+      },
+      {
+        "endpoint": "/v1/developer/webhooks/{id}/logs",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: WebhookLog[], pagination }"
+      },
+      {
+        "endpoint": "/v1/developer/usage",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "UsageData"
+      },
+      {
+        "endpoint": "/v1/developer/sandbox/reset",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "5/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/developer/sdks",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ sdks: SDK[] }"
+      },
+      {
+        "endpoint": "/v1/developer/connectors",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?category=crm",
+        "response_schema": "{ connectors: Connector[] }"
+      },
+      {
+        "endpoint": "/v1/developer/connectors/{id}/connect",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Developer",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ credentials: any }",
+        "response_schema": "{ success: boolean, connectionId: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Developer, Label Admin",
+      "authorization": "API access requires Business account; developer role",
+      "tenant_scope": "Business account",
+      "primary_entities": "APIKey, WebhookSubscription, WebhookDelivery, SandboxRequest",
+      "database\n____references": "api_keys, webhook_subscriptions, webhook_deliveries, sandbox_requests",
+      "async_jobs": "Webhook delivery (with retry)",
+      "events_emitted": "webhook.delivered, webhook.failed",
+      "audit_events": "api_key.created, api_key.revoked",
+      "privacy_classification": "API keys are sensitive; webhook data may contain business data"
+    }
+  },
+  {
+    "code": "D22",
+    "name": "Advertising Integration (AdNote Boundary)",
+    "owner": "Ad Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/advertise/campaigns",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "CampaignCreateRequest",
+        "response_schema": "{ campaignId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "Campaign"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "CampaignUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}/settings",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, specialCategories: string[], splitTest: boolean, cbo: boolean }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}/budget",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ strategy: string, dailyAmount: number, lifetimeAmount: number, startDate: string, endDate: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/campaigns/{id}/projections",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ impressions: Range, reach: Range, cpm: Range }"
+      },
+      {
+        "endpoint": "/v1/advertise/groups",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "AdGroupCreateRequest",
+        "response_schema": "{ groupId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/groups/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "AdGroupUpdateRequest",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/groups/{id}/placements",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ placements: string[], autoOptimize: boolean }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/groups/{id}/delivery",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ type: string, frequencyCapping: FrequencyConfig, crossFormatRules: ImpressionRule[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/audiences",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, criteria: AudienceCriteria }",
+        "response_schema": "{ audienceId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/audiences/{id}/size",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ size: number, reach: number }"
+      },
+      {
+        "endpoint": "/v1/advertise/audiences/controls",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ location: string, minAge: number, exclusions: string[] }"
+      },
+      {
+        "endpoint": "/v1/advertise/audiences/controls",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ location: string, minAge: number, exclusions: string[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/creatives",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ audio: File, companionImage: File, logo: File, cta: string, destinationUrl: string }",
+        "response_schema": "{ creativeId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/creatives/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "Creative"
+      },
+      {
+        "endpoint": "/v1/advertise/creatives/{id}/preview",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?device=mobile",
+        "response_schema": "{ previewUrl: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/creatives/generate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/hour",
+        "request_schema": "{ script: string, voiceover: string, tone: string, musicGenre: string }",
+        "response_schema": "{ creativeId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/analytics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?dateRange=30d&campaignId=uuid",
+        "response_schema": "CampaignAnalytics"
+      },
+      {
+        "endpoint": "/v1/advertise/analytics/metrics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?dateRange=30d&campaignId=uuid",
+        "response_schema": "MetricData"
+      },
+      {
+        "endpoint": "/v1/advertise/leads",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Lead[], pagination }"
+      },
+      {
+        "endpoint": "/v1/advertise/leads/export",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ format: string, dateRange: string }",
+        "response_schema": "{ exportId: string, url: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/catalog",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "20/min",
+        "request_schema": "{ source: string, credentials: any }",
+        "response_schema": "{ catalogId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/catalog/products",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: ProductSummary[], pagination }"
+      },
+      {
+        "endpoint": "/v1/advertise/exchange/ssp",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ protocol: string, config: any }",
+        "response_schema": "{ endpointId: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/exchange/revenue",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "{ revenue: RevenueBreakdown }"
+      },
+      {
+        "endpoint": "/v1/advertise/account",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ account: AdAccount }"
+      },
+      {
+        "endpoint": "/v1/advertise/account/verify",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ documents: File[] }",
+        "response_schema": "{ verificationId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/advertise/billing",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ address: Address, paymentMethod: string, legalEntity: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/advertise/transactions",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Advertiser",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Transaction[], pagination }"
+      }
+    ],
+    "contract": {
+      "actors": "Advertiser, Agency, Admin",
+      "authorization": "Advertiser account; verified business required",
+      "tenant_scope": "Advertiser account (external)",
+      "primary_entities": "Campaign, AdGroup, Creative, Lead",
+      "database_references": "ad_campaigns, ad_groups, creatives, leads",
+      "async_jobs": "Campaign delivery, ad serving, reporting aggregation",
+      "events\n____emitted": "campaign.launched, campaign.completed, ad.impression, ad.click",
+      "audit_events": "campaign.created, campaign.budget_changed",
+      "privacy_classification": "Campaign data is advertiser-private; audience data is aggregated"
+    }
+  },
+  {
+    "code": "D23",
+    "name": "Trust & Safety Ops",
+    "owner": "Safety Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/safety/reports",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ contentId: string, reason: string, evidence: string[] }",
+        "response_schema": "{ reportId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/safety/reports",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=pending&limit=25&cursor=string",
+        "response_schema": "{ data: Report[], pagination }"
+      },
+      {
+        "endpoint": "/v1/safety/reports/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Report"
+      },
+      {
+        "endpoint": "/v1/safety/reports/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ action: string, notes: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/safety/appeals",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ moderationId: string, reason: string, evidence: string[] }",
+        "response_schema": "{ appealId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/safety/appeals",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=pending&limit=25&cursor=string",
+        "response_schema": "{ data: Appeal[], pagination }"
+      },
+      {
+        "endpoint": "/v1/safety/appeals/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ decision: string, notes: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/safety/actions",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ userId: string, action: string, reason: string, duration: string }",
+        "response_schema": "{ actionId: string }"
+      },
+      {
+        "endpoint": "/v1/safety/fraud-alerts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: FraudAlert[], pagination }"
+      },
+      {
+        "endpoint": "/v1/safety/fraud-alerts/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string, notes: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/safety/trust-metrics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "{ metrics: TrustMetrics }"
+      },
+      {
+        "endpoint": "/v1/safety/investigations",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ caseId: string, findings: string, actions: string[] }",
+        "response_schema": "{ investigationId: string }"
+      },
+      {
+        "endpoint": "/v1/safety/investigations/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Moderator",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ investigation: Investigation }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Moderator, Admin",
+      "authorization": "Report submission requires authenticated user; moderation requires role",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "Report, Investigation, SafetyAction",
+      "database\n____references": "reports, investigations, safety_actions, appeals",
+      "async_jobs": "Fraud detection (cron), automated moderation",
+      "events_emitted": "report.created, moderation.action_taken",
+      "audit_events": "All moderation actions are audit-logged",
+      "privacy_classification": "Reports and investigations are internal/confidential"
+    }
+  },
+  {
+    "code": "D24",
+    "name": "Support & Admin Operations",
+    "owner": "Support Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/support/tickets",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ subject: string, message: string, priority: string, category: string }",
+        "response_schema": "{ ticketId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/support/tickets",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=open&limit=25&cursor=string",
+        "response_schema": "{ data: Ticket[], pagination }"
+      },
+      {
+        "endpoint": "/v1/support/tickets/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "User/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Ticket"
+      },
+      {
+        "endpoint": "/v1/support/tickets/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string, assignee: string, notes: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/support/tickets/{id}/messages",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Participant",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ message: string, attachments: File[] }",
+        "response_schema": "{ messageId: string }"
+      },
+      {
+        "endpoint": "/v1/support/disputes",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "User (self)",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ orderId: string, reason: string, amount: number }",
+        "response_schema": "{ disputeId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/support/disputes",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?status=pending&limit=25&cursor=string",
+        "response_schema": "{ data: Dispute[], pagination }"
+      },
+      {
+        "endpoint": "/v1/support/disputes/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ decision: string, notes: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/support/escalations",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ caseId: string, reason: string, severity: string }",
+        "response_schema": "{ escalationId: string }"
+      },
+      {
+        "endpoint": "/v1/support/escalations",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?status=active&limit=25&cursor=string",
+        "response_schema": "{ data: Escalation[], pagination }"
+      },
+      {
+        "endpoint": "/v1/support/escalations/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string, assignee: string, resolution: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/support/analytics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "{ metrics: SupportMetrics }"
+      },
+      {
+        "endpoint": "/v1/support/admin-actions",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: AdminAction[], pagination }"
+      },
+      {
+        "endpoint": "/v1/support/overrides",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ action: string, target: string, params: any, reason: string }",
+        "response_schema": "{ overrideId: string }"
+      }
+    ],
+    "contract": {
+      "actors": "User, Support Agent, Admin",
+      "authorization": "Users can create own tickets; admin for management",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "Ticket, Dispute, Escalation, AdminAction",
+      "database\n____references": "tickets, disputes, escalations, admin_actions",
+      "async_jobs": "Ticket routing, SLA monitoring",
+      "events_emitted": "ticket.created, ticket.resolved",
+      "audit_events": "All support actions are audit-logged",
+      "privacy_classification": "Support data is confidential; contains PII"
+    }
+  },
+  {
+    "code": "D25",
+    "name": "Legal, Policy & Compliance",
+    "owner": "Legal Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/legal/contracts",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?status=active&limit=25&cursor=string",
+        "response_schema": "{ data: LegalContract[], pagination }"
+      },
+      {
+        "endpoint": "/v1/legal/contracts",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ type: string, counterparty: string, terms: any }",
+        "response_schema": "{ contractId: string }"
+      },
+      {
+        "endpoint": "/v1/legal/contracts/{id}",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "LegalContract"
+      },
+      {
+        "endpoint": "/v1/legal/contracts/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string, terms: any, signedAt: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/legal/contracts/{id}/sign",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ signature: string }",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/legal/contracts/templates",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ templates: ContractTemplate[] }"
+      },
+      {
+        "endpoint": "/v1/legal/compliance/rights",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?userId=uuid",
+        "response_schema": "{ rights: RightsRecord[] }"
+      },
+      {
+        "endpoint": "/v1/legal/compliance/rights",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ userId: string, assetId: string, rights: string[] }",
+        "response_schema": "{ rightId: string }"
+      },
+      {
+        "endpoint": "/v1/legal/compliance/registrations",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ type: string, data: any, documents: File[] }",
+        "response_schema": "{ registrationId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/legal/policies",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ policies: Policy[] }"
+      },
+      {
+        "endpoint": "/v1/legal/policies/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "Policy"
+      },
+      {
+        "endpoint": "/v1/legal/policies",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ content: string, version: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/legal/terms",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ terms: Terms[] }"
+      }
+    ],
+    "contract": {
+      "actors": "Admin, Legal Team, Public",
+      "authorization": "Contract/rights management requires admin; policies public",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "LegalContract, ComplianceRecord, RightsAgreement",
+      "database\n____references": "legal_contracts, compliance_records, rights_agreements",
+      "async_jobs": "Contract expiration alerts, rights renewal",
+      "events_emitted": "contract.signed, rights.granted",
+      "audit_events": "All legal actions are audit-logged",
+      "privacy_classification": "Legal data is confidential; policies are public"
+    }
+  },
+  {
+    "code": "D26",
+    "name": "Platform Infra & Reliability",
+    "owner": "Infra Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/infra/status",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ services: ServiceStatus[] }"
+      },
+      {
+        "endpoint": "/v1/infra/status/{service}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "ServiceStatus"
+      },
+      {
+        "endpoint": "/v1/infra/incidents",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?status=active&limit=25&cursor=string",
+        "response_schema": "{ data: Incident[], pagination }"
+      },
+      {
+        "endpoint": "/v1/infra/incidents",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ title: string, severity: string, description: string }",
+        "response_schema": "{ incidentId: string }"
+      },
+      {
+        "endpoint": "/v1/infra/incidents/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string, resolution: string, updates: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/infra/maintenance",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ start: string, end: string, description: string, services: string[] }",
+        "response_schema": "{ maintenanceId: string }"
+      },
+      {
+        "endpoint": "/v1/infra/maintenance",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?upcoming=true&limit=25",
+        "response_schema": "{ data: Maintenance[], pagination }"
+      },
+      {
+        "endpoint": "/v1/infra/maintenance/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ status: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/infra/backups",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Backup[], pagination }"
+      },
+      {
+        "endpoint": "/v1/infra/backups",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ service: string, type: string }",
+        "response_schema": "{ backupId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/infra/backups/{id}/restore",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "5/min",
+        "request_schema": "{ target: string }",
+        "response_schema": "{ restoreId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/infra/scaling",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ config: ScalingConfig }"
+      },
+      {
+        "endpoint": "/v1/infra/scaling",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "ScalingConfig",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/infra/rate-limits",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ rules: RateLimitRule[] }"
+      },
+      {
+        "endpoint": "/v1/infra/rate-limits",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ rules: RateLimitRule[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/infra/health",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Service",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "{ healthy: boolean, dependencies: DependencyHealth[] }"
+      }
+    ],
+    "contract": {
+      "actors": "Admin, Platform Staff, Public",
+      "authorization": "Status public; management requires admin",
+      "tenant_scope": "Platform-wide",
+      "primary_entities": "ServiceStatus, Incident, Backup, ScalingRule",
+      "database\n____references": "service_status, incidents, backups, scaling_rules",
+      "async_jobs": "Health checks, backup scheduling, auto-scaling",
+      "events\n____emitted": "service.degraded, service.restored, incident.created",
+      "audit_events": "All admin infrastructure actions are audit-logged",
+      "privacy_classification": "Status public; infrastructure config internal"
+    }
+  },
+  {
+    "code": "D27",
+    "name": "Podcast Network",
+    "owner": "Podcast Service",
+    "endpoints": [
+      {
+        "endpoint": "/v1/podcast/shows",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: PodcastShow[], pagination }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, description: string, cover: File }",
+        "response_schema": "{ showId: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Owner",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "PodcastShow"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ name: string, description: string, cover: File }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/episodes",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Owner",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: PodcastEpisode[], pagination }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/episodes",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ title: string, description: string, audio: File, season: number, episodeNumber: number }",
+        "response_schema": "{ episodeId: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public/Owner",
+        "idempotent": "N/A",
+        "rate": "120/min",
+        "request_schema": "\\-",
+        "response_schema": "PodcastEpisode"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ title: string, description: string, status: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/rss",
+        "method": "GET",
+        "auth": "Optional",
+        "authorization": "Public",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?format=xml",
+        "response_schema": "{ rss: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/rss/validate",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ valid: boolean, errors: string[] }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/rss/canonical",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ url: string, cname: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/rss/canonical",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ cname: string }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/private/feeds",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ subscriberId: string }",
+        "response_schema": "{ feedId: string, token: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/private/subscribers",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?limit=25&cursor=string",
+        "response_schema": "{ data: Subscriber[], pagination }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/private/subscribers",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ emails: string[] }",
+        "response_schema": "{ added: number }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/private/subscribers/{subscriberId}",
+        "method": "DELETE",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "\\-",
+        "response_schema": "{ success: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/private/sso",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ provider: string, config: any }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/dai/markers",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ markers: AdMarker[] }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/dai/markers",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ markers: AdMarker[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/dci",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ type: string, content: string, position: string }",
+        "response_schema": "{ jobId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/distribute",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ directories: string[] }",
+        "response_schema": "{ distributionId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/distribute/status",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ statuses: DirectoryStatus[] }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/transcript",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ language: string }",
+        "response_schema": "{ jobId: string, status: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/transcript",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "\\-",
+        "response_schema": "{ transcript: Transcript }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/transcript/edit",
+        "method": "PUT",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "30/min",
+        "request_schema": "{ transcript: string, speakers: Speaker[] }",
+        "response_schema": "{ updated: boolean }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/ai/show-notes",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ title: string, summary: string, takeaways: string[], seoDescription: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/episodes/{id}/ai/chapters",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "\\-",
+        "response_schema": "{ chapters: Chapter[] }"
+      },
+      {
+        "endpoint": "/v1/podcast/monetization/programmatic",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ endpoint: string, credentials: any }",
+        "response_schema": "{ connectionId: string }"
+      },
+      {
+        "endpoint": "/v1/podcast/monetization/revenue",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "{ revenue: PodcastRevenue }"
+      },
+      {
+        "endpoint": "/v1/podcast/monetization/forecast",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "30/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "{ forecast: InventoryForecast }"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/analytics",
+        "method": "GET",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "N/A",
+        "rate": "60/min",
+        "request_schema": "?dateRange=30d",
+        "response_schema": "PodcastAnalytics"
+      },
+      {
+        "endpoint": "/v1/podcast/shows/{id}/analytics/export",
+        "method": "POST",
+        "auth": "Required",
+        "authorization": "Owner/Admin",
+        "idempotent": "Yes",
+        "rate": "10/min",
+        "request_schema": "{ format: string, dateRange: string }",
+        "response_schema": "{ exportId: string, url: string }"
+      }
+    ],
+    "contract": {
+      "actors": "Podcast Creator, Label Manager, Admin",
+      "authorization": "Podcast management requires Business account; distribution requires Label tier",
+      "tenant_scope": "Business account",
+      "primary_entities": "PodcastShow, PodcastEpisode, RSSFeed, AdMarker, Transcript",
+      "database\n____references": "podcast_shows, podcast_episodes, rss_feeds, ad_markers, transcripts",
+      "async_jobs": "Audio processing, DDEX packaging, directory distribution",
+      "events\n____emitted": "podcast.show_created, podcast.episode_published, podcast.distributed",
+      "audit_events": "All podcast lifecycle changes are audit-logged",
+      "privacy_classification": "Podcast metadata public; private feeds tokenized; financial data private"
+    }
+  }
+]

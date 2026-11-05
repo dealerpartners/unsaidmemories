@@ -1,0 +1,7103 @@
+[
+{
+"title": "PERSONAL CONTEXT - HOME / DISCOVER",
+"slug": "personal-context-home-discover",
+"features": [
+{
+"name": "For You Algorithmic Feed",
+"slug": "for-you-algorithmic-feed",
+"goal": "Discover personalized content recommendations based on listening history, taste profile, and similar user activity",
+"actions": [
+"Scroll feed vertically",
+"Refresh to load new recommendations",
+"Filter by content type (music, video, posts)",
+"View algorithmic recommendations"
+],
+"routes": "/app/discover?tab=for-you",
+"components": "ForYouFeed, RecommendationEngine, FeedItemCard, InfiniteScroll",
+"apis": [
+"GET /api/feed/for-you",
+"POST /api/feed/refresh",
+"Recommendation Service (ML pipeline)",
+"User Taste Profile Service"
+],
+"rules": [
+"Requires authenticated user",
+"Recommendations based on listening history, follows, engagement",
+"Rate-limited: 100 requests/minute"
+]
+},
+{
+"name": "Following Feed",
+"slug": "following-feed",
+"goal": "See content from followed creators in chronological order",
+"actions": [
+"View posts from followed artists",
+"Scroll through chronological feed",
+"Interact with content (like, comment, share)"
+],
+"routes": "/app/discover?tab=following",
+"components": "FollowingFeed, FeedItemCard",
+"apis": [
+"GET /api/feed/following",
+"Follow Graph Service",
+"Chronological Feed Builder"
+],
+"rules": [
+"Requires authenticated user",
+"Only shows content from followed creators",
+"Chronological ordering (newest first)"
+]
+},
+{
+"name": "Friends Activity Feed",
+"slug": "friends-activity-feed",
+"goal": "See what connected friends are listening to, liking, favoriting, and adding to collections",
+"actions": [
+"View friends' listening activity",
+"See friends' likes and favorites",
+"View playlist additions",
+"Find friends from contacts"
+],
+"routes": "/app/discover?tab=friends",
+"components": "FriendsActivityFeed, FriendActivityCard, FindFriendsFromContacts",
+"apis": [
+"GET /api/feed/friends-activity",
+"Social Graph Service",
+"Contacts Integration Service"
+],
+"rules": [
+"Requires authenticated user",
+"Only shows activity from connected friends",
+"Privacy controls: users can hide activity from friends"
+]
+},
+{
+"name": "Genre & Mood Explorer",
+"slug": "genre-mood-explorer",
+"goal": "Browse catalogs by musical genres, sub-genres, moods, activities, and atmospheres",
+"actions": [
+"Browse genre categories",
+"Filter by sub-genre",
+"Filter by mood/activity/atmosphere",
+"View curated genre collections"
+],
+"routes": "/app/discover?tab=genres",
+"components": "GenreMoodExplorer, GenreTile, MoodFilter, GenrePlaylistCard",
+"apis": [
+"GET /api/discover/genres",
+"GET /api/discover/genre/{id}/content",
+"Catalog Metadata Service"
+],
+"rules": [
+"Public access (no authentication required)",
+"Rate-limited: 50 requests/minute"
+]
+},
+{
+"name": "Editorial & Curated Highlights",
+"slug": "editorial-curated-highlights",
+"goal": "Discover human-curated releases, artist spotlights, and editorial picks",
+"actions": [
+"View editorial picks",
+"View featured artists",
+"View curated playlists",
+"View showcase surfaces"
+],
+"routes": "/app/discover?tab=editorial",
+"components": "EditorialHighlights, CuratedShowcase, FeaturedArtistCard, CuratedPlaylistCard",
+"apis": [
+"GET /api/discover/editorial",
+"Editorial Content Management Service",
+"Curator Dashboard (internal)"
+],
+"rules": [
+"Public access",
+"Editorial content managed by platform curators",
+"Content updated daily/weekly"
+]
+},
+{
+"name": "Trending & Viral Charts",
+"slug": "trending-viral-charts",
+"goal": "See top tracks, viral clips, trending artists, and fast-growing posts across daily/weekly cycles",
+"actions": [
+"View daily charts",
+"View weekly charts",
+"Filter by genre",
+"View trending artists",
+"View viral clips"
+],
+"routes": "/app/discover?tab=trending",
+"components": "TrendingCharts, ChartList, TrendingArtistCard, ViralClipCard",
+"apis": [
+"GET /api/discover/trending/daily",
+"GET /api/discover/trending/weekly",
+"Trending Algorithm Service",
+"Chart Calculation Engine"
+],
+"rules": [
+"Public access",
+"Charts updated daily (midnight UTC)",
+"Trending based on velocity (last 24h/7d)"
+]
+},
+{
+"name": "New Release Radar",
+"slug": "new-release-radar",
+"goal": "See newly published songs, albums, and music videos from followed creators",
+"actions": [
+"View personalized new release feed",
+"Filter by content type",
+"Subscribe to artist release notifications"
+],
+"routes": "/app/discover?tab=new-releases",
+"components": "NewReleaseRadar, NewReleaseCard, ReleaseNotificationToggle",
+"apis": [
+"GET /api/discover/new-releases",
+"Follow Graph Service",
+"Release Calendar Service"
+],
+"rules": [
+"Requires authenticated user",
+"Only shows releases from followed artists",
+"Shows releases from last 7 days"
+]
+},
+{
+"name": "Nearby & Local Radar",
+"slug": "nearby-local-radar",
+"goal": "Discover local artists, nearby upcoming events, and trending music in the user's city",
+"actions": [
+"View geolocation-powered discovery feed",
+"Find local artists",
+"Discover nearby events",
+"View local trending music"
+],
+"routes": "/app/discover?tab=local",
+"components": "LocalRadar, LocalArtistCard, NearbyEventCard, CityTrendingCard",
+"apis": [
+"GET /api/discover/local",
+"Geolocation Service",
+"Event Service",
+"Local Artist Index"
+],
+"rules": [
+"Requires location permission (browser)",
+"Falls back to IP geolocation if denied",
+"Shows artists within 50-mile radius"
+]
+},
+{
+"name": "Live Now Rail",
+"slug": "live-now-rail",
+"goal": "See currently active live broadcasts from followed creators and trending streams",
+"actions": [
+"View live stream carousel",
+"Join live streams",
+"See who's currently broadcasting"
+],
+"routes": "/app/discover (integrated rail), /app/discover?tab=live",
+"components": "LiveNowRail, LiveStreamPreviewCard, LiveIndicator",
+"apis": [
+"GET /api/discover/live-now",
+"Live Stream Service",
+"WebSocket for real-time updates"
+],
+"rules": [
+"Requires authenticated user",
+"Shows live streams from followed creators first",
+"Shows trending live streams second"
+]
+},
+{
+"name": "AI Recommendation Engine",
+"slug": "ai-recommendation-engine",
+"goal": "Receive tailored recommendations based on listening history, user taste profiles, and similar user activity",
+"actions": [
+"View AI-curated recommendations",
+"See \"Because you listened to X\" suggestions",
+"See \"Fans also like\" recommendations"
+],
+"routes": "/app/discover (integrated into feed)",
+"components": "AIRecommendationEngine, RecommendationCard",
+"apis": [
+"GET /api/recommendations/personalized",
+"ML Recommendation Pipeline",
+"User Taste Profile Service",
+"Collaborative Filtering Engine"
+],
+"rules": [
+"Requires authenticated user",
+"Requires minimum listening history (10 tracks)",
+"Model retrained daily"
+]
+},
+{
+"name": "Universal Search \u2014 Artist Search",
+"slug": "universal-search-artist-search",
+"goal": "Find creator accounts, verified artist profiles, and user profiles",
+"actions": [
+"Search by artist name",
+"Search by profile handle",
+"View search results with relevance ranking"
+],
+"routes": "/app/search?type=artists&q={query}",
+"components": "ArtistSearchResults, SearchBar, ArtistResultCard",
+"apis": [
+"GET /api/search/artists?q={query}",
+"Search Index Service (Elasticsearch)",
+"User Profile Service"
+],
+"rules": [
+"Public access",
+"Autocomplete on 3+ characters",
+"Exact match prioritized"
+]
+},
+{
+"name": "Universal Search \u2014 Catalog Search",
+"slug": "universal-search-catalog-search",
+"goal": "Find tracks, albums, and videos",
+"actions": [
+"Search by track title",
+"Search by album name",
+"View search results with relevance ranking"
+],
+"routes": "/app/search?type=catalog&q={query}",
+"components": "CatalogSearchResults, TrackResultCard, AlbumResultCard",
+"apis": [
+"GET /api/search/catalog?q={query}",
+"Search Index Service (Elasticsearch)",
+"Catalog Metadata Service"
+],
+"rules": [
+"Public access",
+"Autocomplete on 3+ characters",
+"Exact match prioritized over partial"
+]
+},
+{
+"name": "Universal Search \u2014 Audio Fingerprint Search",
+"slug": "universal-search-audio-fingerprint-search",
+"goal": "Find a song by humming or playing it into the microphone",
+"actions": [
+"Tap \"Search by Sound\" button",
+"Hum or play audio into microphone (3-10 seconds)",
+"Receive matching track results"
+],
+"routes": "/app/search?type=fingerprint",
+"components": "AudioFingerprintSearch, MicrophoneRecorder, FingerprintMatchResults",
+"apis": [
+"POST /api/search/fingerprint (audio upload)",
+"Audio Fingerprinting Service (AcoustID/Chromaprint)",
+"Catalog Matching Service"
+],
+"rules": [
+"Requires microphone permission",
+"Minimum 3-second audio sample",
+"Maximum 10-second audio sample",
+"Rate-limited: 10 requests/hour"
+]
+},
+{
+"name": "Universal Search \u2014 Lyrics Search",
+"slug": "universal-search-lyrics-search",
+"goal": "Find tracks by lyric fragments",
+"actions": [
+"Enter lyrics text",
+"View matching tracks with highlighted lyric matches"
+],
+"routes": "/app/search?type=lyrics&q={query}",
+"components": "LyricsSearchResults, TrackResultCardWithLyrics",
+"apis": [
+"GET /api/search/lyrics?q={query}",
+"Lyrics Search Index (Elasticsearch)",
+"Lyrics Management Service"
+],
+"rules": [
+"Public access",
+"Fuzzy matching supported",
+"Minimum 2 words for search"
+]
+},
+{
+"name": "Universal Search \u2014 Metadata Search",
+"slug": "universal-search-metadata-search",
+"goal": "Search by catalog metadata (ISRC, UPC, GRID codes)",
+"actions": [
+"Enter ISRC/UPC/GRID code",
+"View matching asset details"
+],
+"routes": "/app/search?type=metadata&q={query}",
+"components": "MetadataSearchResults, AssetDetailCard",
+"apis": [
+"GET /api/search/metadata?q={query}",
+"Catalog Metadata Service",
+"Identifiers Registry"
+],
+"rules": [
+"Public access",
+"Exact match required",
+"Validates code format"
+]
+},
+{
+"name": "Universal Search \u2014 Playlist Search",
+"slug": "universal-search-playlist-search",
+"goal": "Find user-generated and editorial playlists",
+"actions": [
+"Search by playlist name",
+"Search by playlist description",
+"View search results"
+],
+"routes": "/app/search?type=playlists&q={query}",
+"components": "PlaylistSearchResults, PlaylistResultCard",
+"apis": [
+"GET /api/search/playlists?q={query}",
+"Playlist Service",
+"Search Index Service"
+],
+"rules": [
+"Public access",
+"Shows public playlists only",
+"Shows followed playlists first"
+]
+},
+{
+"name": "Universal Search \u2014 Event Search",
+"slug": "universal-search-event-search",
+"goal": "Find upcoming concerts, virtual streams, meet-and-greets, and release events",
+"actions": [
+"Search by event name",
+"Search by artist name",
+"Search by venue/location",
+"Filter by date range"
+],
+"routes": "/app/search?type=events&q={query}",
+"components": "EventSearchResults, EventResultCard, DateRangeFilter",
+"apis": [
+"GET /api/search/events?q={query}",
+"Event Service",
+"Location Service"
+],
+"rules": [
+"Public access",
+"Shows upcoming events only",
+"Can filter by date range"
+]
+},
+{
+"name": "Content Interaction \u2014 Like",
+"slug": "content-interaction-like",
+"goal": "Express appreciation for content",
+"actions": [
+"Tap like button on posts, tracks, videos",
+"View like count",
+"Unlike content"
+],
+"routes": "In-card action on all content surfaces",
+"components": "LikeButton, LikeCount",
+"apis": [
+"POST /api/interactions/like",
+"DELETE /api/interactions/unlike",
+"Activity Feed Service"
+],
+"rules": [
+"Requires authenticated user",
+"Cannot like own content",
+"Rate-limited: 100 likes/minute"
+]
+},
+{
+"name": "Content Interaction \u2014 Comment",
+"slug": "content-interaction-comment",
+"goal": "Add public commentary to content",
+"actions": [
+"Write comment with text, emojis, @mentions",
+"Add time-stamped replies pinned to specific track moments",
+"Reply to other comments"
+],
+"routes": "In-card action on all content surfaces",
+"components": "CommentComposer, CommentThread, TimestampedReply",
+"apis": [
+"POST /api/interactions/comment",
+"GET /api/interactions/comments/{contentId}",
+"Moderation Service"
+],
+"rules": [
+"Requires authenticated user",
+"Minimum 1 character, maximum 1000 characters",
+"Auto-moderation (spam/toxicity filter)",
+"Creator can delete comments on own content"
+]
+},
+{
+"name": "Content Interaction \u2014 Share",
+"slug": "content-interaction-share",
+"goal": "Share content internally and externally",
+"actions": [
+"Share via internal direct message",
+"Share to Instagram Stories",
+"Share to TikTok",
+"Share to X (Twitter)",
+"Share to WhatsApp",
+"Generate smart link for sharing"
+],
+"routes": "In-card action on all content surfaces",
+"components": "ShareMenu, ShareTargetPicker, SmartLinkGenerator",
+"apis": [
+"POST /api/interactions/share",
+"Social Platform SDK Integration",
+"Smart Link Service",
+"GET /api/links/smart/{contentId}"
+],
+"rules": [
+"Requires authenticated user for internal share",
+"External share uses platform SDKs",
+"Smart links track clicks and conversions"
+]
+},
+{
+"name": "Content Interaction \u2014 Repost",
+"slug": "content-interaction-repost",
+"goal": "Repost artist updates to own profile feed with added commentary",
+"actions": [
+"Tap repost button",
+"Add commentary text",
+"View repost on own profile"
+],
+"routes": "In-card action on all content surfaces",
+"components": "RepostButton, RepostComposer, RepostCard",
+"apis": [
+"POST /api/interactions/repost",
+"DELETE /api/interactions/unrepost",
+"Activity Feed Service"
+],
+"rules": [
+"Requires authenticated user",
+"Can repost content from any public creator",
+"Commentary optional"
+]
+},
+{
+"name": "Content Interaction \u2014 Web Embed",
+"slug": "content-interaction-web-embed",
+"goal": "Embed content on external websites and blogs",
+"actions": [
+"Generate responsive HTML embed code",
+"Copy embed code to clipboard"
+],
+"routes": "In-card action on all content surfaces",
+"components": "EmbedGenerator, EmbedCodeDisplay, CopyToClipboard",
+"apis": [
+"GET /api/embed/{contentId}",
+"Embed Player Service"
+],
+"rules": [
+"Public content can be embedded",
+"Private content requires authentication token",
+"Embed code includes tracking pixel"
+]
+},
+{
+"name": "Collection & Playlist Quick-Add",
+"slug": "collection-playlist-quick-add",
+"goal": "Instantly add audio/video posts directly into personal playlists",
+"actions": [
+"Tap \"Add to Playlist\" on content",
+"Select existing playlist or create new",
+"Confirmation of addition"
+],
+"routes": "In-card action on all content surfaces",
+"components": "QuickAddToPlaylist, PlaylistSelectorModal",
+"apis": [
+"POST /api/playlists/{playlistId}/items",
+"Playlist Service"
+],
+"rules": [
+"Requires authenticated user",
+"Can only add to own playlists",
+"Duplicate detection"
+]
+},
+{
+"name": "Multi-Format Reaction Engine",
+"slug": "multi-format-reaction-engine",
+"goal": "Express nuanced emotional responses beyond a basic \"like\"",
+"actions": [
+"Long-press or tap reaction button",
+"Select from extended reaction set (\u2764\ufe0f\ud83d\udd25\ud83d\udcaf\ud83d\ude2e\ud83d\ude22\ud83d\ude02\ud83d\udc4f)",
+"View reaction counts"
+],
+"routes": "In-card action on all content surfaces",
+"components": "ReactionPicker, ReactionCount, ReactionAnimation",
+"apis": [
+"POST /api/interactions/reaction",
+"GET /api/interactions/reactions/{contentId}",
+"Activity Feed Service"
+],
+"rules": [
+"Requires authenticated user",
+"One reaction per content per user",
+"Can change reaction"
+]
+}
+]
+},
+{
+"title": "PERSONAL CONTEXT - LIVE",
+"slug": "personal-context-live",
+"features": [
+{
+"name": "Browse Live Streams",
+"slug": "browse-live-streams",
+"goal": "Discover currently active live broadcasts",
+"actions": [
+"View live stream listings",
+"Filter by category (music, chat, gaming, etc.)",
+"Sort by popularity or new",
+"See upcoming scheduled streams"
+],
+"routes": "/app/live",
+"components": "LiveStreamGrid, LiveStreamCard, CategoryFilter, UpcomingSchedule",
+"apis": [
+"GET /api/live/active",
+"GET /api/live/upcoming",
+"Live Stream Service",
+"WebSocket for real-time updates"
+],
+"rules": [
+"Public access (view-only)",
+"Must be authenticated to chat/tip",
+"Stream listings update in real-time"
+]
+},
+{
+"name": "Watch Live Broadcast",
+"slug": "watch-live-broadcast",
+"goal": "View live video stream",
+"actions": [
+"Watch video stream",
+"Toggle resolution (up to 4K)",
+"Toggle fullscreen",
+"Enable picture-in-picture mode",
+"Adjust volume"
+],
+"routes": "/app/live/[id]",
+"components": "LivePlayer, ResolutionSelector, FullscreenToggle, PictureInPicture, VolumeControl",
+"apis": [
+"HLS/DASH streaming",
+"GET /api/live/stream/{id}/config",
+"WebRTC for low-latency"
+],
+"rules": [
+"Public streams: open access",
+"Paid streams: require ticket purchase",
+"Age-restricted streams: require age verification"
+]
+},
+{
+"name": "Live Chat & Reactions",
+"slug": "live-chat-reactions",
+"goal": "Interact during live broadcasts",
+"actions": [
+"Send chat messages",
+"Send animated reaction spams",
+"View creator pinned messages",
+"View chat in real-time"
+],
+"routes": "/app/live/[id] (overlay)",
+"components": "LiveChat, ChatComposer, ReactionSpam, PinnedMessageBanner",
+"apis": [
+"WebSocket for real-time chat",
+"POST /api/live/chat/message",
+"Moderation Service"
+],
+"rules": [
+"Requires authenticated user",
+"Rate-limited: 10 messages/minute",
+"Auto-moderation (spam/toxicity filter)",
+"Creator can pin messages"
+]
+},
+{
+"name": "In-Stream Tipping & Virtual Gifts",
+"slug": "in-stream-tipping-virtual-gifts",
+"goal": "Financially support creators during live broadcasts",
+"actions": [
+"Send financial tips (custom amounts)",
+"Send animated virtual gifts (coins)",
+"View tip leaderboard",
+"Receive thank-you response"
+],
+"routes": "/app/live/[id] (overlay)",
+"components": "TipJar, VirtualGiftPicker, TipAmountSelector, TipLeaderboard",
+"apis": [
+"POST /api/payments/tip",
+"POST /api/payments/gift",
+"Wallet Service",
+"Payment Processing Service"
+],
+"rules": [
+"Requires authenticated user",
+"Requires payment method on file",
+"Minimum tip: $1.00",
+"Platform takes 10-15% fee"
+]
+},
+{
+"name": "Virtual Meet & Greet Room",
+"slug": "virtual-meet-greet-room",
+"goal": "Participate in 1-to-1 video sessions with creators",
+"actions": [
+"Join private video waiting room",
+"Enter video call interface",
+"Record photo/video during session",
+"View timer countdown"
+],
+"routes": "/app/live/[id]/meet-greet",
+"components": "MeetGreetWaitingRoom, VideoCallInterface, TimerDisplay, PhotoVideoRecorder",
+"apis": [
+"WebRTC for video calling",
+"Queue Routing Service",
+"Timer Management Service",
+"POST /api/live/meet-greet/record"
+],
+"rules": [
+"Requires ticket purchase",
+"Time-limited sessions (5-10 minutes)",
+"Queue order enforced",
+"Recording requires consent"
+]
+},
+{
+"name": "Interactive Listening Party Room",
+"slug": "interactive-listening-party-room",
+"goal": "Listen to a release drop simultaneously while chatting with the artist in real time",
+"actions": [
+"Join shared listening room",
+"Listen to synchronized playback",
+"Chat with artist and other fans",
+"React to specific moments"
+],
+"routes": "/app/live/[id]/listening-party",
+"components": "ListeningPartyRoom, SynchronizedPlayer, PartyChat, MomentReaction",
+"apis": [
+"WebSocket for synchronization",
+"Audio Sync Service",
+"Chat Service"
+],
+"rules": [
+"Requires ticket purchase or subscription",
+"Artist controls playback",
+"All listeners hear same moment"
+]
+},
+{
+"name": "In-Stream Merch Overlay",
+"slug": "in-stream-merch-overlay",
+"goal": "Purchase merchandise without leaving the live event",
+"actions": [
+"Click interactive product card",
+"View product details",
+"Add to cart",
+"Checkout without leaving stream"
+],
+"routes": "/app/live/[id] (overlay)",
+"components": "MerchOverlay, ProductCard, QuickCart, CheckoutDrawer",
+"apis": [
+"GET /api/commerce/products/live/{streamId}",
+"Shopping Cart Service",
+"Checkout Service"
+],
+"rules": [
+"Requires authenticated user",
+"Products tied to creator",
+"Limited-time offers during stream"
+]
+},
+{
+"name": "Host Live Broadcast",
+"slug": "host-live-broadcast",
+"goal": "Stream video content to fans in real-time",
+"actions": [
+"Start broadcast (browser or RTMP encoder)",
+"Manage stream settings",
+"Monitor stream health",
+"End broadcast"
+],
+"routes": "/app/live?mode=host",
+"components": "BroadcastDashboard, StreamSettings, RTMPConfigurator, StreamHealthMonitor",
+"apis": [
+"POST /api/live/broadcast/start",
+"POST /api/live/broadcast/end",
+"RTMP Ingest Service",
+"HLS Transcoding Service"
+],
+"rules": [
+"Requires Creator unlock",
+"16+ age requirement",
+"Content policy compliance",
+"Minimum 1 viewer to broadcast (anti-spam)"
+]
+},
+{
+"name": "Host Virtual Listening Party",
+"slug": "host-virtual-listening-party",
+"goal": "Sync track playback across fans in real time while hosting live audio/chat commentary",
+"actions": [
+"Select track/album to play",
+"Start listening party",
+"Chat commentary during playback",
+"Manage playback (play/pause/seek)"
+],
+"routes": "/app/live?mode=host&type=listening-party",
+"components": "ListeningPartyHost, PlaybackControl, LiveCommentary, AttendeeList",
+"apis": [
+"WebSocket for synchronization",
+"Playback Sync Service",
+"Chat Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Requires rights to play selected audio",
+"Maximum attendees based on tier"
+]
+},
+{
+"name": "Host Virtual Meet & Greet",
+"slug": "host-virtual-meet-greet",
+"goal": "Manage time-gated 1-to-1 video call sessions with fans",
+"actions": [
+"Set session schedule",
+"Manage queue routing",
+"Set timer limits",
+"Allow fan photo/video recording"
+],
+"routes": "/app/live?mode=host&type=meet-greet",
+"components": "MeetGreetHost, SessionManager, QueueRouter, TimerControl, RecordingConsent",
+"apis": [
+"POST /api/live/meet-greet/schedule",
+"WebRTC Service",
+"Queue Management Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Requires Business verification for paid sessions",
+"5-10 minute session limits"
+]
+},
+{
+"name": "Live Stream Monetization Controls",
+"slug": "live-stream-monetization-controls",
+"goal": "Enable revenue generation during broadcasts",
+"actions": [
+"Enable paid ticket gating",
+"Enable virtual tipping jar",
+"Enable pinned merchandise overlays",
+"Set ticket pricing"
+],
+"routes": "/app/live?mode=host&panel=monetization",
+"components": "MonetizationControls, TicketConfigurator, TipJarSettings, MerchOverlaySettings",
+"apis": [
+"POST /api/live/broadcast/monetization",
+"Ticket Service",
+"Payment Service",
+"Commerce Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Business verification for paid events",
+"Platform takes 10-15% fee"
+]
+},
+{
+"name": "Purchase Live Event Tickets",
+"slug": "purchase-live-event-tickets",
+"goal": "Buy access to paid virtual events",
+"actions": [
+"View ticket options",
+"Select pricing tier",
+"Checkout",
+"Receive digital QR-code ticket",
+"Add calendar reminder"
+],
+"routes": "/checkout/ticket",
+"components": "TicketCheckout, TicketSelection, PaymentForm, QRCodeGenerator, CalendarReminder",
+"apis": [
+"POST /api/checkout/ticket",
+"Payment Processing Service",
+"Ticket Service",
+"Calendar Service"
+],
+"rules": [
+"Requires authenticated user",
+"Requires payment method on file",
+"Ticket refund policy applies"
+]
+}
+]
+},
+{
+"title": "PERSONAL CONTEXT - CREATE",
+"slug": "personal-context-create",
+"features": [
+{
+"name": "Rich Post Authoring",
+"slug": "rich-post-authoring",
+"goal": "Create multi-format text posts",
+"actions": [
+"Write text with rich formatting (bold, italic, lists, headings)",
+"Add images",
+"Preview post",
+"Publish or save as draft"
+],
+"routes": "/app/create?type=post",
+"components": "PostEditor, RichTextToolbar, ImageUploader, PostPreview",
+"apis": [
+"POST /api/posts",
+"PUT /api/posts/{id}",
+"Draft Service",
+"Image Upload Service"
+],
+"rules": [
+"Requires authenticated user",
+"Minimum 1 character, maximum 5000 characters",
+"Image max: 10MB, supported formats"
+]
+},
+{
+"name": "Image Carousel Builder",
+"slug": "image-carousel-builder",
+"goal": "Create multi-image swipeable posts",
+"actions": [
+"Upload multiple images",
+"Arrange order (drag-and-drop)",
+"Add caption per image",
+"Set cover image",
+"Preview carousel"
+],
+"routes": "/app/create?type=carousel",
+"components": "CarouselBuilder, ImageUploadArea, DragDropReorder, CaptionEditor, CarouselPreview",
+"apis": [
+"POST /api/posts/carousel",
+"Image Upload Service",
+"File Management Service"
+],
+"rules": [
+"Requires authenticated user",
+"Minimum 2 images, maximum 10",
+"Each image: max 10MB",
+"Aspect ratio: 1:1 or 16:9"
+]
+},
+{
+"name": "Interactive Poll Tool",
+"slug": "interactive-poll-tool",
+"goal": "Create customizable fan polls and opinion votes",
+"actions": [
+"Add poll question",
+"Add multiple choice options",
+"Set duration",
+"Enable/disable anonymous voting",
+"Publish poll"
+],
+"routes": "/app/create?type=poll",
+"components": "PollBuilder, QuestionEditor, OptionAdder, DurationPicker, VotingSettings",
+"apis": [
+"POST /api/posts/poll",
+"POST /api/interactions/poll/vote",
+"Poll Service",
+"Real-time Vote Service"
+],
+"rules": [
+"Requires authenticated user",
+"Minimum 2 options, maximum 10",
+"Duration: 1 hour to 7 days",
+"Can vote once per poll"
+]
+},
+{
+"name": "Official Announcement Builder",
+"slug": "official-announcement-builder",
+"goal": "Publish high-visibility banner posts for major news",
+"actions": [
+"Create announcement post",
+"Add prominent banner styling",
+"Set visibility (highlighted)",
+"Pin to profile"
+],
+"routes": "/app/create?type=announcement",
+"components": "AnnouncementBuilder, BannerStylePicker, PinToggle",
+"apis": [
+"POST /api/posts/announcement",
+"Announcement Service",
+"Pin Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Limited to 1 pinned announcement at a time",
+"Banner styling based on subscription tier"
+]
+},
+{
+"name": "Release & Tour Countdown Widget",
+"slug": "release-tour-countdown-widget",
+"goal": "Build anticipation for upcoming drops, streams, or ticket sales",
+"actions": [
+"Set target date/time",
+"Choose countdown style",
+"Embed in post",
+"View countdown animation"
+],
+"routes": "/app/create?type=countdown",
+"components": "CountdownBuilder, DateTimePicker, StyleSelector, CountdownDisplay",
+"apis": [
+"POST /api/posts/countdown",
+"Countdown Timer Service",
+"Notification Service (alert at zero)"
+],
+"rules": [
+"Requires authenticated user",
+"Target must be in future",
+"Auto-reminder at 24h and 1h"
+]
+},
+{
+"name": "Audio Snippet & Voice Note Recorder",
+"slug": "audio-snippet-voice-note-recorder",
+"goal": "Share informal voice messages, studio session clips, and unreleased teasers directly to feed",
+"actions": [
+"Record audio (browser/mobile)",
+"Trim audio",
+"Add caption",
+"Publish to feed"
+],
+"routes": "/app/create?type=audio",
+"components": "AudioRecorder, WaveformDisplay, AudioTrimmer, CaptionEditor",
+"apis": [
+"POST /api/posts/audio",
+"Audio Upload Service",
+"Transcoding Service"
+],
+"rules": [
+"Requires authenticated user",
+"Maximum duration: 5 minutes",
+"Audio format: MP3, M4A, WAV",
+"File size: max 100MB"
+]
+},
+{
+"name": "Photo & Video Upload",
+"slug": "photo-video-upload",
+"goal": "Share visual content with fans",
+"actions": [
+"Upload photos",
+"Upload videos",
+"Add captions",
+"Publish to feed"
+],
+"routes": "/app/create?type=media",
+"components": "MediaUploader, PhotoEditor, VideoTrim, CaptionEditor",
+"apis": [
+"POST /api/posts/media",
+"Media Upload Service",
+"Transcoding Service"
+],
+"rules": [
+"Requires authenticated user",
+"Photos: max 20MB, JPEG/PNG",
+"Videos: max 500MB, MP4",
+"Maximum duration: 10 minutes"
+]
+},
+{
+"name": "Post Scheduling & Draft Manager",
+"slug": "post-scheduling-draft-manager",
+"goal": "Plan and schedule future content",
+"actions": [
+"Draft content",
+"Schedule for future publication",
+"Manage draft library",
+"Set time zone targeting"
+],
+"routes": "/app/create?tab=schedule, /app/create?tab=drafts",
+"components": "DraftManager, SchedulePicker, TimezoneSelector, DraftList",
+"apis": [
+"GET /api/posts/drafts",
+"POST /api/posts/schedule",
+"PUT /api/posts/drafts/{id}",
+"Scheduling Service"
+],
+"rules": [
+"Requires authenticated user",
+"Drafts expire after 30 days unused",
+"Schedule up to 30 days in advance"
+]
+},
+{
+"name": "AI Remix & Attribution (Consumer)",
+"slug": "ai-remix-attribution-consumer",
+"goal": "Create derivative works with proper attribution",
+"actions": [
+"Upload audio",
+"Apply AI stem separation",
+"Add attribution",
+"Share remix"
+],
+"routes": "/app/create?type=ai-remix",
+"components": "AIRemixStudio, StemSeparator, AttributionEditor, RemixPreview",
+"apis": [
+"POST /api/ai/remix",
+"Stem Separation Service",
+"Attribution Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Must credit original artist",
+"Remix rights governed by original creator settings"
+]
+}
+]
+},
+{
+"title": "PERSONAL CONTEXT - INBOX",
+"slug": "personal-context-inbox",
+"features": [
+{
+"name": "Direct Messaging Inbox",
+"slug": "direct-messaging-inbox",
+"goal": "View and respond to direct messages",
+"actions": [
+"List all conversations",
+"Filter by relationship level (Follower, Subscriber, Top Spender)",
+"View unread count",
+"Search conversations"
+],
+"routes": "/app/inbox",
+"components": "MessageInbox, ConversationList, FilterTabs, SearchBar",
+"apis": [
+"GET /api/messages/conversations",
+"WebSocket for real-time updates",
+"Message Service"
+],
+"rules": [
+"Requires authenticated user",
+"Only shows conversations user is part of",
+"Archived after 30 days inactive"
+]
+},
+{
+"name": "Direct Message Send/Receive",
+"slug": "direct-message-send-receive",
+"goal": "Communicate 1-to-1 with fans and creators",
+"actions": [
+"Send text messages",
+"Send audio clips",
+"Send video clips",
+"View conversation history"
+],
+"routes": "/app/inbox/conversation/[id]",
+"components": "MessageThread, MessageComposer, AudioRecorder, VideoRecorder, MessageBubble",
+"apis": [
+"POST /api/messages",
+"GET /api/messages/{conversationId}",
+"WebSocket for real-time delivery",
+"File Upload Service"
+],
+"rules": [
+"Requires authenticated user",
+"Can only message mutual connections",
+"Rate-limited: 100 messages/hour",
+"Blocked users cannot send"
+]
+},
+{
+"name": "Broadcast Channel Manager",
+"slug": "broadcast-channel-manager",
+"goal": "Send one-to-many communications to target fan groups",
+"actions": [
+"Create broadcast channel",
+"Target specific fan segments (all followers, subscribers, top spenders)",
+"Send broadcast message",
+"View delivery stats"
+],
+"routes": "/app/studio/fans/broadcast",
+"components": "BroadcastManager, ChannelSelector, AudienceTargeting, MessageComposer, BroadcastStats",
+"apis": [
+"POST /api/messages/broadcast",
+"GET /api/messages/broadcast/stats",
+"Audience Segmentation Service",
+"Push Notification Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Only creator can broadcast to own followers",
+"Rate-limited: 1 broadcast/day (Free), 5/day (Pro)",
+"Cannot broadcast to blocked users"
+]
+},
+{
+"name": "Automated Fan Response Flows",
+"slug": "automated-fan-response-flows",
+"goal": "Send automated welcome messages and responses",
+"actions": [
+"Configure auto-responder for new followers",
+"Configure auto-responder for new subscribers",
+"Configure auto-responder for new buyers",
+"Customize message template"
+],
+"routes": "/app/studio/fans/automation",
+"components": "AutoResponderConfig, TriggerSelector, MessageTemplateEditor, FlowBuilder",
+"apis": [
+"POST /api/messages/auto-responder",
+"GET /api/messages/auto-responder",
+"Workflow Engine",
+"Event Listener Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Only creator can configure own auto-responders",
+"Minimum 1 trigger, maximum 10 triggers"
+]
+},
+{
+"name": "Voice & Video Direct Notes",
+"slug": "voice-video-direct-notes",
+"goal": "Send personalized voice clips and short video responses to fans",
+"actions": [
+"Record voice clip",
+"Record video clip",
+"Send in conversation thread"
+],
+"routes": "/app/inbox (composer action)",
+"components": "VoiceNoteRecorder, VideoNoteRecorder, MediaPreview",
+"apis": [
+"POST /api/messages/voice",
+"POST /api/messages/video",
+"Media Upload Service"
+],
+"rules": [
+"Requires authenticated user",
+"Voice notes: max 2 minutes",
+"Video notes: max 1 minute",
+"Requires mutual connection"
+]
+},
+{
+"name": "Notification Center",
+"slug": "notification-center",
+"goal": "View all alerts in one place",
+"actions": [
+"View all notifications",
+"Filter by type (All, Issues, Announcements, Suggestions, Tickets)",
+"Mark as read",
+"Click to navigate to source"
+],
+"routes": "/app/inbox/notifications",
+"components": "NotificationCenter, NotificationCard, FilterTabs, MarkAllRead",
+"apis": [
+"GET /api/notifications",
+"POST /api/notifications/read",
+"Push Notification Service",
+"WebSocket for real-time updates"
+],
+"rules": [
+"Requires authenticated user",
+"Notifications expire after 30 days",
+"Max 1000 notifications stored"
+]
+},
+{
+"name": "New Content Drop Alerts",
+"slug": "new-content-drop-alerts",
+"goal": "Know when followed artists release new content",
+"actions": [
+"Receive notification for new songs",
+"Receive notification for new videos",
+"Receive notification for new albums",
+"Receive notification for new posts"
+],
+"routes": "Push/email/in-app notification",
+"components": "NewContentAlert, PushNotification, EmailNotification, InAppToast",
+"apis": [
+"Notification Dispatcher",
+"Follow Graph Service",
+"Release Calendar Service"
+],
+"rules": [
+"Auto-subscribed for followed artists",
+"Can opt-out per artist",
+"Push requires permission"
+]
+},
+{
+"name": "Social Engagement Alerts",
+"slug": "social-engagement-alerts",
+"goal": "Know when fans engage with your content",
+"actions": [
+"Receive notification for new comments",
+"Receive notification for likes",
+"Receive notification for reposts",
+"Receive notification for connection requests"
+],
+"routes": "Push/email/in-app notification",
+"components": "EngagementAlert, PushNotification, EmailNotification, InAppToast",
+"apis": [
+"Notification Dispatcher",
+"Activity Feed Service",
+"Follow Graph Service"
+],
+"rules": [
+"Auto-subscribed for own content",
+"Can mute per content type",
+"Push requires permission"
+]
+},
+{
+"name": "Live Event & Stream Reminders",
+"slug": "live-event-stream-reminders",
+"goal": "Know when livestreams and events are starting",
+"actions": [
+"Receive notification 24h before event",
+"Receive notification 1h before event",
+"Receive notification at event start"
+],
+"routes": "Push/email/in-app notification",
+"components": "EventReminder, PushNotification, EmailNotification, CalendarIntegration",
+"apis": [
+"Notification Dispatcher",
+"Event Service",
+"Calendar Sync Service"
+],
+"rules": [
+"Auto-subscribed for bought tickets",
+"Can opt-out per event",
+"Push requires permission"
+]
+},
+{
+"name": "Commerce & Order Updates",
+"slug": "commerce-order-updates",
+"goal": "Track purchases and shipping",
+"actions": [
+"Receive order confirmation",
+"Receive shipping tracking updates",
+"Receive ticket delivery alerts",
+"Receive receipt notifications"
+],
+"routes": "Push/email/in-app notification",
+"components": "OrderUpdate, ShippingTracking, TicketDeliveryAlert, ReceiptEmail",
+"apis": [
+"Notification Dispatcher",
+"Commerce Service",
+"Shipping Service",
+"Ticket Service"
+],
+"rules": [
+"Auto-subscribed for own purchases",
+"Critical notifications cannot be disabled",
+"Email required for receipts"
+]
+},
+{
+"name": "Notification Preference Controls",
+"slug": "notification-preference-controls",
+"goal": "Customize which notifications you receive",
+"actions": [
+"Toggle push notifications",
+"Toggle email notifications",
+"Toggle in-app notifications",
+"Configure per artist",
+"Configure per notification type"
+],
+"routes": "/app/settings/notifications",
+"components": "NotificationPreferences, ToggleSwitch, ArtistFilter, CategoryFilter",
+"apis": [
+"GET /api/notifications/preferences",
+"PUT /api/notifications/preferences",
+"Preference Store Service"
+],
+"rules": [
+"Requires authenticated user",
+"Preferences apply across all devices",
+"Critical notifications cannot be disabled"
+]
+},
+{
+"name": "Block/Mute Controls",
+"slug": "block-mute-controls",
+"goal": "Restrict unwanted interactions",
+"actions": [
+"Block user (complete restriction)",
+"Mute user (hide content only)",
+"Manage blocked list",
+"Manage muted list"
+],
+"routes": "/app/settings/account",
+"components": "BlockListManager, MuteListManager, UserSearch, BlockButton",
+"apis": [
+"POST /api/users/block",
+"POST /api/users/mute",
+"GET /api/users/blocked",
+"GET /api/users/muted"
+],
+"rules": [
+"Requires authenticated user",
+"Block prevents all interaction",
+"Mute hides content from feed",
+"Cannot block oneself"
+]
+}
+]
+},
+{
+"title": "PERSONAL CONTEXT - PROFILE",
+"slug": "personal-context-profile",
+"features": [
+{
+"name": "Profile Editor",
+"slug": "profile-editor",
+"goal": "Manage public identity",
+"actions": [
+"Edit display name",
+"Edit bio",
+"Upload avatar",
+"Upload header imagery",
+"Add external web links"
+],
+"routes": "/app/profile/settings",
+"components": "ProfileEditor, AvatarUploader, HeaderUploader, BioEditor, LinkManager",
+"apis": [
+"GET /api/profile",
+"PUT /api/profile",
+"Image Upload Service"
+],
+"rules": [
+"Requires authenticated user",
+"Avatar: max 5MB, square, 500x500",
+"Header: max 10MB, 16:9, 1920x1080",
+"Bio: max 500 characters"
+]
+},
+{
+"name": "Unified Creator Profile Editor",
+"slug": "unified-creator-profile-editor",
+"goal": "Manage artist brand assets, visual identity, and catalog settings",
+"actions": [
+"Customize artist brand assets",
+"Manage avatars, header imagery, bios",
+"Manage external web links",
+"Manage personnel credits",
+"Manage catalog settings"
+],
+"routes": "/app/profile/settings (Creator mode)",
+"components": "UnifiedCreatorProfileEditor, BrandAssetManager, CreditManager, CatalogSettings",
+"apis": [
+"GET /api/creator/profile",
+"PUT /api/creator/profile",
+"Catalog Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Verification required for some features"
+]
+},
+{
+"name": "Catalog Association & Credits Manager",
+"slug": "catalog-association-credits-manager",
+"goal": "Claim, link, and manage verified performance and songwriting credits across tracks, albums, and videos",
+"actions": [
+"Claim performance credits",
+"Claim songwriting credits",
+"Link to tracks/albums/videos",
+"Manage verified credits",
+"View credit history"
+],
+"routes": "/app/profile/settings/credits",
+"components": "CreditManager, CreditClaimForm, CreditLinker, CreditHistory",
+"apis": [
+"GET /api/credits",
+"POST /api/credits/claim",
+"PUT /api/credits/{id}",
+"Catalog Metadata Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Verification required for some credits",
+"Disputes resolved by admin"
+]
+},
+{
+"name": "Verification & Badge Administration",
+"slug": "verification-badge-administration",
+"goal": "Obtain and manage official artist verification",
+"actions": [
+"Request official artist verification",
+"Manage blue-check badge issuance",
+"Manage legal account ownership",
+"View verification status"
+],
+"routes": "/app/profile/settings/verification",
+"components": "VerificationRequest, BadgeManager, LegalOwnership, VerificationStatus",
+"apis": [
+"POST /api/verification/request",
+"GET /api/verification/status",
+"Admin Approval Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Must meet follower threshold (10k minimum)",
+"Requires legal document submission"
+]
+},
+{
+"name": "Roster & Team Access Controls",
+"slug": "roster-team-access-controls",
+"goal": "Manage multi-user profile access for managers, publicists, and team members",
+"actions": [
+"Invite team members",
+"Assign role-based permissions",
+"Remove team members",
+"View team activity log"
+],
+"routes": "/app/settings/team",
+"components": "TeamInvite, RoleAssignment, PermissionMatrix, ActivityLog",
+"apis": [
+"POST /api/team/invite",
+"PUT /api/team/{memberId}/role",
+"DELETE /api/team/{memberId}",
+"Audit Log Service"
+],
+"rules": [
+"Creator is Owner by default",
+"Roles: Admin, Editor, Viewer",
+"Invite requires email address"
+]
+},
+{
+"name": "Follow & Connect Actions",
+"slug": "follow-connect-actions",
+"goal": "Build relationships with creators",
+"actions": [
+"Follow creator",
+"Subscribe to creator",
+"Send connection request",
+"Approve/deny connection request"
+],
+"routes": "/app/profile/[id] (actions)",
+"components": "FollowButton, SubscribeButton, ConnectionRequest, ApproveDenyButtons",
+"apis": [
+"POST /api/follow",
+"POST /api/subscribe",
+"POST /api/connection/request",
+"PUT /api/connection/{id}"
+],
+"rules": [
+"Requires authenticated user",
+"Cannot follow oneself",
+"Connection request requires mutual approval"
+]
+},
+{
+"name": "Relationship Level Status Badge",
+"slug": "relationship-level-status-badge",
+"goal": "See your relationship tier with a specific artist",
+"actions": [
+"View relationship badge",
+"See tier progress",
+"Learn about next tier requirements"
+],
+"routes": "/app/profile/[id] (badge)",
+"components": "RelationshipBadge, TierProgress, TierRequirements",
+"apis": [
+"GET /api/relationship/{artistId}",
+"Relationship Service"
+],
+"rules": [
+"Requires authenticated user",
+"Tiers: Listener, Follower, Fan, Connection, Subscriber",
+"Tiers based on engagement metrics"
+]
+},
+{
+"name": "Fan-to-Artist Direct Chat",
+"slug": "fan-to-artist-direct-chat",
+"goal": "Message artists directly (if permitted)",
+"actions": [
+"Send text message to artist",
+"Send audio message to artist",
+"Send video message to artist"
+],
+"routes": "/app/profile/[id]/message",
+"components": "DirectChat, MessageComposer, AudioRecorder, VideoRecorder",
+"apis": [
+"POST /api/messages/direct",
+"WebSocket Service",
+"Blocking Service"
+],
+"rules": [
+"Requires authenticated user",
+"Artist must have messaging enabled",
+"Artist can block/mute fan",
+"Followers only (or higher tier)"
+]
+},
+{
+"name": "Subscriber Community Forums",
+"slug": "subscriber-community-forums",
+"goal": "Participate in exclusive group messaging channels and forum threads",
+"actions": [
+"Access subscriber-only forum",
+"Post in forum threads",
+"Reply to other subscribers",
+"View subscriber-only content"
+],
+"routes": "/app/community/[id]",
+"components": "CommunityForum, ThreadList, PostComposer, ReplyThread",
+"apis": [
+"GET /api/community/{artistId}",
+"POST /api/community/post",
+"Subscription Service"
+],
+"rules": [
+"Requires active subscription",
+"Artist can moderate",
+"Platform moderation applies"
+]
+},
+{
+"name": "Superfan Achievement Badges",
+"slug": "superfan-achievement-badges",
+"goal": "Earn visual recognition for fandom milestones",
+"actions": [
+"View available badges",
+"Track badge progress",
+"Display earned badges"
+],
+"routes": "/app/profile/[id] (badges)",
+"components": "BadgeDisplay, BadgeProgress, BadgeMilestone",
+"apis": [
+"GET /api/badges/{userId}",
+"GET /api/badges/available",
+"Badge Engine Service"
+],
+"rules": [
+"Requires authenticated user",
+"Badges: Early Listener, Concert Goer, Top 1%, Mega Fan",
+"Badges auto-awarded based on activity"
+]
+},
+{
+"name": "Followers Management",
+"slug": "followers-management",
+"goal": "View and manage followers",
+"actions": [
+"View follower list",
+"Sort/Filter followers",
+"Approve/deny connection requests",
+"Remove follower"
+],
+"routes": "/app/profile/followers",
+"components": "FollowerList, FollowerCard, ApproveDeny, RemoveButton",
+"apis": [
+"GET /api/followers",
+"GET /api/connections/pending",
+"PUT /api/connections/{id}"
+],
+"rules": [
+"Requires authenticated user",
+"Can only manage own followers",
+"Private accounts require approval"
+]
+},
+{
+"name": "Connection Approval Desk",
+"slug": "connection-approval-desk",
+"goal": "Manage fan connection requests",
+"actions": [
+"Review connection requests",
+"Approve requests",
+"Deny requests",
+"Manage VIP fan roster"
+],
+"routes": "/app/studio/relationships/approvals",
+"components": "ApprovalDesk, RequestQueue, ApproveDeny, VIPManager",
+"apis": [
+"GET /api/connections/pending",
+"PUT /api/connections/{id}",
+"VIP Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Can set auto-approve for some tiers",
+"VIP list manually managed"
+]
+},
+{
+"name": "Relationship Hierarchy Builder",
+"slug": "relationship-hierarchy-builder",
+"goal": "Define custom relationship tiers for audience progression",
+"actions": [
+"Configure tier names",
+"Set tier criteria",
+"Define progression rules",
+"Configure: Anonymous \u2192 Listener \u2192 Follower \u2192 Fan \u2192 Connection \u2192 Subscriber"
+],
+"routes": "/app/settings/relationships",
+"components": "HierarchyBuilder, TierEditor, CriteriaManager, ProgressionRules",
+"apis": [
+"GET /api/relationships/hierarchy",
+"PUT /api/relationships/hierarchy",
+"Relationship Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Default hierarchy provided",
+"Custom tiers available on Pro tier"
+]
+},
+{
+"name": "Per-Tier Perk Allocator",
+"slug": "per-tier-perk-allocator",
+"goal": "Grant specific perks to designated connection levels",
+"actions": [
+"Assign perks to tiers",
+"Configure exclusive posts",
+"Configure early ticket access",
+"Configure private streams",
+"Configure discount codes"
+],
+"routes": "/app/settings/relationships/perks",
+"components": "PerkAllocator, PerkSelector, TierPerkMapper, PerkPreview",
+"apis": [
+"GET /api/relationships/perks",
+"PUT /api/relationships/perks",
+"Perk Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Perks vary by subscription tier",
+"Some perks require Business verification"
+]
+},
+{
+"name": "Library \u2014 Personal Playlists",
+"slug": "library-personal-playlists",
+"goal": "Curate custom audio playlists",
+"actions": [
+"Create playlist",
+"Name playlist",
+"Add description",
+"Sequence tracks",
+"Edit playlist",
+"Delete playlist"
+],
+"routes": "/app/profile/library",
+"components": "PlaylistList, PlaylistBuilder, PlaylistEditor, TrackSequence",
+"apis": [
+"GET /api/playlists",
+"POST /api/playlists",
+"PUT /api/playlists/{id}",
+"DELETE /api/playlists/{id}"
+],
+"rules": [
+"Requires authenticated user",
+"Max 100 playlists",
+"Max 500 tracks per playlist"
+]
+},
+{
+"name": "Library \u2014 Video Collections",
+"slug": "library-video-collections",
+"goal": "Curate personal video collections",
+"actions": [
+"Create video collection",
+"Name collection",
+"Add description",
+"Add videos",
+"Edit collection",
+"Delete collection"
+],
+"routes": "/app/profile/library/videos",
+"components": "VideoCollectionList, CollectionBuilder, VideoSelector",
+"apis": [
+"GET /api/video/collections",
+"POST /api/video/collections",
+"PUT /api/video/collections/{id}",
+"DELETE /api/video/collections/{id}"
+],
+"rules": [
+"Requires authenticated user",
+"Max 50 collections",
+"Max 100 videos per collection"
+]
+},
+{
+"name": "Collaborative Playlists",
+"slug": "collaborative-playlists",
+"goal": "Build playlists with invited friends",
+"actions": [
+"Share playlist",
+"Invite participants",
+"Set permissions (add/remove/reorder)",
+"Collaborate in real-time",
+"View edit history"
+],
+"routes": "/app/profile/library/playlist/[id]/collaborate",
+"components": "CollaborativePlaylist, ParticipantList, PermissionSettings, EditHistory",
+"apis": [
+"POST /api/playlists/{id}/collaborate",
+"PUT /api/playlists/{id}/participants",
+"WebSocket for real-time updates"
+],
+"rules": [
+"Requires authenticated user",
+"Playlist owner sets permissions",
+"Max 10 collaborators"
+]
+},
+{
+"name": "Smart Auto-Playlists",
+"slug": "smart-auto-playlists",
+"goal": "Automate playlist creation based on listening history and favorites",
+"actions": [
+"Generate \"Recently Played\" auto-playlist",
+"Generate \"Liked Songs\" auto-playlist",
+"Generate \"Favorites\" auto-playlist",
+"Generate custom auto-playlist based on rules"
+],
+"routes": "/app/profile/library/smart-playlists",
+"components": "SmartPlaylistList, AutoPlaylistGenerator, RuleBuilder, PlaylistPreview",
+"apis": [
+"GET /api/playlists/smart",
+"POST /api/playlists/smart/generate",
+"Auto-Playlist Service"
+],
+"rules": [
+"Requires authenticated user",
+"Auto-generated based on listening history",
+"Can create custom rules on Pro tier"
+]
+},
+{
+"name": "Collection & Series Following",
+"slug": "collection-series-following",
+"goal": "Follow user-generated, editorial, or creator-owned playlists and episodic audio series",
+"actions": [
+"Follow playlist",
+"Follow editorial collection",
+"Follow episodic series",
+"Unfollow",
+"View followed collections"
+],
+"routes": "/app/profile/library/following",
+"components": "FollowingCollectionList, FollowButton, UnfollowButton",
+"apis": [
+"POST /api/playlists/{id}/follow",
+"DELETE /api/playlists/{id}/follow",
+"GET /api/playlists/following"
+],
+"rules": [
+"Requires authenticated user",
+"Follow count visible to all",
+"Notifications for new episodes"
+]
+},
+{
+"name": "Profile Privacy Settings",
+"slug": "profile-privacy-settings",
+"goal": "Control who sees profile content",
+"actions": [
+"Set profile visibility (Public/Private)",
+"Manage blocked users",
+"Manage muted users",
+"Control content visibility"
+],
+"routes": "/app/settings/account",
+"components": "PrivacySettings, VisibilityToggle, BlockedListManager, MutedListManager",
+"apis": [
+"GET /api/settings/privacy",
+"PUT /api/settings/privacy",
+"User Service"
+],
+"rules": [
+"Requires authenticated user",
+"Private profile requires approval for follows",
+"Blocked users cannot see profile"
+]
+},
+{
+"name": "Account Upgrade to Business",
+"slug": "account-upgrade-to-business",
+"goal": "Unlock professional tools and business features",
+"actions": [
+"Tap \"Set up Musicosy for Business\"",
+"Select Business type (Label/Artist, Advertiser, Agency)",
+"Submit legal name, tax ID",
+"Complete KYC verification",
+"Wait for approval"
+],
+"routes": "/business/setup",
+"components": "BusinessSetupWizard, BusinessTypeSelector, KYBForm, VerificationStatus",
+"apis": [
+"POST /api/business/setup",
+"GET /api/business/status",
+"KYB Service",
+"KYC Service"
+],
+"rules": [
+"Requires authenticated user",
+"18+ age requirement",
+"Valid tax ID required",
+"Business verification queue (1-3 days)"
+]
+},
+{
+"name": "Wallet & Payment Settings",
+"slug": "wallet-payment-settings",
+"goal": "Manage earnings and payments",
+"actions": [
+"View balance",
+"View transaction history",
+"Add payout method",
+"Withdraw funds",
+"View payment status"
+],
+"routes": "/app/settings/payments",
+"components": "WalletDashboard, BalanceDisplay, TransactionList, PayoutMethodManager, WithdrawButton",
+"apis": [
+"GET /api/wallet",
+"GET /api/wallet/transactions",
+"POST /api/wallet/withdraw",
+"Payment Service",
+"Disbursement Service"
+],
+"rules": [
+"Requires authenticated user",
+"Minimum withdrawal: $10",
+"Payout methods: Bank account, PayPal",
+"Processing time: 3-5 business days"
+]
+},
+{
+"name": "Subscription Management (Consumer)",
+"slug": "subscription-management-consumer",
+"goal": "Manage creator subscriptions",
+"actions": [
+"View active subscriptions",
+"View subscription details",
+"Cancel subscription",
+"Update payment method"
+],
+"routes": "/app/profile/subscriptions",
+"components": "SubscriptionList, SubscriptionCard, CancelButton, PaymentMethodUpdater",
+"apis": [
+"GET /api/subscriptions",
+"DELETE /api/subscriptions/{id}",
+"PUT /api/subscriptions/{id}/payment",
+"Payment Service"
+],
+"rules": [
+"Requires authenticated user",
+"Cancel takes effect at end of billing cycle",
+"Refund policy applies",
+"CREATOR STUDIO (Unlocked via posting)"
+]
+},
+{
+"name": "Content Visibility Controls",
+"slug": "content-visibility-controls",
+"goal": "Control who can see creator content",
+"actions": [
+"Set asset visibility: Public, Followers Only, Connection Tier, Active Subscribers, Ticket Buyers, Private",
+"Apply per-asset or globally",
+"Preview visibility"
+],
+"routes": "/app/studio/governance/visibility",
+"components": "VisibilityMatrix, VisibilitySelector, PreviewMode, GlobalSettings",
+"apis": [
+"GET /api/governance/visibility",
+"PUT /api/governance/visibility",
+"Content Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Private content not indexed",
+"Subscriber content requires active subscription"
+]
+},
+{
+"name": "Delivery Rule Configurator",
+"slug": "delivery-rule-configurator",
+"goal": "Define monetization gating for content distribution",
+"actions": [
+"Set distribution state: Free Stream, Gated Preview, Purchase Required, Connection-Unlocked",
+"Configure monetization rules",
+"Set preview length"
+],
+"routes": "/app/studio/governance/delivery",
+"components": "DeliveryRuleConfig, StateSelector, MonetizationSettings, PreviewLength",
+"apis": [
+"GET /api/governance/delivery",
+"PUT /api/governance/delivery",
+"Monetization Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Purchase Required requires Business verification",
+"Connection-Unlocked requires Relationship setup"
+]
+},
+{
+"name": "Download Rights Engine",
+"slug": "download-rights-engine",
+"goal": "Enable or disable offline local downloads per track, album, or video asset",
+"actions": [
+"Toggle download rights",
+"Apply per-track",
+"Apply per-album",
+"Apply per-video"
+],
+"routes": "/app/studio/governance/downloads",
+"components": "DownloadRightsToggle, BulkApply, RightsStatus",
+"apis": [
+"GET /api/governance/downloads",
+"PUT /api/governance/downloads",
+"DRM Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Downloaded files include DRM",
+"Can be disabled anytime"
+]
+},
+{
+"name": "Regional Availability & Windowing",
+"slug": "regional-availability-windowing",
+"goal": "Restrict content access by geographic territory and set release time windowing rules",
+"actions": [
+"Set geofencing rules",
+"Add countries/regions",
+"Set release window start/end",
+"Set availability windows"
+],
+"routes": "/app/studio/governance/regional",
+"components": "RegionalSettings, GeofenceBuilder, WindowingRules, TerritoryList",
+"apis": [
+"GET /api/governance/regional",
+"PUT /api/governance/regional",
+"GeoIP Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Geofencing by country/region",
+"Windowing supports pre-release previews"
+]
+},
+{
+"name": "Interaction Permission Switches",
+"slug": "interaction-permission-switches",
+"goal": "Control user interaction capabilities on published content",
+"actions": [
+"Toggle comments on/off",
+"Toggle likes on/off",
+"Toggle reactions on/off",
+"Toggle internal reposts on/off",
+"Toggle external embeds on/off",
+"Apply globally or per-post"
+],
+"routes": "/app/studio/governance/interactions",
+"components": "InteractionSwitches, GlobalToggle, PerPostOverride, StatusIndicator",
+"apis": [
+"GET /api/governance/interactions",
+"PUT /api/governance/interactions",
+"Interaction Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Global settings apply to all content",
+"Per-post overrides global"
+]
+},
+{
+"name": "Remix & Stitch Permissions",
+"slug": "remix-stitch-permissions",
+"goal": "Allow or block fans from stitching, dueting, sampling, or creating video shorts from artist assets",
+"actions": [
+"Enable/disable stitching",
+"Enable/disable dueting",
+"Enable/disable sampling",
+"Enable/disable shorts creation",
+"Set credit attribution requirements"
+],
+"routes": "/app/studio/governance/remix",
+"components": "RemixPermissions, StitchToggle, DuetToggle, SamplingToggle, AttributionSettings",
+"apis": [
+"GET /api/governance/remix",
+"PUT /api/governance/remix",
+"Remix Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Attribution required when enabled",
+"Can set commercial use restrictions"
+]
+},
+{
+"name": "Automated Comment Moderation",
+"slug": "automated-comment-moderation",
+"goal": "Manage comment quality and community standards",
+"actions": [
+"Set blocked keyword lists",
+"Enable automated spam protection",
+"Enable comment approval queues",
+"Review flagged comments",
+"Approve/reject comments"
+],
+"routes": "/app/studio/governance/moderation",
+"components": "ModerationSettings, KeywordBlocker, SpamProtection, ApprovalQueue, ReviewInterface",
+"apis": [
+"GET /api/governance/moderation",
+"PUT /api/governance/moderation",
+"GET /api/comments/flagged",
+"PUT /api/comments/{id}/moderate",
+"Moderation Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Blocked keywords apply globally",
+"Queue approval requires manual review"
+]
+},
+{
+"name": "Content Takedown & Archival Engine",
+"slug": "content-takedown-archival-engine",
+"goal": "Unpublish, archive, or permanently remove content",
+"actions": [
+"Unpublish content",
+"Archive content",
+"Permanently remove content",
+"Restore archived content"
+],
+"routes": "/app/studio/governance/takedown",
+"components": "ContentTakedown, ArchiveManager, DeleteConfirmation, RestoreButton",
+"apis": [
+"POST /api/content/unpublish",
+"POST /api/content/archive",
+"POST /api/content/delete",
+"POST /api/content/restore"
+],
+"rules": [
+"Requires Creator unlock",
+"Delete is irreversible",
+"Archive retains metadata",
+"Unpublish removes from public view"
+]
+}
+]
+},
+{
+"title": "CREATOR STUDIO - ANALYTICS",
+"slug": "creator-studio-analytics",
+"features": [
+{
+"name": "Streaming Performance Dashboard",
+"slug": "streaming-performance-dashboard",
+"goal": "Track audio/video consumption and performance",
+"actions": [
+"View play counts",
+"View completion rates",
+"View listener demographics",
+"View geographic maps",
+"Filter by time period"
+],
+"routes": "/app/studio/analytics/streaming",
+"components": "PerformanceDashboard, PlayCountChart, CompletionRateChart, DemographicsPanel, GeoMap",
+"apis": [
+"GET /api/analytics/streaming",
+"GET /api/analytics/streaming/demographics",
+"GET /api/analytics/streaming/geo",
+"Analytics Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Data aggregated daily",
+"Last 30 days default view"
+]
+},
+{
+"name": "Listener Demographics",
+"slug": "listener-demographics",
+"goal": "Understand audience composition",
+"actions": [
+"View age breakdown",
+"View gender breakdown",
+"View location breakdown",
+"Export demographic data"
+],
+"routes": "/app/studio/analytics/streaming/demographics",
+"components": "DemographicsDashboard, AgeChart, GenderChart, LocationMap, ExportButton",
+"apis": [
+"GET /api/analytics/streaming/demographics",
+"Analytics Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Anonymous aggregated data only",
+"Minimum threshold for display (privacy)"
+]
+},
+{
+"name": "Geographic Listener Maps",
+"slug": "geographic-listener-maps",
+"goal": "See where listeners are located",
+"actions": [
+"View world map visualization",
+"View country breakdown",
+"View state/province breakdown",
+"View city breakdown"
+],
+"routes": "/app/studio/analytics/streaming/geography",
+"components": "GeoMap, CountryList, StateList, CityList, HeatMap",
+"apis": [
+"GET /api/analytics/streaming/geo",
+"Analytics Service",
+"GeoIP Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Data aggregated by country/state/city",
+"Zoom levels from world to city"
+]
+},
+{
+"name": "Completion Rate Tracking",
+"slug": "completion-rate-tracking",
+"goal": "Understand listener engagement depth",
+"actions": [
+"View overall completion rate",
+"View completion by content type",
+"View drop-off points",
+"Export completion data"
+],
+"routes": "/app/studio/analytics/streaming/completion",
+"components": "CompletionDashboard, CompletionChart, DropOffAnalysis, ExportButton",
+"apis": [
+"GET /api/analytics/streaming/completion",
+"Analytics Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Shows percentage listened",
+"Drop-off points in seconds"
+]
+},
+{
+"name": "Fan Growth & Relationship Velocity",
+"slug": "fan-growth-relationship-velocity",
+"goal": "Track audience development and conversion rates",
+"actions": [
+"View listener growth",
+"View follower growth",
+"View subscriber growth",
+"View conversion rates: Listeners \u2192 Followers \u2192 Fans \u2192 Paid Subscribers"
+],
+"routes": "/app/studio/analytics/fans",
+"components": "FanGrowthDashboard, ConversionFunnel, GrowthChart, VelocityMetrics",
+"apis": [
+"GET /api/analytics/fans/growth",
+"GET /api/analytics/fans/conversion",
+"Analytics Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Growth tracked daily",
+"Conversion rates calculated weekly"
+]
+},
+{
+"name": "Commerce & Revenue Analytics",
+"slug": "commerce-revenue-analytics",
+"goal": "Track sales and earnings",
+"actions": [
+"View gross sales",
+"View merchandise conversion rates",
+"View ticket sales",
+"View tipping revenue",
+"View net earnings"
+],
+"routes": "/app/studio/analytics/revenue",
+"components": "RevenueDashboard, SalesChart, RevenueBreakdown, ConversionMetrics, NetEarnings",
+"apis": [
+"GET /api/analytics/revenue",
+"GET /api/analytics/revenue/breakdown",
+"Finance Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Revenue data reconciled daily",
+"Net earnings after platform fees"
+]
+},
+{
+"name": "Social Post & Content Engagement",
+"slug": "social-post-content-engagement",
+"goal": "Analyze post performance and engagement",
+"actions": [
+"View impressions",
+"View clicks",
+"View video views",
+"View likes",
+"View comments",
+"View internal/external shares"
+],
+"routes": "/app/studio/analytics/engagement",
+"components": "EngagementDashboard, PostList, EngagementChart, ShareBreakdown",
+"apis": [
+"GET /api/analytics/engagement",
+"GET /api/analytics/engagement/posts",
+"Analytics Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Per-post metrics",
+"Internal vs external share tracking"
+]
+}
+]
+},
+{
+"title": "CREATOR STUDIO - MONETIZATION",
+"slug": "creator-studio-monetization",
+"features": [
+{
+"name": "Virtual Tip Jar Configurator",
+"slug": "virtual-tip-jar-configurator",
+"goal": "Customize fan tipping experience",
+"actions": [
+"Customize tipping prompts",
+"Set suggested tip amounts",
+"Configure thank-you popups",
+"Enable/disable tipping"
+],
+"routes": "/app/settings/monetization/tip-jar",
+"components": "TipJarConfig, PromptEditor, AmountSelector, ThankYouPopup, EnableToggle",
+"apis": [
+"GET /api/monetization/tip-jar",
+"PUT /api/monetization/tip-jar",
+"Payment Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Minimum tip: $1",
+"Platform takes 10-15% fee"
+]
+},
+{
+"name": "Subscription Tier Designer",
+"slug": "subscription-tier-designer",
+"goal": "Create recurring fan membership tiers",
+"actions": [
+"Set monthly/annual price",
+"Set billing cycles",
+"Design subscriber badge",
+"Set tier perks",
+"Preview subscriber experience"
+],
+"routes": "/app/settings/monetization/subscriptions",
+"components": "SubscriptionDesigner, PricingEditor, BillingCycleSelector, BadgeDesigner, PerkSelector, PreviewMode",
+"apis": [
+"GET /api/monetization/subscriptions",
+"POST /api/monetization/subscriptions",
+"PUT /api/monetization/subscriptions/{id}",
+"Payment Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Business verification required",
+"Multiple tiers supported",
+"Platform takes 10-15% fee"
+]
+},
+{
+"name": "Paid Event Ticket Configurator",
+"slug": "paid-event-ticket-configurator",
+"goal": "Set up ticketing for live events",
+"actions": [
+"Set pricing tiers",
+"Set ticket capacities",
+"Configure early-bird discounts",
+"Configure bundle offerings",
+"Set event date/time"
+],
+"routes": "/app/settings/monetization/events",
+"components": "TicketConfigurator, PricingTierEditor, CapacityManager, DiscountConfigurator, BundleBuilder",
+"apis": [
+"GET /api/monetization/events",
+"POST /api/monetization/events",
+"PUT /api/monetization/events/{id}",
+"Ticket Service",
+"Payment Service"
+],
+"rules": [
+"Requires Creator unlock",
+"Business verification required",
+"Platform takes 10-15% fee",
+"Refund policy applies"
+]
+}
+]
+},
+{
+"title": "BUSINESS CONTEXT - DASHBOARD",
+"slug": "business-context-dashboard",
+"features": [
+{
+"name": "Business Command Center",
+"slug": "business-command-center",
+"goal": "See cross-module business snapshot",
+"actions": [
+"View royalty status summary",
+"View release pipeline status",
+"View campaign performance",
+"View roster activity",
+"Click through to module details"
+],
+"routes": "/app/dashboard",
+"components": "BusinessDashboard, RoyaltySnapshot, ReleasePipeline, CampaignPerformance, RosterActivity",
+"apis": [
+"GET /api/dashboard",
+"GET /api/dashboard/royalties",
+"GET /api/dashboard/releases",
+"GET /api/dashboard/campaigns",
+"GET /api/dashboard/roster",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Data aggregated daily",
+"Widgets show last 30 days"
+]
+},
+{
+"name": "Revenue Snapshot Widget",
+"slug": "revenue-snapshot-widget",
+"goal": "See current financial overview",
+"actions": [
+"View total revenue",
+"View pending payouts",
+"View monthly trends",
+"Click through to Finance module"
+],
+"routes": "/app/dashboard (widget)",
+"components": "RevenueWidget, RevenueChart, PayoutStatus",
+"apis": [
+"GET /api/dashboard/revenue",
+"Finance Service"
+],
+"rules": [
+"Requires Business account",
+"Finance module access required",
+"Data updated daily"
+]
+},
+{
+"name": "Release Pipeline Widget",
+"slug": "release-pipeline-widget",
+"goal": "Track upcoming releases",
+"actions": [
+"View scheduled releases",
+"View distribution status",
+"View upcoming milestones",
+"Click through to Catalog module"
+],
+"routes": "/app/dashboard (widget)",
+"components": "ReleasePipelineWidget, ReleaseTimeline, StatusBadge",
+"apis": [
+"GET /api/dashboard/releases",
+"Catalog Service"
+],
+"rules": [
+"Requires Business account",
+"Catalog module access required",
+"Shows next 5 releases"
+]
+},
+{
+"name": "Campaign Performance Widget",
+"slug": "campaign-performance-widget",
+"goal": "See ad campaign effectiveness",
+"actions": [
+"View active campaign metrics",
+"View spend vs budget",
+"View ROI",
+"Click through to Advertise module"
+],
+"routes": "/app/dashboard (widget)",
+"components": "CampaignWidget, MetricDisplay, SpendProgress, ROIDisplay",
+"apis": [
+"GET /api/dashboard/campaigns",
+"Advertise Service"
+],
+"rules": [
+"Requires Business account",
+"Advertise module access required",
+"Shows only active campaigns"
+]
+},
+{
+"name": "Roster Activity Widget",
+"slug": "roster-activity-widget",
+"goal": "Monitor team activity",
+"actions": [
+"View recent team actions",
+"View pending approvals",
+"View team member status",
+"Click through to Roster & Team module"
+],
+"routes": "/app/dashboard (widget)",
+"components": "RosterActivityWidget, ActivityFeed, ApprovalList",
+"apis": [
+"GET /api/dashboard/roster",
+"Roster Service",
+"Audit Log Service"
+],
+"rules": [
+"Requires Business account",
+"Roster & Team module access required",
+"Shows last 7 days activity"
+]
+}
+]
+},
+{
+"title": "BUSINESS CONTEXT - CATALOG",
+"slug": "business-context-catalog",
+"features": [
+{
+"name": "Release Wizard",
+"slug": "release-wizard",
+"goal": "Create and submit new releases",
+"actions": [
+"Step 1: Asset uploads",
+"Step 2: Metadata entry",
+"Step 3: Contributor split allocations",
+"Step 4: Delivery scheduling",
+"Preview release package",
+"Submit for distribution"
+],
+"routes": "/app/catalog/release/wizard",
+"components": "ReleaseWizard, AssetUploader, MetadataForm, SplitManager, SchedulePicker, PreviewMode, SubmitButton",
+"apis": [
+"POST /api/releases",
+"PUT /api/releases/{id}",
+"POST /api/releases/{id}/submit",
+"Asset Upload Service",
+"Metadata Service",
+"Split Service"
+],
+"rules": [
+"Requires Business account",
+"All required fields must be filled",
+"Audio validation (bitrate, format)",
+"Metadata validation (ISRC, UPC)"
+]
+},
+{
+"name": "Release Calendar Operations",
+"slug": "release-calendar-operations",
+"goal": "Plan release schedule and promotional milestones",
+"actions": [
+"View release calendar",
+"Add release dates",
+"Set promotional milestones",
+"Coordinate regional release strategies",
+"View team calendar"
+],
+"routes": "/app/catalog/release/calendar",
+"components": "ReleaseCalendar, MonthView, WeekView, MilestoneManager, RegionalCoordinator",
+"apis": [
+"GET /api/releases/calendar",
+"POST /api/releases/calendar/milestone",
+"Calendar Service"
+],
+"rules": [
+"Requires Business account",
+"Calendar shows all active releases",
+"Milestones trigger notifications"
+]
+},
+{
+"name": "Pre-Release Campaign Engine",
+"slug": "pre-release-campaign-engine",
+"goal": "Build anticipation for releases",
+"actions": [
+"Configure pre-save links",
+"Set territory availability",
+"Configure windowed streaming access",
+"Set promotional content schedule",
+"View campaign performance"
+],
+"routes": "/app/catalog/release/campaigns",
+"components": "CampaignEngine, PreSaveLinkGenerator, TerritorySettings, PromoSchedule, CampaignMetrics",
+"apis": [
+"POST /api/campaigns/pre-release",
+"GET /api/campaigns/{id}/performance",
+"Campaign Service",
+"Smart Link Service"
+],
+"rules": [
+"Requires Business account",
+"Pre-saves require DSP integration",
+"Campaign metrics available after launch"
+]
+},
+{
+"name": "Digital Asset Management (DAM)",
+"slug": "digital-asset-management-dam",
+"goal": "Store and organize high-security digital assets",
+"actions": [
+"Upload master WAV files",
+"Upload multitrack stems",
+"Upload high-resolution artwork archives",
+"Upload video master files",
+"Search/filter assets",
+"Tag assets",
+"Organize assets"
+],
+"routes": "/app/catalog/assets",
+"components": "DAMDashboard, AssetUploader, AssetSearch, AssetFilter, TagManager, FolderOrganizer",
+"apis": [
+"GET /api/assets",
+"POST /api/assets",
+"PUT /api/assets/{id}",
+"DELETE /api/assets/{id}",
+"Cloud Storage Service (S3/GCS)"
+],
+"rules": [
+"Requires Business account",
+"Asset storage based on tier",
+"Max file size: 10GB",
+"Versioning enabled"
+]
+},
+{
+"name": "Enterprise DAM Core",
+"slug": "enterprise-dam-core",
+"goal": "Advanced asset management with automated processing",
+"actions": [
+"Automatic format conversions",
+"Audio QC (bitrate/sample rate/peak levels)",
+"Generate preview assets",
+"Validate asset compliance"
+],
+"routes": "/app/catalog/assets/dam-core",
+"components": "DAMCore, FormatConverter, AudioQCAnalyzer, PreviewGenerator, ComplianceChecker",
+"apis": [
+"POST /api/assets/{id}/process",
+"GET /api/assets/{id}/qc",
+"Media Processing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Automated QC reports generated"
+]
+},
+{
+"name": "Metadata Editor",
+"slug": "metadata-editor",
+"goal": "Input and validate per-release metadata",
+"actions": [
+"Input ISRCs",
+"Input UPCs",
+"Input GRIDs",
+"Add contributor credits",
+"Set explicit tags",
+"Set language metadata",
+"Validate metadata"
+],
+"routes": "/app/catalog/metadata/[release-id]",
+"components": "MetadataEditor, ISRCInput, UPCInput, CreditManager, TagSelector, ValidationEngine",
+"apis": [
+"GET /api/metadata/{releaseId}",
+"PUT /api/metadata/{releaseId}",
+"Identifiers Service",
+"Validation Service"
+],
+"rules": [
+"Requires Business account",
+"ISRC/UPC format validation",
+"Contributor credits validated",
+"Explicit content must be tagged"
+]
+},
+{
+"name": "AI Batch Metadata Tagger",
+"slug": "ai-batch-metadata-tagger",
+"goal": "Automatically generate metadata tags",
+"actions": [
+"Upload audio files",
+"Analyze BPM",
+"Analyze musical key",
+"Analyze genre",
+"Analyze mood",
+"Analyze instrumentation",
+"Apply tags in batch"
+],
+"routes": "/app/catalog/metadata/batch",
+"components": "BatchTagger, AudioAnalyzer, TagPreview, ApplyBatch, EditIndividual",
+"apis": [
+"POST /api/metadata/batch/analyze",
+"POST /api/metadata/batch/apply",
+"ML Audio Analysis Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Batch size: max 100 files",
+"Manual verification recommended"
+]
+},
+{
+"name": "Global Identifier Registry",
+"slug": "global-identifier-registry",
+"goal": "Manage global identifiers and validate compliance",
+"actions": [
+"Issue ISRCs",
+"Issue UPCs",
+"Issue GRIDs",
+"Issue Catalog Numbers",
+"Validate compliance with international supply chain standards",
+"Track identifier usage"
+],
+"routes": "/app/catalog/identifiers",
+"components": "IdentifierRegistry, ISRCIssuer, UPCIssuer, GRIDIssuer, ComplianceValidator, UsageTracker",
+"apis": [
+"GET /api/identifiers",
+"POST /api/identifiers/issue",
+"GET /api/identifiers/{id}/validate",
+"Identifiers Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Issued identifiers are globally unique",
+"Compliance validated automatically"
+]
+},
+{
+"name": "Barcode Generation System",
+"slug": "barcode-generation-system",
+"goal": "Generate product barcodes",
+"actions": [
+"Generate UPC barcode",
+"Generate EAN barcode",
+"Download barcode image",
+"Assign barcode to product",
+"Track barcode usage"
+],
+"routes": "/app/catalog/identifiers/barcodes",
+"components": "BarcodeGenerator, UPCGenerator, EANGenerator, BarcodeDownload, BarcodeAssignment",
+"apis": [
+"POST /api/barcodes/generate",
+"GET /api/barcodes/{code}",
+"Barcode Service"
+],
+"rules": [
+"Requires Business account",
+"Validated-ready barcodes",
+"Unique barcode assignment"
+]
+},
+{
+"name": "Lyrics Management System",
+"slug": "lyrics-management-system",
+"goal": "Manage lyrical content for releases",
+"actions": [
+"Store plain lyrics",
+"Store time-coded synced lyrics",
+"Store multi-language translations",
+"Edit lyrics",
+"Review lyrics",
+"Publish lyrics"
+],
+"routes": "/app/catalog/lyrics",
+"components": "LyricsManager, LyricsEditor, SyncedLyricsEditor, TranslationManager, PublishButton",
+"apis": [
+"GET /api/lyrics/{releaseId}",
+"PUT /api/lyrics/{releaseId}",
+"POST /api/lyrics/{releaseId}/publish",
+"Lyrics Service"
+],
+"rules": [
+"Requires Business account",
+"Synced lyrics require time codes",
+"Published lyrics syndicated automatically"
+]
+},
+{
+"name": "Lyrics Syndication Engine",
+"slug": "lyrics-syndication-engine",
+"goal": "Publish lyrics to third-party platforms",
+"actions": [
+"Push lyrics to Musixmatch",
+"Push lyrics to Genius",
+"Push lyrics to Spotify",
+"Push lyrics to Apple Music",
+"View syndication status"
+],
+"routes": "/app/catalog/lyrics/syndication",
+"components": "SyndicationEngine, PlatformSelector, StatusDashboard, PushButton, RetryButton",
+"apis": [
+"POST /api/lyrics/syndicate",
+"GET /api/lyrics/syndication/status",
+"Syndication Service",
+"Third-party API Integrations"
+],
+"rules": [
+"Requires Business account",
+"Verified lyrics only",
+"Syndication status tracked"
+]
+},
+{
+"name": "Outsourced Lyric Operations",
+"slug": "outsourced-lyric-operations",
+"goal": "Get professional human transcription for lyrics",
+"actions": [
+"Dispatch audio to human transcriptionists",
+"Receive precision lyric writing",
+"Receive time-code syncing",
+"Review transcriptions",
+"Approve and publish"
+],
+"routes": "/app/catalog/lyrics/outsource",
+"components": "OutsourceDispatch, AudioSubmitter, TranscriptionStatus, ReviewInterface, ApproveButton",
+"apis": [
+"POST /api/lyrics/outsource",
+"GET /api/lyrics/outsource/status",
+"Transcription Service (Human)"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Turnaround time: 24-72 hours",
+"Additional fee applies"
+]
+},
+{
+"name": "DSP Distribution Pipeline",
+"slug": "dsp-distribution-pipeline",
+"goal": "Deliver audio to digital streaming platforms",
+"actions": [
+"Select target DSPs",
+"Package audio masters",
+"Package cover art",
+"Package XML metadata",
+"Submit for distribution",
+"View delivery status"
+],
+"routes": "/app/catalog/distribute/digital",
+"components": "DistributionPipeline, DSPSelector, PackageBuilder, SubmissionForm, StatusTracker",
+"apis": [
+"POST /api/distribution/submit",
+"GET /api/distribution/{id}/status",
+"DSP Integration Service",
+"DDEX Service"
+],
+"rules": [
+"Requires Business account",
+"Audio validation required",
+"Metadata validation required",
+"Delivery to 150+ DSPs"
+]
+},
+{
+"name": "One-Click Release Pipeline",
+"slug": "one-click-release-pipeline",
+"goal": "Trigger distribution with one click",
+"actions": [
+"Complete release package",
+"Click \"Distribute\"",
+"Confirm distribution",
+"Monitor deployment"
+],
+"routes": "/app/catalog/distribute/push",
+"components": "OneClickDistribute, PackageSummary, ConfirmModal, DeploymentMonitor",
+"apis": [
+"POST /api/distribution/one-click",
+"GET /api/distribution/{id}/deployment",
+"Distribution Service"
+],
+"rules": [
+"Requires Business account",
+"All release validation must pass",
+"One-click push to selected DSPs"
+]
+},
+{
+"name": "Musicosy Native Ecosystem Streaming",
+"slug": "musicosy-native-ecosystem-streaming",
+"goal": "Publish to platform's internal streaming environment",
+"actions": [
+"Publish to native streaming",
+"Enable internal playback",
+"Enable internal monetization",
+"View native performance"
+],
+"routes": "/app/catalog/distribute/native",
+"components": "NativePublisher, EcosystemToggle, MonetizationStatus, NativeAnalytics",
+"apis": [
+"POST /api/distribution/native",
+"GET /api/distribution/native/status",
+"Native Streaming Service"
+],
+"rules": [
+"Requires Business account",
+"Published immediately",
+"Monetization enabled by default",
+"Native streams count toward royalties"
+]
+},
+{
+"name": "Global DSP Distribution Network",
+"slug": "global-dsp-distribution-network",
+"goal": "Reach all major streaming services and digital stores",
+"actions": [
+"View global DSP list",
+"Select distribution network",
+"Submit to broad network",
+"Track network distribution"
+],
+"routes": "/app/catalog/distribute/network",
+"components": "GlobalNetwork, DSPList, NetworkSelector, DistributionTracker",
+"apis": [
+"GET /api/distribution/network/dsps",
+"POST /api/distribution/network/submit",
+"Distribution Service"
+],
+"rules": [
+"Requires Business account",
+"450+ DSPs available",
+"Network distribution included"
+]
+},
+{
+"name": "Territory Routing Manager",
+"slug": "territory-routing-manager",
+"goal": "Manage regional availability and localized metadata",
+"actions": [
+"Configure territorial rights",
+"Set localized metadata overrides",
+"Set store availability per territory",
+"View territory coverage"
+],
+"routes": "/app/catalog/distribute/territory",
+"components": "TerritoryManager, RightsConfigurator, MetadataOverride, StoreAvailability, CoverageMap",
+"apis": [
+"GET /api/distribution/territory",
+"PUT /api/distribution/territory",
+"Rights Service",
+"Localization Service"
+],
+"rules": [
+"Requires Business account",
+"Territory routing required for physical",
+"Metadata overrides per region"
+]
+},
+{
+"name": "Distribution Status Matrix",
+"slug": "distribution-status-matrix",
+"goal": "Monitor delivery progress across all connected DSPs",
+"actions": [
+"View batch statuses",
+"View store ingestions",
+"View live status updates",
+"Filter by DSP",
+"Filter by status"
+],
+"routes": "/app/catalog/distribute/status",
+"components": "StatusMatrix, BatchStatusList, StoreIngestionStatus, LiveUpdateFeed, FilterControls",
+"apis": [
+"GET /api/distribution/status",
+"GET /api/distribution/status/batch/{id}",
+"Distribution Service",
+"WebSocket for live updates"
+],
+"rules": [
+"Requires Business account",
+"Real-time status updates",
+"Status colors: pending, processing, live, error"
+]
+},
+{
+"name": "Enterprise DDEX ERN Delivery",
+"slug": "enterprise-ddex-ern-delivery",
+"goal": "Standardized supply chain delivery",
+"actions": [
+"Package XML metadata via DDEX ERN",
+"Transmit via automated SFTP",
+"Validate DDEX compliance",
+"Monitor delivery"
+],
+"routes": "/app/catalog/distribute/ddex",
+"components": "DDEXDelivery, XMLPackager, SFTPTransmitter, ComplianceValidator, DeliveryMonitor",
+"apis": [
+"POST /api/distribution/ddex",
+"GET /api/distribution/ddex/status",
+"DDEX Service",
+"SFTP Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"DDEX ERN 3.8+ support",
+"Automated delivery pipeline"
+]
+},
+{
+"name": "Hi-Res & Spatial Audio Pipeline",
+"slug": "hi-res-spatial-audio-pipeline",
+"goal": "Deliver advanced audio formats",
+"actions": [
+"Upload 24-bit lossless audio",
+"Upload Dolby Atmos spatial audio",
+"Validate hi-res formats",
+"Distribute to supported DSPs"
+],
+"routes": "/app/catalog/distribute/hires",
+"components": "HiResUploader, SpatialAudioManager, FormatValidator, DSPCompatibilityCheck",
+"apis": [
+"POST /api/distribution/hires",
+"POST /api/distribution/atmos",
+"Media Processing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Supported DSPs: Apple Music, Tidal, Amazon Music"
+]
+},
+{
+"name": "White-Label Distribution Header",
+"slug": "white-label-distribution-header",
+"goal": "Enable partner and imprint distribution",
+"actions": [
+"Set custom DDEX header credentials",
+"Configure white-label partner settings",
+"Submit white-label distribution",
+"Track white-label deliveries"
+],
+"routes": "/app/catalog/distribute/white-label",
+"components": "WhiteLabelConfig, HeaderEditor, PartnerSettings, SubmissionForm, DeliveryTracker",
+"apis": [
+"PUT /api/distribution/white-label",
+"POST /api/distribution/white-label/submit",
+"White-Label Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Custom header credentials required",
+"Partner validation required"
+]
+},
+{
+"name": "Takedown & Update Requests",
+"slug": "takedown-update-requests",
+"goal": "Remove or update distributed content",
+"actions": [
+"Submit takedown request",
+"Submit update request",
+"Track request status",
+"View takedown history"
+],
+"routes": "/app/catalog/distribute/takedown",
+"components": "TakedownManager, RequestForm, StatusTracker, HistoryLog",
+"apis": [
+"POST /api/distribution/takedown",
+"POST /api/distribution/update",
+"GET /api/distribution/takedown/status",
+"Distribution Service"
+],
+"rules": [
+"Requires Business account",
+"Takedown may take 24-72 hours",
+"Updates require metadata approval"
+]
+},
+{
+"name": "Omni-Channel Supply Chain Engine",
+"slug": "omni-channel-supply-chain-engine",
+"goal": "Manage integrated digital and physical delivery",
+"actions": [
+"Process DSP direct pushes",
+"Process automated DDEX formatting",
+"Process takedown/update requests",
+"Process physical manufacturing orders",
+"View omni-channel status"
+],
+"routes": "/app/catalog/distribute/omni",
+"components": "OmniChannelEngine, ChannelSelector, OrderProcessor, StatusDashboard",
+"apis": [
+"POST /api/distribution/omni",
+"GET /api/distribution/omni/status",
+"Integrated Supply Chain Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Digital and physical in one view"
+]
+},
+{
+"name": "Physical Supply Chain Manager",
+"slug": "physical-supply-chain-manager",
+"goal": "Manage manufacturing and physical inventory",
+"actions": [
+"Route orders to physical distribution networks",
+"Manage physical inventory",
+"Track manufacturing status",
+"View fulfillment status"
+],
+"routes": "/app/catalog/distribute/physical",
+"components": "PhysicalSupplyChain, OrderRouter, InventoryManager, ManufacturingStatus, FulfillmentTracker",
+"apis": [
+"GET /api/distribution/physical",
+"POST /api/distribution/physical/order",
+"Physical Distribution Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Integrated with manufacturing partners"
+]
+},
+{
+"name": "Vinyl Production Pipeline",
+"slug": "vinyl-production-pipeline",
+"goal": "Manage vinyl manufacturing process",
+"actions": [
+"Submit lacquer cutting request",
+"Submit metal plating request",
+"Submit pressing request",
+"Submit packaging request",
+"Submit retail distribution request",
+"Track production status"
+],
+"routes": "/app/catalog/distribute/physical/vinyl",
+"components": "VinylPipeline, LacquerSubmitter, PlatingManager, PressingManager, PackagingManager, RetailDistributor, StatusTracker",
+"apis": [
+"POST /api/distribution/physical/vinyl",
+"GET /api/distribution/physical/vinyl/status",
+"Vinyl Manufacturing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Minimum order quantity applies",
+"Lead time: 8-12 weeks"
+]
+},
+{
+"name": "CD Production Pipeline",
+"slug": "cd-production-pipeline",
+"goal": "Manage CD manufacturing process",
+"actions": [
+"Submit glass mastering request",
+"Submit replication request",
+"Submit printing request",
+"Submit jewel case assembly request",
+"Submit retail distribution request",
+"Track production status"
+],
+"routes": "/app/catalog/distribute/physical/cd",
+"components": "CDPipeline, GlassMasteringSubmitter, ReplicationManager, PrintingManager, AssemblyManager, RetailDistributor, StatusTracker",
+"apis": [
+"POST /api/distribution/physical/cd",
+"GET /api/distribution/physical/cd/status",
+"CD Manufacturing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Minimum order quantity applies",
+"Lead time: 4-6 weeks"
+]
+},
+{
+"name": "Cassette Production Pipeline",
+"slug": "cassette-production-pipeline",
+"goal": "Manage cassette manufacturing process",
+"actions": [
+"Submit audio duplication request",
+"Submit J-card printing request",
+"Submit shell assembly request",
+"Submit physical fulfillment request",
+"Track production status"
+],
+"routes": "/app/catalog/distribute/physical/cassette",
+"components": "CassettePipeline, AudioDuplicator, JCardPrinter, ShellAssembler, FulfillmentManager, StatusTracker",
+"apis": [
+"POST /api/distribution/physical/cassette",
+"GET /api/distribution/physical/cassette/status",
+"Cassette Manufacturing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Minimum order quantity applies",
+"Lead time: 3-4 weeks"
+]
+},
+{
+"name": "Custom USB Production Pipeline",
+"slug": "custom-usb-production-pipeline",
+"goal": "Manage USB audio product manufacturing",
+"actions": [
+"Submit custom drive shell branding",
+"Submit audio preload operations",
+"Submit physical distribution request",
+"Track production status"
+],
+"routes": "/app/catalog/distribute/physical/usb",
+"components": "USBPipeline, ShellBrandingManager, AudioPreloader, DistributionManager, StatusTracker",
+"apis": [
+"POST /api/distribution/physical/usb",
+"GET /api/distribution/physical/usb/status",
+"USB Manufacturing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Minimum order quantity applies",
+"Lead time: 3-4 weeks"
+]
+},
+{
+"name": "Podcast Hosting \u2014 Unlimited Shows & Episodes",
+"slug": "podcast-hosting-unlimited-shows-episodes",
+"goal": "Host unlimited podcast content",
+"actions": [
+"Create podcast show",
+"Create season structure",
+"Upload episodes",
+"Manage episode archives",
+"Organize by season"
+],
+"routes": "/app/catalog/podcast",
+"components": "PodcastManager, ShowCreator, SeasonManager, EpisodeUploader, ArchiveManager",
+"apis": [
+"GET /api/podcast/shows",
+"POST /api/podcast/shows",
+"PUT /api/podcast/shows/{id}",
+"DELETE /api/podcast/shows/{id}",
+"Podcast Service",
+"Media Storage Service"
+],
+"rules": [
+"Requires Business account",
+"Unlimited shows and episodes",
+"Storage limits based on tier"
+]
+},
+{
+"name": "Podcast \u2014 Video Podcast Hosting & Streaming",
+"slug": "podcast-video-podcast-hosting-streaming",
+"goal": "Host video podcast content",
+"actions": [
+"Upload HD MP4/HLS video podcasts",
+"Stream video alongside audio",
+"Comply with Spotify Video specs",
+"Comply with Apple Podcasts specs",
+"Comply with YouTube RSS specs"
+],
+"routes": "/app/catalog/podcast/[id]/video",
+"components": "VideoPodcastManager, VideoUploader, StreamingConfig, SpecComplianceChecker",
+"apis": [
+"POST /api/podcast/video",
+"GET /api/podcast/video/{id}/stream",
+"Video Streaming Service"
+],
+"rules": [
+"Requires Business account",
+"Video formats: MP4, MOV",
+"Max file size: 10GB",
+"Transcoding to HLS"
+]
+},
+{
+"name": "Podcast \u2014 Master Audio Processing",
+"slug": "podcast-master-audio-processing",
+"goal": "Automatically normalize podcast audio",
+"actions": [
+"Upload audio",
+"Apply LUFS loudness normalization (-16 LUFS stereo)",
+"Apply noise gating",
+"Apply bit-rate optimization",
+"Download processed audio"
+],
+"routes": "/app/catalog/podcast/[id]/processing",
+"components": "AudioProcessor, LUFSNormalizer, NoiseGater, BitrateOptimizer, ProcessedAudioDownload",
+"apis": [
+"POST /api/podcast/audio/process",
+"GET /api/podcast/audio/process/status",
+"Audio Processing Service"
+],
+"rules": [
+"Requires Business account",
+"Processing time: 5-10 minutes",
+"LUFS target: -16 LUFS stereo"
+]
+},
+{
+"name": "Podcast \u2014 Podcasting 2.0 Namespace Support",
+"slug": "podcast-podcasting-2-0-namespace-support",
+"goal": "Generate advanced RSS feeds",
+"actions": [
+"Generate XML with Podcasting 2.0 tags",
+"Support transcript tag",
+"Support chapters tag",
+"Support person tag",
+"Support location tag",
+"Support guid tag",
+"Support value tag",
+"Validate RSS feed"
+],
+"routes": "/app/catalog/podcast/[id]/rss",
+"components": "RSSGenerator, XMLBuilder, TagSelector, FeedValidator, PreviewFeed",
+"apis": [
+"GET /api/podcast/rss/{showId}",
+"POST /api/podcast/rss/validate",
+"RSS Service"
+],
+"rules": [
+"Requires Business account",
+"Podcasting 2.0 tags supported",
+"Feed validation required"
+]
+},
+{
+"name": "Podcast \u2014 Bulk Episode Importer",
+"slug": "podcast-bulk-episode-importer",
+"goal": "Migrate shows from existing hosts",
+"actions": [
+"Parse RSS feed URL",
+"Download media files",
+"Import episodes",
+"Generate 301 redirects",
+"View import status"
+],
+"routes": "/app/catalog/podcast/import",
+"components": "BulkImporter, RSSParser, MediaDownloader, RedirectGenerator, ImportStatus",
+"apis": [
+"POST /api/podcast/import",
+"GET /api/podcast/import/status",
+"Import Service"
+],
+"rules": [
+"Requires Business account",
+"Valid RSS feed URL required",
+"301 redirects for SEO"
+]
+},
+{
+"name": "Podcast \u2014 Private RSS Engine",
+"slug": "podcast-private-rss-engine",
+"goal": "Distribute gated audio content to authorized subscribers",
+"actions": [
+"Generate tokenized RSS feeds",
+"Tie feeds to subscriber credentials",
+"Prevent unauthorized feed sharing",
+"Prevent public indexing"
+],
+"routes": "/app/catalog/podcast/[id]/private",
+"components": "PrivateRSSEngine, TokenGenerator, CredentialMapper, AuthValidator, FeedProtector",
+"apis": [
+"GET /api/podcast/private/{token}",
+"POST /api/podcast/private/generate",
+"Private RSS Service"
+],
+"rules": [
+"Requires Business account",
+"Tokenized access only",
+"Feed authentication required"
+]
+},
+{
+"name": "Podcast \u2014 Single Sign-On (SSO) Private Access",
+"slug": "podcast-single-sign-on-sso-private-access",
+"goal": "Grant enterprise employees automatic private access",
+"actions": [
+"Integrate SAML 2.0",
+"Integrate Okta",
+"Integrate Azure AD",
+"Integrate OAuth",
+"Grant automatic access"
+],
+"routes": "/app/catalog/podcast/[id]/private/sso",
+"components": "SSOIntegration, SAMLConfig, OktaConnector, AzureADConnector, OAuthProvider, AccessManager",
+"apis": [
+"POST /api/podcast/private/sso",
+"GET /api/podcast/private/sso/status",
+"SSO Service",
+"Identity Provider Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"SAML 2.0, Okta, Azure AD, OAuth supported"
+]
+},
+{
+"name": "Podcast \u2014 Subscriber Revocation",
+"slug": "podcast-subscriber-revocation",
+"goal": "Terminate private feed access in real-time",
+"actions": [
+"Cancel subscriber",
+"Offboard employee",
+"Invalidate tokenized RSS feed",
+"Revoke access immediately"
+],
+"routes": "/app/catalog/podcast/[id]/private/revoke",
+"components": "RevocationEngine, CancelSubscriber, OffboardEmployee, TokenInvalidator, AccessRevoker",
+"apis": [
+"POST /api/podcast/private/revoke",
+"GET /api/podcast/private/revoke/status",
+"Subscription Service",
+"IAM Service"
+],
+"rules": [
+"Requires Business account",
+"Immediate revocation",
+"Historical access logs retained"
+]
+},
+{
+"name": "Podcast \u2014 Device & IP Lock Governance",
+"slug": "podcast-device-ip-lock-governance",
+"goal": "Secure private feeds and prevent sharing",
+"actions": [
+"Track download anomalies",
+"Limit simultaneous devices",
+"Flag suspicious feed distribution",
+"Lock feed to specific IPs/devices",
+"View security logs"
+],
+"routes": "/app/catalog/podcast/[id]/private/security",
+"components": "DeviceLockEngine, IPLockEngine, AnomalyDetector, DeviceLimiter, SecurityLogger",
+"apis": [
+"GET /api/podcast/private/security",
+"PUT /api/podcast/private/security",
+"Security Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Anomaly detection enabled",
+"Device limit configurable"
+]
+},
+{
+"name": "Podcast \u2014 Omni-Directory One-Click Publishing",
+"slug": "podcast-omni-directory-one-click-publishing",
+"goal": "Distribute to all major podcast directories",
+"actions": [
+"Submit to Apple Podcasts",
+"Submit to Spotify",
+"Submit to Amazon Music",
+"Submit to YouTube",
+"Submit to Pocket Casts",
+"Submit to Overcast",
+"Submit to iHeartRadio",
+"One-click publish to all"
+],
+"routes": "/app/catalog/podcast/[id]/distribute",
+"components": "OmniDirectoryPublisher, DirectorySelector, OneClickPublish, SubmissionTracker",
+"apis": [
+"POST /api/podcast/distribute",
+"GET /api/podcast/distribute/status",
+"Directory API Integrations"
+],
+"rules": [
+"Requires Business account",
+"One-click to all selected directories",
+"Automated submission workflow"
+]
+},
+{
+"name": "Podcast \u2014 Directory Connection Status Dashboard",
+"slug": "podcast-directory-connection-status-dashboard",
+"goal": "Monitor distribution status",
+"actions": [
+"View real-time ingestion status",
+"View directory-assigned IDs",
+"View feed validation errors",
+"View error resolution steps"
+],
+"routes": "/app/catalog/podcast/[id]/distribute/status",
+"components": "DirectoryStatusDashboard, IngestionStatusList, DirectoryIDDisplay, ErrorLog, ResolutionGuide",
+"apis": [
+"GET /api/podcast/distribute/status",
+"GET /api/podcast/distribute/errors",
+"Directory Integration Service"
+],
+"rules": [
+"Requires Business account",
+"Real-time status updates",
+"Error resolution guidance provided"
+]
+},
+{
+"name": "Podcast \u2014 Canonical RSS Feed Management",
+"slug": "podcast-canonical-rss-feed-management",
+"goal": "Own distribution feeds",
+"actions": [
+"Generate white-label RSS feed URL",
+"Configure custom domain CNAME",
+"Manage canonical feed settings",
+"View feed ownership"
+],
+"routes": "/app/catalog/podcast/[id]/rss/canonical",
+"components": "CanonicalRSSManager, URIGenerator, CNAMEConfigurator, OwnershipDisplay, FeedSettings",
+"apis": [
+"GET /api/podcast/rss/canonical",
+"PUT /api/podcast/rss/canonical",
+"DNS Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Custom domain CNAME support",
+"Full network ownership"
+]
+},
+{
+"name": "Podcast \u2014 Dynamic Ad Insertion Cue-Point Marker Editor",
+"slug": "podcast-dynamic-ad-insertion-cue-point-marker-editor",
+"goal": "Set ad insertion markers",
+"actions": [
+"Open visual waveform editor",
+"Set pre-roll marker",
+"Set mid-roll markers",
+"Set post-roll marker",
+"Adjust millisecond precision",
+"Save marker configuration"
+],
+"routes": "/app/catalog/podcast/[id]/episode/[id]/dai",
+"components": "WaveformEditor, MarkerPlacer, PreRollMarker, MidRollMarker, PostRollMarker, PrecisionControl, SaveButton",
+"apis": [
+"GET /api/podcast/dai/markers",
+"PUT /api/podcast/dai/markers",
+"DAI Service"
+],
+"rules": [
+"Requires Business account",
+"Millisecond precision markers",
+"Multiple mid-roll points supported"
+]
+},
+{
+"name": "Podcast \u2014 Dynamic Content Insertion (DCI)",
+"slug": "podcast-dynamic-content-insertion-dci",
+"goal": "Update content across back-catalog episodes",
+"actions": [
+"Stitch show intros",
+"Stitch show outros",
+"Stitch host announcements",
+"Stitch cross-show network promotions",
+"Apply to back-catalog episodes"
+],
+"routes": "/app/catalog/podcast/[id]/dci",
+"components": "DCIManager, IntroStitcher, OutroStitcher, AnnouncementStitcher, PromotionStitcher, BackCatalogApplier",
+"apis": [
+"POST /api/podcast/dci/update",
+"GET /api/podcast/dci/status",
+"DCI Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Applied to back-catalog episodes",
+"Real-time audio stitching"
+]
+},
+{
+"name": "Podcast \u2014 Geo/Device/Demographic Ad Targeting",
+"slug": "podcast-geo-device-demographic-ad-targeting",
+"goal": "Target ads to specific listeners",
+"actions": [
+"Target by listener IP geography",
+"Target by device operating system",
+"Target by listening app",
+"Target by demographic profile",
+"Configure campaign targeting"
+],
+"routes": "/app/catalog/podcast/[id]/dai/targeting",
+"components": "AdTargetingEngine, GeoTargeting, DeviceTargeting, AppTargeting, DemographicTargeting, CampaignConfig",
+"apis": [
+"GET /api/podcast/dai/targeting",
+"PUT /api/podcast/dai/targeting",
+"Ad Targeting Service"
+],
+"rules": [
+"Requires Business account",
+"Geo/device/demographic targeting",
+"Real-time ad delivery selection"
+]
+},
+{
+"name": "Podcast \u2014 Ad Frequency Capping",
+"slug": "podcast-ad-frequency-capping",
+"goal": "Prevent listener ad fatigue",
+"actions": [
+"Enforce maximum impression caps",
+"Set flight date ranges",
+"Configure competitive ad separation",
+"Set per-listener limits",
+"View frequency cap logs"
+],
+"routes": "/app/catalog/podcast/[id]/dai/frequency",
+"components": "FrequencyCapper, ImpressionCapSet, FlightDatePicker, CompetitiveSeparation, ListenerLimitConfig, FrequencyLogs",
+"apis": [
+"GET /api/podcast/dai/frequency",
+"PUT /api/podcast/dai/frequency",
+"Frequency Capping Service"
+],
+"rules": [
+"Requires Business account",
+"Per-listener frequency caps",
+"Competitive separation enforced"
+]
+},
+{
+"name": "Podcast \u2014 Programmatic Ad Marketplace",
+"slug": "podcast-programmatic-ad-marketplace",
+"goal": "Connect to ad exchanges",
+"actions": [
+"Integrate with DSPs via VAST/DAAST",
+"Connect to supply-side platforms",
+"Manage inventory exposure",
+"View programmatic revenue"
+],
+"routes": "/app/catalog/podcast/monetization/programmatic",
+"components": "ProgrammaticMarketplace, DSPIntegrator, SSPConnector, InventoryManager, RevenueDashboard",
+"apis": [
+"POST /api/podcast/monetization/programmatic",
+"GET /api/podcast/monetization/programmatic/revenue",
+"Programmatic Ad Service",
+"VAST/DAAST Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"External DSP integration",
+"Revenue sharing applies"
+]
+},
+{
+"name": "Podcast \u2014 Direct Sponsor Campaign Manager",
+"slug": "podcast-direct-sponsor-campaign-manager",
+"goal": "Manage direct ad sales",
+"actions": [
+"Create insertion orders",
+"Set CPM pricing rules",
+"Schedule campaign flights",
+"Manage sponsor relationships",
+"View campaign performance"
+],
+"routes": "/app/catalog/podcast/monetization/direct",
+"components": "SponsorCampaignManager, InsertionOrderBuilder, CPMEditor, FlightScheduler, SponsorCRM, PerformanceDashboard",
+"apis": [
+"POST /api/podcast/monetization/direct",
+"GET /api/podcast/monetization/direct/campaigns",
+"Direct Ad Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Direct sponsor deals",
+"CPM pricing configurable"
+]
+},
+{
+"name": "Podcast \u2014 Inventory Forecasting Engine",
+"slug": "podcast-inventory-forecasting-engine",
+"goal": "Project available ad inventory",
+"actions": [
+"View projected inventory availability",
+"View historical download velocity",
+"View audience growth projections",
+"Optimize ad sales"
+],
+"routes": "/app/catalog/podcast/monetization/forecast",
+"components": "InventoryForecaster, HistoricalVelocityView, AudienceGrowthProjector, OptimizationEngine, ForecastDashboard",
+"apis": [
+"GET /api/podcast/monetization/forecast",
+"GET /api/podcast/monetization/forecast/historical",
+"ML Forecasting Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"ML-based predictions",
+"Updated daily"
+]
+},
+{
+"name": "Podcast \u2014 Automated AI Transcription",
+"slug": "podcast-automated-ai-transcription",
+"goal": "Generate episode transcripts",
+"actions": [
+"Submit audio for transcription",
+"Receive multi-language transcripts",
+"View speaker diarization",
+"View time-coded alignment",
+"Download transcript"
+],
+"routes": "/app/catalog/podcast/[id]/episode/[id]/transcript",
+"components": "TranscriptionEngine, AudioSubmitter, LanguageSelector, SpeakerDiarizationView, TimeCodeView, DownloadButton",
+"apis": [
+"POST /api/podcast/transcript",
+"GET /api/podcast/transcript/{id}",
+"AI Transcription Service",
+"Speech-to-Text Service"
+],
+"rules": [
+"Requires Business account",
+"Multi-language support",
+"Speaker diarization enabled",
+"Processing time: 1-5 minutes"
+]
+},
+{
+"name": "Podcast \u2014 Interactive Transcript Editor",
+"slug": "podcast-interactive-transcript-editor",
+"goal": "Review and edit AI-generated transcripts",
+"actions": [
+"Open browser-based text editor",
+"View transcript with time codes",
+"Edit text",
+"Correct speaker labels",
+"Save changes",
+"Publish transcript"
+],
+"routes": "/app/catalog/podcast/[id]/episode/[id]/transcript/edit",
+"components": "TranscriptEditor, TextArea, TimeCodeDisplay, SpeakerLabelEditor, SaveButton, PublishButton",
+"apis": [
+"GET /api/podcast/transcript/{id}/edit",
+"PUT /api/podcast/transcript/{id}",
+"Transcript Service"
+],
+"rules": [
+"Requires Business account",
+"Editable AI-generated transcripts",
+"Version control for changes"
+]
+},
+{
+"name": "Podcast \u2014 AI Show Notes & Summary Generator",
+"slug": "podcast-ai-show-notes-summary-generator",
+"goal": "Automate episode metadata",
+"actions": [
+"Generate episode title",
+"Generate executive summary",
+"Generate bulleted key takeaways",
+"Generate SEO-optimized description",
+"Review and edit",
+"Publish show notes"
+],
+"routes": "/app/catalog/podcast/[id]/episode/[id]/ai-tools",
+"components": "ShowNotesGenerator, TitleGenerator, SummaryGenerator, TakeawaysGenerator, SEOGenerator, Editor, PublishButton",
+"apis": [
+"POST /api/podcast/ai/show-notes",
+"GET /api/podcast/ai/show-notes/{id}",
+"Generative AI Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"AI-generated metadata",
+"Manual review recommended"
+]
+},
+{
+"name": "Podcast \u2014 Automated AI Chapter Marker Creation",
+"slug": "podcast-automated-ai-chapter-marker-creation",
+"goal": "Automatically generate time-coded chapter markers",
+"actions": [
+"Analyze episode audio",
+"Detect topic transitions",
+"Generate time-coded chapter markers",
+"Review and edit markers",
+"Apply to episode"
+],
+"routes": "/app/catalog/podcast/[id]/episode/[id]/ai-tools/chapters",
+"components": "ChapterGenerator, TopicTransitionDetector, MarkerCreator, Editor, ApplyButton",
+"apis": [
+"POST /api/podcast/ai/chapters",
+"GET /api/podcast/ai/chapters/{id}",
+"Content Analysis Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"AI-generated chapter markers",
+"Editable before publishing"
+]
+}
+]
+},
+{
+"title": "BUSINESS CONTEXT - FINANCE",
+"slug": "business-context-finance",
+"features": [
+{
+"name": "Royalty Accounting Engine",
+"slug": "royalty-accounting-engine",
+"goal": "Ingest sales statements and calculate earnings",
+"actions": [
+"Ingest sales statements",
+"Match transactions to contract terms",
+"Calculate earnings",
+"View royalty calculations",
+"Export royalty reports"
+],
+"routes": "/app/finance/royalties",
+"components": "RoyaltyEngine, StatementIngestor, TransactionMatcher, EarningsCalculator, RoyaltyDashboard, ExportButton",
+"apis": [
+"POST /api/finance/royalties/ingest",
+"GET /api/finance/royalties/{id}",
+"GET /api/finance/royalties/reports",
+"Royalty Service",
+"Statement Processing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Statement ingestion via CSV/TSV/DDEX/XML",
+"Calculations based on contract terms"
+]
+},
+{
+"name": "Royalty Split Manager",
+"slug": "royalty-split-manager",
+"goal": "Define multi-party revenue sharing rules",
+"actions": [
+"Add artist split",
+"Add writer split",
+"Add producer split",
+"Add label split",
+"Add publisher split",
+"Set percentage allocations",
+"Set automated allocations"
+],
+"routes": "/app/finance/royalties/splits",
+"components": "SplitManager, ParticipantAdder, PercentageAllocator, AutoAllocationEngine, SplitPreview",
+"apis": [
+"GET /api/finance/splits",
+"POST /api/finance/splits",
+"PUT /api/finance/splits/{id}",
+"Split Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Multiple participants supported",
+"Percentage allocations must sum to 100%"
+]
+},
+{
+"name": "Mechanical & Performance Royalty Engine",
+"slug": "mechanical-performance-royalty-engine",
+"goal": "Reconcile mechanical and performance royalties",
+"actions": [
+"Reconcile mechanical royalties from physical/digital usage",
+"Reconcile performance revenues from PROs",
+"Match to catalog assets",
+"View royalty breakdowns"
+],
+"routes": "/app/finance/royalties/mechanical",
+"components": "MechanicalRoyaltyEngine, PerformanceRoyaltyEngine, PROReconciler, BreakdownView",
+"apis": [
+"POST /api/finance/royalties/mechanical",
+"POST /api/finance/royalties/performance",
+"Mechanical Rights Service",
+"PRO Integration Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Mechanical from physical/digital",
+"Performance from PROs"
+]
+},
+{
+"name": "Multi-Format Statement Ingestion",
+"slug": "multi-format-statement-ingestion",
+"goal": "Ingest high-volume sales statements",
+"actions": [
+"Upload CSV statements",
+"Upload TSV statements",
+"Upload DDEX statements",
+"Upload XML statements",
+"Parse all formats",
+"Validate data"
+],
+"routes": "/app/finance/statements/ingest",
+"components": "StatementIngestor, CSVParser, TSVParser, DDEXParser, XMLParser, Validator, StatusDisplay",
+"apis": [
+"POST /api/finance/statements/ingest",
+"GET /api/finance/statements/status",
+"Statement Processing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Supports CSV/TSV/DDEX/XML",
+"Validation before processing"
+]
+},
+{
+"name": "Global Disbursements Engine",
+"slug": "global-disbursements-engine",
+"goal": "Execute global payouts",
+"actions": [
+"Initiate wire transfers",
+"Initiate local ACH",
+"Initiate SWIFT",
+"Initiate SEPA",
+"Initiate digital wallet disbursements",
+"Apply automated FX conversion"
+],
+"routes": "/app/finance/payouts/disbursements",
+"components": "DisbursementEngine, WireTransfer, ACHProcessor, SWIFTProcessor, SEPAProcessor, WalletDisbursement, FXConverter",
+"apis": [
+"POST /api/finance/disbursements",
+"GET /api/finance/disbursements/status",
+"Payment Service",
+"FX Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Multi-channel payout support",
+"Auto-FX conversion applied"
+]
+},
+{
+"name": "Payouts Oversight Dashboard",
+"slug": "payouts-oversight-dashboard",
+"goal": "Review and manage payouts",
+"actions": [
+"Review pending transactions",
+"Approve payout queues",
+"Manage holds",
+"Audit system liquidity",
+"View payout history"
+],
+"routes": "/app/finance/payouts/oversight",
+"components": "PayoutsDashboard, PendingQueue, ApprovalWorkflow, HoldManager, LiquidityAudit, HistoryLog",
+"apis": [
+"GET /api/finance/payouts/pending",
+"PUT /api/finance/payouts/{id}/approve",
+"PUT /api/finance/payouts/{id}/hold",
+"Finance Service"
+],
+"rules": [
+"Requires Business account",
+"Owner/Admin role required",
+"Dual approval required for large payouts"
+]
+},
+{
+"name": "Annual Statement Generator",
+"slug": "annual-statement-generator",
+"goal": "Compile yearly tax statements",
+"actions": [
+"Generate annual tax statements",
+"Generate consolidated royalty histories",
+"Generate for all recipients",
+"Export statements",
+"Schedule distribution"
+],
+"routes": "/app/finance/statements/annual",
+"components": "StatementGenerator, AnnualCompiler, RoyaltyHistoryBuilder, ExportButton, DistributionScheduler",
+"apis": [
+"POST /api/finance/statements/annual",
+"GET /api/finance/statements/annual/{year}",
+"Reporting Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Generated after fiscal year-end",
+"Distributed to all recipients"
+]
+},
+{
+"name": "Recoupment & Split Engine",
+"slug": "recoupment-split-engine",
+"goal": "Process complex multi-tiered revenue splits",
+"actions": [
+"Configure multi-tiered revenue splits",
+"Apply participant fee deductions",
+"Apply cross-collateralization",
+"Apply advance recoupment schedules",
+"View recoupment status"
+],
+"routes": "/app/finance/recoupment",
+"components": "RecoupmentEngine, SplitConfigurator, FeeDeductionManager, CrossCollateralizer, AdvanceScheduler, RecoupmentDashboard",
+"apis": [
+"GET /api/finance/recoupment",
+"PUT /api/finance/recoupment",
+"Recoupment Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Complex split support",
+"Advance recoupment tracking"
+]
+},
+{
+"name": "Recipient Royalty Reporting",
+"slug": "recipient-royalty-reporting",
+"goal": "Provide rights holders with earnings visibility",
+"actions": [
+"View itemized statements",
+"View source breakdowns",
+"View available balances",
+"Download statements",
+"View payment history"
+],
+"routes": "/app/finance/recipient",
+"components": "RecipientPortal, ItemizedStatement, SourceBreakdown, BalanceDisplay, DownloadButton, PaymentHistory",
+"apis": [
+"GET /api/finance/recipient/statements",
+"GET /api/finance/recipient/balance",
+"Reporting Service"
+],
+"rules": [
+"Requires authenticated user",
+"Only view own statements",
+"Available balance shown"
+]
+},
+{
+"name": "Global Payment Infrastructure",
+"slug": "global-payment-infrastructure",
+"goal": "Enterprise payment processing",
+"actions": [
+"Integrate international payment channels",
+"Apply real-time FX optimization",
+"Manage hold management",
+"Configure custom payout thresholds",
+"Integrate payment gateways (Stripe, Adyen)"
+],
+"routes": "/app/finance/payments/infrastructure",
+"components": "GlobalPaymentInfra, PaymentChannelManager, FXOptimizer, HoldManager, ThresholdConfigurator, GatewayConnector",
+"apis": [
+"GET /api/finance/payments/infrastructure",
+"PUT /api/finance/payments/infrastructure",
+"Payment Service",
+"Gateway Service (Stripe/Adyen)"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Global payment channels supported",
+"Gateway connectors included"
+]
+},
+{
+"name": "Enterprise Integration \u2014 General Ledger Sync",
+"slug": "enterprise-integration-general-ledger-sync",
+"goal": "Sync transactions to external accounting",
+"actions": [
+"Connect to Xero",
+"Connect to QuickBooks",
+"Connect to NetSuite",
+"Sync internal transactions",
+"View sync status",
+"Resolve sync errors"
+],
+"routes": "/app/finance/integrations",
+"components": "GLIntegrator, XeroConnector, QuickBooksConnector, NetSuiteConnector, SyncStatus, ErrorResolver",
+"apis": [
+"POST /api/finance/integrations/sync",
+"GET /api/finance/integrations/status",
+"Integration Service",
+"Third-party API Connectors"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Real-time sync supported",
+"Error resolution provided"
+]
+},
+{
+"name": "Financial Reconciliation Engine",
+"slug": "financial-reconciliation-engine",
+"goal": "Automatically reconcile bank ledgers",
+"actions": [
+"Match bank ledgers",
+"Match gateway records",
+"Match DSP statement data",
+"Detect discrepancies",
+"Generate reconciliation reports"
+],
+"routes": "/app/finance/reconciliation",
+"components": "ReconciliationEngine, BankLedgerMatcher, GatewayRecordMatcher, DSPStatementMatcher, DiscrepancyDetector, ReportGenerator",
+"apis": [
+"POST /api/finance/reconciliation",
+"GET /api/finance/reconciliation/reports",
+"Reconciliation Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Automated matching",
+"Discrepancy flagging"
+]
+},
+{
+"name": "Capital & Advance Financing",
+"slug": "capital-advance-financing",
+"goal": "Evaluate streaming performance for advances",
+"actions": [
+"Evaluate streaming performance history",
+"Underwrite advances",
+"Underwrite catalog loans",
+"Underwrite revenue-based financing",
+"View financing offers",
+"Accept financing"
+],
+"routes": "/app/finance/capital",
+"components": "CapitalEngine, PerformanceEvaluator, AdvanceUnderwriter, LoanCalculator, FinancingOffer, AcceptButton",
+"apis": [
+"GET /api/finance/capital/eligibility",
+"POST /api/finance/capital/request",
+"Capital Service",
+"Risk Assessment Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Streaming history required",
+"Credit check may apply"
+]
+},
+{
+"name": "Financial Accounting Operations",
+"slug": "financial-accounting-operations",
+"goal": "Enterprise FinOps workspace",
+"actions": [
+"Automate vendor syncing",
+"Route invoices",
+"Reconcile bank statements",
+"Generate P&L statements",
+"Generate budget-vs-actuals reporting"
+],
+"routes": "/app/finance/operations",
+"components": "FinOpsWorkspace, VendorSync, InvoiceRouter, BankReconciler, PandLGenerator, BudgetVsActuals",
+"apis": [
+"GET /api/finance/operations",
+"POST /api/finance/operations/report",
+"Operations Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Automated operations",
+"Real-time reporting"
+]
+},
+{
+"name": "Funding & Capital Operations",
+"slug": "funding-capital-operations",
+"goal": "Advanced liquidity management",
+"actions": [
+"Automate advance underwriting",
+"Manage repayment schedules",
+"Value catalog assets",
+"Manage deal escrow holdings",
+"View capital dashboard"
+],
+"routes": "/app/finance/capital/operations",
+"components": "CapitalOperations, AdvanceUnderwriter, RepaymentScheduler, CatalogValuator, EscrowManager, CapitalDashboard",
+"apis": [
+"GET /api/finance/capital/operations",
+"POST /api/finance/capital/operations",
+"Capital Operations Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Advanced liquidity management",
+"Deal escrow support"
+]
+},
+{
+"name": "Regulatory Compliance Engine",
+"slug": "regulatory-compliance-engine",
+"goal": "Monitor transaction compliance",
+"actions": [
+"Monitor AML compliance",
+"Monitor data privacy (GDPR/CCPA)",
+"Monitor copyright laws",
+"Monitor platform policies",
+"View compliance status",
+"Resolve compliance issues"
+],
+"routes": "/app/finance/compliance/regulatory",
+"components": "RegulatoryEngine, AMLMonitor, GDPRMonitor, CCPAMonitor, CopyrightMonitor, PolicyMonitor, ComplianceDashboard",
+"apis": [
+"GET /api/finance/compliance/status",
+"POST /api/finance/compliance/resolve",
+"Compliance Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Automated compliance monitoring",
+"Issue resolution workflow"
+]
+},
+{
+"name": "Tax Form Intake & Generation",
+"slug": "tax-form-intake-generation",
+"goal": "Automate tax form collection and generation",
+"actions": [
+"Collect W-9 forms",
+"Collect W-8BEN forms",
+"Apply global tax treaty withholding logic",
+"Generate 1099 forms",
+"Generate 1042-S forms",
+"File end-of-year taxes"
+],
+"routes": "/app/finance/tax/forms",
+"components": "TaxFormManager, W9Collector, W8BENCollector, TaxTreatyEngine, FormGenerator1099, FormGenerator1042S, FilingEngine",
+"apis": [
+"GET /api/finance/tax/forms",
+"POST /api/finance/tax/forms",
+"Tax Service",
+"IRS Integration Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Automated form generation",
+"Year-end filing"
+]
+},
+{
+"name": "Tax Reporting Operations",
+"slug": "tax-reporting-operations",
+"goal": "Supervise IRS and international tax filings",
+"actions": [
+"Supervise IRS filings",
+"Supervise international tax filings",
+"View audit trails",
+"View jurisdiction compliance",
+"Generate tax reports"
+],
+"routes": "/app/finance/tax/reporting",
+"components": "TaxReportingOps, IRSFilingSupervisor, InternationalTaxSupervisor, AuditTrailView, ComplianceReport, TaxReportGenerator",
+"apis": [
+"GET /api/finance/tax/reporting",
+"POST /api/finance/tax/reporting/filing",
+"Tax Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Audit trail retained",
+"Compliance reporting"
+]
+},
+{
+"name": "Identity Verification System (KYC)",
+"slug": "identity-verification-system-kyc",
+"goal": "Verify recipient identities",
+"actions": [
+"Match government IDs",
+"Match public databases",
+"Validate recipient identities",
+"View verification status",
+"Resolve verification failures"
+],
+"routes": "/app/finance/compliance/kyc",
+"components": "KYCSystem, IDMatcher, DatabaseMatcher, Validator, VerificationStatus, FailureResolver",
+"apis": [
+"POST /api/finance/kyc",
+"GET /api/finance/kyc/status",
+"KYC Service",
+"Identity Verification Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Automated KYC verification",
+"Manual review for failures"
+]
+},
+{
+"name": "Verification Oversight Queue",
+"slug": "verification-oversight-queue",
+"goal": "Review flagged identity verifications",
+"actions": [
+"View flagged verifications",
+"Review compliance issues",
+"Resolve onboarding friction",
+"Approve/deny verification"
+],
+"routes": "/app/finance/compliance/kyc/queue",
+"components": "VerificationQueue, FlaggedList, ReviewInterface, ResolutionWorkflow, ApproveDenyButton",
+"apis": [
+"GET /api/finance/kyc/queue",
+"PUT /api/finance/kyc/{id}/review",
+"Compliance Service"
+],
+"rules": [
+"Requires Business account",
+"Admin role required",
+"Manual review interface",
+"Decision logging"
+]
+},
+{
+"name": "Risk Scoring & Anti-Fraud Engine",
+"slug": "risk-scoring-anti-fraud-engine",
+"goal": "Identify suspicious activity",
+"actions": [
+"Detect artificial streaming inflation",
+"Detect suspicious earnings patterns",
+"Detect fraudulent payment activities",
+"Generate risk scores",
+"Flag suspicious accounts"
+],
+"routes": "/app/finance/compliance/risk",
+"components": "RiskEngine, StreamingInflationDetector, EarningsPatternDetector, FraudPaymentDetector, RiskScoringEngine, FlaggingSystem",
+"apis": [
+"GET /api/finance/risk/score",
+"GET /api/finance/risk/flags",
+"Fraud Detection Service",
+"ML Risk Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Real-time risk scoring",
+"Automated flagging"
+]
+},
+{
+"name": "Risk Review Desk",
+"slug": "risk-review-desk",
+"goal": "Review flagged security incidents",
+"actions": [
+"View flagged security incidents",
+"Analyze flagged accounts",
+"Freeze suspicious balances",
+"Take corrective action",
+"Document decisions"
+],
+"routes": "/app/finance/compliance/risk/review",
+"components": "RiskReviewDesk, IncidentList, AccountAnalyzer, BalanceFreezer, ActionWorkflow, DecisionLogger",
+"apis": [
+"GET /api/finance/risk/incidents",
+"POST /api/finance/risk/{id}/resolve",
+"Compliance Service"
+],
+"rules": [
+"Requires Business account",
+"Admin role required",
+"Account freezing capability",
+"Audit trail for decisions"
+]
+},
+{
+"name": "Anti-Fraud & KYC Operations",
+"slug": "anti-fraud-kyc-operations",
+"goal": "Security operations suite",
+"actions": [
+"Photo ID matching",
+"Public record validation",
+"Streaming manipulation detection",
+"Automated account re-verification",
+"View security dashboard"
+],
+"routes": "/app/finance/compliance/anti-fraud",
+"components": "AntiFraudOps, PhotoIDMatcher, PublicRecordValidator, StreamingManipulationDetector, ReVerifier, SecurityDashboard",
+"apis": [
+"GET /api/finance/anti-fraud",
+"POST /api/finance/anti-fraud/reverify",
+"Anti-Fraud Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Automated re-verification",
+"Security dashboard"
+]
+}
+]
+},
+{
+"title": "BUSINESS CONTEXT - GROWTH",
+"slug": "business-context-growth",
+"features": [
+{
+"name": "Fan CRM & Audience Segmentation",
+"slug": "fan-crm-audience-segmentation",
+"goal": "Manage unified fan database",
+"actions": [
+"Aggregate purchase histories",
+"Aggregate streaming activity",
+"Aggregate geographic location",
+"Aggregate engagement metrics",
+"Create unified profile cards",
+"Apply tag-based segmentation"
+],
+"routes": "/app/growth/crm",
+"components": "FanCRM, UnifiedProfileCard, ActivityAggregator, SegmentationEngine, TagManager, AudienceList",
+"apis": [
+"GET /api/growth/crm/fans",
+"POST /api/growth/crm/segments",
+"GET /api/growth/crm/segments/{id}/fans",
+"CRM Service",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Tag-based segmentation",
+"Exportable segments"
+]
+},
+{
+"name": "Multi-Network Social Publisher",
+"slug": "multi-network-social-publisher",
+"goal": "Publish to multiple social networks simultaneously",
+"actions": [
+"Connect social accounts",
+"Create content once",
+"Publish to TikTok",
+"Publish to Instagram",
+"Publish to YouTube",
+"Publish to X (Twitter)",
+"Publish simultaneously"
+],
+"routes": "/app/growth/social/publish",
+"components": "MultiNetworkPublisher, SocialAccountConnector, ContentComposer, NetworkSelector, PublishButton, PublishStatus",
+"apis": [
+"POST /api/growth/social/publish",
+"GET /api/growth/social/status",
+"Social Media Service",
+"Platform SDK Integrations"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"All major platforms supported",
+"Cross-platform publishing"
+]
+},
+{
+"name": "Omni-Social Management Suite",
+"slug": "omni-social-management-suite",
+"goal": "Unified social operations",
+"actions": [
+"View unified cross-platform content calendar",
+"Access central social comment inbox",
+"Access central social DM inbox",
+"View follower growth velocity metrics",
+"Apply automated comment moderation"
+],
+"routes": "/app/growth/social/dashboard",
+"components": "OmniSocialSuite, ContentCalendar, SocialInbox, CommentModerator, GrowthMetrics, DashboardView",
+"apis": [
+"GET /api/growth/social/dashboard",
+"GET /api/growth/social/inbox",
+"Social Management Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Unified social inbox",
+"Cross-platform calendar"
+]
+},
+{
+"name": "Social Media Management Dashboard",
+"slug": "social-media-management-dashboard",
+"goal": "Centralized social operations",
+"actions": [
+"Schedule content",
+"Publish media",
+"View audience analytics",
+"Manage social accounts",
+"View performance metrics"
+],
+"routes": "/app/growth/social/management",
+"components": "SocialDashboard, Scheduler, Publisher, AnalyticsView, AccountManager, PerformanceMetrics",
+"apis": [
+"GET /api/growth/social/analytics",
+"POST /api/growth/social/schedule",
+"Social Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Multi-platform scheduling",
+"Performance analytics"
+]
+},
+{
+"name": "Campaign Launch Templates",
+"slug": "campaign-launch-templates",
+"goal": "Streamline release campaigns",
+"actions": [
+"Select campaign template",
+"Apply pre-configured content sequences",
+"Apply posting calendars",
+"Apply copy templates",
+"Customize for release"
+],
+"routes": "/app/growth/campaigns/templates",
+"components": "CampaignTemplates, TemplateLibrary, ContentSequence, PostingCalendar, CopyTemplate, Customizer",
+"apis": [
+"GET /api/growth/campaigns/templates",
+"POST /api/growth/campaigns/templates/apply",
+"Campaign Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Pre-configured templates",
+"Customizable for releases"
+]
+},
+{
+"name": "Fan Marketing Automation",
+"slug": "fan-marketing-automation",
+"goal": "Automate fan messaging campaigns",
+"actions": [
+"Configure triggered email campaigns",
+"Configure broadcast SMS drops",
+"Set audience segmentation routines",
+"Schedule automated messages",
+"View campaign performance"
+],
+"routes": "/app/growth/campaigns/automation",
+"components": "MarketingAutomation, EmailTriggerEngine, SMSEngine, SegmentSelector, Scheduler, PerformanceDashboard",
+"apis": [
+"POST /api/growth/marketing/automate",
+"GET /api/growth/marketing/campaigns",
+"Marketing Automation Service",
+"Email Service",
+"SMS Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Audience segmentation",
+"Automated messaging"
+]
+},
+{
+"name": "Automated Promotional Suite",
+"slug": "automated-promotional-suite",
+"goal": "Comprehensive automated marketing",
+"actions": [
+"Run targeted email journeys",
+"Run broadcast SMS marketing",
+"Create intelligent pre-save links",
+"Apply pixel-based attribution",
+"View campaign performance"
+],
+"routes": "/app/growth/campaigns/promotion",
+"components": "PromotionalSuite, EmailJourneyBuilder, SMSCampaignManager, PreSaveLinkEngine, AttributionPixelManager, PerformanceMetrics",
+"apis": [
+"POST /api/growth/promotion",
+"GET /api/growth/promotion/performance",
+"Promotion Service",
+"Pixel Tracking Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Automated email/SMS journeys",
+"Pixel-based attribution"
+]
+},
+{
+"name": "Smart Links & Pre-Save Engine",
+"slug": "smart-links-pre-save-engine",
+"goal": "Generate trackable pre-save campaigns",
+"actions": [
+"Generate smart links",
+"Generate pre-save pages",
+"Add conversion tracking pixels",
+"View link performance",
+"Track conversions"
+],
+"routes": "/app/growth/links",
+"components": "SmartLinkEngine, PreSaveBuilder, PixelManager, PerformanceDashboard, ConversionTracker",
+"apis": [
+"POST /api/growth/links/smart",
+"POST /api/growth/links/pre-save",
+"GET /api/growth/links/performance",
+"Smart Link Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Smart link generation",
+"Pre-save landing pages",
+"Conversion tracking"
+]
+},
+{
+"name": "Advertising Operations Manager",
+"slug": "advertising-operations-manager",
+"goal": "Coordinate paid ad placements",
+"actions": [
+"Manage paid ad placements",
+"Manage sponsored listening campaigns",
+"Manage playlist sponsorships",
+"View ad performance",
+"Manage ad spend"
+],
+"routes": "/app/growth/ads",
+"components": "AdOpsManager, AdPlacementManager, SponsoredListeningManager, PlaylistSponsorshipManager, PerformanceDashboard, SpendManager",
+"apis": [
+"POST /api/growth/ads",
+"GET /api/growth/ads/performance",
+"Ad Operations Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Paid ad coordination",
+"Sponsored campaigns"
+]
+},
+{
+"name": "Paid Media Engine",
+"slug": "paid-media-engine",
+"goal": "Execute paid media campaigns",
+"actions": [
+"Run audio ad buys",
+"Run Spotify Marquee campaigns",
+"Run Spotify Showcase campaigns",
+"Connect social ad networks",
+"Run playlist sponsorships"
+],
+"routes": "/app/growth/ads/paid",
+"components": "PaidMediaEngine, AudioAdBuyer, SpotifyMarquee, SpotifyShowcase, SocialAdNetworkConnector, PlaylistSponsor, PerformanceDashboard",
+"apis": [
+"POST /api/growth/ads/paid",
+"GET /api/growth/ads/paid/performance",
+"Paid Media Service",
+"DSP API Integrations"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Paid media campaigns",
+"DSP integration"
+]
+},
+{
+"name": "DSP Creator Profile Manager",
+"slug": "dsp-creator-profile-manager",
+"goal": "Manage profiles across DSPs",
+"actions": [
+"Update Spotify for Artists",
+"Update Apple Music for Artists",
+"Update YouTube Official Artist Channel",
+"Upload Canvas images",
+"Update bios",
+"Submit editorial pitches"
+],
+"routes": "/app/growth/dsp-profiles",
+"components": "DSPProfileManager, SpotifyConnector, AppleMusicConnector, YouTubeConnector, CanvasUploader, BioUpdater, PitchSubmitter",
+"apis": [
+"POST /api/growth/dsp-profiles/update",
+"GET /api/growth/dsp-profiles/status",
+"DSP Profile Service",
+"Platform API Integrations"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Cross-DSP profile management",
+"Automated updates"
+]
+},
+{
+"name": "Industry CRM & Network",
+"slug": "industry-crm-network",
+"goal": "Connect with industry professionals",
+"actions": [
+"Connect with playlist curators",
+"Connect with journalists",
+"Connect with booking agents",
+"Connect with sync supervisors",
+"Connect with PR agencies",
+"Manage professional network"
+],
+"routes": "/app/growth/network",
+"components": "IndustryCRM, ProfessionalDirectory, ConnectionManager, MessageCenter, NetworkDashboard",
+"apis": [
+"GET /api/growth/network/contacts",
+"POST /api/growth/network/connect",
+"CRM Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Professional networking",
+"Direct contact management"
+]
+},
+{
+"name": "Cross-Platform Analytics Dashboard",
+"slug": "cross-platform-analytics-dashboard",
+"goal": "Unify streaming, social, and sales data",
+"actions": [
+"View unified streaming stats",
+"View unified social engagement metrics",
+"View unified sales data",
+"View clean visualizations",
+"Export reports"
+],
+"routes": "/app/growth/analytics",
+"components": "CrossPlatformAnalytics, StreamingStatsView, SocialMetricsView, SalesDataView, VisualizationEngine, ExportButton",
+"apis": [
+"GET /api/growth/analytics/cross-platform",
+"POST /api/growth/analytics/export",
+"Analytics Service",
+"Data Aggregation Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Cross-platform data",
+"Unified visualizations"
+]
+},
+{
+"name": "Audience Intelligence Engine",
+"slug": "audience-intelligence-engine",
+"goal": "Deep audience understanding",
+"actions": [
+"View listener demographic profiles",
+"View geographic heatmaps",
+"View consumption trends",
+"View retention metrics",
+"Export audience reports"
+],
+"routes": "/app/growth/analytics/audience",
+"components": "AudienceIntelligence, DemographicProfiler, GeoHeatmap, TrendAnalyzer, RetentionMetrics, ReportExporter",
+"apis": [
+"GET /api/growth/analytics/audience",
+"POST /api/growth/analytics/audience/export",
+"Audience Intelligence Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Audience profiling",
+"Geographic analysis"
+]
+},
+{
+"name": "Website Builder",
+"slug": "website-builder",
+"goal": "Build artist website without code",
+"actions": [
+"Drag-and-drop builder",
+"Publish site",
+"Maintain professional presence",
+"Update content",
+"View analytics"
+],
+"routes": "/app/growth/web/builder",
+"components": "WebsiteBuilder, DragDropEditor, TemplateLibrary, PublishButton, ContentManager, AnalyticsView",
+"apis": [
+"POST /api/growth/web/build",
+"GET /api/growth/web/site",
+"Web Builder Service",
+"Hosting Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Drag-and-drop builder",
+"Hosted on platform"
+]
+},
+{
+"name": "Brand Identity System",
+"slug": "brand-identity-system",
+"goal": "Enforce visual identity consistency",
+"actions": [
+"Manage brand colors",
+"Manage brand typography",
+"Manage brand logos",
+"Apply across websites",
+"Apply across storefronts",
+"Apply across fan environments"
+],
+"routes": "/app/growth/web/brand",
+"components": "BrandIdentitySystem, ColorPaletteManager, TypographyManager, LogoManager, BrandApplyEngine",
+"apis": [
+"GET /api/growth/brand",
+"PUT /api/growth/brand",
+"Brand Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Centralized brand management",
+"Consistent brand enforcement"
+]
+},
+{
+"name": "Media Asset Library",
+"slug": "media-asset-library",
+"goal": "Manage press photos and promotional media",
+"actions": [
+"Upload high-resolution press photos",
+"Upload key visual assets",
+"Upload promotional media",
+"Organize assets",
+"Share assets"
+],
+"routes": "/app/growth/web/assets",
+"components": "MediaAssetLibrary, AssetUploader, AssetOrganizer, AssetShare, AssetSearch",
+"apis": [
+"GET /api/growth/assets",
+"POST /api/growth/assets",
+"PUT /api/growth/assets/{id}",
+"Asset Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Press photo management",
+"Promotional media storage"
+]
+},
+{
+"name": "Multi-Language Bio Manager",
+"slug": "multi-language-bio-manager",
+"goal": "Manage multilingual biography content",
+"actions": [
+"Add language translations",
+"Edit multilingual bios",
+"Version control",
+"Syndicate to DSPs",
+"Syndicate to press portals"
+],
+"routes": "/app/growth/web/bio",
+"components": "BioManager, LanguageAdder, TranslationEditor, VersionControl, SyndicationEngine",
+"apis": [
+"GET /api/growth/bio",
+"PUT /api/growth/bio",
+"POST /api/growth/bio/syndicate",
+"Bio Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Multi-language support",
+"Automated syndication"
+]
+},
+{
+"name": "Electronic Press Kit (EPK) Generator",
+"slug": "electronic-press-kit-epk-generator",
+"goal": "Create shareable press kits",
+"actions": [
+"Compile bios",
+"Compile press photos",
+"Compile streaming audio",
+"Compile embedded video",
+"Compile press quotes",
+"Compile tour dates",
+"Generate press kit",
+"Share press kit"
+],
+"routes": "/app/growth/web/epk",
+"components": "EPKGenerator, BioCompiler, PhotoCompiler, AudioCompiler, VideoCompiler, QuoteCompiler, TourCompiler, ShareButton",
+"apis": [
+"POST /api/growth/epk",
+"GET /api/growth/epk/{id}",
+"EPK Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Dynamic press kit generation",
+"Shareable EPK link"
+]
+}
+]
+},
+{
+"title": "BUSINESS CONTEXT - ROSTER & TEAM",
+"slug": "business-context-roster-team",
+"features": [
+{
+"name": "Team & RBAC Management",
+"slug": "team-rbac-management",
+"goal": "Manage team roles and permissions",
+"actions": [
+"Invite team members",
+"Assign base roles (Owner, Admin, Member, Viewer)",
+"Assign module scopes (Catalog, Finance, Growth, Roster & Team, Advertise, Developer Platform)",
+"Remove team members",
+"View team activity log"
+],
+"routes": "/app/roster/team",
+"components": "TeamManager, InviteForm, RoleSelector, ScopeSelector, MemberList, RemoveButton, ActivityLog",
+"apis": [
+"GET /api/roster/team",
+"POST /api/roster/team/invite",
+"PUT /api/roster/team/{id}/role",
+"DELETE /api/roster/team/{id}",
+"IAM Service",
+"Audit Log Service"
+],
+"rules": [
+"Requires Business account",
+"Owner/Admin role required",
+"Invite requires email",
+"Audit log immutable"
+]
+},
+{
+"name": "Identity & Access Management (IAM)",
+"slug": "identity-access-management-iam",
+"goal": "Enterprise access management",
+"actions": [
+"Support multi-tenant label hierarchies (sub-labels/imprints)",
+"Apply Role-Based Access Control (RBAC)",
+"Set roster permission barriers",
+"Configure Single Sign-On (SSO)"
+],
+"routes": "/app/roster/team/iam",
+"components": "IAMSystem, TenantHierarchyManager, RBACEngine, PermissionBarrierManager, SSOConfigurator",
+"apis": [
+"GET /api/roster/iam",
+"PUT /api/roster/iam",
+"IAM Service",
+"SSO Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Multi-tenant support",
+"SSO integration"
+]
+},
+{
+"name": "System Operational Audit Logs",
+"slug": "system-operational-audit-logs",
+"goal": "Security audit tracking",
+"actions": [
+"Log user logins",
+"Log metadata modifications",
+"Log subscriber additions",
+"Log episode deletions",
+"Log asset exports",
+"View audit log"
+],
+"routes": "/app/roster/team/audit",
+"components": "AuditLogViewer, LogList, FilterControls, SearchBar, ExportButton",
+"apis": [
+"GET /api/roster/audit",
+"POST /api/roster/audit/export",
+"Audit Service"
+],
+"rules": [
+"Requires Business account",
+"Admin role required",
+"Immutable audit logs",
+"7-year retention"
+]
+},
+{
+"name": "Contract Lifecycle Management (CLM)",
+"slug": "contract-lifecycle-management-clm",
+"goal": "Manage contracts from draft to execution",
+"actions": [
+"Use contract templates",
+"Draft contracts",
+"Apply integrated e-signatures",
+"Extract split terms automatically",
+"Set option/expiration alerts",
+"Store signed contracts"
+],
+"routes": "/app/roster/contracts",
+"components": "CLMSystem, TemplateLibrary, ContractEditor, E-SignIntegration, SplitExtractor, AlertManager, ContractStorage",
+"apis": [
+"GET /api/roster/contracts",
+"POST /api/roster/contracts",
+"PUT /api/roster/contracts/{id}",
+"GET /api/roster/contracts/{id}/status",
+"CLM Service",
+"E-Sign Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"E-signature integration",
+"Automated alerts"
+]
+},
+{
+"name": "A&R Scouting & Pipeline",
+"slug": "a-r-scouting-pipeline",
+"goal": "Discover and track talent",
+"actions": [
+"View streaming analytics for talent",
+"View social media growth indicators",
+"Manage demo ingestion queue",
+"Track A&R deals",
+"Evaluate talent pipeline"
+],
+"routes": "/app/roster/ar",
+"components": "ARScouting, StreamingAnalyticsView, SocialGrowthView, DemoQueue, DealTracker, PipelineDashboard",
+"apis": [
+"GET /api/roster/ar/talent",
+"POST /api/roster/ar/demo",
+"PUT /api/roster/ar/deal",
+"AR Service",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Demo ingestion queue",
+"Deal tracking"
+]
+},
+{
+"name": "Partner CRM & Portals",
+"slug": "partner-crm-portals",
+"goal": "Manage partner relationships",
+"actions": [
+"Maintain contact records for distributors",
+"Maintain contact records for PROs",
+"Maintain contact records for agents",
+"Maintain contact records for curators",
+"Manage white-label partner onboarding portals"
+],
+"routes": "/app/roster/partners",
+"components": "PartnerCRM, ContactManager, PortalManager, WhiteLabelOnboarding, PartnerDashboard",
+"apis": [
+"GET /api/roster/partners",
+"POST /api/roster/partners",
+"PUT /api/roster/partners/{id}",
+"CRM Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Partner contact management",
+"White-label partner portals"
+]
+},
+{
+"name": "Workflow & Approvals Engine",
+"slug": "workflow-approvals-engine",
+"goal": "Manage multi-step approval flows",
+"actions": [
+"Route marketing budget approvals",
+"Route release sign-offs",
+"Route royalty split updates",
+"Route payout distributions",
+"View approval status"
+],
+"routes": "/app/roster/workflows",
+"components": "WorkflowEngine, ApprovalRouter, BudgetApproval, ReleaseSignOff, SplitUpdate, PayoutApproval, StatusDashboard",
+"apis": [
+"GET /api/roster/workflows",
+"POST /api/roster/workflows",
+"PUT /api/roster/workflows/{id}/approve",
+"Workflow Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Multi-step approvals",
+"Role-based routing"
+]
+},
+{
+"name": "Tour Operations Manager",
+"slug": "tour-operations-manager",
+"goal": "Create and manage tours",
+"actions": [
+"Create tour itineraries",
+"Map travel routes",
+"Build day sheets",
+"Coordinate travel logistics",
+"View tour dashboard"
+],
+"routes": "/app/roster/tours",
+"components": "TourManager, ItineraryBuilder, RouteMapper, DaySheetBuilder, LogisticsCoordinator, TourDashboard",
+"apis": [
+"GET /api/roster/tours",
+"POST /api/roster/tours",
+"PUT /api/roster/tours/{id}",
+"Tour Service",
+"Mapping Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Itinerary management",
+"Logistics coordination"
+]
+},
+{
+"name": "Booking & Routing Operations",
+"slug": "booking-routing-operations",
+"goal": "Manage bookings and route optimization",
+"actions": [
+"Generate offer letters",
+"Manage holds",
+"Negotiate contracts",
+"Optimize tour routes",
+"View booking dashboard"
+],
+"routes": "/app/roster/tours/bookings",
+"components": "BookingManager, OfferLetterGenerator, HoldManager, NegotiationTracker, RouteOptimizer, BookingDashboard",
+"apis": [
+"GET /api/roster/tours/bookings",
+"POST /api/roster/tours/bookings",
+"Booking Service",
+"Route Optimization Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Offer letter generation",
+"Route optimization"
+]
+},
+{
+"name": "Tour & Logistics Operations",
+"slug": "tour-logistics-operations",
+"goal": "Comprehensive tour logistics",
+"actions": [
+"Manage itinerary",
+"Optimize routing",
+"Track show settlements",
+"Access venue spec repositories",
+"Manage travel/hospitality"
+],
+"routes": "/app/roster/tours/logistics",
+"components": "TourLogistics, ItineraryManager, RouteOptimizer, SettlementTracker, VenueSpecRepo, TravelManager",
+"apis": [
+"GET /api/roster/tours/logistics",
+"PUT /api/roster/tours/logistics",
+"Logistics Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Venue spec repository",
+"Travel/hospitality management"
+]
+},
+{
+"name": "Booking Agency Operations",
+"slug": "booking-agency-operations",
+"goal": "Agency workspace for bookings",
+"actions": [
+"Process offer letters",
+"Track deal negotiations",
+"Manage hold calendars",
+"Track performance riders",
+"Supervise deposit escrows"
+],
+"routes": "/app/roster/tours/agency",
+"components": "AgencyOps, OfferProcessor, DealTracker, HoldCalendar, RiderManager, EscrowSupervisor",
+"apis": [
+"GET /api/roster/tours/agency",
+"PUT /api/roster/tours/agency",
+"Agency Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Offer processing",
+"Escrow management"
+]
+},
+{
+"name": "Promoter & Venue Portal View",
+"slug": "promoter-venue-portal-view",
+"goal": "External portal for promoters and venues",
+"actions": [
+"Submit show offers",
+"Negotiate guarantees",
+"Upload settlements",
+"View booking status"
+],
+"routes": "/app/roster/tours/portal",
+"components": "PromoterVenuePortal, OfferSubmitter, GuaranteeNegotiator, SettlementUploader, StatusView",
+"apis": [
+"POST /api/roster/tours/portal/offer",
+"GET /api/roster/tours/portal/status",
+"Portal Service"
+],
+"rules": [
+"External portal access",
+"Limited to promoter/venue accounts",
+"Offer submission workflow"
+]
+},
+{
+"name": "Live Ticketing Dashboard",
+"slug": "live-ticketing-dashboard",
+"goal": "Track box-office sales",
+"actions": [
+"View box-office sales across venues",
+"View primary ticket outlet sales",
+"View tour date sales",
+"Track sales analytics"
+],
+"routes": "/app/roster/tours/ticketing",
+"components": "TicketingDashboard, SalesViewer, OutletTracker, TourDateSales, AnalyticsView",
+"apis": [
+"GET /api/roster/tours/ticketing",
+"Ticketing Service",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Multi-venue tracking",
+"Sales analytics"
+]
+},
+{
+"name": "Direct Ticketing Engine",
+"slug": "direct-ticketing-engine",
+"goal": "Primary ticket sales",
+"actions": [
+"Configure ticket sales",
+"Set seat selection",
+"Manage digital delivery",
+"Manage entry scanning"
+],
+"routes": "/app/roster/tours/ticketing/direct",
+"components": "DirectTicketing, TicketConfigurator, SeatSelector, DigitalDeliveryManager, EntryScanner",
+"apis": [
+"POST /api/roster/tickets",
+"GET /api/roster/tickets/{id}",
+"Ticketing Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Direct ticket sales",
+"Entry scanning support"
+]
+},
+{
+"name": "Virtual Event Platform",
+"slug": "virtual-event-platform",
+"goal": "Host online events",
+"actions": [
+"Host livestreamed concerts",
+"Host interactive listening parties",
+"Enable real-time chat",
+"Manage virtual venue"
+],
+"routes": "/app/roster/tours/virtual",
+"components": "VirtualEventPlatform, LivestreamManager, ListeningPartyHost, ChatEngine, VenueManager",
+"apis": [
+"POST /api/roster/events/virtual",
+"GET /api/roster/events/virtual/{id}",
+"Virtual Event Service",
+"Streaming Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Livestream concerts",
+"Listening parties"
+]
+},
+{
+"name": "In-Person Experience Manager",
+"slug": "in-person-experience-manager",
+"goal": "Manage physical events",
+"actions": [
+"Manage pop-up shops",
+"Manage VIP meet-and-greets",
+"Manage soundcheck parties",
+"Manage release events"
+],
+"routes": "/app/roster/tours/events",
+"components": "InPersonEventManager, PopUpManager, VIPMeetGreet, SoundcheckManager, ReleaseEventManager",
+"apis": [
+"POST /api/roster/events/in-person",
+"GET /api/roster/events/in-person/{id}",
+"Event Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Physical event management",
+"VIP experience coordination"
+]
+},
+{
+"name": "Ticketing Partner Integrations",
+"slug": "ticketing-partner-integrations",
+"goal": "Connect to primary ticketing platforms",
+"actions": [
+"Connect to Ticketmaster",
+"Connect to Eventbrite",
+"Connect to AXS",
+"View unified revenue reporting"
+],
+"routes": "/app/roster/tours/integrations",
+"components": "TicketingIntegrations, TicketmasterConnector, EventbriteConnector, AXSConnector, RevenueReportView",
+"apis": [
+"POST /api/roster/tours/integrations",
+"GET /api/roster/tours/integrations/revenue",
+"Integration Service",
+"Third-party API Connectors"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Major ticketing platforms",
+"Unified revenue reporting"
+]
+},
+{
+"name": "Multi-Artist Roster Switcher",
+"slug": "multi-artist-roster-switcher",
+"goal": "Navigate between managed artist accounts",
+"actions": [
+"Switch between artist accounts",
+"View unified dashboard",
+"Manage multiple artists",
+"Access artist-specific modules"
+],
+"routes": "/app/roster/switcher",
+"components": "RosterSwitcher, ArtistList, SwitchButton, UnifiedDashboard",
+"apis": [
+"GET /api/roster/artists",
+"POST /api/roster/switch",
+"Roster Service"
+],
+"rules": [
+"Requires Business account",
+"Label tier or higher",
+"Multi-artist management",
+"Artist-specific access"
+]
+},
+{
+"name": "Super-Admin Account Control",
+"slug": "super-admin-account-control",
+"goal": "Enterprise platform administration",
+"actions": [
+"Manage subscription plans",
+"Apply feature overrides",
+"Set platform access limits",
+"Manage account status"
+],
+"routes": "/app/roster/admin",
+"components": "SuperAdminControl, SubscriptionManager, FeatureOverrideEngine, AccessLimitManager, AccountStatusManager",
+"apis": [
+"GET /api/roster/admin",
+"PUT /api/roster/admin",
+"Admin Service"
+],
+"rules": [
+"Requires Business account",
+"Owner role required",
+"Enterprise tier or higher",
+"Full platform control",
+"BUSINESS CONTEXT \u2014 ADVERTISE (External \u2014 AdNote)"
+]
+},
+{
+"name": "Campaign Objective Selection",
+"slug": "campaign-objective-selection",
+"goal": "Define campaign goal",
+"actions": [
+"Select primary objective (Brand Awareness, Website Traffic, Engagement, Lead Generation, App Installs, Sales)",
+"Select delivery goal (Impressions, Reach, Video Views, Clicks, Streams, Leads, Installs, Purchases)",
+"Refine objective (Traffic with Rebate, Video Views, Community Interaction, Website Conversion, Instant Form, Direct Messages, Website Form)",
+"Choose campaign creation method (Standard, Quick)"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create",
+"components": "ObjectiveSelector, GoalMapping, MethodSelector, CampaignSetupWizard",
+"apis": [
+"POST /api/advertise/campaigns",
+"GET /api/advertise/objectives",
+"Campaign Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Verified business required",
+"Objective determines available features"
+]
+},
+{
+"name": "Campaign Details Configuration",
+"slug": "campaign-details-configuration",
+"goal": "Configure campaign metadata",
+"actions": [
+"Set campaign name (auto-generated with override)",
+"Declare special ad categories (Housing, Employment, Credit)",
+"Enable split testing",
+"Enable Campaign Budget Optimization (CBO)"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create",
+"components": "CampaignDetailsForm, NameGenerator, SpecialCategorySelector, SplitTestToggle, CBOToggle",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/settings",
+"Campaign Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Special categories trigger restrictions",
+"CBO requires specific optimization goals"
+]
+},
+{
+"name": "Special Ad Category Declaration",
+"slug": "special-ad-category-declaration",
+"goal": "Ensure compliance for restricted categories",
+"actions": [
+"Declare Housing, Employment, Credit (HEC) advertising",
+"View automated targeting restrictions",
+"Access policy documentation"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/special",
+"components": "SpecialCategorySelector, RestrictionDisplay, PolicyLink",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/categories",
+"Compliance Service"
+],
+"rules": [
+"Requires Advertiser account",
+"HEC categories trigger restrictions",
+"US and Canada only"
+]
+},
+{
+"name": "Split Testing",
+"slug": "split-testing",
+"goal": "Test two ad versions for performance",
+"actions": [
+"Enable split test",
+"Create two ad versions",
+"View automated performance comparison",
+"Identify winning version"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/split-test",
+"components": "SplitTestToggle, VersionBuilder, PerformanceComparison, WinnerDisplay",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/split-test",
+"Analytics Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Does not apply to \"page visits\" optimization",
+"Minimum budget required"
+]
+},
+{
+"name": "Campaign Budget Optimization (CBO)",
+"slug": "campaign-budget-optimization-cbo",
+"goal": "Auto-optimize budget allocation",
+"actions": [
+"Enable CBO",
+"Set campaign budget",
+"View automated allocation",
+"Monitor performance"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "CBOToggle, BudgetAllocator, AllocationDisplay, PerformanceMonitor",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/cbo",
+"Optimization Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Requires consistent optimization locations",
+"Does not apply to \"page visits\" optimization"
+]
+},
+{
+"name": "Budget Strategy Configuration",
+"slug": "budget-strategy-configuration",
+"goal": "Configure budget management",
+"actions": [
+"Choose campaign budget strategy (auto-optimized)",
+"Choose ad group budget strategy (manual)",
+"Set total spending limit"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "BudgetStrategySelector, AdGroupBudgetManager, SpendLimitConfig",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/budget",
+"Budget Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Auto-optimized requires specific goals",
+"Manual per ad group"
+]
+},
+{
+"name": "Budget Configuration",
+"slug": "budget-configuration",
+"goal": "Set campaign budget and schedule",
+"actions": [
+"Choose daily or lifetime budget",
+"Set daily budget amount ($50 min)",
+"Set lifetime budget amount ($250 min)",
+"Select start date",
+"Select end date",
+"Configure start/end time"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "BudgetTypeSelector, DailyBudgetInput, LifetimeBudgetInput, DatePicker, TimePicker",
+"apis": [
+"PUT /api/advertise/campaigns/{id}/budget",
+"Budget Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Daily minimum: $50",
+"Lifetime minimum: $250",
+"7-day lock after budget selection"
+]
+},
+{
+"name": "Budget Delivery Likelihood",
+"slug": "budget-delivery-likelihood",
+"goal": "Understand budget spend probability",
+"actions": [
+"View delivery likelihood status",
+"View inventory availability alerts",
+"Receive budget optimization suggestions"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "DeliveryLikelihoodIndicator, InventoryAlert, OptimizationSuggestion",
+"apis": [
+"GET /api/advertise/campaigns/{id}/budget-likelihood",
+"Inventory Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Real-time inventory check",
+"\"High\" status indicates good probability"
+]
+},
+{
+"name": "Estimated Results Calculator",
+"slug": "estimated-results-calculator",
+"goal": "See campaign performance projections",
+"actions": [
+"View monthly/weekly/daily projections",
+"View impressions projection (low-high range)",
+"View reach projection (low-high range)",
+"View CPM projection (low-high range)",
+"Update projections based on budget"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "ResultsCalculator, ProjectionDisplay, BudgetSlider, Disclaimer",
+"apis": [
+"GET /api/advertise/campaigns/{id}/projections",
+"Projection Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Estimates not a guarantee",
+"Based on historical data"
+]
+},
+{
+"name": "Budget Tier Recommendations",
+"slug": "budget-tier-recommendations",
+"goal": "Choose budget tier with deliverables",
+"actions": [
+"View tiered budget recommendations",
+"Select Traffic objective tiers",
+"Select Sales objective tiers",
+"Select Lead Generation tiers",
+"View budget lock notification"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/budget",
+"components": "BudgetTierSelector, DeliverableDisplay, LockNotification",
+"apis": [
+"GET /api/advertise/campaigns/budget-tiers",
+"Budget Service"
+],
+"rules": [
+"Requires Advertiser account",
+"7-day budget lock",
+"Edit restrictions apply"
+]
+},
+{
+"name": "Rebate Offer System",
+"slug": "rebate-offer-system",
+"goal": "Get performance protection",
+"actions": [
+"View rebate offer display",
+"Start 7-day learning phase",
+"Track target achievement",
+"Receive ad credit if targets not met"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/create/rebate",
+"components": "RebateOfferDisplay, LearningPhaseProgress, TargetTracker, AdCreditEngine",
+"apis": [
+"GET /api/advertise/campaigns/{id}/rebate",
+"Rebate Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Smart+ campaigns only",
+"5 conversions/leads target"
+]
+},
+{
+"name": "Ad Group Setup",
+"slug": "ad-group-setup",
+"goal": "Configure ad group-level settings",
+"actions": [
+"Set ad group budget",
+"Select placements",
+"Configure audience targeting",
+"Set bidding and optimization",
+"Configure brand safety",
+"Set delivery type"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/{id}/groups/create",
+"components": "AdGroupBuilder, BudgetInput, PlacementSelector, AudienceManager, BidConfig, BrandSafety, DeliverySelector",
+"apis": [
+"POST /api/advertise/groups",
+"PUT /api/advertise/groups/{id}",
+"Ad Group Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Manual budget entry",
+"Group-level targeting"
+]
+},
+{
+"name": "Placements & Inventory",
+"slug": "placements-inventory",
+"goal": "Select ad placements",
+"actions": [
+"Select In-Feed Audio",
+"Select In-Feed Video",
+"Select Top Feed",
+"Select Search Ads",
+"Select Catalog Ads",
+"Enable automatic placement optimization",
+"View placement performance"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/{id}/groups/create/placements",
+"components": "PlacementSelector, InventoryManager, AutoOptimizationToggle, PerformanceDashboard",
+"apis": [
+"PUT /api/advertise/groups/{id}/placements",
+"Placement Service"
+],
+"rules": [
+"Requires Advertiser account",
+"All placement types available",
+"AI-driven optimization optional"
+]
+},
+{
+"name": "Delivery Type & Frequency Capping",
+"slug": "delivery-type-frequency-capping",
+"goal": "Control delivery pacing and listener fatigue",
+"actions": [
+"Select Standard delivery (optimized pacing)",
+"Select Accelerated delivery (fastest possible)",
+"Select Scheduled delivery (dayparting)",
+"Set audio-specific frequency capping",
+"Set cross-format impression rules"
+],
+"routes": "adnote.musicosy.com/advertise/campaigns/{id}/groups/create/delivery",
+"components": "DeliveryTypeSelector, FrequencyCappingConfig, ImpressionRuleBuilder",
+"apis": [
+"PUT /api/advertise/groups/{id}/delivery",
+"Delivery Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Frequency capping recommended for audio",
+"Cross-format rules available"
+]
+},
+{
+"name": "Audience Targeting",
+"slug": "audience-targeting",
+"goal": "Target specific audiences",
+"actions": [
+"Set demographic targeting (age, location, gender, language)",
+"Set music behavior targeting (genre affinity, streaming frequency)",
+"Set artist affinity targeting",
+"Build custom audiences",
+"Upload first-party data",
+"Set audience exclusions",
+"View audience size estimation"
+],
+"routes": "adnote.musicosy.com/advertise/audiences",
+"components": "DemographicTargeting, MusicBehaviorTargeting, ArtistAffinityTargeting, CustomAudienceBuilder, AudienceSizeEstimator, ExclusionManager",
+"apis": [
+"POST /api/advertise/audiences",
+"GET /api/advertise/audiences/{id}/size",
+"Audience Service",
+"Data Upload Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Age: 13-65+",
+"Location: country/region/city/DMA",
+"21+ targeting for regulated content"
+]
+},
+{
+"name": "Audience Controls",
+"slug": "audience-controls",
+"goal": "Set account-level targeting defaults",
+"actions": [
+"Set default location targeting",
+"Set default minimum age",
+"Set default exclusions",
+"Apply to Smart+ campaigns",
+"Override for custom campaigns"
+],
+"routes": "adnote.musicosy.com/advertise/audiences/controls",
+"components": "DefaultTargetingConfig, LocationDefault, AgeDefault, ExclusionDefault, SmartPlusApply",
+"apis": [
+"GET /api/advertise/audiences/controls",
+"PUT /api/advertise/audiences/controls",
+"Audience Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Applies to new Smart+ campaigns",
+"Custom campaigns can override"
+]
+},
+{
+"name": "Audience Insights",
+"slug": "audience-insights",
+"goal": "Analyze audience performance",
+"actions": [
+"View audience reports",
+"Compare performance by age",
+"Compare performance by gender",
+"Compare performance by genre",
+"Build custom audiences for targeting",
+"Analyze conversion events"
+],
+"routes": "adnote.musicosy.com/advertise/audiences/insights",
+"components": "AudienceReportViewer, AgePerformanceChart, GenderPerformanceChart, GenrePerformanceChart, CustomAudienceBuilder, ConversionAnalyzer",
+"apis": [
+"GET /api/advertise/audiences/insights",
+"POST /api/advertise/audiences/insights/export",
+"Audience Intelligence Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Pro tier or higher",
+"Pre-configured reports available"
+]
+},
+{
+"name": "Ad Creative Studio",
+"slug": "ad-creative-studio",
+"goal": "Upload and manage creative assets",
+"actions": [
+"Upload audio (.MP3, .WAV, .AAC) with validation",
+"Set audio duration (15-60 seconds)",
+"Upload companion images (600x600px square, 1920x1080px horizontal)",
+"Upload brand logos",
+"Preview ads across devices",
+"Select Call to Action (Learn More, Listen Now, Shop Now, Pre-Save, Follow, Download, Sign Up)",
+"Configure destination URL with UTM tags"
+],
+"routes": "adnote.musicosy.com/advertise/creatives",
+"components": "CreativeStudio, AudioUploader, ImageUploader, LogoManager, AdPreview, CTASelector, URLConfigurator",
+"apis": [
+"POST /api/advertise/creatives",
+"GET /api/advertise/creatives/{id}/preview",
+"PUT /api/advertise/creatives/{id}",
+"Creative Service",
+"Media Validation Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Audio: high-bitrate, automated LUFS normalization",
+"Image: minimum size requirements",
+"CTA options available"
+]
+},
+{
+"name": "AI-Powered Creative Generation",
+"slug": "ai-powered-creative-generation",
+"goal": "Automate creative generation",
+"actions": [
+"Generate scripts with AI",
+"Select voiceover (Woman, Man)",
+"Select voice tone (Chill, Serious, Energetic, Inspirational, Professional)",
+"Select background music from library",
+"Generate AI video from audio/text inputs",
+"Use creative templates"
+],
+"routes": "adnote.musicosy.com/advertise/creatives/generate",
+"components": "AIGenerator, ScriptWriter, VoiceoverSelector, ToneSelector, MusicLibrary, AIVideoGenerator, TemplateLibrary",
+"apis": [
+"POST /api/advertise/creatives/generate",
+"GET /api/advertise/creatives/generate/status",
+"AI Creative Service",
+"TikTok Symphony Integration"
+],
+"rules": [
+"Requires Advertiser account",
+"Pro tier or higher",
+"Curated music library",
+"AI video generation"
+]
+},
+{
+"name": "Creative Library",
+"slug": "creative-library",
+"goal": "Store and organize creative assets",
+"actions": [
+"Store audio, video, companion images, logos",
+"Search and filter assets",
+"Apply tags",
+"Version control",
+"Track usage",
+"Bulk edit assets",
+"Manage ad variations"
+],
+"routes": "adnote.musicosy.com/advertise/creatives/library",
+"components": "CreativeLibrary, AssetSearch, TagManager, VersionControl, UsageTracker, BulkEditor, VariationManager",
+"apis": [
+"GET /api/advertise/creatives/library",
+"POST /api/advertise/creatives/library/bulk",
+"Library Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Secure repository",
+"Version control enabled"
+]
+},
+{
+"name": "Audio-Visual Companion Synchronization",
+"slug": "audio-visual-companion-synchronization",
+"goal": "Ensure synchronized visual display",
+"actions": [
+"Upload companion banner (600x600px)",
+"Enable persistence engine",
+"Track Synchronized Visual Impression (SVI) metric",
+"Configure interactive overlay sync",
+"Set fallback visual manager"
+],
+"routes": "adnote.musicosy.com/advertise/creatives/companion",
+"components": "CompanionEngine, BannerUploader, PersistenceConfig, SVITracker, OverlaySync, FallbackManager",
+"apis": [
+"PUT /api/advertise/creatives/{id}/companion",
+"GET /api/advertise/creatives/{id}/svi",
+"Companion Service",
+"SVI Tracking Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Banner persists throughout audio playback",
+"SVI metric logged separately",
+"Fallback to artist cover art"
+]
+},
+{
+"name": "Campaign Analytics Dashboard",
+"slug": "campaign-analytics-dashboard",
+"goal": "Monitor campaign performance",
+"actions": [
+"View lifetime ad results",
+"View weekly campaign results",
+"View daily ad set results",
+"View age/gender/genre reports",
+"View conversion reports",
+"Create custom reports",
+"Export reports (CSV/PDF)",
+"Schedule delivery"
+],
+"routes": "adnote.musicosy.com/advertise/analytics",
+"components": "AnalyticsDashboard, LifetimeView, WeeklyView, DailyView, AudienceReport, ConversionReport, CustomReportBuilder, ExportButton, Scheduler",
+"apis": [
+"GET /api/advertise/analytics",
+"POST /api/advertise/analytics/reports",
+"Analytics Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Pre-built and custom reports",
+"CSV/PDF export",
+"Scheduled delivery available"
+]
+},
+{
+"name": "Performance Metrics",
+"slug": "performance-metrics",
+"goal": "Track all performance indicators",
+"actions": [
+"View core metrics (Impressions, Reach, Streams, Clicks, Conversions, CPM, CPC, CPA)",
+"View audio/video engagement metrics (Audio Start, 25%, 50%, 75%, Completion Rate, Average Listen Duration, Drop-off Rate, Interaction Rate)",
+"View SVI metrics (Synchronized Visual Impressions, Companion CTR, Banner Dwell Time)",
+"View revenue metrics (Ad Spend, Creator Payout, Platform Revenue, ROAS)",
+"View delivery metrics (Budget spent, Delivery pace, Inventory utilization)",
+"View audience performance (Age, Gender, Genre)",
+"View outcome metrics (Conversion events, Downstream streams/purchases, ROAS)"
+],
+"routes": "adnote.musicosy.com/advertise/analytics/metrics",
+"components": "MetricsDisplay, CoreMetricsView, EngagementMetricsView, SVIMetricsView, RevenueMetricsView, DeliveryMetricsView, AudiencePerformanceView, OutcomeMetricsView",
+"apis": [
+"GET /api/advertise/analytics/metrics",
+"Analytics Service"
+],
+"rules": [
+"Requires Advertiser account",
+"All metrics available",
+"SVI metrics separate from audio completion"
+]
+},
+{
+"name": "Lead Management Dashboard",
+"slug": "lead-management-dashboard",
+"goal": "Manage campaign leads",
+"actions": [
+"View lead list",
+"Filter leads",
+"Search by ad name/ID",
+"Select date range",
+"Connect CRM",
+"Edit leads",
+"Download leads",
+"Use Message Assistant"
+],
+"routes": "adnote.musicosy.com/advertise/leads",
+"components": "LeadDashboard, LeadList, FilterControls, SearchBar, DateRangePicker, CRMConnector, LeadEditor, DownloadButton, MessageAssistant",
+"apis": [
+"GET /api/advertise/leads",
+"PUT /api/advertise/leads/{id}",
+"POST /api/advertise/leads/export",
+"Lead Service",
+"CRM Integration Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Lead capture from Instant Forms, Direct Messages, Website Forms",
+"CRM integration available"
+]
+},
+{
+"name": "Lead Generation Methods",
+"slug": "lead-generation-methods",
+"goal": "Configure lead capture",
+"actions": [
+"Set up Instant Form (in-app forms with rebate offer)",
+"Set up Direct Messages or Phone Calls",
+"Set up Website Form (external submissions)",
+"Configure Message Assistant for automated responses"
+],
+"routes": "adnote.musicosy.com/advertise/leads/methods",
+"components": "LeadMethodSelector, InstantFormBuilder, DirectMessageConfig, WebsiteFormConfig, MessageAssistant",
+"apis": [
+"POST /api/advertise/leads/methods",
+"GET /api/advertise/leads/methods",
+"Lead Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Rebate offer available for some methods",
+"Message Assistant automates responses"
+]
+},
+{
+"name": "Account Settings & Verification",
+"slug": "account-settings-verification",
+"goal": "Manage advertiser account",
+"actions": [
+"View account information",
+"Manage documents",
+"Configure audience controls",
+"Access brand safety hub",
+"View account health",
+"Start business verification",
+"View verification status"
+],
+"routes": "adnote.musicosy.com/advertise/settings",
+"components": "AccountSettings, DocumentManager, AudienceControls, BrandSafetyHub, AccountHealthMonitor, VerificationStarter, VerificationStatus",
+"apis": [
+"GET /api/advertise/account",
+"PUT /api/advertise/account",
+"POST /api/advertise/account/verify",
+"Account Service",
+"KYB Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Verification unlocks full features",
+"Brand safety hub available"
+]
+},
+{
+"name": "Account Setup & Onboarding",
+"slug": "account-setup-onboarding",
+"goal": "Complete account setup",
+"actions": [
+"Select business type (Advertiser, Agency)",
+"Enter company website",
+"Select country/region",
+"Enter business name",
+"Select industry",
+"Enter contact name",
+"Enter phone number",
+"Confirm contact email"
+],
+"routes": "adnote.musicosy.com/advertise/setup",
+"components": "SetupWizard, BusinessTypeSelector, WebsiteInput, CountrySelector, BusinessNameInput, IndustrySelector, ContactForm, PhoneInput, EmailConfirm",
+"apis": [
+"POST /api/advertise/setup",
+"GET /api/advertise/setup/status",
+"Account Service"
+],
+"rules": [
+"New user onboarding",
+"Business type cannot be changed after submission",
+"Email pre-filled from login"
+]
+},
+{
+"name": "Business Center & Ad Account Setup",
+"slug": "business-center-ad-account-setup",
+"goal": "Configure account infrastructure",
+"actions": [
+"Set Business Center name",
+"Set time zone",
+"Set currency",
+"Set ad account name",
+"Set ad account time zone"
+],
+"routes": "adnote.musicosy.com/advertise/setup/business",
+"components": "BusinessCenterConfig, NameInput, TimezoneSelector, CurrencySelector, AdAccountConfig",
+"apis": [
+"POST /api/advertise/business-center",
+"POST /api/advertise/ad-account",
+"Business Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Default time zone: New York",
+"Default currency: USD"
+]
+},
+{
+"name": "Business Verification",
+"slug": "business-verification",
+"goal": "Verify business identity",
+"actions": [
+"View verification status",
+"Understand verification benefits",
+"Start verification workflow",
+"Submit business documents",
+"View verification progress"
+],
+"routes": "adnote.musicosy.com/advertise/settings/verification",
+"components": "VerificationStatus, BenefitsDisplay, StartVerificationButton, DocumentUploader, ProgressTracker",
+"apis": [
+"POST /api/advertise/verification",
+"GET /api/advertise/verification/status",
+"KYB Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Unlocks full platform features",
+"Document review required"
+]
+},
+{
+"name": "Team Member Management",
+"slug": "team-member-management",
+"goal": "Manage team access",
+"actions": [
+"View active members dashboard",
+"Invite members by email",
+"Assign roles",
+"Set reporting access",
+"Search members"
+],
+"routes": "adnote.musicosy.com/advertise/settings/team",
+"components": "TeamDashboard, MemberList, InviteForm, RoleSelector, SearchBar",
+"apis": [
+"GET /api/advertise/team",
+"POST /api/advertise/team/invite",
+"DELETE /api/advertise/team/{id}",
+"Team Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Owner/Admin role required",
+"Email-based invitations"
+]
+},
+{
+"name": "Role-Based Permissions (Advertiser)",
+"slug": "role-based-permissions-advertiser",
+"goal": "Define access levels",
+"actions": [
+"Assign Owner role (full access, billing, account settings)",
+"Assign Admin role (full access except billing, campaign management, team management)",
+"Assign Member role (create campaigns, edit own, view reports)",
+"Assign Viewer role (read-only, view campaigns and reports)"
+],
+"routes": "adnote.musicosy.com/advertise/settings/team/roles",
+"components": "RoleDefinition, PermissionMatrix, RoleAssignment",
+"apis": [
+"GET /api/advertise/roles",
+"PUT /api/advertise/team/{id}/role",
+"IAM Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Owner cannot be removed",
+"Roles match platform RBAC"
+]
+},
+{
+"name": "Account Tier System",
+"slug": "account-tier-system",
+"goal": "Understand account tier benefits",
+"actions": [
+"View current tier",
+"View tier benefits (Creator access, Physical product subsidy, Request another creative)",
+"View upgrade requirements",
+"Track ad spend progress",
+"View status display"
+],
+"routes": "adnote.musicosy.com/advertise/settings/tiers",
+"components": "TierDisplay, BenefitsList, UpgradeRequirements, SpendProgressTracker, StatusBadge",
+"apis": [
+"GET /api/advertise/tiers",
+"GET /api/advertise/tiers/progress",
+"Tier Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Essential: $2K/30 days",
+"Classic: $10K/30 days",
+"Premium: $50K/30 days"
+]
+},
+{
+"name": "Payment Configuration",
+"slug": "payment-configuration",
+"goal": "Set up payment methods",
+"actions": [
+"Enter billing information (State/Province, Street Address, Postal Code)",
+"Select payment method (Automatic, Manual)",
+"Enter billing name",
+"Enter legal entity",
+"Submit billing setup"
+],
+"routes": "adnote.musicosy.com/advertise/settings/billing",
+"components": "BillingForm, AddressInput, PaymentMethodSelector, LegalEntityInput, SubmitButton",
+"apis": [
+"POST /api/advertise/billing",
+"GET /api/advertise/billing",
+"Billing Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Account cannot run ads until billing complete",
+"Legal name appears on invoices"
+]
+},
+{
+"name": "Transaction Management",
+"slug": "transaction-management",
+"goal": "Manage financial transactions",
+"actions": [
+"View transaction history",
+"Generate invoices",
+"Manage payment portfolio",
+"View tax calculations",
+"Manage promotions and credits"
+],
+"routes": "adnote.musicosy.com/advertise/settings/billing/transactions",
+"components": "TransactionHistory, InvoiceGenerator, PaymentPortfolio, TaxDisplay, PromotionsManager",
+"apis": [
+"GET /api/advertise/transactions",
+"POST /api/advertise/invoices",
+"Finance Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Complete transaction ledger",
+"Automated invoicing"
+]
+},
+{
+"name": "Catalog Manager \u2014 Onboarding",
+"slug": "catalog-manager-onboarding",
+"goal": "Set up product catalog for commerce ads",
+"actions": [
+"View welcome screen",
+"Understand benefits (personalized ads, AI-optimized creatives)",
+"Start catalog setup",
+"Sync from Shopify",
+"Import existing data feed",
+"Add products manually"
+],
+"routes": "adnote.musicosy.com/advertise/catalog",
+"components": "CatalogOnboarding, WelcomeScreen, BenefitsDisplay, SetupMethodSelector",
+"apis": [
+"POST /api/advertise/catalog",
+"GET /api/advertise/catalog/status",
+"Catalog Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Commerce-optimized formats available",
+"Setup in minutes"
+]
+},
+{
+"name": "Catalog Setup Methods",
+"slug": "catalog-setup-methods",
+"goal": "Integrate product catalog",
+"actions": [
+"Connect Shopify store",
+"Import data feed",
+"Enter products manually",
+"Manage product inventory (variants, SKUs, pricing, stock levels)",
+"Curate storefront layout"
+],
+"routes": "adnote.musicosy.com/advertise/catalog/setup",
+"components": "CatalogSetup, ShopifyConnector, DataFeedImporter, ManualProductEntry, InventoryManager, StorefrontCurator",
+"apis": [
+"POST /api/advertise/catalog/shopify",
+"POST /api/advertise/catalog/import",
+"POST /api/advertise/catalog/product",
+"Catalog Service",
+"Shopify Integration Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Shopify sync available",
+"Product variants supported"
+]
+},
+{
+"name": "Commerce Ad Formats",
+"slug": "commerce-ad-formats",
+"goal": "Create shoppable ad formats",
+"actions": [
+"Create swipeable carousels",
+"Create AI-optimized product showcases",
+"Create catalog ads",
+"Preview commerce ads"
+],
+"routes": "adnote.musicosy.com/advertise/catalog/formats",
+"components": "CommerceFormatBuilder, CarouselBuilder, ProductShowcase, CatalogAdBuilder, PreviewMode",
+"apis": [
+"POST /api/advertise/catalog/formats",
+"GET /api/advertise/catalog/formats/preview",
+"Commerce Ad Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Catalog required",
+"AI-optimized formats available"
+]
+},
+{
+"name": "Notification System",
+"slug": "notification-system",
+"goal": "Manage platform alerts",
+"actions": [
+"View all notifications",
+"Filter by type (All, Issues, Announcements, Suggestions, Tickets)",
+"Configure notification settings",
+"Toggle announcements (News & Events, New features, Promotions)",
+"Toggle Business Center (Suggestions, Reports)",
+"View always-on issues (Tickets, Asset sync, Account security, Payments, Ad status)"
+],
+"routes": "adnote.musicosy.com/advertise/notifications",
+"components": "NotificationCenter, FilterTabs, NotificationList, NotificationSettings, ToggleSwitches, AlwaysOnDisplay",
+"apis": [
+"GET /api/advertise/notifications",
+"PUT /api/advertise/notifications/settings",
+"Notification Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Always-on notifications cannot be disabled",
+"Critical alerts protected"
+]
+},
+{
+"name": "Programmatic SSP & Exchange Integration",
+"slug": "programmatic-ssp-exchange-integration",
+"goal": "Connect to external programmatic exchanges",
+"actions": [
+"Expose inventory via VAST 4.x endpoint",
+"Expose inventory via DAAST 1.0 protocol",
+"Enable OpenRTB 2.5/3.0 real-time bidding",
+"Configure PMP deals",
+"Configure programmatic guaranteed",
+"Configure open auction",
+"Track external DSP revenue reconciliation",
+"View fill rates",
+"View clearing CPMs",
+"View network revenue share"
+],
+"routes": "adnote.musicosy.com/advertise/exchange",
+"components": "SSPIntegration, VASTEndpointConfig, DAASTProtocolConfig, OpenRTBConfig, PMPDealManager, ProgrammaticGuaranteedConfig, RevenueReconciliation, FillRateDisplay, ClearingCPMDisplay, RevenueShareDisplay",
+"apis": [
+"POST /api/advertise/exchange/ssp",
+"GET /api/advertise/exchange/revenue",
+"SSP Service",
+"VAST/DAAST Service",
+"OpenRTB Service"
+],
+"rules": [
+"Requires Advertiser account",
+"Enterprise tier or higher",
+"VAST 4.x endpoint support",
+"DAAST 1.0 protocol support",
+"OpenRTB real-time bidding",
+"Revenue reconciliation dashboard",
+"Third-party fill rate tracking",
+"Clearing CPM analytics"
+]
+}
+]
+},
+{
+"title": "CROSS-CUTTING - DEVELOPER PLATFORM",
+"slug": "cross-cutting-developer-platform",
+"features": [
+{
+"name": "Public REST & GraphQL APIs",
+"slug": "public-rest-graphql-apis",
+"goal": "Programmatic platform access",
+"actions": [
+"Access catalog API endpoints",
+"Access finance API endpoints",
+"Access marketing API endpoints",
+"Manage API keys",
+"Authenticate via OAuth 2.0"
+],
+"routes": "/developers/api",
+"components": "APIExplorer, EndpointList, RequestBuilder, ResponseDisplay",
+"apis": [
+"GET /api/developers/endpoints",
+"POST /api/developers/keys",
+"API Gateway Service",
+"Authentication Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"API key required",
+"Rate limits apply"
+]
+},
+{
+"name": "Internal API Testing Console",
+"slug": "internal-api-testing-console",
+"goal": "Test API calls",
+"actions": [
+"Execute test API calls",
+"View request/response",
+"Debug issues",
+"Test microservices"
+],
+"routes": "/developers/console",
+"components": "APIConsole, RequestBuilder, ResponseViewer, DebugTools",
+"apis": [
+"Internal API Gateway",
+"Microservice Test Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Test calls isolated"
+]
+},
+{
+"name": "Third-Party Connector Directory",
+"slug": "third-party-connector-directory",
+"goal": "Connect to third-party tools",
+"actions": [
+"View pre-built connectors",
+"Connect to CRM platforms",
+"Connect to accounting software",
+"Connect to ad networks"
+],
+"routes": "/developers/connectors",
+"components": "ConnectorDirectory, ConnectorCard, ConnectButton",
+"apis": [
+"GET /api/developers/connectors",
+"POST /api/developers/connectors/{id}/connect",
+"Integration Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Pre-built connectors",
+"Custom integration available"
+]
+},
+{
+"name": "Official Developer SDKs",
+"slug": "official-developer-sdks",
+"goal": "Build software integrations",
+"actions": [
+"Download Python SDK",
+"Download JavaScript SDK",
+"Download Java SDK",
+"Download Go SDK",
+"Use SDK documentation"
+],
+"routes": "/developers/sdks",
+"components": "SDKList, DownloadButton, DocumentationLink",
+"apis": [
+"GET /api/developers/sdks",
+"SDK Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Multiple language support",
+"Documentation available"
+]
+},
+{
+"name": "Streaming Playback SDKs",
+"slug": "streaming-playback-sdks",
+"goal": "Embed secure audio streaming",
+"actions": [
+"Download web player SDK",
+"Download mobile SDK",
+"Embed in external apps",
+"Embed in external websites"
+],
+"routes": "/developers/sdks/streaming",
+"components": "StreamingSDKList, WebSDKDownload, MobileSDKDownload",
+"apis": [
+"GET /api/developers/sdks/streaming",
+"Streaming SDK Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Secure audio streaming",
+"External app embedding"
+]
+},
+{
+"name": "Real-Time Webhooks Manager",
+"slug": "real-time-webhooks-manager",
+"goal": "Subscribe to system events",
+"actions": [
+"View webhook endpoints",
+"Create webhook subscription",
+"Set event triggers",
+"Configure delivery URL",
+"View webhook logs",
+"Test webhook delivery"
+],
+"routes": "/developers/webhooks",
+"components": "WebhookManager, SubscriptionForm, EventSelector, URLEditor, LogViewer, TestButton",
+"apis": [
+"GET /api/developers/webhooks",
+"POST /api/developers/webhooks",
+"DELETE /api/developers/webhooks/{id}",
+"Webhook Service",
+"Event Dispatcher Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"JSON webhook payloads",
+"Retry logic applied"
+]
+},
+{
+"name": "Developer Utility Tools",
+"slug": "developer-utility-tools",
+"goal": "Debug and test integrations",
+"actions": [
+"Use CLI tools",
+"Use debugging software",
+"Use API consoles",
+"Run test suites"
+],
+"routes": "/developers/tools",
+"components": "ToolList, CLIDownload, DebuggerDownload, APIConsole",
+"apis": [
+"GET /api/developers/tools",
+"Developer Tools Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Command-line tools available",
+"Debugging software provided"
+]
+},
+{
+"name": "API Key & Credential Manager",
+"slug": "api-key-credential-manager",
+"goal": "Secure API access",
+"actions": [
+"Issue API keys",
+"Manage OAuth 2.0 clients",
+"Set token permissions",
+"Revoke API keys",
+"View key usage"
+],
+"routes": "/developers/keys",
+"components": "KeyManager, KeyGenerator, OAuthClientManager, PermissionSelector, RevokeButton, UsageView",
+"apis": [
+"GET /api/developers/keys",
+"POST /api/developers/keys",
+"DELETE /api/developers/keys/{id}",
+"Authentication Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Secure authentication portal",
+"OAuth 2.0 support"
+]
+},
+{
+"name": "Sandbox Testing Environment",
+"slug": "sandbox-testing-environment",
+"goal": "Test API calls safely",
+"actions": [
+"Execute test API calls",
+"Generate dummy payouts",
+"Test store delivery pipelines",
+"Isolated environment",
+"Reset sandbox data"
+],
+"routes": "/developers/sandbox",
+"components": "SandboxEnvironment, APITestConsole, PayoutSimulator, DeliveryTest, ResetButton",
+"apis": [
+"POST /api/developers/sandbox/reset",
+"POST /api/developers/sandbox/test",
+"Sandbox Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Isolated environment",
+"No real data affected"
+]
+},
+{
+"name": "Rate Limit & Usage Dashboard",
+"slug": "rate-limit-usage-dashboard",
+"goal": "Monitor API usage",
+"actions": [
+"View API call volume",
+"View latency stats",
+"View rate-limit thresholds",
+"View usage by endpoint"
+],
+"routes": "/developers/usage",
+"components": "UsageDashboard, VolumeChart, LatencyChart, RateLimitDisplay, EndpointBreakdown",
+"apis": [
+"GET /api/developers/usage",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Real-time analytics",
+"Usage monitoring"
+]
+},
+{
+"name": "Developer Portal & Docs",
+"slug": "developer-portal-docs",
+"goal": "Access API documentation",
+"actions": [
+"Browse API specs",
+"View integration guides",
+"View payload schemas",
+"View SDK reference materials",
+"Search documentation"
+],
+"routes": "/developers/docs",
+"components": "DocumentationPortal, APISpecViewer, IntegrationGuide, SchemaExplorer, SDKReference, SearchBar",
+"apis": [
+"GET /api/developers/docs",
+"Documentation Service"
+],
+"rules": [
+"Requires Business account",
+"Interactive documentation",
+"Payload schemas included"
+]
+},
+{
+"name": "Developer Ecosystem Engine",
+"slug": "developer-ecosystem-engine",
+"goal": "Unified developer suite",
+"actions": [
+"Access REST/GraphQL APIs",
+"Access client SDKs",
+"Subscribe to webhooks",
+"Use sandbox environment",
+"Browse integration marketplace"
+],
+"routes": "/developers",
+"components": "DeveloperEcosystem, UnifiedAPIAccess, SDKManager, WebhookManager, SandboxLauncher, MarketplaceBrowse",
+"apis": [
+"GET /api/developers/ecosystem",
+"Ecosystem Service"
+],
+"rules": [
+"Requires Business account",
+"Developer role required",
+"Comprehensive developer suite",
+"Integration marketplace"
+]
+}
+]
+},
+{
+"title": "CROSS-CUTTING - ANALYTICS & INTELLIGENCE",
+"slug": "cross-cutting-analytics-intelligence",
+"features": [
+{
+"name": "Business Intelligence Dashboard",
+"slug": "business-intelligence-dashboard",
+"goal": "Executive business overview",
+"actions": [
+"View streaming consumption velocity",
+"View audience retention heatmaps",
+"View financial projections",
+"View operational efficiency stats",
+"Export reports"
+],
+"routes": "/app/analytics/bi",
+"components": "BIDashboard, ConsumptionVelocityChart, RetentionHeatmap, FinancialProjection, EfficiencyStats, ExportButton",
+"apis": [
+"GET /api/analytics/bi",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Enterprise tier or higher",
+"Executive reporting",
+"Exportable visualizations"
+]
+},
+{
+"name": "Custom Reporting Engine",
+"slug": "custom-reporting-engine",
+"goal": "Generate custom reports",
+"actions": [
+"Select metrics",
+"Select date range",
+"Configure dimensions",
+"Generate report",
+"Export CSV/PDF",
+"Schedule reports"
+],
+"routes": "/app/analytics/reports",
+"components": "ReportBuilder, MetricSelector, DateRangePicker, DimensionConfigurator, GenerateButton, ExportButton, Scheduler",
+"apis": [
+"POST /api/analytics/reports",
+"GET /api/analytics/reports/{id}",
+"Reporting Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Custom report generation",
+"CSV/PDF export"
+]
+},
+{
+"name": "Operational Audit Logs (Cross-Cutting)",
+"slug": "operational-audit-logs-cross-cutting",
+"goal": "Track system changes",
+"actions": [
+"View financial transaction logs",
+"View rights modification logs",
+"View user activity logs",
+"Export audit logs"
+],
+"routes": "/app/analytics/audit",
+"components": "AuditLogViewer, TransactionLog, RightsModificationLog, ActivityLog, ExportButton",
+"apis": [
+"GET /api/analytics/audit",
+"Audit Service"
+],
+"rules": [
+"Requires Business account",
+"Admin role required",
+"Immutable logs",
+"7-year retention"
+]
+},
+{
+"name": "Audience Retention Heatmaps",
+"slug": "audience-retention-heatmaps",
+"goal": "Understand listener drop-off points",
+"actions": [
+"View streaming heatmap",
+"View drop-off points",
+"View average consumption time",
+"View skipped ad sections",
+"Export heatmap data"
+],
+"routes": "/app/analytics/retention",
+"components": "RetentionHeatmap, DropOffVisualizer, ConsumptionTimeDisplay, AdSkipTracker, ExportButton",
+"apis": [
+"GET /api/analytics/retention",
+"Analytics Service"
+],
+"rules": [
+"Requires Business account",
+"Pro tier or higher",
+"Listener drop-off analysis",
+"Ad section tracking",
+"CROSS-CUTTING \u2014 SETTINGS (22 Pages)"
+]
+},
+{
+"name": "Account Settings",
+"slug": "account-settings",
+"goal": "Manage account configuration",
+"actions": [
+"View security settings",
+"Configure privacy settings",
+"Manage blocked/muted users",
+"View account status",
+"Manage feature upgrades"
+],
+"routes": "/app/settings/account",
+"components": "AccountSettings, SecurityTab, PrivacyTab, BlockedListTab, StatusTab, UpgradesTab",
+"apis": [
+"GET /api/settings/account",
+"PUT /api/settings/account",
+"Account Service"
+],
+"rules": []
+},
+{
+"name": "Profile Settings",
+"slug": "profile-settings",
+"goal": "Manage profile content",
+"actions": [
+"Edit bio/languages",
+"Manage credits",
+"Manage verification/badges",
+"Manage social links",
+"Manage EPK"
+],
+"routes": "/app/settings/profile",
+"components": "ProfileSettings, BioTab, CreditsTab, VerificationTab, SocialLinksTab, EPKTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Notification Settings",
+"slug": "notification-settings",
+"goal": "Configure notification preferences",
+"actions": [
+"Configure push notifications",
+"Configure email notifications",
+"Configure fan activity alerts",
+"Configure revenue alerts",
+"Configure system alerts"
+],
+"routes": "/app/settings/notifications",
+"components": "NotificationSettings, PushTab, EmailTab, FanActivityTab, RevenueTab, SystemTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Content Settings",
+"slug": "content-settings",
+"goal": "Manage content governance",
+"actions": [
+"Configure visibility settings",
+"Configure delivery rules",
+"Configure download rights",
+"Configure regional settings",
+"Configure comments/remix permissions",
+"Configure moderation rules",
+"Configure explicit content filter",
+"Configure embed settings"
+],
+"routes": "/app/settings/content",
+"components": "ContentSettings, VisibilityTab, DeliveryRulesTab, DownloadsTab, RegionalTab, CommentsTab, ModerationTab, ExplicitTab, EmbedsTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Monetization Settings",
+"slug": "monetization-settings",
+"goal": "Configure monetization",
+"actions": [
+"Configure tips",
+"Configure subscriptions",
+"Configure donations",
+"Configure tiers/splits"
+],
+"routes": "/app/settings/monetization",
+"components": "MonetizationSettings, TipsTab, SubscriptionsTab, DonationsTab, TiersTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Relationship Settings",
+"slug": "relationship-settings",
+"goal": "Configure relationship tiers",
+"actions": [
+"Build relationship hierarchy",
+"Allocate perks per tier"
+],
+"routes": "/app/settings/relationships",
+"components": "RelationshipSettings, HierarchyTab, PerksTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Player Settings",
+"slug": "player-settings",
+"goal": "Configure playback experience",
+"actions": [
+"Set playback quality",
+"Set playback speed",
+"Set language",
+"Configure downloads",
+"Configure privacy",
+"Configure crossfade"
+],
+"routes": "/app/settings/player",
+"components": "PlayerSettings, QualityTab, SpeedTab, LanguageTab, DownloadsTab, PrivacyTab, CrossfadeTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Team Settings",
+"slug": "team-settings",
+"goal": "Manage team access",
+"actions": [
+"Manage members",
+"Manage roles",
+"Manage roster",
+"View audit logs",
+"Configure SSO",
+"Configure show isolation"
+],
+"routes": "/app/settings/team",
+"components": "TeamSettings, MembersTab, RolesTab, RosterTab, AuditTab, SSOTab, IsolationTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Payment Settings",
+"slug": "payment-settings",
+"goal": "Configure payments",
+"actions": [
+"Set payout method",
+"Configure global payment infrastructure"
+],
+"routes": "/app/settings/payments",
+"components": "PaymentSettings, PayoutMethodTab, GlobalInfraTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "API Settings",
+"slug": "api-settings",
+"goal": "Manage API access",
+"actions": [
+"Manage API keys",
+"Manage webhooks (pointer to Developer Platform)"
+],
+"routes": "/app/settings/api",
+"components": "APISettings, KeysTab, WebhooksTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Branding Settings",
+"slug": "branding-settings",
+"goal": "Manage brand identity",
+"actions": [
+"Manage brand identity",
+"Configure white-label branding"
+],
+"routes": "/app/settings/branding",
+"components": "BrandingSettings, IdentityTab, WhiteLabelTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Studio Settings",
+"slug": "studio-settings",
+"goal": "Configure studio defaults",
+"actions": [
+"Set audio quality defaults",
+"Set mastering presets",
+"Configure stem separation rules",
+"Configure AI tools"
+],
+"routes": "/app/settings/studio",
+"components": "StudioSettings, AudioQualityTab, MasteringPresetsTab, StemRulesTab, AIConfigTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Distribution Settings",
+"slug": "distribution-settings",
+"goal": "Configure distribution defaults",
+"actions": [
+"Set DSP defaults",
+"Configure territory routing",
+"Configure physical distribution",
+"Configure DDEX delivery",
+"Configure RSS feeds"
+],
+"routes": "/app/settings/distribution",
+"components": "DistributionSettings, DSPDefaultsTab, TerritoryTab, PhysicalTab, DDEXTab, RSSTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Marketing Settings",
+"slug": "marketing-settings",
+"goal": "Configure marketing defaults",
+"actions": [
+"Configure social auto-publish",
+"Configure advertising operations",
+"Configure smart links",
+"Configure templates",
+"Manage DSP profile"
+],
+"routes": "/app/settings/marketing",
+"components": "MarketingSettings, AutoPublishTab, AdOpsTab, LinksTab, TemplatesTab, DSPProfileTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Compliance Settings",
+"slug": "compliance-settings",
+"goal": "Manage regulatory compliance",
+"actions": [
+"Configure regulatory engine",
+"Configure risk scoring",
+"Manage review desk"
+],
+"routes": "/app/settings/compliance",
+"components": "ComplianceSettings, RegulatoryTab, RiskScoringTab, ReviewDeskTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Tax Settings",
+"slug": "tax-settings",
+"goal": "Manage tax configuration",
+"actions": [
+"Configure form intake",
+"Configure tax reporting",
+"Configure tax compliance suite"
+],
+"routes": "/app/settings/tax",
+"components": "TaxSettings, FormIntakeTab, ReportingTab, ComplianceTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Verification Settings",
+"slug": "verification-settings",
+"goal": "Manage verification status",
+"actions": [
+"Manage KYC queue",
+"Manage anti-fraud operations"
+],
+"routes": "/app/settings/verification",
+"components": "VerificationSettings, KYCQueueTab, AntiFraudTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Organization Settings",
+"slug": "organization-settings",
+"goal": "Manage organization",
+"actions": [
+"Manage tenant",
+"Manage multi-artist roster switcher"
+],
+"routes": "/app/settings/organization",
+"components": "OrganizationSettings, TenantTab, RosterSwitcherTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Storefront Settings",
+"slug": "storefront-settings",
+"goal": "Manage storefront layout",
+"actions": [
+"Curate storefront layout"
+],
+"routes": "/app/settings/storefront",
+"components": "StorefrontSettings, LayoutCuratorTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Commerce Settings",
+"slug": "commerce-settings",
+"goal": "Manage commerce operations",
+"actions": [
+"Configure omni-channel commerce operations"
+],
+"routes": "/app/settings/commerce",
+"components": "CommerceSettings, OmniChannelTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Web Settings",
+"slug": "web-settings",
+"goal": "Manage web presence",
+"actions": [
+"Configure web & EPK suite (pointer to Growth)"
+],
+"routes": "/app/settings/web",
+"components": "WebSettings, WebSuiteTab",
+"apis": [],
+"rules": []
+},
+{
+"name": "Admin Settings",
+"slug": "admin-settings",
+"goal": "Super-admin controls",
+"actions": [
+"Manage super-admin controls (Owner-only)"
+],
+"routes": "/app/settings/admin",
+"components": "AdminSettings, SuperAdminTab",
+"apis": [],
+"rules": []
+}
+]
+},
+{
+"title": "CROSS-CUTTING - HELP, LEGAL & SUPPORT",
+"slug": "cross-cutting-help-legal-support",
+"features": [
+{
+"name": "Help Center",
+"slug": "help-center",
+"goal": "Get platform support and education",
+"actions": [
+"Browse help articles",
+"Search for help",
+"View context-specific help",
+"Access guides"
+],
+"routes": "/help, /help/context?route={route}",
+"components": "HelpCenter, SearchBar, CategoryList, ArticleList, ArticleView",
+"apis": [
+"GET /api/help/search",
+"GET /api/help/articles",
+"Help Service"
+],
+"rules": []
+},
+{
+"name": "Privacy & Safety",
+"slug": "privacy-safety",
+"goal": "Access privacy and safety resources",
+"actions": [
+"View privacy policy",
+"View safety guidelines",
+"Report issues",
+"View community conduct",
+"View security resources"
+],
+"routes": "/help/privacy, /help/safety, /help/reporting, /help/conduct, /help/security",
+"components": "PrivacyPage, SafetyPage, ReportingPage, ConductPage, SecurityPage",
+"apis": [],
+"rules": []
+},
+{
+"name": "Legal & Policies",
+"slug": "legal-policies",
+"goal": "Access legal documentation",
+"actions": [
+"View legal terms",
+"View platform policies"
+],
+"routes": "/legal",
+"components": "LegalPage, TermsOfService, PlatformPolicies",
+"apis": [],
+"rules": []
+},
+{
+"name": "Resources",
+"slug": "resources",
+"goal": "Access educational content",
+"actions": [
+"Read blog",
+"View guides",
+"View glossary"
+],
+"routes": "/blog, /guides, /glossary",
+"components": "Blog, Guides, Glossary",
+"apis": [],
+"rules": []
+}
+]
+}
+]

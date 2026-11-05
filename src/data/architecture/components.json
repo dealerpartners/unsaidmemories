@@ -1,0 +1,659 @@
+{
+  "type_definitions": [
+    {
+      "type": "Page/container",
+      "examples": "DiscoverPage, LivePage, CatalogPage",
+      "document_at": "Page specification",
+      "purpose": "Top-level route component"
+    },
+    {
+      "type": "Feature module",
+      "examples": "ReleaseWizard, BroadcastDashboard, RoyaltyEngine",
+      "document_at": "Feature specification",
+      "purpose": "Domain-specific workflow component"
+    },
+    {
+      "type": "Reusable domain UI",
+      "examples": "SplitManager, AssetUploader, SearchBar",
+      "document_at": "Component catalog",
+      "purpose": "Reusable across multiple features"
+    },
+    {
+      "type": "Primitive UI",
+      "examples": "Button, Modal, TextInput, Select, Tabs",
+      "document_at": "Design system",
+      "purpose": "Base UI components"
+    },
+    {
+      "type": "Domain service",
+      "examples": "Recommendation engine, royalty calculation, entitlement logic",
+      "document_at": "Architecture/service documentation",
+      "purpose": "Backend business logic"
+    },
+    {
+      "type": "External adapter",
+      "examples": "RTMP ingest, payment processor, DSP delivery connector",
+      "document_at": "Integration documentation",
+      "purpose": "Third-party integration"
+    }
+  ],
+  "catalogs": [
+    {
+      "context": "Personal Context",
+      "components": [
+        {
+          "component": "DiscoverPage",
+          "type": "Page/container",
+          "purpose": "Main discovery surface",
+          "used_by": "/app/discover",
+          "dependencies": "FeedService, SessionService",
+          "owner": "D2"
+        },
+        {
+          "component": "ForYouFeed",
+          "type": "Feature module",
+          "purpose": "Algorithmic personalized feed",
+          "used_by": "DiscoverPage",
+          "dependencies": "RecommendationEngine, FeedService",
+          "owner": "D2"
+        },
+        {
+          "component": "FollowingFeed",
+          "type": "Feature module",
+          "purpose": "Chronological following feed",
+          "used_by": "DiscoverPage",
+          "dependencies": "FeedService, FollowGraphService",
+          "owner": "D2"
+        },
+        {
+          "component": "FriendsActivityFeed",
+          "type": "Feature module",
+          "purpose": "Friends\\' listening activity",
+          "used_by": "DiscoverPage",
+          "dependencies": "SocialGraphService, FeedService",
+          "owner": "D2"
+        },
+        {
+          "component": "GenreMoodExplorer",
+          "type": "Feature module",
+          "purpose": "Genre/mood browsing",
+          "used_by": "DiscoverPage",
+          "dependencies": "CatalogService, SearchService",
+          "owner": "D14"
+        },
+        {
+          "component": "SearchBar",
+          "type": "Reusable domain UI",
+          "purpose": "Universal search input",
+          "used_by": "Global header",
+          "dependencies": "SearchService",
+          "owner": "D14"
+        },
+        {
+          "component": "LivePage",
+          "type": "Page/container",
+          "purpose": "Main live hub",
+          "used_by": "/app/live",
+          "dependencies": "LiveService",
+          "owner": "D5"
+        },
+        {
+          "component": "LivePlayer",
+          "type": "Feature module",
+          "purpose": "Video playback",
+          "used_by": "/app/live/[id]",
+          "dependencies": "StreamingService, WebRTC",
+          "owner": "D17"
+        },
+        {
+          "component": "LiveChat",
+          "type": "Feature module",
+          "purpose": "Real-time chat",
+          "used_by": "/app/live/[id]",
+          "dependencies": "ChatService, WebSocket",
+          "owner": "D5"
+        },
+        {
+          "component": "BroadcastDashboard",
+          "type": "Feature module",
+          "purpose": "Host control panel",
+          "used_by": "/app/live?mode=host",
+          "dependencies": "LiveService, RTMPService",
+          "owner": "D5"
+        },
+        {
+          "component": "CreatePage",
+          "type": "Page/container",
+          "purpose": "Main creation hub",
+          "used_by": "/app/create",
+          "dependencies": "PostService, AssetService",
+          "owner": "D3"
+        },
+        {
+          "component": "PostEditor",
+          "type": "Feature module",
+          "purpose": "Rich text post creation",
+          "used_by": "CreatePage",
+          "dependencies": "RichTextEditor, AssetService",
+          "owner": "D3"
+        },
+        {
+          "component": "ImageCarouselBuilder",
+          "type": "Feature module",
+          "purpose": "Multi-image posts",
+          "used_by": "CreatePage",
+          "dependencies": "ImageUploadService",
+          "owner": "D17"
+        },
+        {
+          "component": "PollBuilder",
+          "type": "Feature module",
+          "purpose": "Interactive polls",
+          "used_by": "CreatePage",
+          "dependencies": "PollService",
+          "owner": "D3"
+        },
+        {
+          "component": "AudioRecorder",
+          "type": "Feature module",
+          "purpose": "Audio snippet recording",
+          "used_by": "CreatePage",
+          "dependencies": "AudioService",
+          "owner": "D16"
+        },
+        {
+          "component": "AIRemixStudio",
+          "type": "Feature module",
+          "purpose": "AI remix creation",
+          "used_by": "CreatePage",
+          "dependencies": "StemSeparationService, AttributionService",
+          "owner": "D16"
+        },
+        {
+          "component": "InboxPage",
+          "type": "Page/container",
+          "purpose": "Main inbox",
+          "used_by": "/app/inbox",
+          "dependencies": "MessagingService",
+          "owner": "D4"
+        },
+        {
+          "component": "MessageThread",
+          "type": "Feature module",
+          "purpose": "Threaded conversation",
+          "used_by": "/app/inbox/conversation/[id]",
+          "dependencies": "MessagingService, WebSocket",
+          "owner": "D4"
+        },
+        {
+          "component": "NotificationCenter",
+          "type": "Feature module",
+          "purpose": "Notification feed",
+          "used_by": "/app/inbox/notifications",
+          "dependencies": "NotificationService",
+          "owner": "D19"
+        },
+        {
+          "component": "ProfilePage",
+          "type": "Page/container",
+          "purpose": "User profile",
+          "used_by": "/app/profile/[id]",
+          "dependencies": "ProfileService",
+          "owner": "D1"
+        },
+        {
+          "component": "FollowButton",
+          "type": "Reusable domain UI",
+          "purpose": "Follow/unfollow",
+          "used_by": "Multiple surfaces",
+          "dependencies": "FollowService",
+          "owner": "D1"
+        },
+        {
+          "component": "RelationshipBadge",
+          "type": "Reusable domain UI",
+          "purpose": "Relationship level display",
+          "used_by": "ProfilePage",
+          "dependencies": "RelationshipService",
+          "owner": "D1"
+        },
+        {
+          "component": "LibraryPage",
+          "type": "Page/container",
+          "purpose": "Playlist collection",
+          "used_by": "/app/profile/library",
+          "dependencies": "PlaylistService",
+          "owner": "D7"
+        },
+        {
+          "component": "PlaylistBuilder",
+          "type": "Feature module",
+          "purpose": "Playlist creation/editing",
+          "used_by": "LibraryPage",
+          "dependencies": "PlaylistService",
+          "owner": "D7"
+        },
+        {
+          "component": "CollaborativePlaylist",
+          "type": "Feature module",
+          "purpose": "Shared playlist collaboration",
+          "used_by": "/app/profile/library/playlist/[id]/collaborate",
+          "dependencies": "PlaylistService, WebSocket",
+          "owner": "D7"
+        }
+      ]
+    },
+    {
+      "context": "Creator Studio",
+      "components": [
+        {
+          "component": "StudioPage",
+          "type": "Page/container",
+          "purpose": "Main creator studio",
+          "used_by": "/app/studio",
+          "dependencies": "GovernanceService, AnalyticsService",
+          "owner": "D6"
+        },
+        {
+          "component": "VisibilityMatrix",
+          "type": "Feature module",
+          "purpose": "Visibility settings",
+          "used_by": "GovernancePage",
+          "dependencies": "GovernanceService",
+          "owner": "D6"
+        },
+        {
+          "component": "DeliveryRuleConfigurator",
+          "type": "Feature module",
+          "purpose": "Monetization rules",
+          "used_by": "GovernancePage",
+          "dependencies": "GovernanceService",
+          "owner": "D6"
+        },
+        {
+          "component": "ModerationSettings",
+          "type": "Feature module",
+          "purpose": "Comment moderation",
+          "used_by": "GovernancePage",
+          "dependencies": "ModerationService",
+          "owner": "D6"
+        },
+        {
+          "component": "CommentApprovalQueue",
+          "type": "Feature module",
+          "purpose": "Review flagged comments",
+          "used_by": "GovernancePage",
+          "dependencies": "ModerationService",
+          "owner": "D6"
+        },
+        {
+          "component": "CreatorAnalyticsPage",
+          "type": "Page/container",
+          "purpose": "Analytics hub",
+          "used_by": "/app/studio/analytics",
+          "dependencies": "AnalyticsService",
+          "owner": "D15"
+        },
+        {
+          "component": "PerformanceDashboard",
+          "type": "Feature module",
+          "purpose": "Streaming performance",
+          "used_by": "CreatorAnalyticsPage",
+          "dependencies": "AnalyticsService",
+          "owner": "D15"
+        },
+        {
+          "component": "FanGrowthDashboard",
+          "type": "Feature module",
+          "purpose": "Fan growth metrics",
+          "used_by": "CreatorAnalyticsPage",
+          "dependencies": "AnalyticsService",
+          "owner": "D15"
+        },
+        {
+          "component": "RevenueDashboard",
+          "type": "Feature module",
+          "purpose": "Revenue analytics",
+          "used_by": "CreatorAnalyticsPage",
+          "dependencies": "FinanceService, AnalyticsService",
+          "owner": "D9/D15"
+        }
+      ]
+    },
+    {
+      "context": "Business Context",
+      "components": [
+        {
+          "component": "CatalogPage",
+          "type": "Page/container",
+          "purpose": "Main catalog hub",
+          "used_by": "/app/catalog",
+          "dependencies": "ReleaseService, AssetService",
+          "owner": "D8"
+        },
+        {
+          "component": "ReleaseWizard",
+          "type": "Feature module",
+          "purpose": "Step-by-step release setup",
+          "used_by": "/app/catalog/release",
+          "dependencies": "ReleaseService, AssetService, MetadataService, IdentifiersService",
+          "owner": "D8"
+        },
+        {
+          "component": "AssetUploader",
+          "type": "Reusable domain UI",
+          "purpose": "File upload",
+          "used_by": "Multiple surfaces",
+          "dependencies": "AssetService",
+          "owner": "D17"
+        },
+        {
+          "component": "MetadataEditor",
+          "type": "Feature module",
+          "purpose": "Release metadata",
+          "used_by": "ReleaseWizard",
+          "dependencies": "MetadataService",
+          "owner": "D8"
+        },
+        {
+          "component": "SplitManager",
+          "type": "Feature module",
+          "purpose": "Contributor split management",
+          "used_by": "ReleaseWizard",
+          "dependencies": "SplitService",
+          "owner": "D9"
+        },
+        {
+          "component": "DAMDashboard",
+          "type": "Feature module",
+          "purpose": "Digital asset management",
+          "used_by": "/app/catalog/assets",
+          "dependencies": "AssetService",
+          "owner": "D8"
+        },
+        {
+          "component": "DistributionPipeline",
+          "type": "Feature module",
+          "purpose": "DSP distribution",
+          "used_by": "/app/catalog/distribute",
+          "dependencies": "DistributionService",
+          "owner": "D8"
+        },
+        {
+          "component": "FinancePage",
+          "type": "Page/container",
+          "purpose": "Main finance hub",
+          "used_by": "/app/finance",
+          "dependencies": "FinanceService",
+          "owner": "D9"
+        },
+        {
+          "component": "RoyaltyEngine",
+          "type": "Domain service",
+          "purpose": "Royalty calculation",
+          "used_by": "FinancePage",
+          "dependencies": "FinanceService, StatementService",
+          "owner": "D9"
+        },
+        {
+          "component": "StatementIngestor",
+          "type": "Feature module",
+          "purpose": "Statement upload",
+          "used_by": "FinancePage",
+          "dependencies": "FinanceService",
+          "owner": "D9"
+        },
+        {
+          "component": "PayoutsDashboard",
+          "type": "Feature module",
+          "purpose": "Payout oversight",
+          "used_by": "/app/finance/payouts",
+          "dependencies": "FinanceService",
+          "owner": "D9"
+        },
+        {
+          "component": "TaxFormManager",
+          "type": "Feature module",
+          "purpose": "Tax form collection",
+          "used_by": "/app/finance/tax",
+          "dependencies": "TaxService",
+          "owner": "D9"
+        },
+        {
+          "component": "GrowthPage",
+          "type": "Page/container",
+          "purpose": "Main growth hub",
+          "used_by": "/app/growth",
+          "dependencies": "MarketingService, AnalyticsService",
+          "owner": "D13/D15"
+        },
+        {
+          "component": "FanCRM",
+          "type": "Feature module",
+          "purpose": "Fan database and segmentation",
+          "used_by": "/app/growth/crm",
+          "dependencies": "AnalyticsService",
+          "owner": "D15"
+        },
+        {
+          "component": "SocialDashboard",
+          "type": "Feature module",
+          "purpose": "Social media management",
+          "used_by": "/app/growth/social",
+          "dependencies": "SocialService",
+          "owner": "D13"
+        },
+        {
+          "component": "CampaignManager",
+          "type": "Feature module",
+          "purpose": "Marketing campaigns",
+          "used_by": "/app/growth/campaigns",
+          "dependencies": "MarketingService",
+          "owner": "D13"
+        },
+        {
+          "component": "SmartLinkEngine",
+          "type": "Feature module",
+          "purpose": "Link generation",
+          "used_by": "/app/growth/links",
+          "dependencies": "MarketingService",
+          "owner": "D13"
+        },
+        {
+          "component": "WebsiteBuilder",
+          "type": "Feature module",
+          "purpose": "Website/EPK builder",
+          "used_by": "/app/growth/web",
+          "dependencies": "WebService",
+          "owner": "D12"
+        },
+        {
+          "component": "RosterPage",
+          "type": "Page/container",
+          "purpose": "Main roster hub",
+          "used_by": "/app/roster",
+          "dependencies": "TeamService, ContractService",
+          "owner": "D10"
+        },
+        {
+          "component": "TeamManager",
+          "type": "Feature module",
+          "purpose": "Team member management",
+          "used_by": "/app/roster/team",
+          "dependencies": "IAMService",
+          "owner": "D10"
+        },
+        {
+          "component": "ContractManager",
+          "type": "Feature module",
+          "purpose": "Contract lifecycle",
+          "used_by": "/app/roster/contracts",
+          "dependencies": "LegalService",
+          "owner": "D10/D25"
+        },
+        {
+          "component": "ARScouting",
+          "type": "Feature module",
+          "purpose": "A&R talent pipeline",
+          "used_by": "/app/roster/ar",
+          "dependencies": "AnalyticsService",
+          "owner": "D10"
+        },
+        {
+          "component": "TourManager",
+          "type": "Feature module",
+          "purpose": "Tour operations",
+          "used_by": "/app/roster/tours",
+          "dependencies": "TourService",
+          "owner": "D11"
+        }
+      ]
+    },
+    {
+      "context": "Production & Commerce",
+      "components": [
+        {
+          "component": "StudioProductionPage",
+          "type": "Page/container",
+          "purpose": "Production hub",
+          "used_by": "/app/studio",
+          "dependencies": "AudioService, AIService",
+          "owner": "D16"
+        },
+        {
+          "component": "CloudMixingConsole",
+          "type": "Feature module",
+          "purpose": "Multi-track mixing",
+          "used_by": "/app/studio/audio",
+          "dependencies": "AudioService",
+          "owner": "D16"
+        },
+        {
+          "component": "AIMasteringEngine",
+          "type": "Domain service",
+          "purpose": "AI mastering",
+          "used_by": "/app/studio/mastering",
+          "dependencies": "AIService, AudioService",
+          "owner": "D16"
+        },
+        {
+          "component": "StemSeparator",
+          "type": "Domain service",
+          "purpose": "AI stem separation",
+          "used_by": "/app/studio/stem",
+          "dependencies": "AIService",
+          "owner": "D16"
+        },
+        {
+          "component": "AICoPilot",
+          "type": "Feature module",
+          "purpose": "AI creative assistant",
+          "used_by": "/app/studio/ai",
+          "dependencies": "AIService",
+          "owner": "D16"
+        },
+        {
+          "component": "CanvasGenerator",
+          "type": "Feature module",
+          "purpose": "Animated canvas",
+          "used_by": "/app/studio/canvas",
+          "dependencies": "AIService",
+          "owner": "D16"
+        },
+        {
+          "component": "PromoVideoMaker",
+          "type": "Feature module",
+          "purpose": "Promotional video",
+          "used_by": "/app/studio/video",
+          "dependencies": "VideoService",
+          "owner": "D16"
+        },
+        {
+          "component": "MerchandiseManager",
+          "type": "Feature module",
+          "purpose": "Product catalog",
+          "used_by": "/app/catalog/merch",
+          "dependencies": "CommerceService",
+          "owner": "D7"
+        },
+        {
+          "component": "PODConfigurator",
+          "type": "Feature module",
+          "purpose": "Print-on-demand setup",
+          "used_by": "/app/catalog/merch",
+          "dependencies": "CommerceService",
+          "owner": "D7"
+        },
+        {
+          "component": "StorefrontLayoutCurator",
+          "type": "Feature module",
+          "purpose": "Storefront design",
+          "used_by": "/app/settings/storefront",
+          "dependencies": "CommerceService",
+          "owner": "D7"
+        },
+        {
+          "component": "PreOrderEngine",
+          "type": "Feature module",
+          "purpose": "Pre-order campaigns",
+          "used_by": "/app/catalog/merch",
+          "dependencies": "CommerceService",
+          "owner": "D7"
+        }
+      ]
+    },
+    {
+      "context": "Podcast",
+      "components": [
+        {
+          "component": "PodcastManager",
+          "type": "Feature module",
+          "purpose": "Podcast show management",
+          "used_by": "/app/catalog/podcast",
+          "dependencies": "PodcastService",
+          "owner": "D27"
+        },
+        {
+          "component": "EpisodeUploader",
+          "type": "Feature module",
+          "purpose": "Episode management",
+          "used_by": "PodcastManager",
+          "dependencies": "PodcastService, MediaService",
+          "owner": "D17/D27"
+        },
+        {
+          "component": "RSSGenerator",
+          "type": "Feature module",
+          "purpose": "RSS feed generation",
+          "used_by": "/app/catalog/podcast/[id]/rss",
+          "dependencies": "PodcastService",
+          "owner": "D27"
+        },
+        {
+          "component": "PrivateFeedManager",
+          "type": "Feature module",
+          "purpose": "Private podcast management",
+          "used_by": "/app/catalog/podcast/[id]/private",
+          "dependencies": "PodcastService",
+          "owner": "D27"
+        },
+        {
+          "component": "WaveformEditor",
+          "type": "Feature module",
+          "purpose": "DAI cue point editing",
+          "used_by": "/app/catalog/podcast/[id]/episode/[id]/dai",
+          "dependencies": "PodcastService",
+          "owner": "D27"
+        },
+        {
+          "component": "TranscriptionEngine",
+          "type": "Feature module",
+          "purpose": "AI transcription",
+          "used_by": "/app/catalog/podcast/[id]/episode/[id]/transcript",
+          "dependencies": "PodcastService, AIService",
+          "owner": "D16/D27"
+        }
+      ]
+    }
+  ]
+}

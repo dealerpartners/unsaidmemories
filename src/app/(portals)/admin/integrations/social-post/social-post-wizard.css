@@ -1,0 +1,461 @@
+/* Create a Social Post wizard — scoped styles (spw- prefix), following
+   the Connect a Service / Publish wizard stylesheets. Colors follow
+   the owner's fabric palette: ink #202126, primary purple #007c7d.
+   Readable-text rule: every control label is dark ink on light or
+   white on the purple button — never faded gray. Muted color is used
+   only for non-clickable metadata (counts, hints). */
+
+.spw-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  color: #202126;
+  font-family: "DM Sans", system-ui, sans-serif;
+}
+
+.spw-head h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.spw-head p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #3f4048;
+  max-width: 640px;
+}
+
+/* ---- Stepper ---- */
+.spw-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 0;
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #e4e4ea;
+  border-radius: 12px;
+}
+.spw-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #202126;
+}
+.spw-step:not(:last-child)::after {
+  content: "›";
+  margin: 0 10px;
+  color: #202126;
+  font-weight: 700;
+}
+.spw-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #202126;
+  background: #fff;
+  color: #202126;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex: none;
+}
+.spw-step.current .spw-step-num {
+  border-color: #007c7d;
+  background: #007c7d;
+  color: #fff;
+}
+.spw-step.current .spw-step-label {
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.spw-step.done .spw-step-num {
+  border-color: #22754a;
+  background: #22754a;
+  color: #fff;
+}
+.spw-step button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #202126;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spw-step button:hover .spw-step-label {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.spw-step-next {
+  font-size: 11px;
+  font-weight: 700;
+  color: #202126;
+  background: #fdf6e3;
+  border: 1px solid #d9a441;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* ---- Panel ---- */
+.spw-panel {
+  background: #fff;
+  border: 1px solid #e4e4ea;
+  border-radius: 12px;
+  padding: 20px;
+}
+.spw-panel h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.spw-panel .spw-lede {
+  margin: 0 0 16px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #3f4048;
+}
+
+/* ---- Buttons ---- */
+.spw-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.spw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #c9c9d2;
+  color: #202126;
+  border-radius: 9px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: inherit;
+}
+.spw-btn:hover {
+  background: #f4f4f8;
+}
+.spw-btn-primary {
+  background: #007c7d;
+  border-color: #007c7d;
+  color: #fff;
+}
+.spw-btn-primary:hover {
+  background: #00666a;
+}
+.spw-btn:disabled {
+  background: #eceaf6;
+  border-color: #c9c9d2;
+  color: #202126;
+  cursor: not-allowed;
+}
+
+/* ---- States ---- */
+.spw-error {
+  background: #fdecea;
+  border: 1px solid #e5a49f;
+  color: #8f1d18;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.spw-note {
+  background: #f4f2ff;
+  border: 1px solid #d9d2fa;
+  color: #202126;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 16px;
+}
+.spw-empty {
+  font-size: 13px;
+  color: #3f4048;
+  line-height: 1.55;
+  padding: 12px 0;
+}
+.spw-field-hint {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #3f4048;
+  margin: 10px 0 0;
+}
+
+/* ---- Forms + choices ----
+   All control labels dark ink #202126 in every state — selection is
+   shown by border/background/weight, never by fading text. */
+.spw-field {
+  margin-bottom: 14px;
+}
+.spw-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #202126;
+  margin-bottom: 5px;
+}
+.spw-input,
+.spw-select,
+.spw-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #c9c9d2;
+  border-radius: 9px;
+  padding: 9px 11px;
+  font-size: 13px;
+  color: #202126;
+  background: #fff;
+  font-family: inherit;
+}
+.spw-textarea {
+  line-height: 1.55;
+  resize: vertical;
+}
+.spw-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.spw-choice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px solid #d8d8e0;
+  border-radius: 10px;
+  padding: 11px 13px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #202126;
+  cursor: pointer;
+  background: #fff;
+}
+.spw-choice input {
+  margin-top: 2px;
+  flex: none;
+}
+.spw-choice .spw-choice-title {
+  display: block;
+  font-weight: 700;
+  color: #202126;
+}
+.spw-choice-selected {
+  border-color: #007c7d;
+  background: #f4f2ff;
+}
+.spw-choice-disabled {
+  cursor: not-allowed;
+  background: #f7f7fa;
+  color: #202126;
+}
+
+/* ---- Step 1 — product picker ---- */
+.spw-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.spw-product {
+  text-align: left;
+  background: #fff;
+  border: 1px solid #d8d8e0;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  font: inherit;
+  color: #202126;
+  width: 100%;
+}
+.spw-product:hover {
+  border-color: #007c7d;
+}
+.spw-product-selected {
+  border-color: #007c7d;
+  background: #f4f2ff;
+  box-shadow: 0 0 0 1px #007c7d;
+}
+.spw-product img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 8px;
+}
+.spw-product .spw-product-name {
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0 0 2px;
+}
+.spw-product .spw-product-link {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #3f4048;
+  margin: 0;
+  word-break: break-all;
+}
+.spw-no-photo {
+  height: 130px;
+  border-radius: 8px;
+  background: #f4f4f8;
+  border: 1px solid #e4e4ea;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: #202126;
+  margin-bottom: 8px;
+}
+
+/* ---- Step 2 — previews + meters ---- */
+.spw-write-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 760px) {
+  .spw-write-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.spw-previews {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.spw-preview {
+  border: 1px solid #d8d8e0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #202126;
+}
+.spw-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.spw-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.spw-preview-name {
+  font-weight: 700;
+  color: #202126;
+}
+.spw-preview img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+  margin-bottom: 8px;
+}
+.spw-preview-text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.spw-preview-link {
+  margin: 4px 0 0;
+  color: #007c7d;
+  word-break: break-all;
+}
+.spw-preview-empty {
+  margin: 0;
+  color: #3f4048;
+}
+.spw-meter {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #202126;
+}
+.spw-meter-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #eceaf6;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.spw-meter-fill {
+  height: 100%;
+  background: #007c7d;
+}
+.spw-meter-over .spw-meter-fill {
+  background: #b3261e;
+}
+.spw-meter-over {
+  color: #8f1d18;
+  font-weight: 700;
+}
+
+/* ---- Step 3 — account pickers ---- */
+.spw-account-select {
+  margin-top: 6px;
+  max-width: 320px;
+}
+.spw-connect-line {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #202126;
+}
+.spw-connect-line a {
+  color: #007c7d;
+  font-weight: 700;
+}
+
+/* ---- Step 5 — read-only summary ---- */
+.spw-summary {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  border: 1px solid #d8d8e0;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 6px;
+}
+.spw-summary img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex: none;
+}
+.spw-summary dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  font-size: 13px;
+}
+.spw-summary dt {
+  font-weight: 700;
+  color: #202126;
+}
+.spw-summary dd {
+  margin: 0;
+  color: #202126;
+  white-space: pre-wrap;
+  word-break: break-word;
+}

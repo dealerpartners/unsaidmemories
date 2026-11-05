@@ -1,0 +1,78 @@
+/* Accounting module — extends the shared fabric admin tokens, no one-off styling.
+ * This frame is the original module-sidebar pattern the Orders and CRM
+ * frames were modeled on; the rules below also carry the rollout
+ * conformance pass (2026-10-30): owner readable-text law — sidebar
+ * items are full ink in every state, the active item shown by
+ * background + weight, never by fading or recoloring the others. */
+.acct-shell { display: flex; gap: 24px; align-items: flex-start; }
+.acct-side {
+  width: 220px; flex: 0 0 220px; background: #fff; border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px 10px; position: sticky; top: 88px;
+}
+.acct-side-title { font-family: "Space Grotesk", "DM Sans", sans-serif; font-weight: 700; font-size: 15px; padding: 0 10px 10px; color: var(--ink); }
+.acct-side-group { margin-bottom: 14px; }
+.acct-side-section { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0 10px 4px; }
+.acct-side-item { display: block; padding: 7px 10px; border-radius: 8px; color: var(--ink); font-size: 13px; text-decoration: none; }
+.acct-side-item:hover { background: #e0f2f2; }
+.acct-side-item.active { background: #e0f2f2; font-weight: 700; }
+.acct-body { flex: 1; min-width: 0; }
+/* The sticky header is each page's OWN title bar (.fabric-page-head,
+ * rendered by the accounting PageHead with .acct-head): the frame
+ * makes it sticky at the top of the scrolling column — no page is
+ * edited and no title is duplicated. top:-26px tucks the bar flush
+ * against the shell pane's top edge (the pane pads 26px); the
+ * offsetting negative margin / top padding keep the bar's in-flow
+ * position pixel-identical until it sticks, and the bottom padding
+ * (12px + the kept 12px margin = the original 24px) gives it a
+ * covered cushion while content scrolls beneath. Same rule as the
+ * Orders frame (orders-shell.css).
+ * The background MUST be the literal canvas color, never var(--soft):
+ * --soft is defined only on .fabric-admin (admin.css), and FabricShell
+ * renders that class only in the full shell — workspace tab frames
+ * render .f-embed with no .fabric-admin ancestor, so the variable is
+ * undefined there, the declaration is invalid, and the stuck bar came
+ * out transparent: sticky worked, but rows streamed straight through
+ * the title (verified in a real tab frame, 2026-10-30). #f7f7fa is
+ * --soft's exact value and the canvas both contexts paint (.f-view
+ * in the shell, .f-embed in frames), so the bar is opaque in both. */
+.acct-body .fabric-page-head {
+  position: sticky; top: -26px; z-index: 6;
+  background: #f7f7fa;
+  margin-top: -38px; padding-top: 38px;
+  padding-bottom: 12px; margin-bottom: 12px;
+}
+.acct-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.acct-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.acct-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.acct-card { padding: 18px; margin-bottom: 16px; }
+.acct-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.acct-card-head h3 { margin: 0; font-size: 15px; }
+.acct-link { color: var(--purple); font-size: 12px; text-decoration: none; font-weight: 600; }
+.acct-tablewrap { overflow-x: auto; }
+.acct-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.acct-table th { text-align: left; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.acct-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.acct-pill-green { background: #e4f5ec; color: #157347; }
+.acct-pill-red { background: #fde8e8; color: #b3261e; }
+.acct-pill-amber { background: #fdf3e0; color: #96660a; }
+.acct-pill-gray { background: #eef0f3; color: #55565f; }
+.acct-pill-purple { background: var(--purple2); color: var(--purple); }
+.acct-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.acct-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: var(--muted); }
+.acct-field input, .acct-field select, .acct-line-row input {
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px; color: var(--ink); background: #fff; font-family: inherit;
+}
+.acct-form-foot { display: flex; align-items: center; gap: 12px; grid-column: 1 / -1; }
+.acct-err { color: #b3261e; font-size: 12px; }
+.acct-ok { color: #157347; font-size: 12px; }
+.acct-btnwrap { display: inline-flex; align-items: center; gap: 6px; margin: 1px 2px; }
+.acct-lines { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; }
+.acct-line-row { display: grid; grid-template-columns: 1fr 90px 130px; gap: 8px; }
+.acct-row-actions { display: flex; flex-wrap: wrap; gap: 2px; }
+.acct-filterbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.acct-filterbar a { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; text-decoration: none; color: var(--ink); background: #fff; }
+.acct-filterbar a.active { background: var(--purple); color: #fff; border-color: var(--purple); }
+.acct-total-row td { font-weight: 700; border-top: 2px solid var(--line); }
+@media (max-width: 900px) { .acct-shell { flex-direction: column; } .acct-side { width: 100%; flex: none; position: static; } .acct-grid2, .acct-grid3 { grid-template-columns: 1fr; } }
+/* Invoices, statements and reports print from inside this frame — never the sidebar. */
+@media print { .acct-side { display: none; } }

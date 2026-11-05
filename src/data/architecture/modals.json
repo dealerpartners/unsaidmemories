@@ -1,0 +1,108 @@
+[
+  {
+    "name": "DeleteContentModal",
+    "fields": {
+      "**type**": "Confirmation (Destructive)",
+      "**trigger**": "\\\"Delete\\\" action on content",
+      "**purpose**": "Confirm irreversible content deletion request",
+      "**props**": "assetId: UUID, assetTitle: string, canDeletePermanently: boolean, hasActiveObligations: boolean",
+      "**fields**": "confirmationText: string (must equal asset title), reason: string (required for moderation-triggered removal)",
+      "**validation**": "Confirmation text must match asset title; reason required for moderation cases",
+      "**actions**": "Cancel, Archive Instead, Request Permanent Deletion",
+      "**api**": "POST /v1/content/{id}/deletion-requests",
+      "**states**": "idle → validating → submitting → success → error → permissionDenied",
+      "**rules**": "Creator may archive content; permanent deletion request removes from public immediately; 30-day recovery window; published releases with active royalty obligations cannot be deleted; audit event created",
+      "**response**": "{ status: \\\"delete_pending\\\", deletionRequestedAt: string, purgeScheduledAt: string, canRestoreUntil: string }"
+    }
+  },
+  {
+    "name": "ApprovePayoutModal",
+    "fields": {
+      "**type**": "Approval (Dual-authorization)",
+      "**trigger**": "\\\"Approve\\\" on pending payout",
+      "**purpose**": "Approve payout after review",
+      "**props**": "payoutId: string, amount: number, recipient: string, requiresSecondApproval: boolean",
+      "**fields**": "Review payout details; approvalLevel: 1 \\| 2 (auto-calculated), notes: string (required for \\>\\$10k)",
+      "**validation**": "Level 1 approver cannot be same as Level 2 approver; approver cannot approve own payout",
+      "**actions**": "Cancel, Approve, Reject",
+      "**api**": "PUT /v1/finance/payouts/{id}/approve",
+      "**states**": "idle → confirming → submitting → success → error",
+      "**rules**": "Payouts \\>\\$10k require dual approval; approver cannot approve own payout; audit event created"
+    }
+  },
+  {
+    "name": "PurchaseTicketModal",
+    "fields": {
+      "**type**": "Checkout",
+      "**trigger**": "\\\"Buy Ticket\\\" on live stream or event",
+      "**purpose**": "Purchase access to paid live event",
+      "**props**": "eventId: string, tiers: TicketTier[], onComplete: (ticket: Ticket) =\\> void",
+      "**fields**": "tierId: select, quantity: number (1-10), paymentMethodId: select",
+      "**validation**": "Tier must be selected; payment method required; quantity \\> 0",
+      "**actions**": "Cancel, Purchase",
+      "**api**": "POST /v1/live-streams/{streamId}/ticket-checkouts",
+      "**states**": "idle → validating → submitting → success → error (retry)",
+      "**rules**": "Payment authorized; ticket issued after webhook confirmation; QR code generated; calendar reminder auto-added",
+      "**idempotency**": "Idempotency-Key required"
+    }
+  },
+  {
+    "name": "StartBroadcastModal",
+    "fields": {
+      "**type**": "Workflow",
+      "**trigger**": "\\\"Go Live\\\" on /app/live?mode=host",
+      "**purpose**": "Configure and start live broadcast",
+      "**props**": "onStart: (config: BroadcastConfig) =\\> void",
+      "**fields**": "title: string (required), description: string, type: select (standard/listening-party/meet-greet), monetization: toggle",
+      "**validation**": "Title required; type selected; stream key validated",
+      "**actions**": "Cancel, Start Broadcast",
+      "**api**": "POST /v1/live-streams",
+      "**states**": "idle → validating → starting → live (redirects to stream) → error",
+      "**rules**": "Creator must be verified; 16+ age requirement; content policy check"
+    }
+  },
+  {
+    "name": "SubmitReleaseModal",
+    "fields": {
+      "**type**": "Confirmation + Validation",
+      "**trigger**": "\\\"Submit Release\\\" button in wizard",
+      "**purpose**": "Validate and submit release for distribution",
+      "**props**": "releaseId: string, validationResults: ValidationResult[], onSubmit: () =\\> void",
+      "**fields**": "Review required: all validation warnings displayed; confirmAccuracy: toggle (must check \\\"I confirm all metadata is accurate\\\")",
+      "**actions**": "Cancel, Fix Issues, Submit for Distribution",
+      "**api**": "POST /v1/releases/{id}/submit",
+      "**states**": "idle → validating → submitting → success → error",
+      "**rules**": "All required fields must be valid; audio quality checks pass; metadata validation pass; split percentages sum to 100%"
+    }
+  },
+  {
+    "name": "RequestVerificationModal",
+    "fields": {
+      "**type**": "Workflow",
+      "**trigger**": "\\\"Request Verification\\\" on profile",
+      "**purpose**": "Submit artist verification request",
+      "**props**": "userId: string, onComplete: () =\\> void",
+      "**fields**": "legalName: string, artistName: string, taxId: string, documents: file[] (government ID, proof of identity), reason: textarea",
+      "**validation**": "Required: legalName, artistName, documents; document types: JPEG/PDF, max 10MB",
+      "**actions**": "Cancel, Submit Request",
+      "**api**": "POST /v1/verification/requests",
+      "**states**": "idle → validating → uploading → submitting → success → error",
+      "**rules**": "Minimum 10k followers; legal ID must match profile; review queue (1-3 days)",
+      "**audit**": "verification.requested, verification.approved, verification.rejected"
+    }
+  },
+  {
+    "name": "HoldPayoutModal",
+    "fields": {
+      "**type**": "Workflow",
+      "**trigger**": "\\\"Hold\\\" on payout (risk flag)",
+      "**purpose**": "Place hold on payout for review",
+      "**props**": "payoutId: string, riskScore: number, flags: string[]",
+      "**fields**": "reason: string (required), holdDuration: select (24h, 7d, 14d, indefinite), reviewerNotes: textarea",
+      "**actions**": "Cancel, Apply Hold, Escalate",
+      "**api**": "PUT /v1/finance/payouts/{id}/hold",
+      "**states**": "idle → submitting → success → error",
+      "**rules**": "Risk flags require compliance review; holds trigger notification to recipient; escalated holds go to compliance team"
+    }
+  }
+]

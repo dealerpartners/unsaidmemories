@@ -1,0 +1,39 @@
+
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <a href="#" class="wordmark">UnSaid Memories</a>
+  <div class="brand-note">THE THINGS WE FEEL. THE THINGS WE KEEP.</div>
+  <nav class="nav primary-nav" aria-label="Marketplace navigation">
+    <button class="active" data-category="All Products"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg></span><span>Marketplace home</span><span class="nav-count">↗</span></button>
+  </nav>
+  <div class="workspace-label">SHOP DEPARTMENTS</div>
+  <nav class="nav taxonomy-nav" id="sideDepartments" aria-label="Shop departments"></nav>
+  <div class="workspace-label">SHOP BY EDIT</div>
+  <nav class="nav">
+    <button data-category="Best sellers"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="m12 3 2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4Z"/></svg></span><span>Best sellers</span></button>
+    <button data-category="New arrivals"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="m12 3 1.8 6.2L20 12l-6.2 2.8L12 21l-1.8-6.2L4 12l6.2-2.8Z"/></svg></span><span>New arrivals</span></button>
+    <button data-category="Gift Sets"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.5-2.5C10 6 12 7 12 7Zm0 0h4.5A2.5 2.5 0 1 0 14 4.5C14 6 12 7 12 7Z"/></svg></span><span>Bundles & gifts</span></button>
+    <button data-category="Personalized"><span class="nav-ico"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/></svg></span><span>Personalized</span></button>
+  </nav>
+  <div class="workspace-label">RELATIONSHIPS &amp; COLLECTIONS</div>
+  <nav class="nav" id="sideCollections" aria-label="Relationships and collections"></nav>
+</aside>
+<main>
+<header class="topbar"><button class="mobile-menu" id="menuBtn" aria-label="Open navigation">☰</button><label class="searchbox"><span>⌕</span><input id="searchInput" placeholder="Search products, collections, categories…" type="search"></label><div class="top-actions"><button class="icon-button" id="wishlistBtn" aria-label="Saved items">♡</button><button class="icon-button" id="cartBtn" aria-label="Shopping bag">♧<span class="count" id="cartCount">0</span></button><div class="avatar">u.</div></div></header>
+<div class="content">
+<div class="crumb" id="breadcrumbs">MARKETPLACE&nbsp; / &nbsp;ALL PRODUCTS</div>
+<div id="marketView" class="market-view">
+<section class="promo"><img class="promo-img" src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1800&q=85" alt="Colorful art and creative objects"><div class="promo-copy"><div class="eyebrow">THE UNSAID EDIT / NEW ARRIVALS</div><h1 class="serif">Meaningful things.<br>Made for real life.</h1><p>Explore apparel, objects, keepsakes and everyday essentials designed around the people who matter.</p><button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">EXPLORE THE MARKETPLACE&nbsp; ↗</button></div><div class="promo-meta">SHOP THE COLLECTION&nbsp; / &nbsp;01—04</div></section>
+<div class="section-head"><div><h2 class="serif">Shop the marketplace</h2><p>Browse the catalog by product type, collection or connection.</p></div><a href="#products" class="plain-link">VIEW ALL PRODUCTS ↗</a></div>
+<div class="category-strip" id="chips"><button class="chip active" data-category="All Products">All products</button><button class="chip" data-category="Apparel">Apparel</button><button class="chip" data-category="Accessories">Accessories</button><button class="chip" data-category="Drinkware">Drinkware</button><button class="chip" data-category="Wall Art">Wall art</button><button class="chip" data-category="Home & Living">Home & living</button><button class="chip" data-category="Keepsakes">Keepsakes</button><button class="chip" data-category="Relationships">Relationships</button><button class="chip" data-category="UnSaid Holidays">UnSaid Holidays</button></div>
+<div class="listing-toolbar" id="products"><div><h2 class="serif" id="listingTitle">All products</h2><div class="listing-meta" id="resultCount">Showing 1–8 of 24 products</div></div><div class="toolbar-right"><button class="filter-button" onclick="toast('Filter panel placeholder — connect to catalog attributes')">☷ &nbsp; Filters</button><select class="sort-select" id="sortSelect" aria-label="Sort products"><option value="featured">Sort by: Featured</option><option value="low">Price: Low to high</option><option value="high">Price: High to low</option><option value="name">Name: A to Z</option></select></div></div>
+<div class="grid" id="productGrid"></div><div class="pagination" id="pagination"></div>
+<section class="ad-banner"><div><h3 class="serif">Built around the people who matter.</h3><p>Explore collections for your chosen family, day ones, and every connection in between.</p></div><button onclick="setCategory('Relationships')">EXPLORE COLLECTIONS ↗</button></section>
+<footer class="footer"><span>© 2026 UNSAID MARKETPLACE</span><span>PRODUCTS · COLLECTIONS · MEANING</span><span>SUPPORT &nbsp; / &nbsp; SHIPPING &nbsp; / &nbsp; RETURNS</span></footer>
+</div>
+<section class="detail-view" id="detailView"></section>
+</div>
+</main>
+</div>
+<div class="overlay" id="quickModal" role="dialog" aria-modal="true" aria-labelledby="modalName"><div class="modal"><button class="close" id="closeModal" aria-label="Close">×</button><img class="modal-image" id="modalImage" alt="Product preview" src=""><div class="modal-body"><div class="eyebrow" id="modalCategory">PRODUCT</div><h2 id="modalName" class="serif">Product name</h2><div class="modal-price" id="modalPrice">$0.00</div><p class="modal-desc" id="modalDesc"></p><span class="label">SELECT OPTION</span><div class="option-row" id="options"><button class="option selected">Standard</button><button class="option">Gift-ready</button><button class="option">Personalized</button></div><div class="qtyrow"><span style="font-size:10px;color:var(--muted)">Quantity</span><div class="qty"><button id="minus">−</button><span id="qty">1</span><button id="plus">+</button></div></div><button class="add-btn" id="addToCart">ADD TO BAG</button><div class="modal-note">Product options shown for prototype · Checkout not connected</div></div></div></div>
+<div class="toast" id="toast"></div>

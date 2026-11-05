@@ -1,0 +1,570 @@
+[
+  {
+    "feature": "For You Feed",
+    "page_per_workflow": "/app/discover",
+    "modal": "\\-",
+    "domain_owner": "D2: Feed & Discovery",
+    "api_operation": "GET /v1/feed/for-you",
+    "primary_entity": "FeedItem"
+  },
+  {
+    "feature": "Following Feed",
+    "page_per_workflow": "/app/discover",
+    "modal": "\\-",
+    "domain_owner": "D2: Feed & Discovery",
+    "api_operation": "GET /v1/feed/following",
+    "primary_entity": "FeedItem"
+  },
+  {
+    "feature": "Universal Search",
+    "page_per_workflow": "/app/search",
+    "modal": "\\-",
+    "domain_owner": "D14: Search & Indexing",
+    "api_operation": "GET /v1/search",
+    "primary_entity": "SearchIndex"
+  },
+  {
+    "feature": "Like Content",
+    "page_per_workflow": "In-card",
+    "modal": "\\-",
+    "domain_owner": "D3: Content & Media Publishing",
+    "api_operation": "POST /v1/interactions/like",
+    "primary_entity": "Interaction"
+  },
+  {
+    "feature": "Comment",
+    "page_per_workflow": "In-card",
+    "modal": "\\-",
+    "domain_owner": "D3: Content & Media Publishing",
+    "api_operation": "POST /v1/interactions/comment",
+    "primary_entity": "Comment"
+  },
+  {
+    "feature": "Share Content",
+    "page_per_workflow": "In-card",
+    "modal": "\\-",
+    "domain_owner": "D3: Content & Media Publishing",
+    "api_operation": "POST /v1/interactions/share",
+    "primary_entity": "Share"
+  },
+  {
+    "feature": "Watch Live",
+    "page_per_workflow": "/app/live/[id]",
+    "modal": "\\-",
+    "domain_owner": "D5: Live Broadcasting",
+    "api_operation": "GET /v1/live-streams/{id}",
+    "primary_entity": "LiveStream"
+  },
+  {
+    "feature": "Host Live",
+    "page_per_workflow": "/app/live?mode=host",
+    "modal": "StartBroadcastModal",
+    "domain_owner": "D5: Live Broadcasting",
+    "api_operation": "POST /v1/live-streams",
+    "primary_entity": "LiveStream"
+  },
+  {
+    "feature": "Purchase Ticket",
+    "page_per_workflow": "/app/live/[id]",
+    "modal": "PurchaseTicketModal",
+    "domain_owner": "D11: Live Events & Tour Ops",
+    "api_operation": "POST /v1/checkout/ticket",
+    "primary_entity": "Ticket"
+  },
+  {
+    "feature": "Create Post",
+    "page_per_workflow": "/app/create",
+    "modal": "PublishPostModal",
+    "domain_owner": "D3: Content & Media Publishing",
+    "api_operation": "POST /v1/posts",
+    "primary_entity": "Post"
+  },
+  {
+    "feature": "Schedule Post",
+    "page_per_workflow": "/app/create?tab=schedule",
+    "modal": "\\-",
+    "domain_owner": "D3: Content & Media Publishing",
+    "api_operation": "POST /v1/posts/{id}/schedule",
+    "primary_entity": "ScheduledPost"
+  },
+  {
+    "feature": "AI Remix",
+    "page_per_workflow": "/app/create?type=ai-remix",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "POST /v1/studio/ai/remix",
+    "primary_entity": "RemixJob"
+  },
+  {
+    "feature": "Direct Message",
+    "page_per_workflow": "/app/inbox",
+    "modal": "\\-",
+    "domain_owner": "D4: Relational Mechanics & Messaging",
+    "api_operation": "POST /v1/messages",
+    "primary_entity": "Message"
+  },
+  {
+    "feature": "Broadcast",
+    "page_per_workflow": "/app/studio/fans/broadcast",
+    "modal": "\\-",
+    "domain_owner": "D4: Relational Mechanics & Messaging",
+    "api_operation": "POST /v1/messages/broadcast",
+    "primary_entity": "Broadcast"
+  },
+  {
+    "feature": "Notification Preferences",
+    "page_per_workflow": "/app/settings/notifications",
+    "modal": "\\-",
+    "domain_owner": "D19: Notifications",
+    "api_operation": "PUT /v1/notifications/preferences",
+    "primary_entity": "NotificationPreference"
+  },
+  {
+    "feature": "Follow",
+    "page_per_workflow": "/app/profile/[id]",
+    "modal": "ConfirmUnfollowModal",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "PUT /v1/profiles/{id}/followers/me",
+    "primary_entity": "Follow"
+  },
+  {
+    "feature": "Request Verification",
+    "page_per_workflow": "/app/profile/settings/verification",
+    "modal": "RequestVerificationModal",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "POST /v1/verification/requests",
+    "primary_entity": "VerificationRequest"
+  },
+  {
+    "feature": "Create Playlist",
+    "page_per_workflow": "/app/profile/library",
+    "modal": "\\-",
+    "domain_owner": "D7: Wallet & Consumer Commerce",
+    "api_operation": "POST /v1/playlists",
+    "primary_entity": "Playlist"
+  },
+  {
+    "feature": "Delete Playlist",
+    "page_per_workflow": "/app/profile/library",
+    "modal": "DeletePlaylistModal",
+    "domain_owner": "D7: Wallet & Consumer Commerce",
+    "api_operation": "DELETE /v1/playlists/{id}",
+    "primary_entity": "Playlist"
+  },
+  {
+    "feature": "Content Visibility",
+    "page_per_workflow": "/app/studio/governance",
+    "modal": "\\-",
+    "domain_owner": "D6: Governance & Enforcement",
+    "api_operation": "PUT /v1/governance/visibility/{assetId}",
+    "primary_entity": "VisibilityConfig"
+  },
+  {
+    "feature": "Delete Content",
+    "page_per_workflow": "/app/studio/governance/takedown",
+    "modal": "DeleteContentModal",
+    "domain_owner": "D6: Governance & Enforcement",
+    "api_operation": "POST /v1/content/{id}/deletion-requests",
+    "primary_entity": "DeletionRequest"
+  },
+  {
+    "feature": "Comment Moderation",
+    "page_per_workflow": "/app/studio/governance/moderation",
+    "modal": "\\-",
+    "domain_owner": "D6: Governance & Enforcement",
+    "api_operation": "PUT /v1/comments/{id}/moderate",
+    "primary_entity": "CommentFlag"
+  },
+  {
+    "feature": "Creator Analytics",
+    "page_per_workflow": "/app/studio/analytics",
+    "modal": "\\-",
+    "domain_owner": "D15: Analytics & Telemetry",
+    "api_operation": "GET /v1/analytics/streaming",
+    "primary_entity": "AnalyticsEvent"
+  },
+  {
+    "feature": "Release Wizard",
+    "page_per_workflow": "/app/catalog/release",
+    "modal": "SubmitReleaseModal",
+    "domain_owner": "D8: Catalog & Distribution",
+    "api_operation": "POST /v1/releases",
+    "primary_entity": "Release"
+  },
+  {
+    "feature": "Submit Release",
+    "page_per_workflow": "/app/catalog/release",
+    "modal": "SubmitReleaseModal",
+    "domain_owner": "D8: Catalog & Distribution",
+    "api_operation": "POST /v1/releases/{id}/submit",
+    "primary_entity": "Release"
+  },
+  {
+    "feature": "DSP Distribution",
+    "page_per_workflow": "/app/catalog/distribute",
+    "modal": "\\-",
+    "domain_owner": "D8: Catalog & Distribution",
+    "api_operation": "POST /v1/distribution/submit",
+    "primary_entity": "DistributionJob"
+  },
+  {
+    "feature": "Lyric Management",
+    "page_per_workflow": "/app/catalog/lyrics",
+    "modal": "\\-",
+    "domain_owner": "D8: Catalog & Distribution",
+    "api_operation": "PUT /v1/lyrics/{releaseId}",
+    "primary_entity": "Lyrics"
+  },
+  {
+    "feature": "Royalty Statement",
+    "page_per_workflow": "/app/finance/royalties",
+    "modal": "\\-",
+    "domain_owner": "D9: Royalties, Splits & Finance",
+    "api_operation": "POST /v1/finance/statements",
+    "primary_entity": "RoyaltyStatement"
+  },
+  {
+    "feature": "Approve Payout",
+    "page_per_workflow": "/app/finance/payouts",
+    "modal": "ApprovePayoutModal",
+    "domain_owner": "D9: Royalties, Splits & Finance",
+    "api_operation": "PUT /v1/finance/payouts/{id}/approve",
+    "primary_entity": "Payout"
+  },
+  {
+    "feature": "Hold Payout",
+    "page_per_workflow": "/app/finance/payouts",
+    "modal": "HoldPayoutModal",
+    "domain_owner": "D9: Royalties, Splits & Finance",
+    "api_operation": "PUT /v1/finance/payouts/{id}/hold",
+    "primary_entity": "Payout"
+  },
+  {
+    "feature": "Fan CRM",
+    "page_per_workflow": "/app/growth/crm",
+    "modal": "\\-",
+    "domain_owner": "D15: Analytics & Telemetry",
+    "api_operation": "GET /v1/growth/crm/fans",
+    "primary_entity": "FanSegment"
+  },
+  {
+    "feature": "Social Publish",
+    "page_per_workflow": "/app/growth/social",
+    "modal": "\\-",
+    "domain_owner": "D13: Social Distribution & Syndication",
+    "api_operation": "POST /v1/syndication/social/publish",
+    "primary_entity": "SocialPost"
+  },
+  {
+    "feature": "Smart Link",
+    "page_per_workflow": "/app/growth/links",
+    "modal": "\\-",
+    "domain_owner": "D13: Social Distribution & Syndication",
+    "api_operation": "POST /v1/syndication/smart-links",
+    "primary_entity": "SmartLink"
+  },
+  {
+    "feature": "EPK Generator",
+    "page_per_workflow": "/app/growth/web/epk",
+    "modal": "\\-",
+    "domain_owner": "D12: Editorial & Marketing CMS",
+    "api_operation": "POST /v1/cms/epk",
+    "primary_entity": "EPK"
+  },
+  {
+    "feature": "Team Management",
+    "page_per_workflow": "/app/roster/team",
+    "modal": "\\-",
+    "domain_owner": "D10: Roster, Team & Org",
+    "api_operation": "POST /v1/roster/team/invite",
+    "primary_entity": "TeamMember"
+  },
+  {
+    "feature": "Contract Management",
+    "page_per_workflow": "/app/roster/contracts",
+    "modal": "\\-",
+    "domain_owner": "D25: Legal, Policy & Compliance",
+    "api_operation": "POST /v1/legal/contracts",
+    "primary_entity": "LegalContract"
+  },
+  {
+    "feature": "Tour Management",
+    "page_per_workflow": "/app/roster/tours",
+    "modal": "\\-",
+    "domain_owner": "D11: Live Events & Tour Ops",
+    "api_operation": "POST /v1/tours",
+    "primary_entity": "Tour"
+  },
+  {
+    "feature": "Cloud Mixing",
+    "page_per_workflow": "/app/studio/audio",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "POST /v1/studio/mix",
+    "primary_entity": "MixSession"
+  },
+  {
+    "feature": "AI Mastering",
+    "page_per_workflow": "/app/studio/mastering",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "POST /v1/studio/master",
+    "primary_entity": "MasteringJob"
+  },
+  {
+    "feature": "Stem Separation",
+    "page_per_workflow": "/app/studio/stem",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "POST /v1/studio/stem-separate",
+    "primary_entity": "StemJob"
+  },
+  {
+    "feature": "AI Composition",
+    "page_per_workflow": "/app/studio/ai/composition",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "POST /v1/studio/ai/compose",
+    "primary_entity": "CompositionJob"
+  },
+  {
+    "feature": "Merchandise Management",
+    "page_per_workflow": "/app/catalog/merch",
+    "modal": "\\-",
+    "domain_owner": "D7: Wallet & Consumer Commerce",
+    "api_operation": "POST /v1/commerce/products",
+    "primary_entity": "Product"
+  },
+  {
+    "feature": "Pre-Order",
+    "page_per_workflow": "/app/catalog/merch/pre-order",
+    "modal": "\\-",
+    "domain_owner": "D7: Wallet & Consumer Commerce",
+    "api_operation": "POST /v1/commerce/pre-order",
+    "primary_entity": "PreOrderCampaign"
+  },
+  {
+    "feature": "Podcast Show",
+    "page_per_workflow": "/app/catalog/podcast",
+    "modal": "\\-",
+    "domain_owner": "D27: Podcast Network",
+    "api_operation": "POST /v1/podcast/shows",
+    "primary_entity": "PodcastShow"
+  },
+  {
+    "feature": "Podcast Episode",
+    "page_per_workflow": "/app/catalog/podcast/[id]/episodes",
+    "modal": "\\-",
+    "domain_owner": "D27: Podcast Network",
+    "api_operation": "POST /v1/podcast/shows/{id}/episodes",
+    "primary_entity": "PodcastEpisode"
+  },
+  {
+    "feature": "Private Podcast",
+    "page_per_workflow": "/app/catalog/podcast/[id]/private",
+    "modal": "\\-",
+    "domain_owner": "D27: Podcast Network",
+    "api_operation": "POST /v1/podcast/shows/{id}/private/feeds",
+    "primary_entity": "SubscriberFeed"
+  },
+  {
+    "feature": "DAI Markers",
+    "page_per_workflow": "/app/catalog/podcast/[id]/episode/[id]/dai",
+    "modal": "\\-",
+    "domain_owner": "D27: Podcast Network",
+    "api_operation": "PUT /v1/podcast/episodes/{id}/dai/markers",
+    "primary_entity": "AdMarker"
+  },
+  {
+    "feature": "AI Transcription",
+    "page_per_workflow": "/app/catalog/podcast/[id]/episode/[id]/transcript",
+    "modal": "\\-",
+    "domain_owner": "D27: Podcast Network",
+    "api_operation": "POST /v1/podcast/episodes/{id}/transcript",
+    "primary_entity": "Transcript"
+  },
+  {
+    "feature": "Campaign Creation",
+    "page_per_workflow": "adnote.musicosy.com/advertise/campaigns/create",
+    "modal": "\\-",
+    "domain_owner": "D22: Advertising Integration",
+    "api_operation": "POST /v1/advertise/campaigns",
+    "primary_entity": "Campaign"
+  },
+  {
+    "feature": "Ad Targeting",
+    "page_per_workflow": "adnote.musicosy.com/advertise/audiences",
+    "modal": "\\-",
+    "domain_owner": "D22: Advertising Integration",
+    "api_operation": "POST /v1/advertise/audiences",
+    "primary_entity": "AudienceSegment"
+  },
+  {
+    "feature": "Creative Upload",
+    "page_per_workflow": "adnote.musicosy.com/advertise/creatives",
+    "modal": "\\-",
+    "domain_owner": "D22: Advertising Integration",
+    "api_operation": "POST /v1/advertise/creatives",
+    "primary_entity": "Creative"
+  },
+  {
+    "feature": "Programmatic SSP",
+    "page_per_workflow": "adnote.musicosy.com/advertise/exchange",
+    "modal": "\\-",
+    "domain_owner": "D22: Advertising Integration",
+    "api_operation": "POST /v1/advertise/exchange/ssp",
+    "primary_entity": "SSPEndpoint"
+  },
+  {
+    "feature": "Lead Management",
+    "page_per_workflow": "adnote.musicosy.com/advertise/leads",
+    "modal": "\\-",
+    "domain_owner": "D22: Advertising Integration",
+    "api_operation": "GET /v1/advertise/leads",
+    "primary_entity": "Lead"
+  },
+  {
+    "feature": "Report Content",
+    "page_per_workflow": "/help/reporting",
+    "modal": "ReportContentModal",
+    "domain_owner": "D23: Trust & Safety Ops",
+    "api_operation": "POST /v1/safety/reports",
+    "primary_entity": "Report"
+  },
+  {
+    "feature": "Support Ticket",
+    "page_per_workflow": "/help/support",
+    "modal": "\\-",
+    "domain_owner": "D24: Support & Admin Operations",
+    "api_operation": "POST /v1/support/tickets",
+    "primary_entity": "Ticket"
+  },
+  {
+    "feature": "API Key Management",
+    "page_per_workflow": "/developers/keys",
+    "modal": "\\-",
+    "domain_owner": "D21: Developer Platform",
+    "api_operation": "POST /v1/developer/keys",
+    "primary_entity": "APIKey"
+  },
+  {
+    "feature": "Webhook Management",
+    "page_per_workflow": "/developers/webhooks",
+    "modal": "\\-",
+    "domain_owner": "D21: Developer Platform",
+    "api_operation": "POST /v1/developer/webhooks",
+    "primary_entity": "WebhookSubscription"
+  },
+  {
+    "feature": "Account Settings",
+    "page_per_workflow": "/app/settings/account",
+    "modal": "\\-",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "PUT /v1/settings/account",
+    "primary_entity": "AccountSettings"
+  },
+  {
+    "feature": "Content Settings",
+    "page_per_workflow": "/app/settings/content",
+    "modal": "\\-",
+    "domain_owner": "D6: Governance & Enforcement",
+    "api_operation": "PUT /v1/settings/content",
+    "primary_entity": "ContentSettings"
+  },
+  {
+    "feature": "Monetization Settings",
+    "page_per_workflow": "/app/settings/monetization",
+    "modal": "\\-",
+    "domain_owner": "D6: Governance & Enforcement",
+    "api_operation": "PUT /v1/settings/monetization",
+    "primary_entity": "MonetizationSettings"
+  },
+  {
+    "feature": "Relationship Settings",
+    "page_per_workflow": "/app/settings/relationships",
+    "modal": "\\-",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "PUT /v1/relationships/hierarchy",
+    "primary_entity": "RelationshipHierarchy"
+  },
+  {
+    "feature": "Player Settings",
+    "page_per_workflow": "/app/settings/player",
+    "modal": "\\-",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "PUT /v1/settings/player",
+    "primary_entity": "PlayerSettings"
+  },
+  {
+    "feature": "Team Settings",
+    "page_per_workflow": "/app/settings/team",
+    "modal": "\\-",
+    "domain_owner": "D10: Roster, Team & Org",
+    "api_operation": "PUT /v1/settings/team",
+    "primary_entity": "TeamSettings"
+  },
+  {
+    "feature": "Payment Settings",
+    "page_per_workflow": "/app/settings/payments",
+    "modal": "\\-",
+    "domain_owner": "D18: Payments & Payouts Infra",
+    "api_operation": "PUT /v1/settings/payments",
+    "primary_entity": "PaymentSettings"
+  },
+  {
+    "feature": "Branding Settings",
+    "page_per_workflow": "/app/settings/branding",
+    "modal": "\\-",
+    "domain_owner": "D12: Editorial & Marketing CMS",
+    "api_operation": "PUT /v1/settings/branding",
+    "primary_entity": "BrandingSettings"
+  },
+  {
+    "feature": "Studio Settings",
+    "page_per_workflow": "/app/settings/studio",
+    "modal": "\\-",
+    "domain_owner": "D16: AI & Audio Intelligence",
+    "api_operation": "PUT /v1/settings/studio",
+    "primary_entity": "StudioSettings"
+  },
+  {
+    "feature": "Distribution Settings",
+    "page_per_workflow": "/app/settings/distribution",
+    "modal": "\\-",
+    "domain_owner": "D8: Catalog & Distribution",
+    "api_operation": "PUT /v1/settings/distribution",
+    "primary_entity": "DistributionSettings"
+  },
+  {
+    "feature": "Compliance Settings",
+    "page_per_workflow": "/app/settings/compliance",
+    "modal": "\\-",
+    "domain_owner": "D25: Legal, Policy & Compliance",
+    "api_operation": "PUT /v1/settings/compliance",
+    "primary_entity": "ComplianceSettings"
+  },
+  {
+    "feature": "Tax Settings",
+    "page_per_workflow": "/app/settings/tax",
+    "modal": "\\-",
+    "domain_owner": "D9: Royalties, Splits & Finance",
+    "api_operation": "PUT /v1/settings/tax",
+    "primary_entity": "TaxSettings"
+  },
+  {
+    "feature": "Verification Settings",
+    "page_per_workflow": "/app/settings/verification",
+    "modal": "\\-",
+    "domain_owner": "D1: Identity & Social Graph",
+    "api_operation": "PUT /v1/settings/verification",
+    "primary_entity": "VerificationSettings"
+  },
+  {
+    "feature": "Organization Settings",
+    "page_per_workflow": "/app/settings/organization",
+    "modal": "\\-",
+    "domain_owner": "D10: Roster, Team & Org",
+    "api_operation": "PUT /v1/settings/organization",
+    "primary_entity": "OrganizationSettings"
+  }
+]

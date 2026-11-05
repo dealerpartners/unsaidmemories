@@ -1,0 +1,42 @@
+/* UnSaid Cookie Notice — adapted from UnSaid Memories cookie-notice.css.
+   Classes are self-prefixed (unsaid-cookie-*); tokens are scoped to the
+   banner root so nothing leaks into the app. UnSaid storefront palette:
+   ink #25222c, muted #79727f, line #e5e1e9, surface #f5f1fa,
+   accent purple #5f4c84, primary button black #25222c. */
+.unsaid-cookie{--ink:#25222c;--muted:#79727f;--line:#e5e1e9;--paper:#fff;--surface:#f5f1fa;--accent:#5f4c84;--serif:Georgia,'Times New Roman',serif;--sans:'DM Sans',ui-sans-serif,system-ui,sans-serif;--mono:'Courier New',monospace}
+.unsaid-cookie-backdrop{position:fixed;inset:0;background:rgba(25,22,31,.6);backdrop-filter:blur(2px);z-index:99998}
+.unsaid-cookie{position:fixed;left:24px;right:24px;bottom:24px;z-index:99999;display:none;font-family:var(--sans);color:var(--ink)}
+.unsaid-cookie.show{display:block}
+.unsaid-cookie-panel{width:min(1120px,100%);margin:auto;background:var(--paper);border:1px solid var(--line);box-shadow:0 24px 70px rgba(23,25,22,.18);padding:25px 28px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center}
+.unsaid-cookie-eyebrow{margin:0 0 7px;color:var(--accent);font:10px var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.unsaid-cookie-title{margin:0 0 7px;font:29px/1.05 var(--serif);letter-spacing:-.035em}
+.unsaid-cookie-text{margin:0;max-width:700px;color:var(--muted);font-size:13px;line-height:1.6}
+.unsaid-cookie-text a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.unsaid-cookie-actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.unsaid-cookie-btn{min-height:44px;padding:0 17px;border:1px solid var(--ink);background:#fff;color:var(--ink);cursor:pointer;font:10px var(--mono);letter-spacing:.07em;text-transform:uppercase}
+.unsaid-cookie-btn:hover{background:var(--surface)}
+.unsaid-cookie-btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.unsaid-cookie-btn.primary:hover{background:#4c405e}
+.unsaid-cookie-settings{display:none;grid-column:1/-1;border-top:1px solid var(--line);padding-top:20px}
+.unsaid-cookie-settings.open{display:block}
+.unsaid-cookie-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.unsaid-cookie-choice{border:1px solid var(--line);background:var(--surface);padding:16px}
+.unsaid-cookie-choice strong{font:17px var(--serif)}
+.unsaid-cookie-choice small{display:block;color:var(--muted);font-size:11px;line-height:1.5;margin-top:5px}
+.unsaid-cookie-toggle{float:right;width:35px;height:20px;border-radius:20px;background:#c9cdc7;position:relative;cursor:pointer;border:0;padding:0}
+.unsaid-cookie-toggle:after{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;border-radius:50%;background:#fff}
+.unsaid-cookie-toggle.on{background:var(--accent)}
+.unsaid-cookie-toggle.on:after{left:18px}
+.unsaid-cookie-links{margin:9px 0 0;color:var(--muted);font-size:11.5px;line-height:1.6}
+.unsaid-cookie-links a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.unsaid-cookie-grouplabel{grid-column:1/-1;margin:12px 0 2px;font:10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.unsaid-cookie-grouplabel:first-of-type{margin-top:0}
+.unsaid-cookie-choice.essential{grid-column:1/-1;opacity:.92}
+.unsaid-cookie-save{margin-top:14px}
+@media(max-width:760px){
+.unsaid-cookie{left:12px;right:12px;bottom:12px}
+.unsaid-cookie-panel{grid-template-columns:1fr;padding:21px}
+.unsaid-cookie-actions{justify-content:stretch}
+.unsaid-cookie-btn{flex:1 1 100%}
+.unsaid-cookie-choices{grid-template-columns:1fr}
+}

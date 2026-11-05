@@ -1,0 +1,228 @@
+/*
+ * module-frame.css — overrides on the teal .adm-* system for the
+ * on-page module sidebar (owner standard, 2026-10-31). The sidebar is
+ * a 240px WHITE column fixed to the viewport's left rail, full height
+ * under the chrome (topbar 56px + rule + tabstrip 38px + rule = 96px);
+ * content runs the full width of the remaining column.
+ */
+
+/* The shell is the sidebar+main flex row, filling the viewport below
+   the chrome. */
+.mframe-shell {
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Sidebar pinned to the left rail (overrides .adm-sidebar's sticky). */
+.mframe-side {
+  position: fixed;
+  top: 96px;
+  left: 0;
+  bottom: 0;
+  height: auto;
+  width: 240px;
+  flex: 0 0 240px;
+  border-right: 1px solid var(--sidebar-border);
+  background: var(--sidebar);
+}
+
+/* Uppercase section header — the module's name (image spec: small
+   caps, gray, letter-spaced). */
+.mframe-section-head {
+  font: 700 11px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  padding: 16px 16px 8px;
+  border-bottom: 1px solid var(--sidebar-border);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Logo block — the Ad Center reference treatment: favicon + wordmark
+   at the top of the rail, bordered underneath. */
+.mframe-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--sidebar-border);
+  flex: 0 0 auto;
+}
+.mframe-logo-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  object-fit: contain;
+  flex: 0 0 30px;
+}
+.mframe-logo-name {
+  font: 600 15px var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+
+/* Collapsible section (Ad Center pattern: chevron toggles children). */
+.mframe-section {
+  margin-top: 6px;
+}
+.mframe-section-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--foreground);
+  font: 600 12.5px var(--font-sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: calc(var(--radius) - 4px);
+  text-align: left;
+}
+.mframe-section-btn:hover { background: var(--sidebar-accent); }
+.mframe-section-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mframe-chev {
+  color: var(--muted-foreground);
+  flex: 0 0 auto;
+  transition: transform 0.15s ease;
+  transform: rotate(-90deg);
+}
+.mframe-chev.open { transform: rotate(0deg); }
+
+.mframe-children {
+  margin: 1px 0 6px 8px;
+  border-left: 1px solid var(--border);
+  padding-left: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.mframe-nav {
+  padding: 4px 10px 16px;
+  /* The rail is fixed to the viewport; without min-height:0 the flex
+     child refuses to shrink, the list overflows past the screen's
+     bottom edge, and everything below the fold is unreachable
+     (owner report 2026-11-01: over half the ERP sidebar missing). */
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Intent category header inside a module's sidebar (ERP groups:
+   Books, Sales, Purchases, Banking, Taxes, Reports, Catalog,
+   Inventory). A label, so it follows the readable-text rule: full
+   dark ink, never faded, never tinted. */
+.mframe-group-head {
+  font: 700 10.5px var(--font-sans);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  padding: 13px 8px 4px;
+}
+
+/* Content column: offset by the fixed sidebar's width; full bleed.
+   Uses a DEDICATED .mframe-content class (not .adm-content) so the
+   1440px max-width + auto-margin in admin.css can't win a specificity
+   war and push content to mid-screen. Content sits directly beside
+   the sidebar (left edge = sidebar right edge + this padding). */
+.mframe-main {
+  /* The rail renders IN FLOW beside this column (sticky .adm-sidebar) —
+     an extra margin-left here double-counted the rail's 240px and pushed
+     every module page's content 240px right of the rail, leaving the dead
+     band the owner flagged on 2026-10-31. The offset is the rail itself;
+     no margin. (Owner order: close the gap.) */
+  margin-left: 0;
+}
+
+.mframe-content {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 24px;
+}
+
+/* Active leaf — teal tint + teal text + teal icon, per the standard.
+   .adm-nav-leaf.active in admin.css already gives the base; this
+   sharpens it to the teal-tint look from the reference images. */
+.mframe-side .adm-nav-leaf.active {
+  background: #e0f2f2;
+  color: #00595a;
+}
+.mframe-side .adm-nav-leaf.active svg {
+  color: #007c7d;
+}
+
+/* Styled "select" trigger for a role cell — looks like a dropdown
+   affordance but links to the record (image spec). */
+.adm-role-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius) - 4px);
+  background: #fff;
+  color: var(--foreground);
+  font: 400 13px var(--font-sans);
+  text-decoration: none;
+}
+.adm-role-select:hover { border-color: var(--primary); color: var(--primary); }
+.adm-role-select > span { color: var(--muted-foreground); font-size: 11px; }
+
+/* Quick-link row — icon + label, inline, used in module toolbars. */
+.adm-link-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--foreground);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+}
+.adm-link-row:hover { color: var(--primary); text-decoration: underline; }
+.adm-link-row svg { color: var(--muted-foreground); flex: 0 0 auto; }
+.adm-link-row:hover svg { color: var(--primary); }
+
+/* Mobile: the sidebar docks on top as a wrapped chip row. */
+@media (max-width: 900px) {
+  .mframe-side {
+    position: static;
+    width: 100%;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--sidebar-border);
+  }
+  .mframe-main { margin-left: 0; }
+  .mframe-nav {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px 12px;
+  }
+  .mframe-section-head { padding: 10px 12px 6px; margin-bottom: 0; }
+  .mframe-side .adm-nav-leaf {
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 4px);
+    padding: 6px 10px;
+  }
+}
+
+/* Framed views flush (owner order, 2026-10-31): the shell viewport pads
+   every view (26px / up to 38px), and the frame's 240px body margin then
+   applies INSIDE that padding — the stack shoved every module page to
+   the right with a dead band between the rail and the content. When a
+   view or tab pane wraps a module frame, the shell's horizontal padding
+   comes off: rail, then the page's own padding, nothing in between.
+   Mirrors the studio flush rule in fabric-shell.css. */
+.f-view:has(> .f-wrap > .mframe), .f-pane:has(> .f-wrap > .mframe) { padding-left: 0; padding-right: 0; }
+.f-view:has(> .f-wrap > .mframe) > .f-wrap, .f-pane:has(> .f-wrap > .mframe) > .f-wrap { max-width: none; margin: 0; }
+.f-embed:has(.mframe) { padding-left: 0; padding-right: 0; }
+.f-embed:has(.mframe) .f-wrap, .f-embed:has(.mframe) > div { max-width: none; margin: 0; }

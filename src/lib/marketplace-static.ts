@@ -1,0 +1,2680 @@
+// Auto-generated from UnSaid_Memories_Marketplace_Updated.html
+// All data is STATIC — not database-driven. Renders client-side.
+
+export const taxonomy = [
+  {
+    "name": "All products",
+    "slug": "all-products-277",
+    "count": 0,
+    "children": []
+  },
+  {
+    "name": "Brands",
+    "slug": "brands-159",
+    "count": 0,
+    "children": [
+      {
+        "name": "Adidas",
+        "slug": "adidas-214",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "AS Colour",
+        "slug": "as-colour-273",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Atlantis",
+        "slug": "atlantis-297",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "BagBase",
+        "slug": "bagbase-165",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Beechfield Hats",
+        "slug": "beechfield-hats-167",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Bella + Canvas",
+        "slug": "bella-canvas-164",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Big Accessories",
+        "slug": "big-accessories-168",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Champion",
+        "slug": "champion-169",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Columbia",
+        "slug": "columbia-261",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Comfort Colors",
+        "slug": "comfort-colors-272",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Cotton Heritage",
+        "slug": "cotton-heritage-170",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "District",
+        "slug": "district-178",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Econscious",
+        "slug": "econscious-171",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Flexfit",
+        "slug": "flexfit-172",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Gildan",
+        "slug": "gildan-173",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Independent Trading Co.",
+        "slug": "independent-trading-co-294",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Jerzees",
+        "slug": "jerzees-174",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Lane Seven",
+        "slug": "lane-seven-306",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "LAT Apparel",
+        "slug": "lat-apparel-212",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Liberty Bags",
+        "slug": "liberty-bags-179",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Next Level Apparel",
+        "slug": "next-level-apparel-180",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Otto Cap",
+        "slug": "otto-cap-181",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Port Authority",
+        "slug": "port-authority-182",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Rabbit Skins",
+        "slug": "rabbit-skins-183",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "SOL'S",
+        "slug": "sol-s-237",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Sport-Tek",
+        "slug": "sport-tek-184",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Sportsman",
+        "slug": "sportsman-185",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Shaka Wear",
+        "slug": "shaka-wear-236",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Stanley/Stella",
+        "slug": "stanley-stella-211",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Threadfast Apparel",
+        "slug": "threadfast-apparel-231",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Tultex",
+        "slug": "tultex-186",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Under Armour\u00ae",
+        "slug": "under-armour-286",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Yupoong",
+        "slug": "yupoong-187",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Calendars",
+    "slug": "gelato-calendars",
+    "count": 0,
+    "children": [
+      {
+        "name": "SQ210x210",
+        "slug": "gelato-calendars-sq210x210",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Slim148x400-mm",
+        "slug": "gelato-calendars-slim148x400-mm",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "XL11x16-5-inch",
+        "slug": "gelato-calendars-xl11x16-5-inch",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Cards",
+    "slug": "gelato-cards",
+    "count": 0,
+    "children": []
+  },
+  {
+    "name": "Collections",
+    "slug": "collections-116",
+    "count": 0,
+    "children": [
+      {
+        "name": "All-over print",
+        "slug": "all-over-print-305",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Back to school",
+        "slug": "back-to-school-209",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Beachwear",
+        "slug": "beachwear-120",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Bestsellers",
+        "slug": "bestsellers-188",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "DTFlex products",
+        "slug": "dtflex-products-303",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Eco-friendly",
+        "slug": "eco-friendly-121",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Embroidery products",
+        "slug": "embroidery-products-287",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Gifts",
+        "slug": "gifts-122",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Grow a fashion brand",
+        "slug": "grow-a-fashion-brand-213",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Halloween",
+        "slug": "halloween-260",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Holiday Season",
+        "slug": "holiday-season-304",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Made in EU",
+        "slug": "made-in-eu-242",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Matching Sets",
+        "slug": "matching-sets-310",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "New Apparel Variants",
+        "slug": "new-apparel-variants-316",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "New products",
+        "slug": "new-products-123",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Sportswear",
+        "slug": "sportswear-117",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Starter pack for your store",
+        "slug": "starter-pack-for-your-store-266",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Streetwear",
+        "slug": "streetwear-119",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Style Trends",
+        "slug": "style-trends-155",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Framed Posters",
+    "slug": "gelato-framed-posters",
+    "count": 0,
+    "children": [
+      {
+        "name": "wood",
+        "slug": "gelato-framed-posters-wood",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Hats",
+    "slug": "hats-93",
+    "count": 0,
+    "children": [
+      {
+        "name": "All hats",
+        "slug": "all-hats-15",
+        "count": 1,
+        "children": [
+          {
+            "name": "Beanies",
+            "slug": "beanies-45",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Dad hats / baseball caps",
+            "slug": "dad-hats-baseball-caps-42",
+            "count": 22,
+            "children": []
+          },
+          {
+            "name": "Snapbacks",
+            "slug": "snapbacks-41",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "Trucker hats",
+            "slug": "trucker-hats-40",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "5-panel hats",
+            "slug": "5-panel-hats-43",
+            "count": 2,
+            "children": []
+          },
+          {
+            "name": "Mesh hats",
+            "slug": "mesh-hats-44",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Bucket hats",
+            "slug": "bucket-hats-46",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "Visors",
+            "slug": "visors-47",
+            "count": 1,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Home & Living",
+    "slug": "home-and-living",
+    "count": 0,
+    "children": [
+      {
+        "name": "All home & living products",
+        "slug": "all-home-living-products-230",
+        "count": 7,
+        "children": []
+      },
+      {
+        "name": "Wall art",
+        "slug": "wall-art-21",
+        "count": 5,
+        "children": [
+          {
+            "name": "Posters",
+            "slug": "posters-55",
+            "count": 5,
+            "children": []
+          },
+          {
+            "name": "Framed posters",
+            "slug": "framed-posters-56",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "Canvas prints",
+            "slug": "canvas-prints-57",
+            "count": 3,
+            "children": []
+          },
+          {
+            "name": "Metal prints",
+            "slug": "metal-prints-239",
+            "count": 1,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Home decor",
+        "slug": "home-decor-252",
+        "count": 16,
+        "children": [
+          {
+            "name": "Holiday decor",
+            "slug": "holiday-decor-254",
+            "count": 13,
+            "children": []
+          },
+          {
+            "name": "Blankets",
+            "slug": "blankets-255",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "Candles",
+            "slug": "candles-256",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Pillows & pillow cases",
+            "slug": "pillows-pillow-cases-258",
+            "count": 7,
+            "children": []
+          },
+          {
+            "name": "Magnets",
+            "slug": "magnets-267",
+            "count": 2,
+            "children": []
+          },
+          {
+            "name": "Tableware",
+            "slug": "tableware-274",
+            "count": 2,
+            "children": []
+          },
+          {
+            "name": "Flags & signs",
+            "slug": "flags-signs-296",
+            "count": 2,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Drinkware & coasters",
+        "slug": "drinkware-coasters-112",
+        "count": 3,
+        "children": [
+          {
+            "name": "Water bottles",
+            "slug": "water-bottles-191",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Mugs",
+            "slug": "mugs-195",
+            "count": 8,
+            "children": []
+          },
+          {
+            "name": "Tumblers",
+            "slug": "tumblers-238",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "Coasters",
+            "slug": "coasters-249",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Glassware",
+            "slug": "glassware-264",
+            "count": 3,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Stationery",
+        "slug": "stationery-190",
+        "count": 6,
+        "children": [
+          {
+            "name": "Postcards",
+            "slug": "postcards-197",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Notebooks",
+            "slug": "notebooks-198",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Stickers",
+            "slug": "stickers-202",
+            "count": 5,
+            "children": []
+          },
+          {
+            "name": "Greeting cards",
+            "slug": "greeting-cards-232",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Books",
+            "slug": "books-315",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Towels",
+        "slug": "towels-22",
+        "count": 2,
+        "children": []
+      },
+      {
+        "name": "Textiles",
+        "slug": "textiles",
+        "count": 21,
+        "children": [
+          {
+            "name": "Throw blankets",
+            "slug": "throw-blankets",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Pillows",
+            "slug": "pillows",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Tea towels",
+            "slug": "home-and-living-textiles-tea-towels",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Woven throws",
+            "slug": "home-and-living-textiles-woven-throws",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Toys & games",
+        "slug": "toys-games-292",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "D\u00e9cor",
+        "slug": "decor",
+        "count": 3,
+        "children": [
+          {
+            "name": "Frames",
+            "slug": "frames",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Wall Art",
+            "slug": "wall-art",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Signs",
+            "slug": "signs",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Clocks",
+            "slug": "home-and-living-d-cor-clocks",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Framed prints",
+            "slug": "home-and-living-d-cor-framed-prints",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Ornaments",
+            "slug": "home-and-living-d-cor-ornaments",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Poster prints",
+            "slug": "home-and-living-d-cor-poster-prints",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Pet products",
+        "slug": "pet-products-189",
+        "count": 8,
+        "children": []
+      },
+      {
+        "name": "Mugs & Drinkware",
+        "slug": "mugs-drinkware",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Sticker & Magnets",
+        "slug": "sticker-magnets",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Poster & Wallart",
+        "slug": "poster-wallart",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Home Textiles",
+        "slug": "home-textiles",
+        "count": 9,
+        "children": []
+      },
+      {
+        "name": "Aprons",
+        "slug": "aprons-88",
+        "count": 5,
+        "children": []
+      },
+      {
+        "name": "Cuddle Toys",
+        "slug": "cuddle-toys",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Collections",
+        "slug": "collections",
+        "count": 0,
+        "children": [
+          {
+            "name": "Sportswear",
+            "slug": "sportswear",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Streetwear",
+            "slug": "streetwear",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Beachwear",
+            "slug": "beachwear",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Gifts",
+            "slug": "gifts",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Style Trends",
+            "slug": "style-trends",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Grow a fashion brand",
+            "slug": "grow-a-fashion-brand",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Made in EU",
+            "slug": "made-in-eu",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Halloween",
+            "slug": "halloween",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Back to school",
+            "slug": "back-to-school",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Holiday Season",
+            "slug": "holiday-season",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Matching Sets",
+            "slug": "matching-sets",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "New Apparel Variants",
+            "slug": "new-apparel-variants",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Kitchen & Dining",
+        "slug": "kitchen-dining",
+        "count": 17,
+        "children": [
+          {
+            "name": "Cutting boards",
+            "slug": "home-and-living-kitchen-and-dining-cutting-boards",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Placemat sets",
+            "slug": "home-and-living-kitchen-and-dining-placemat-sets",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Cushions & Pillows",
+        "slug": "cushions-pillows",
+        "count": 7,
+        "children": []
+      },
+      {
+        "name": "Bathroom",
+        "slug": "bathroom",
+        "count": 8,
+        "children": []
+      },
+      {
+        "name": "Bedding",
+        "slug": "bedding",
+        "count": 12,
+        "children": []
+      },
+      {
+        "name": "Rugs & Blankets",
+        "slug": "rugs-blankets",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Tabletops",
+        "slug": "tabletops",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Pets",
+        "slug": "pets",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Christmas Decoration & Gifts",
+        "slug": "christmas-decoration-gifts",
+        "count": 8,
+        "children": []
+      },
+      {
+        "name": "Christmas",
+        "slug": "christmas",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Kids' & youth clothing",
+    "slug": "kids-youth-clothing-3",
+    "count": 0,
+    "children": [
+      {
+        "name": "All kids & youth clothing",
+        "slug": "all-kids-youth-clothing-228",
+        "count": 2,
+        "children": []
+      },
+      {
+        "name": "All shirts",
+        "slug": "all-shirts-12",
+        "count": 0,
+        "children": [
+          {
+            "name": "T-shirts",
+            "slug": "t-shirts-38",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "All-over shirts",
+            "slug": "all-over-shirts-63",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "3/4 sleeve shirts",
+            "slug": "3-4-sleeve-shirts-145",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Long sleeve shirts",
+            "slug": "long-sleeve-shirts-203",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Hoodies & sweatshirts",
+        "slug": "hoodies-sweatshirts-105",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Hats",
+        "slug": "hats-194",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Leggings",
+        "slug": "leggings-13",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "Baby bodysuits",
+        "slug": "baby-bodysuits-14",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "Swimwear",
+        "slug": "swimwear-100",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Men's clothing",
+    "slug": "men-s-clothing-1",
+    "count": 0,
+    "children": [
+      {
+        "name": "All men's clothing",
+        "slug": "all-men-s-clothing-226",
+        "count": 2,
+        "children": []
+      },
+      {
+        "name": "All shirts",
+        "slug": "all-shirts-6",
+        "count": 24,
+        "children": [
+          {
+            "name": "T-shirts",
+            "slug": "t-shirts-24",
+            "count": 53,
+            "children": []
+          },
+          {
+            "name": "All-over shirts",
+            "slug": "all-over-shirts-27",
+            "count": 19,
+            "children": []
+          },
+          {
+            "name": "Polo shirts",
+            "slug": "polo-shirts-108",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Tank tops",
+            "slug": "tank-tops-23",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "3/4 sleeve shirts",
+            "slug": "3-4-sleeve-shirts-25",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Long sleeve shirts",
+            "slug": "long-sleeve-shirts-26",
+            "count": 11,
+            "children": []
+          },
+          {
+            "name": "Embroidered shirts",
+            "slug": "embroidered-shirts-85",
+            "count": 1,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Jackets & vests",
+        "slug": "jackets-vests-95",
+        "count": 10,
+        "children": []
+      },
+      {
+        "name": "All hoodies & sweatshirts",
+        "slug": "all-hoodies-sweatshirts-7",
+        "count": 32,
+        "children": [
+          {
+            "name": "Hoodies",
+            "slug": "hoodies-28",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Sweatshirts",
+            "slug": "sweatshirts-29",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Knitwear",
+        "slug": "knitwear-290",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "All bottoms",
+        "slug": "all-bottoms-106",
+        "count": 4,
+        "children": [
+          {
+            "name": "Sweatpants & joggers",
+            "slug": "sweatpants-joggers-98",
+            "count": 9,
+            "children": []
+          },
+          {
+            "name": "Underwear",
+            "slug": "underwear-125",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Leggings",
+            "slug": "leggings-90",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Shorts",
+            "slug": "shorts-58",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Pants",
+            "slug": "pants-241",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Swimwear",
+            "slug": "swimwear",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Swimwear",
+        "slug": "swimwear-235",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Mugs",
+    "slug": "gelato-mugs",
+    "count": 0,
+    "children": []
+  },
+  {
+    "name": "Notebooks",
+    "slug": "gelato-notebooks",
+    "count": 0,
+    "children": [
+      {
+        "name": "B5",
+        "slug": "gelato-notebooks-b5",
+        "count": 0,
+        "children": [
+          {
+            "name": "wire-o-left",
+            "slug": "gelato-notebooks-b5-wire-o-left",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "SQ148x148",
+        "slug": "gelato-notebooks-sq148x148",
+        "count": 0,
+        "children": [
+          {
+            "name": "wire-o-left",
+            "slug": "gelato-notebooks-sq148x148-wire-o-left",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Posters",
+    "slug": "gelato-posters",
+    "count": 0,
+    "children": [
+      {
+        "name": "B1",
+        "slug": "gelato-posters-b1",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "B2",
+        "slug": "gelato-posters-b2",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "BC",
+        "slug": "gelato-posters-bc",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "BD",
+        "slug": "gelato-posters-bd",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "BX",
+        "slug": "gelato-posters-bx",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "SQ210x210",
+        "slug": "gelato-posters-sq210x210",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "T Shirts",
+    "slug": "gelato-t-shirts",
+    "count": 0,
+    "children": [
+      {
+        "name": "t-shirt / crewneck",
+        "slug": "gelato-t-shirts-t-shirt-crewneck",
+        "count": 0,
+        "children": [
+          {
+            "name": "kids / L",
+            "slug": "gelato-t-shirts-t-shirt-crewneck-kids-l",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "kids / M",
+            "slug": "gelato-t-shirts-t-shirt-crewneck-kids-m",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "kids / S",
+            "slug": "gelato-t-shirts-t-shirt-crewneck-kids-s",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Tote Bags",
+    "slug": "gelato-tote-bags",
+    "count": 0,
+    "children": [
+      {
+        "name": "tote-bag",
+        "slug": "gelato-tote-bags-tote-bag",
+        "count": 0,
+        "children": [
+          {
+            "name": "std-t",
+            "slug": "gelato-tote-bags-tote-bag-std-t",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Women's clothing",
+    "slug": "women-s-clothing-2",
+    "count": 2,
+    "children": [
+      {
+        "name": "All shirts",
+        "slug": "all-shirts-8",
+        "count": 0,
+        "children": [
+          {
+            "name": "T-shirts",
+            "slug": "t-shirts-32",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Polo shirts",
+            "slug": "polo-shirts",
+            "count": 6,
+            "children": []
+          },
+          {
+            "name": "All-over shirts",
+            "slug": "all-over-shirts-35",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Tank tops",
+            "slug": "tank-tops-30",
+            "count": 12,
+            "children": []
+          },
+          {
+            "name": "Crop tops",
+            "slug": "crop-tops-31",
+            "count": 3,
+            "children": []
+          },
+          {
+            "name": "Embroidered shirts",
+            "slug": "embroidered-shirts-89",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "3/4 sleeve shirts",
+            "slug": "3-4-sleeve-shirts-33",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Long sleeve shirts",
+            "slug": "long-sleeve-shirts-34",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Dresses",
+        "slug": "dresses-11",
+        "count": 8,
+        "children": []
+      },
+      {
+        "name": "Knitwear",
+        "slug": "knitwear-289",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Jackets & vests ",
+        "slug": "jackets-vests-96",
+        "count": 2,
+        "children": []
+      },
+      {
+        "name": "All hoodies & sweatshirts",
+        "slug": "all-hoodies-sweatshirts-9",
+        "count": 0,
+        "children": [
+          {
+            "name": "Hoodies",
+            "slug": "hoodies-36",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Sweatshirts",
+            "slug": "sweatshirts-37",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "All Bottoms",
+        "slug": "all-bottoms-107",
+        "count": 0,
+        "children": [
+          {
+            "name": "Sweatpants & joggers",
+            "slug": "sweatpants-joggers-99",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Leggings",
+            "slug": "leggings-10",
+            "count": 12,
+            "children": []
+          },
+          {
+            "name": "Skirts",
+            "slug": "skirts-60",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Shorts",
+            "slug": "shorts-51",
+            "count": 9,
+            "children": []
+          },
+          {
+            "name": "Pants",
+            "slug": "pants-240",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Sports bras",
+        "slug": "sports-bras-86",
+        "count": 4,
+        "children": []
+      },
+      {
+        "name": "Swimwear",
+        "slug": "swimwear-79",
+        "count": 14,
+        "children": []
+      },
+      {
+        "name": "Sleepwear",
+        "slug": "sleepwear-299",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "All women\u2019s clothing",
+        "slug": "all-women-s-clothing-227",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Apparel",
+    "slug": "apparel",
+    "count": 10246,
+    "children": [
+      {
+        "name": "T-Shirts & Polo Shirts",
+        "slug": "t-shirts-polo-shirts",
+        "count": 17,
+        "children": []
+      },
+      {
+        "name": "Hoodies & Sweatshirts",
+        "slug": "hoodies-sweatshirts",
+        "count": 16,
+        "children": []
+      },
+      {
+        "name": "Zip Jackets & Outwear",
+        "slug": "zip-jackets-outwear",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Bottoms",
+        "slug": "bottoms-3",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Apparel for Kids",
+        "slug": "apparel-for-kids",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "Apparel for Babies",
+        "slug": "apparel-for-babys",
+        "count": 7,
+        "children": []
+      },
+      {
+        "name": "Tops",
+        "slug": "tops",
+        "count": 0,
+        "children": [
+          {
+            "name": "Graphic tees",
+            "slug": "graphic-tees",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Premium Tees",
+            "slug": "premium-tees",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Pullover hoodies",
+            "slug": "apparel-tops-pullover-hoodies",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Outerwear",
+        "slug": "outerwear",
+        "count": 2,
+        "children": [
+          {
+            "name": "Hoodies",
+            "slug": "hoodies",
+            "count": 27,
+            "children": []
+          },
+          {
+            "name": "Sweatshirts",
+            "slug": "sweatshirts",
+            "count": 16,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Accessories",
+    "slug": "accessories",
+    "count": 15,
+    "children": [
+      {
+        "name": "Patches",
+        "slug": "patches-215",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Pins",
+        "slug": "pins-268",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Headwear",
+        "slug": "headwear",
+        "count": 0,
+        "children": [
+          {
+            "name": "Caps",
+            "slug": "caps",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Beanies",
+            "slug": "beanies",
+            "count": 11,
+            "children": []
+          },
+          {
+            "name": "Dad hats",
+            "slug": "accessories-headwear-dad-hats",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Hair accessories",
+        "slug": "hair-accessories-217",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "Sports accessories",
+        "slug": "sports-accessories-271",
+        "count": 2,
+        "children": []
+      },
+      {
+        "name": "Footwear",
+        "slug": "footwear-205",
+        "count": 0,
+        "children": [
+          {
+            "name": "Flip flops",
+            "slug": "flip-flops-206",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Shoes",
+            "slug": "shoes-220",
+            "count": 10,
+            "children": []
+          },
+          {
+            "name": "Socks",
+            "slug": "socks-221",
+            "count": 3,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Tech accessories",
+        "slug": "tech-accessories-243",
+        "count": 0,
+        "children": [
+          {
+            "name": "Phone cases",
+            "slug": "phone-cases-244",
+            "count": 8,
+            "children": []
+          },
+          {
+            "name": "Earphone cases",
+            "slug": "earphone-cases-245",
+            "count": 2,
+            "children": []
+          },
+          {
+            "name": "Laptop cases",
+            "slug": "laptop-cases-250",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Mouse pads",
+            "slug": "mouse-pads-251",
+            "count": 4,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Face masks",
+        "slug": "face-masks-126",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Bags",
+        "slug": "bags-16",
+        "count": 101,
+        "children": [
+          {
+            "name": "Tote bags",
+            "slug": "tote-bags-48",
+            "count": 9,
+            "children": []
+          },
+          {
+            "name": "Duffle bags",
+            "slug": "duffle-bags-129",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Drawstring bags",
+            "slug": "drawstring-bags-49",
+            "count": 1,
+            "children": []
+          },
+          {
+            "name": "Fanny packs",
+            "slug": "fanny-packs-101",
+            "count": 3,
+            "children": []
+          },
+          {
+            "name": "Backpacks",
+            "slug": "backpacks-81",
+            "count": 4,
+            "children": []
+          },
+          {
+            "name": "Handbags",
+            "slug": "handbags-270",
+            "count": 1,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Caps & Hats",
+        "slug": "caps-hats",
+        "count": 4,
+        "children": []
+      },
+      {
+        "name": "Socks",
+        "slug": "socks",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "All accessories",
+        "slug": "all-accessories-229",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Pet",
+        "slug": "accessories-pet",
+        "count": 5,
+        "children": [
+          {
+            "name": "ID tags",
+            "slug": "accessories-pet-id-tags",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Accessories for Kids & Babies",
+        "slug": "accessories-for-kids-babys",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Drinkware",
+    "slug": "drinkware",
+    "count": 3,
+    "children": [
+      {
+        "name": "Mugs",
+        "slug": "mugs",
+        "count": 40,
+        "children": [
+          {
+            "name": "Ceramic mugs",
+            "slug": "ceramic-mugs",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Travel Mugs",
+            "slug": "travel-mugs",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Tumblers",
+        "slug": "tumblers",
+        "count": 20,
+        "children": [
+          {
+            "name": "Insulated tumblers",
+            "slug": "insulated-tumblers",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Bottles",
+            "slug": "bottles",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Water bottles",
+            "slug": "drinkware-tumblers-water-bottles",
+            "count": 3,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Glassware",
+        "slug": "drinkware-glassware",
+        "count": 21,
+        "children": [
+          {
+            "name": "Pint glasses",
+            "slug": "drinkware-glassware-pint-glasses",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Gift Sets",
+    "slug": "gift-sets",
+    "count": 0,
+    "children": [
+      {
+        "name": "Bundles",
+        "slug": "bundles",
+        "count": 1,
+        "children": [
+          {
+            "name": "Tee + mug + cap",
+            "slug": "tee-mug-cap",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Themed Kits",
+            "slug": "themed-kits",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Keepsakes",
+    "slug": "keepsakes",
+    "count": 1,
+    "children": [
+      {
+        "name": "Memory Gifts",
+        "slug": "memory-gifts",
+        "count": 1,
+        "children": [
+          {
+            "name": "Memory boxes",
+            "slug": "memory-boxes",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Photo Albums",
+            "slug": "photo-albums",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Journals",
+            "slug": "journals",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Keychains",
+            "slug": "keepsakes-memory-gifts-keychains",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Jewelry",
+    "slug": "jewelry",
+    "count": 0,
+    "children": [
+      {
+        "name": "Sentimental",
+        "slug": "sentimental",
+        "count": 1,
+        "children": [
+          {
+            "name": "Bracelets",
+            "slug": "bracelets",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Necklaces",
+            "slug": "necklaces",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Engraved Charms",
+            "slug": "engraved-charms",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Lockets",
+            "slug": "jewelry-sentimental-lockets",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Wellness",
+    "slug": "wellness",
+    "count": 0,
+    "children": [
+      {
+        "name": "Self-Care",
+        "slug": "self-care",
+        "count": 2,
+        "children": [
+          {
+            "name": "Candles",
+            "slug": "candles",
+            "count": 3,
+            "children": []
+          },
+          {
+            "name": "Spa Sets",
+            "slug": "spa-sets",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Jar candles",
+            "slug": "wellness-self-care-jar-candles",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Room sprays",
+            "slug": "wellness-self-care-room-sprays",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Office",
+    "slug": "office",
+    "count": 0,
+    "children": [
+      {
+        "name": "Desk Gifts",
+        "slug": "desk-gifts",
+        "count": 0,
+        "children": [
+          {
+            "name": "Notebooks",
+            "slug": "notebooks",
+            "count": 19,
+            "children": []
+          },
+          {
+            "name": "Desk Accessories",
+            "slug": "desk-accessories",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Celebrations",
+    "slug": "celebrations",
+    "count": 0,
+    "children": [
+      {
+        "name": "Gift Packaging",
+        "slug": "gift-packaging",
+        "count": 9,
+        "children": [
+          {
+            "name": "Cards",
+            "slug": "cards",
+            "count": 863,
+            "children": []
+          },
+          {
+            "name": "Gift Wrap",
+            "slug": "gift-wrap",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Message Inserts",
+            "slug": "message-inserts",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Gift insert sets",
+            "slug": "celebrations-gift-packaging-gift-insert-sets",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Digital & Memory",
+    "slug": "digital-and-memory",
+    "count": 0,
+    "children": [
+      {
+        "name": "Digital Keepsakes",
+        "slug": "digital-keepsakes",
+        "count": 0,
+        "children": [
+          {
+            "name": "Story collections",
+            "slug": "story-collections",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Memory Prompts",
+            "slug": "memory-prompts",
+            "count": 0,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "Memory Links",
+        "slug": "digital-and-memory-memory-links",
+        "count": 0,
+        "children": [
+          {
+            "name": "NFC stickers",
+            "slug": "digital-and-memory-memory-links-nfc-stickers",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Prompt decks",
+            "slug": "digital-and-memory-memory-links-prompt-decks",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "QR & NFC cards",
+            "slug": "digital-and-memory-memory-links-qr-and-nfc-cards",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Furniture & Storage",
+    "slug": "furniture-and-storage",
+    "count": 0,
+    "children": [
+      {
+        "name": "Small Home Goods",
+        "slug": "small-home-goods",
+        "count": 0,
+        "children": [
+          {
+            "name": "Shelves",
+            "slug": "shelves",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Organizers",
+            "slug": "organizers",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Books & magazines",
+    "slug": "books-magazines",
+    "count": 14,
+    "children": [
+      {
+        "name": "Hardcover",
+        "slug": "hardcover",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Softcover",
+        "slug": "softcover",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Lay Flat Photo book",
+        "slug": "lay-flat-photo-book",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Magazines",
+        "slug": "magazines",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Business & commercial",
+    "slug": "business-commercial",
+    "count": 362,
+    "children": []
+  },
+  {
+    "name": "Cards & stationery",
+    "slug": "cards-stationery",
+    "count": 10,
+    "children": []
+  },
+  {
+    "name": "Prints & posters",
+    "slug": "prints-posters",
+    "count": 0,
+    "children": [
+      {
+        "name": "Art prints",
+        "slug": "art-prints",
+        "count": 1345,
+        "children": []
+      },
+      {
+        "name": "Photo prints",
+        "slug": "photo-prints",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Posters",
+        "slug": "posters",
+        "count": 716,
+        "children": []
+      },
+      {
+        "name": "Poster hangers",
+        "slug": "poster-hangers",
+        "count": 1,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Relationships",
+    "slug": "relationships",
+    "count": 0,
+    "children": [
+      {
+        "name": "Kin Keeper",
+        "slug": "kin-keeper",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Work Bestie",
+        "slug": "work-bestie",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Chosen family",
+        "slug": "chosen-family",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Caregiver",
+        "slug": "caregiver",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Mentor",
+        "slug": "mentor",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Godparent",
+        "slug": "godparent",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Sister-Friend",
+        "slug": "sister-friend",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Sample Packs",
+    "slug": "sample-packs",
+    "count": 0,
+    "children": []
+  },
+  {
+    "name": "Sports & Games",
+    "slug": "sports-games",
+    "count": 2,
+    "children": []
+  },
+  {
+    "name": "Sportswear",
+    "slug": "sportswear-2",
+    "count": 0,
+    "children": [
+      {
+        "name": "T-Shirts & Tops",
+        "slug": "t-shirts-tops",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Hoodies, Sweatshirts & Outwear",
+        "slug": "hoodies-sweatshirts-outwear",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Trousers & Shorts",
+        "slug": "trousers-shorts",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Kids Sportswear",
+        "slug": "kids-sportswear",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Stickers",
+    "slug": "stickers",
+    "count": 2,
+    "children": []
+  },
+  {
+    "name": "Technology",
+    "slug": "technology",
+    "count": 1,
+    "children": [
+      {
+        "name": "Phone cases",
+        "slug": "phone-cases",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Tablet Cases",
+        "slug": "tablet-cases",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Laptop & computer Cases",
+        "slug": "laptop-computer-cases",
+        "count": 1,
+        "children": []
+      },
+      {
+        "name": "Watch Straps",
+        "slug": "watch-straps",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Gaming",
+        "slug": "gaming",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "UnSaid Holidays",
+    "slug": "unsaid-holidays",
+    "count": 0,
+    "children": [
+      {
+        "name": "All UnSaid Holidays",
+        "slug": "all-unsaid-holidays",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Kin Keeper Month",
+        "slug": "kin-keeper-month",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Family by Choice",
+        "slug": "family-by-choice",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Just Because",
+        "slug": "just-because",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Day Ones",
+        "slug": "day-ones",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Wall Art",
+    "slug": "wall-art-2",
+    "count": 81,
+    "children": [
+      {
+        "name": "Framed prints",
+        "slug": "framed-prints",
+        "count": 5205,
+        "children": []
+      },
+      {
+        "name": "Canvas",
+        "slug": "canvas",
+        "count": 14,
+        "children": []
+      },
+      {
+        "name": "Acrylic prints",
+        "slug": "acrylic-prints",
+        "count": 3,
+        "children": []
+      },
+      {
+        "name": "Metal Prints",
+        "slug": "metal-prints",
+        "count": 8,
+        "children": []
+      },
+      {
+        "name": "Wooden Prints",
+        "slug": "wooden-prints",
+        "count": 0,
+        "children": []
+      },
+      {
+        "name": "Display Prints",
+        "slug": "display-prints",
+        "count": 4,
+        "children": []
+      },
+      {
+        "name": "Photo Tiles",
+        "slug": "photo-tiles",
+        "count": 0,
+        "children": []
+      }
+    ]
+  },
+  {
+    "name": "Games & Puzzles",
+    "slug": "games",
+    "count": 0,
+    "children": [
+      {
+        "name": "Puzzles & Cards",
+        "slug": "games-puzzles-and-cards",
+        "count": 3,
+        "children": [
+          {
+            "name": "Jigsaw puzzles",
+            "slug": "games-puzzles-and-cards-jigsaw-puzzles",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Office & Desk",
+    "slug": "office",
+    "count": 16,
+    "children": [
+      {
+        "name": "Desk Gifts",
+        "slug": "office-desk-gifts",
+        "count": 28,
+        "children": [
+          {
+            "name": "Journals",
+            "slug": "office-desk-gifts-journals",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Notecard sets",
+            "slug": "office-desk-gifts-notecard-sets",
+            "count": 0,
+            "children": []
+          },
+          {
+            "name": "Pens",
+            "slug": "office-desk-gifts-pens",
+            "count": 0,
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+];
+
+export const products = [
+  {
+    "id": 1,
+    "name": "The Kin Keeper Tee",
+    "category": "Apparel",
+    "type": "EVERYDAY ESSENTIALS",
+    "price": 32,
+    "color": "Chalk",
+    "badge": "Bestseller",
+    "image": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A considered everyday tee, made for the people who show up.",
+    "colors": [
+      "#e5dfd5",
+      "#25242b",
+      "#b5a7c8"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Chosen Family Crew",
+    "category": "Apparel",
+    "type": "FLEECE & LAYERS",
+    "price": 68,
+    "color": "Oat",
+    "badge": "New",
+    "image": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1578681994506-b8f463449011?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A soft, substantial layer for the ones you choose.",
+    "colors": [
+      "#e5dfd5",
+      "#5a5862",
+      "#b7a9ca"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Day Ones Cap",
+    "category": "Accessories",
+    "type": "ACCESSORIES",
+    "price": 28,
+    "color": "Midnight",
+    "badge": "Just in",
+    "image": "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "Low-key, everyday headwear with a little meaning built in.",
+    "colors": [
+      "#29334b",
+      "#e5dfd5",
+      "#a7a0b5"
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Work Bestie Mug",
+    "category": "Drinkware",
+    "type": "OBJECTS WITH MEANING",
+    "price": 24,
+    "color": "Cloud",
+    "image": "https://images.unsplash.com/photo-1514228742587-6b1558fdda3d?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1514228742587-6b1558fdda3d?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "For the person who makes the long days lighter.",
+    "colors": [
+      "#f4eff9",
+      "#b8b2c1",
+      "#29334b"
+    ]
+  },
+  {
+    "id": 5,
+    "name": "The Always Hoodie",
+    "category": "Apparel",
+    "type": "FLEECE & LAYERS",
+    "price": 74,
+    "color": "Heather grey",
+    "image": "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1578681994506-b8f463449011?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "An easy, elevated staple with room for what matters.",
+    "colors": [
+      "#c6c4c9",
+      "#393943",
+      "#d9c5eb"
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Little Reminder Tote",
+    "category": "Accessories",
+    "type": "BAGS & CARRY",
+    "price": 26,
+    "color": "Natural",
+    "image": "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A useful everyday carryall, made more personal.",
+    "colors": [
+      "#e5dfd5",
+      "#b8b2c1",
+      "#29334b"
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Sister-Friend Long Sleeve",
+    "category": "Apparel",
+    "type": "EVERYDAY ESSENTIALS",
+    "price": 42,
+    "color": "Soft white",
+    "image": "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1503341504253-dff4815485f1?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A little sentiment, designed to live in your weekly rotation.",
+    "colors": [
+      "#f4eff9",
+      "#a7a0b5",
+      "#29334b"
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Keep Close Print",
+    "category": "Wall Art",
+    "type": "HOME & KEEPSAKES",
+    "price": 36,
+    "color": "Lilac / ink",
+    "image": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A quiet visual reminder of the people who make a place feel like home.",
+    "colors": [
+      "#d9c5eb",
+      "#f4eff9",
+      "#29334b"
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Family by Choice Journal",
+    "category": "Keepsakes",
+    "type": "PAGES FOR WHAT MATTERS",
+    "price": 22,
+    "color": "Lilac",
+    "image": "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1455390582262-044c?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A place for stories, thoughts and moments worth holding on to.",
+    "colors": [
+      "#d9c5eb",
+      "#f4eff9",
+      "#b8b2c1"
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Little Moments Framed Art",
+    "category": "Wall Art",
+    "type": "ART FOR YOUR SPACE",
+    "price": 64,
+    "color": "Gallery white",
+    "image": "https://images.unsplash.com/photo-1582201942988-13e60e4556ee?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1582201942988-13e60e4556ee?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A framed reminder that the little moments are often the ones that stay.",
+    "colors": [
+      "#f4eff9",
+      "#d9c5eb"
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Here for You Ceramic Cup",
+    "category": "Drinkware",
+    "type": "EVERYDAY OBJECTS",
+    "price": 22,
+    "color": "Cloud",
+    "image": "https://images.unsplash.com/photo-1493857671505-72967e2e2760?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1493857671505-72967e2e2760?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A comforting cup for a quiet moment or a reminder that someone is in your corner.",
+    "colors": [
+      "#f4eff9",
+      "#b8b2c1",
+      "#29334b"
+    ]
+  },
+  {
+    "id": 12,
+    "name": "Day Ones Keepsake Box",
+    "category": "Relationships",
+    "type": "FOR YOUR PEOPLE",
+    "price": 44,
+    "color": "Lavender",
+    "badge": "Featured",
+    "image": "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?auto=format&fit=crop&w=900&q=85",
+    "images": [
+      "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?auto=format&fit=crop&w=900&q=85",
+      "https://images.unsplash.com/photo-1513883049090-d0b7439799bf?auto=format&fit=crop&w=900&q=85"
+    ],
+    "desc": "A place for photos, little notes and the tiny things that tell your story.",
+    "colors": [
+      "#d9c5eb",
+      "#f4eff9"
+    ]
+  }
+];
+
+export const categoryIcons: Record<string, string> = {
+  "Apparel": "<path d='M7 4 4 6 2 11l4 2 2-3v10h8V10l2 3 4-2-2-5-3-2a5 5 0 0 1-10 0Z'/>",
+  "Accessories": "<path d='M6 8h12l2 12H4L6 8Z'/><path d='M9 8V6a3 3 0 0 1 6 0v2'/>",
+  "Drinkware": "<path d='M5 3h12l-1 17H6L5 3Z'/><path d='M17 6h2a2 2 0 0 1 0 4h-2'/>",
+  "Home & Living": "<path d='m3 11 9-8 9 8'/><path d='M5 10v10h14V10M9 20v-6h6v6'/>",
+  "Wall Art": "<rect x='3' y='4' width='18' height='16' rx='1'/><circle cx='8' cy='9' r='1.5'/><path d='m4 17 5-5 4 4 3-3 4 4'/>",
+  "Keepsakes": "<path d='M20 12.5 12 21l-8-8.5a5 5 0 0 1 7-7L12 7l1-1.5a5 5 0 0 1 7 7Z'/>",
+  "Gift Sets": "<path d='M20 12v9H4v-9M2 7h20v5H2zM12 7v14M12 7H7.5a2.5 2.5 0 1 1 2.5-2.5C10 6 12 7 12 7Zm0 0h4.5A2.5 2.5 0 1 0 14 4.5C14 6 12 7 12 7Z'/>",
+  "UnSaid Holidays": "<path d='M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9 4.9 19.1'/>",
+  "Relationships": "<path d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z'/>",
+  "default": "<circle cx='12' cy='12' r='8'/><path d='M12 8v8M8 12h8'/>"
+};
+
+export const excluded = ['All products', 'Brands', 'Collections'];
+
+export function iconFor(name: string): string {
+  const path = categoryIcons[name] || categoryIcons['default'];
+  return '<span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24">' + path + '</svg></span>';
+}
+
+export function flatTaxonomy(nodes: typeof taxonomy, out: typeof taxonomy = []): typeof taxonomy {
+  for (const n of nodes) {
+    out.push(n);
+    if (n.children && n.children.length) flatTaxonomy(n.children, out);
+  }
+  return out;
+}
+
+// Find category by walking the slug path
+export function findCategoryByPath(slugs: string[]) {
+  let nodes: typeof taxonomy = taxonomy;
+  let found: typeof taxonomy[number] | null = null;
+  for (const slug of slugs) {
+    found = nodes.find(n => n.slug === slug) ?? null;
+    if (!found) return null;
+    nodes = found.children || [];
+  }
+  return found;
+}
+
+// Get all products in a category (including children)
+export function getProductsInCategory(categoryName: string) {
+  if (categoryName === 'All Products') return products;
+  // Find the category in the taxonomy and get all descendant names
+  const allNames = new Set<string>();
+  function collectNames(nodes: typeof taxonomy) {
+    for (const n of nodes) {
+      allNames.add(n.name);
+      if (n.children) collectNames(n.children);
+    }
+  }
+  function findNode(nodes: typeof taxonomy, name: string): typeof taxonomy[0] | null {
+    for (const n of nodes) {
+      if (n.name === name) return n;
+      if (n.children) {
+        const f = findNode(n.children, name);
+        if (f) return f;
+      }
+    }
+    return null;
+  }
+  const node = findNode(taxonomy, categoryName);
+  if (node) {
+    allNames.add(node.name);
+    if (node.children) collectNames(node.children);
+  }
+  // Match products by category name
+  return products.filter(p => allNames.has(p.category));
+}

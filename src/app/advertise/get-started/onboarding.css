@@ -1,0 +1,50 @@
+/* Onboarding wizard — extends the auth styles with a step indicator + multi-field layout.
+   Uses existing .auth-field, .auth-submit, .auth-error from globals.css. */
+
+.ob-progress{display:flex;align-items:center;gap:0;margin:0 0 28px}
+.ob-step-dot{flex:1;height:3px;background:#e5e1ef;position:relative;transition:background .2s}
+.ob-step-dot:first-child{border-radius:3px 0 0 3px}
+.ob-step-dot:last-child{border-radius:0 3px 3px 0}
+.ob-step-dot.ob-done{background:#7656df}
+.ob-step-dot.ob-current{background:linear-gradient(90deg,#7656df 50%,#e5e1ef 50%)}
+.ob-step-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#686477;margin:0 0 18px}
+.ob-step-label strong{color:#17151f}
+
+.ob-step-title{font:400 28px/1.05 Georgia,serif;letter-spacing:-.03em;margin:0 0 6px}
+.ob-step-sub{font-size:13px;color:#686477;margin:0 0 22px;line-height:1.6}
+
+.ob-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ob-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+
+.ob-choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 0}
+.ob-choice{border:1px solid #e5e1ef;border-radius:12px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;gap:5px;background:#fff}
+.ob-choice:hover{border-color:#bcb5d5}
+.ob-choice.ob-selected{border-color:#7656df;background:#f5f2ff}
+.ob-choice strong{font-size:13px;font-weight:700;letter-spacing:-.01em}
+.ob-choice span{font-size:12px;color:#686477;line-height:1.5}
+
+.ob-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 0}
+.ob-check-item{display:flex;align-items:center;gap:10px;border:1px solid #e5e1ef;border-radius:10px;padding:12px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:border-color .15s,background .15s;background:#fff}
+.ob-check-item:hover{border-color:#bcb5d5}
+.ob-check-item.ob-selected{border-color:#7656df;background:#f5f2ff}
+.ob-check-item .ob-check-box{width:18px;height:18px;border:1.5px solid #c5bed8;border-radius:5px;display:grid;place-items:center;flex:none;transition:all .15s}
+.ob-check-item.ob-selected .ob-check-box{background:#7656df;border-color:#7656df;color:#fff}
+
+.ob-nav{display:flex;justify-content:space-between;align-items:center;margin-top:24px;gap:12px}
+.ob-back{background:transparent;border:1px solid #e5e1ef;color:#17151f;padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-radius:0;transition:border-color .15s}
+.ob-back:hover{border-color:#7656df;color:#7656df}
+.ob-back:disabled{opacity:.4;cursor:not-allowed}
+
+.ob-summary{display:grid;gap:14px;margin:0 0 8px}
+.ob-summary-row{display:grid;grid-template-columns:140px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid #e5e1ef;font-size:13px}
+.ob-summary-row:last-child{border-bottom:0}
+.ob-summary-row dt{color:#686477;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.ob-summary-row dd{margin:0;color:#17151f;font-weight:600;overflow-wrap:anywhere}
+.ob-summary-row dd .ob-empty{color:#9b97a8;font-weight:400;font-style:italic}
+
+.ob-note{font-size:11px;color:#9b97a8;margin-top:12px;line-height:1.6}
+
+@media(max-width:520px){
+ .ob-row,.ob-row-3,.ob-choice-grid,.ob-check-grid{grid-template-columns:1fr}
+ .ob-summary-row{grid-template-columns:1fr;gap:4px}
+}

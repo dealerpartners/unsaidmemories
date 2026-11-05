@@ -1,0 +1,532 @@
+/* ============================================================================
+   UNSAID ADMIN OS — DESIGN SYSTEM (the one system every admin page uses)
+   Tokens copied exactly from UnSaid's portal design system (.portal-theme,
+   branch 10-28-2026): canvas #FFFFFF, bars #FFFFFF, ink #171420,
+   radius 0.75rem, primary teal #007C7D, terracotta brand mark #AA3F15,
+   DM Sans canvas + Questrial display. Legacy .fabric-* rules for the
+   pre-existing studio pages are preserved at the bottom of this file;
+   new work uses the .adm-* kit below, never one-off styles.
+   ============================================================================ */
+/* THEME CONSOLIDATION (2026-11-02): (portals)/portals.css also defines a
+   base .portal-theme (the /ads purple palette) and both sheets load on
+   admin pages, so the winner used to be CSS chunk order — the CMS
+   redesign (this palette) never reliably painted. These selectors carry
+   attribute-level specificity (0,2,0), which beats the portals.css base
+   (0,1,0) regardless of order. The :not() block is the full redesign for
+   unthemed admins; the [data-portal-theme] block carries the same
+   tokens MINUS the sidebar/topbar set, which the per-user theme
+   variants in portals.css own and must keep winning. */
+.portal-theme:not([data-portal-theme]) {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #171420;
+  --card: #ffffff;
+  --card-foreground: #171420;
+  --popover: #ffffff;
+  --popover-foreground: #171420;
+  --primary: #007c7d;
+  --brand-teal: #007c7d;
+  --primary-foreground: #ffffff;
+  --quick: #007c7d;
+  --quick-foreground: #ffffff;
+  --brand: #aa3f15;
+  --brand-foreground: #fbfcfd;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #171420;
+  --sidebar-primary: #f7f5fb;
+  --sidebar-primary-foreground: #171420;
+  --sidebar-accent: #f7f5fb;
+  --sidebar-accent-foreground: #171420;
+  --sidebar-border: #e9e6f0;
+  --sidebar-ring: #007c7d;
+  --topbar: #ffffff;
+  --topbar-foreground: #171420;
+  --topbar-border: #e9e6f0;
+  --secondary: #f7f5fb;
+  --secondary-foreground: #171420;
+  --muted: #f7f5fb;
+  --muted-foreground: #706d7c;
+  --accent: #f7f5fb;
+  --accent-foreground: #171420;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --info: #007c7d;
+  --info-foreground: #ffffff;
+  --border: #e9e6f0;
+  --input: #e9e6f0;
+  --ring: #007c7d;
+  /* Legacy purple token aliases, mapped onto the teal system so every
+     var(--purple)/var(--purple2) usage in the older module CSS resolves
+     to teal under this root (the purple .fabric-admin scope is gone). */
+  --purple: #007c7d;
+  --purple2: #e0f2f2;
+  --crm-accent: #007c7d;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Questrial", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.portal-theme[data-portal-theme] {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #171420;
+  --card: #ffffff;
+  --card-foreground: #171420;
+  --popover: #ffffff;
+  --popover-foreground: #171420;
+  --primary: #007c7d;
+  --brand-teal: #007c7d;
+  --primary-foreground: #ffffff;
+  --quick: #007c7d;
+  --quick-foreground: #ffffff;
+  --brand: #aa3f15;
+  --brand-foreground: #fbfcfd;
+  --secondary: #f7f5fb;
+  --secondary-foreground: #171420;
+  --muted: #f7f5fb;
+  --muted-foreground: #706d7c;
+  --accent: #f7f5fb;
+  --accent-foreground: #171420;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --info: #007c7d;
+  --info-foreground: #ffffff;
+  --border: #e9e6f0;
+  --input: #e9e6f0;
+  --ring: #007c7d;
+  /* Legacy purple token aliases, mapped onto the teal system so every
+     var(--purple)/var(--purple2) usage in the older module CSS resolves
+     to teal under this root (the purple .fabric-admin scope is gone). */
+  --purple: #007c7d;
+  --purple2: #e0f2f2;
+  --crm-accent: #007c7d;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Questrial", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+
+/* ── Shell ──────────────────────────────────────────────────────────── */
+.adm-shell { display: flex; min-height: 100vh; background: var(--background); }
+.adm-sidebar {
+  width: 240px; flex: 0 0 240px; position: sticky; top: 0; height: 100vh;
+  background: var(--sidebar); color: var(--sidebar-foreground);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex; flex-direction: column; z-index: 40;
+}
+.adm-brand { display: flex; align-items: center; gap: 10px; padding: 16px 16px 12px; }
+.adm-brandmark {
+  width: 32px; height: 32px; border-radius: var(--radius); background: var(--brand);
+  color: var(--brand-foreground); display: grid; place-items: center;
+  font-family: var(--font-display); font-size: 17px; flex: 0 0 32px;
+}
+.adm-brand-name { font-family: var(--font-display); font-size: 17px; letter-spacing: .01em; line-height: 1.1; }
+.adm-brand-sub { font-size: 11px; color: var(--muted-foreground); letter-spacing: .08em; text-transform: uppercase; }
+.adm-nav { flex: 1; overflow-y: auto; padding: 4px 10px 16px; }
+.adm-nav-section { margin-top: 2px; }
+.adm-nav-section-btn {
+  width: 100%; display: flex; align-items: center; gap: 9px; padding: 8px 8px;
+  border: 0; background: none; cursor: pointer; color: var(--sidebar-foreground);
+  font: 500 13px var(--font-sans); border-radius: calc(var(--radius) - 4px); text-align: left;
+}
+.adm-nav-section-btn:hover { background: var(--sidebar-accent); }
+.adm-nav-section-btn.active { background: var(--sidebar-primary); font-weight: 600; }
+.adm-nav-section-btn .adm-nav-chev { margin-left: auto; color: var(--muted-foreground); transition: transform .15s; }
+.adm-nav-section-btn .adm-nav-chev.open { transform: rotate(180deg); }
+.adm-nav-children { margin: 1px 0 5px 17px; border-left: 1px solid var(--border); padding-left: 8px; }
+.adm-nav-item {
+  display: block; padding: 6px 8px; font-size: 13px; color: #404040;
+  border-radius: calc(var(--radius) - 6px); text-decoration: none;
+}
+.adm-nav-item:hover { background: var(--sidebar-accent); color: var(--foreground); }
+.adm-nav-item.active { background: var(--sidebar-primary); color: var(--foreground); font-weight: 600; }
+.adm-nav-leaf {
+  display: flex; align-items: center; gap: 9px; padding: 8px; font-size: 13px; font-weight: 500;
+  color: var(--sidebar-foreground); border-radius: calc(var(--radius) - 4px); text-decoration: none;
+}
+.adm-nav-leaf:hover { background: var(--sidebar-accent); }
+.adm-nav-leaf.active { background: var(--sidebar-primary); font-weight: 600; }
+.adm-side-foot { border-top: 1px solid var(--sidebar-border); padding: 10px 16px; font-size: 12px; color: var(--muted-foreground); }
+.adm-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.adm-topbar {
+  height: 56px; background: var(--topbar); color: var(--topbar-foreground);
+  border-bottom: 1px solid var(--topbar-border); display: flex; align-items: center;
+  gap: 14px; padding: 0 24px; position: sticky; top: 0; z-index: 30;
+}
+.adm-topbar-title { font-family: var(--font-display); font-size: 16px; }
+.adm-topbar-user { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.adm-content { padding: 26px 28px 48px; width: 100%; max-width: 1440px; margin: 0 auto; }
+@media (max-width: 900px) {
+  .adm-sidebar { position: fixed; left: 0; transform: translateX(-100%); transition: transform .2s; }
+  .adm-sidebar.open { transform: none; box-shadow: 0 10px 40px rgba(0,0,0,.18); }
+}
+
+/* ── Shared kit ─────────────────────────────────────────────────────── */
+.adm-page-head { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.adm-page-head h1 { font-family: var(--font-display); font-size: 26px; font-weight: 400; margin: 0; letter-spacing: .01em; }
+.adm-page-head p { margin: 4px 0 0; color: var(--muted-foreground); font-size: 13px; }
+.adm-page-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.adm-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
+.adm-card h2 { font-family: var(--font-display); font-size: 17px; font-weight: 400; margin: 0 0 6px; }
+.adm-card h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px; }
+.adm-grid { display: grid; gap: 16px; }
+.adm-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.adm-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.adm-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .adm-grid-3, .adm-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .adm-grid-2, .adm-grid-3, .adm-grid-4 { grid-template-columns: 1fr; } }
+.adm-kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted-foreground); }
+.adm-kpi-value { font-family: var(--font-display); font-size: 30px; margin-top: 4px; }
+.adm-kpi-foot { font-size: 12px; color: var(--muted-foreground); margin-top: 2px; }
+.adm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.adm-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted-foreground); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.adm-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.adm-table tr:last-child td { border-bottom: 0; }
+.adm-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; }
+.adm-btn {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; cursor: pointer;
+  background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--primary);
+  border-radius: calc(var(--radius) - 4px); font: 600 13px var(--font-sans); text-decoration: none;
+}
+.adm-btn:hover { filter: brightness(1.07); }
+.adm-btn:disabled { opacity: .5; cursor: not-allowed; }
+.adm-btn-ghost { background: #fff; color: var(--foreground); border: 1px solid var(--border); }
+.adm-btn-ghost:hover { background: var(--muted); filter: none; }
+.adm-btn-danger { background: var(--destructive); border-color: var(--destructive); color: var(--destructive-foreground); }
+.adm-btn-sm { padding: 5px 10px; font-size: 12px; }
+.adm-badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--muted); color: var(--foreground); }
+.adm-badge-teal { background: #e0f2f2; color: #00595a; }
+.adm-badge-green { background: #e6f4ea; color: var(--success); }
+.adm-badge-amber { background: #fdf0e0; color: var(--warning); }
+.adm-badge-red { background: #fde8e8; color: var(--destructive); }
+.adm-badge-brand { background: #f7e8e0; color: var(--brand); }
+.adm-label { display: block; font-size: 12px; font-weight: 600; margin: 0 0 5px; }
+.adm-input, .adm-select, .adm-textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--input); border-radius: calc(var(--radius) - 4px);
+  font: 400 13px var(--font-sans); background: #fff; color: var(--foreground);
+}
+.adm-input:focus, .adm-select:focus, .adm-textarea:focus { outline: 2px solid var(--ring); outline-offset: 1px; }
+.adm-field { margin-bottom: 14px; }
+.adm-help { font-size: 12px; color: var(--muted-foreground); margin-top: 4px; }
+.adm-alert { border: 1px solid var(--border); border-left: 3px solid var(--info); background: var(--secondary); border-radius: calc(var(--radius) - 4px); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; }
+.adm-alert-error { border-left-color: var(--destructive); }
+.adm-alert-ok { border-left-color: var(--success); }
+.adm-empty { border: 1px dashed var(--border); border-radius: var(--radius); padding: 28px; text-align: center; color: var(--muted-foreground); font-size: 13px; background: var(--secondary); }
+.adm-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; }
+.adm-tab { padding: 8px 12px; font-size: 13px; font-weight: 500; color: var(--muted-foreground); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.adm-tab:hover { color: var(--foreground); }
+.adm-tab.active { color: var(--foreground); border-bottom-color: var(--primary); font-weight: 600; }
+.adm-dl { display: grid; grid-template-columns: 190px 1fr; gap: 7px 16px; font-size: 13px; }
+.adm-dl dt { color: var(--muted-foreground); }
+.adm-dl dd { margin: 0; }
+.adm-matrix { border-collapse: collapse; width: 100%; font-size: 13px; }
+.adm-matrix th, .adm-matrix td { border: 1px solid var(--border); padding: 7px 9px; text-align: center; }
+.adm-matrix th:first-child, .adm-matrix td:first-child { text-align: left; }
+.portal-theme a { color: inherit; }
+.portal-theme h1, .portal-theme h2 { font-family: var(--font-display); }
+
+/* ── Legacy .fabric-* rules (pre-existing studio/catalog pages) ─────── */
+/* Fabric Design Studio admin tokens — adapted from fabric-admin.html */
+.fabric-admin {
+  --ink: #202126;
+  --muted: #7c7e89;
+  --line: #e8e8ed;
+  --soft: #f7f7fa;
+  --purple: #007c7d;
+  --purple2: #e0f2f2;
+  --green: #22a06b;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8f8fb;
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 14px;
+}
+.fabric-admin h1,
+.fabric-admin h2,
+.fabric-admin h3 {
+  font-family: "Space Grotesk", "DM Sans", sans-serif;
+}
+.fabric-topnav {
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 24px;
+  height: 64px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.fabric-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  white-space: nowrap;
+}
+.fabric-brandmark {
+  width: 29px;
+  height: 29px;
+  background: var(--purple);
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+}
+.fabric-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.fabric-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: #666875;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.fabric-nav-item:hover,
+.fabric-nav-item.active {
+  background: #e0f2f2;
+  color: var(--purple);
+  font-weight: 700;
+}
+.fabric-nav-icon {
+  width: 20px;
+  text-align: center;
+}
+.fabric-nav-foot {
+  margin-left: auto;
+}
+.fabric-main {
+  flex: 1;
+  min-width: 0;
+  padding: 28px 32px;
+  max-width: 1400px;
+}
+.fabric-page-head {
+  margin-bottom: 24px;
+}
+.fabric-page-head h1 {
+  font-size: 27px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  margin: 0 0 6px;
+}
+.fabric-page-head p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+.fabric-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.fabric-kpi {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+}
+.fabric-kpi-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.1px;
+  color: #9a9ba5;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.fabric-kpi-value {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+}
+.fabric-kpi-foot {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.fabric-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.fabric-card h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.fabric-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.fabric-table th,
+.fabric-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+.fabric-table th {
+  background: #f8f8fb;
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.fabric-table tbody tr:hover {
+  background: #faf9ff;
+}
+.fabric-pill {
+  display: inline-block;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.fabric-pill.green { background: #e6f7ef; color: #15803d; }
+.fabric-pill.amber { background: #fef3e2; color: #b45309; }
+.fabric-pill.purple { background: #e0f2f2; color: #00595a; }
+.fabric-pill.gray { background: #f3f3f7; color: #666875; }
+.fabric-btn {
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+.fabric-btn:hover { transform: translateY(-1px); }
+.fabric-btn-primary {
+  background: var(--purple);
+  color: #fff;
+  border-color: var(--purple);
+}
+.fabric-btn-primary:hover { background: #00666a; }
+.fabric-btn-sm { padding: 7px 10px; font-size: 12px; border-radius: 8px; }
+.fabric-actions { display: flex; gap: 6px; }
+.fabric-empty {
+  border: 1px dashed #d8d8e2;
+  border-radius: 11px;
+  padding: 32px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.fabric-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.fabric-search {
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 0 12px;
+  font-size: 13px;
+  min-width: 220px;
+  background: #fff;
+}
+
+/* ERP module forms (Orders build) — same tokens as the fabric system. */
+.fabric-label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+.fabric-input, .fabric-select, .fabric-textarea {
+  width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; color: var(--ink); font: inherit; font-size: 13px;
+}
+.fabric-textarea { min-height: 72px; resize: vertical; }
+.fabric-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fabric-form-error { color: #b3261e; font-size: 13px; margin-top: 8px; }
+.fabric-form-ok { color: var(--green); font-size: 13px; margin-top: 8px; }
+.fabric-section-title { font-size: 15px; font-weight: 700; margin: 0 0 10px; }
+.fabric-sidebar-tree { font-size: 13px; line-height: 1.9; }
+.fabric-sidebar-tree a { color: var(--ink); text-decoration: none; }
+.fabric-sidebar-tree a.active { color: var(--purple); font-weight: 700; }
+.fabric-sidebar-tree ul { list-style: none; margin: 0; padding-left: 14px; }
+.fabric-pill.red { background: #fdecea; color: #b3261e; }
+.fabric-pill.blue { background: #e8f0fe; color: #1a56db; }
+@media print { .fabric-topnav, .fabric-no-print { display: none !important; } }
+
+/* ── Legacy .fabric-* aliased onto the .adm-* system (2026-10-31) ──
+   Pages still carrying .fabric-table/.fabric-pill/.fabric-card/.fabric-btn
+   /.fabric-input etc render IDENTICALLY to the .adm-* kit, so the whole
+   admin reads as one teal system while individual pages migrate. */
+.fabric-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.fabric-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted-foreground); font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); background: transparent; }
+.fabric-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; text-align: left; }
+.fabric-table tr:last-child td { border-bottom: 0; }
+.fabric-table tbody tr:hover { background: var(--muted); }
+.fabric-pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: var(--muted); color: var(--foreground); }
+.fabric-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+.fabric-card h2 { font-family: var(--font-display); font-size: 17px; font-weight: 400; margin: 0 0 10px; }
+.fabric-btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; cursor: pointer; background: var(--primary); color: var(--primary-foreground); border: 1px solid var(--primary); border-radius: calc(var(--radius) - 4px); font: 600 13px var(--font-sans); text-decoration: none; }
+.fabric-btn:hover { filter: brightness(1.07); transform: none; }
+.fabric-btn-primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); }
+.fabric-btn-sm { padding: 5px 10px; font-size: 12px; border-radius: calc(var(--radius) - 6px); }
+.fabric-input, .fabric-select, .fabric-textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--input); border-radius: calc(var(--radius) - 4px); font: 400 13px var(--font-sans); background: #fff; color: var(--foreground); }
+.fabric-input:focus, .fabric-select:focus, .fabric-textarea:focus { outline: 2px solid var(--ring); outline-offset: 1px; }
+.fabric-label { display: block; font-size: 12px; font-weight: 600; color: var(--foreground); margin: 0 0 5px; }
+.fabric-search { width: auto; min-width: 220px; height: auto; padding: 8px 10px; border: 1px solid var(--input); border-radius: calc(var(--radius) - 4px); font: 400 13px var(--font-sans); background: #fff; }
+.fabric-empty { border: 1px dashed var(--border); border-radius: var(--radius); padding: 28px; text-align: center; color: var(--muted-foreground); font-size: 13px; background: var(--secondary); }
+.fabric-section-title { font-family: var(--font-display); font-size: 17px; font-weight: 400; margin: 0 0 10px; color: var(--foreground); }
+.fabric-form-error { color: var(--destructive); font-size: 13px; margin-top: 8px; }
+.fabric-form-ok { color: var(--success); font-size: 13px; margin-top: 8px; }
+
+/* Button color law (owner, 2026-11-02): the header Create is the only
+   green button in the admin. Every other primary/green button renders
+   black with white text. Unlayered on purpose: it must beat the
+   layered utilities, the same mechanism that hid button text before. */
+button.bg-primary, a.bg-primary,
+button.bg-green-600, a.bg-green-600,
+button.bg-green-700, a.bg-green-700,
+button.bg-green-800, a.bg-green-800,
+button.bg-green-900, a.bg-green-900 {
+  background-color: #171420;
+  color: #ffffff;
+}
+button[class*="bg-[#171420]"], a[class*="bg-[#171420]"] {
+  color: #ffffff;
+}

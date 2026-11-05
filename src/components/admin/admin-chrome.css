@@ -1,0 +1,207 @@
+/*
+ * admin-chrome.css — the admin chrome on the OWN teal design system
+ * (.portal-theme / .adm-* in admin.css), 2026-10-31. The purple
+ * .fabric-admin / .uns-* chrome is retired; this file now styles the
+ * topbar, the workspace tabs, and the 14-panel flyout in the SAME teal
+ * #007c7d tokens the module pages use, so the whole admin reads as one
+ * system. ModuleFrame's sidebar uses .adm-sidebar directly (see
+ * module-frame.css), not classes here.
+ */
+
+.uns-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--background);
+  color: var(--foreground);
+  /* Map the legacy .fabric-admin / .f-* tokens the flyout and tabstrip
+     still reference onto the teal .adm-* system, so they resolve
+     (no purple anywhere in the chrome). */
+  --f-line: var(--border);
+  --f-ink: var(--foreground);
+  --f-muted: var(--muted-foreground);
+  --f-soft: var(--secondary);
+  --f-purple: var(--primary);
+  --f-purple2: #e0f2f2;
+  --f-bg: var(--background);
+}
+
+/* ── Topbar (.adm-topbar gives the 56px teal-edged bar; .uns-topbar
+   lays out the hamburger, breadcrumb, search, date, user, sign out). */
+.uns-topbar {
+  gap: 14px;
+  padding: 0 20px;
+}
+
+/* The hamburger — first element, top-left corner: EXACTLY where the
+   UnSaid image and icon sat before they were deleted. */
+.uns-burger {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 4px);
+  color: var(--foreground);
+  cursor: pointer;
+  transition: 0.15s;
+}
+.uns-burger:hover {
+  background: #e0f2f2;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.uns-crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+  min-width: 0;
+}
+.uns-crumb-mod {
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-weight: 600;
+}
+.uns-crumb-mod:hover { color: var(--primary); text-decoration: underline; }
+.uns-crumb-sep { color: var(--muted-foreground); opacity: 0.6; }
+.uns-crumb b { color: var(--foreground); font-weight: 600; }
+
+.uns-topspacer { flex: 1; }
+
+.uns-searchslot {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 8px 12px;
+  color: var(--muted-foreground);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.uns-searchslot kbd {
+  font: 600 10px var(--font-sans);
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 5px;
+  color: var(--muted-foreground);
+}
+
+.uns-date {
+  color: var(--muted-foreground);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
+.uns-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px 5px 5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+.uns-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: calc(var(--radius) - 4px);
+  background: #e0f2f2;
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font: 700 13px var(--font-display);
+}
+.uns-user-meta { display: flex; flex-direction: column; line-height: 1.15; }
+.uns-user-name { font-size: 12.5px; font-weight: 700; color: var(--foreground); }
+.uns-user-role {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.uns-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: calc(var(--radius) - 4px);
+  padding: 9px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--foreground);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.15s;
+}
+.uns-signout:hover { background: #e0f2f2; border-color: var(--primary); color: var(--primary); }
+
+/* ── 14-panel flyout — teal card grid (the owner's reference panel).
+   The .f-mega-* layout classes live in fabric-shell.css; this file
+   recolors the cards to the teal system so the flyout matches the
+   chrome and the module pages. */
+.f-mega-card:hover { background: #e0f2f2; }
+.f-mega-card:hover .f-mega-card-title { color: var(--primary); }
+.f-mega-card.active {
+  background: #e0f2f2;
+  border-color: #b3dede;
+}
+.f-mega-card.active .f-mega-card-title { color: var(--primary); }
+
+/* Mobile: hide the date/search/signout label to keep the topbar usable. */
+@media (max-width: 720px) {
+  .uns-date, .uns-searchslot, .uns-signout-label { display: none; }
+  .uns-user-meta { display: none; }
+  .uns-topbar { gap: 10px; padding: 0 12px; }
+}
+
+/* Kinnect AI launcher (topbar) — restored to this shell 2026-11-01;
+   same slot/presence it has in the portal header. */
+.uns-aibtn {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+  height: 40px; padding: 0 14px; white-space: nowrap;
+  background: #fff; border: 1px solid var(--border); color: var(--foreground);
+  border-radius: calc(var(--radius) - 4px);
+  font-size: 12.5px; font-weight: 600; cursor: pointer; transition: 0.15s;
+}
+.uns-aibtn svg { color: #7258e8; }
+.uns-aibtn:hover { background: #f4f1fe; border-color: #7258e8; }
+@media (max-width: 720px) { .uns-aibtn span { display: none; } .uns-aibtn { padding: 0 10px; } }
+
+/* Quick actions launcher (topbar) — flex: 0 0 auto + nowrap so the
+   New button is never scrunched by the breadcrumb/search (owner,
+   2026-11-01: "the new button is scrunched up — let it out"). */
+.uns-quickact { position: relative; display: inline-flex; flex: 0 0 auto; }
+.uns-quickact-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid #7258e8; background: #7258e8; color: #fff;
+  border-radius: calc(var(--radius) - 4px); padding: 8px 16px; height: 40px;
+  font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.uns-quickact-backdrop { position: fixed; inset: 0; z-index: 60; }
+.uns-quickact-menu {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 61;
+  min-width: 240px; background: #fff; border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 16px 40px rgba(20, 16, 60, 0.16);
+  padding: 6px; display: flex; flex-direction: column; gap: 2px;
+}
+.uns-quickact-menu button {
+  display: flex; align-items: center; gap: 10px; text-align: left;
+  padding: 9px 10px; border: 0; background: transparent; border-radius: 8px;
+  cursor: pointer; color: var(--foreground);
+}
+.uns-quickact-menu button:hover { background: #f4f1fe; }
+.uns-quickact-menu button span { display: flex; flex-direction: column; }
+.uns-quickact-menu button b { font-size: 13px; font-weight: 600; }
+.uns-quickact-menu button small { font-size: 11.5px; color: var(--muted-foreground); }

@@ -1,0 +1,189 @@
+/* Account center — converted from Sunny's customer account mockup
+   (UnSaid_customer_account__mockup___1.html): utilitarian rail layout,
+   lilac accent, white surfaces, real product imagery (no emoji tiles).
+   All classes are ua- prefixed so nothing collides with storefront
+   globals. */
+.ua-wrap {
+  --ua-ink: #17141a;
+  --ua-mut: #6f6a75;
+  --ua-line: #e9e5ec;
+  --ua-lilac: #8c6fb8;
+  --ua-soft: #f3eefa;
+  --ua-ok: #2f7d5b;
+  --ua-warn: #a9791c;
+  --ua-bad: #b3423a;
+  color: var(--ua-ink);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.ua-layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+.ua-rail {
+  position: sticky;
+  top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ua-rail a {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 9px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--ua-mut);
+  font-weight: 500;
+}
+.ua-rail a:hover { color: var(--ua-ink); }
+.ua-rail a[aria-current="page"] { background: var(--ua-soft); color: var(--ua-ink); }
+.ua-rail small { font-size: 11.5px; color: var(--ua-mut); }
+.ua-rail hr {
+  border: 0;
+  border-top: 1px solid var(--ua-line);
+  margin: 10px 12px;
+  width: calc(100% - 24px);
+}
+.ua-h2 {
+  font-family: var(--font-serif, Georgia, serif);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.5px;
+  margin: 0 0 4px;
+}
+.ua-sub { color: var(--ua-mut); margin: 0 0 18px; font-size: 13.5px; }
+.ua-blk { padding: 30px 0; border-top: 1px solid var(--ua-line); }
+.ua-blk:first-child { border-top: 0; padding-top: 0; }
+.ua-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ua-ink);
+  color: #fff;
+  border: 1px solid var(--ua-ink);
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.ua-btn.ghost { background: transparent; color: var(--ua-ink); border-color: var(--ua-line); }
+.ua-btn.ghost:hover { border-color: var(--ua-ink); }
+.ua-btn.sm { padding: 6px 12px; font-size: 12.5px; }
+.ua-btn:disabled { opacity: 0.55; cursor: default; }
+.ua-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ua-nudge {
+  background: var(--ua-soft);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.ua-nudge p { margin: 0; flex: 1; min-width: 220px; }
+.ua-nudge input { flex: 0 0 220px; width: 220px; }
+.ua-input, .ua-textarea, .ua-select {
+  width: 100%;
+  background: #fff;
+  color: var(--ua-ink);
+  border: 1px solid var(--ua-line);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: inherit;
+}
+.ua-order { border: 1px solid var(--ua-line); border-radius: 14px; padding: 22px; background: #fff; }
+.ua-oh { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.ua-oh .id { font-weight: 600; }
+.ua-mut { color: var(--ua-mut); }
+.ua-steps { display: grid; grid-template-columns: repeat(4, 1fr); margin: 6px 0 22px; }
+.ua-st { position: relative; padding-top: 20px; font-size: 12.5px; color: var(--ua-mut); }
+.ua-st::before { content: ""; position: absolute; top: 5px; left: 0; right: 0; height: 2px; background: var(--ua-line); }
+.ua-st::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 12px; height: 12px;
+  border-radius: 50%; background: #fff; border: 2px solid var(--ua-line);
+}
+.ua-st.done { color: var(--ua-ink); }
+.ua-st.done::before { background: var(--ua-lilac); }
+.ua-st.done::after { background: var(--ua-lilac); border-color: var(--ua-lilac); }
+.ua-st.now { font-weight: 600; }
+.ua-st:last-child::before { right: auto; width: 0; }
+.ua-item { display: flex; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--ua-line); }
+.ua-item .nm { flex: 1; min-width: 0; }
+.ua-item .nm div:first-child { font-weight: 500; }
+.ua-th {
+  width: 56px; height: 56px; border-radius: 10px; flex: none;
+  display: grid; place-items: center; overflow: hidden; background: var(--ua-soft);
+}
+.ua-th img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ua-th .init { font-weight: 600; color: var(--ua-lilac); font-size: 20px; }
+.ua-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.ua-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ua-tile {
+  display: flex; flex-direction: column; gap: 2px;
+  border: 1px solid var(--ua-line); border-radius: 14px;
+  padding: 16px 18px; text-decoration: none; color: var(--ua-ink); background: #fff;
+}
+.ua-tile:hover { border-color: var(--ua-lilac); }
+.ua-tile-label { font-weight: 600; }
+.ua-tile-note { color: var(--ua-mut); font-size: 13px; }
+.ua-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.ua-strip .ua-th { width: 84px; height: 84px; }
+.ua-pillst { font-size: 11.5px; font-weight: 600; padding: 2px 9px; border-radius: 99px; background: var(--ua-soft); }
+.ua-pillst.ok { color: var(--ua-ok); }
+.ua-pillst.warn { color: var(--ua-warn); }
+.ua-pillst.bad { color: var(--ua-bad); }
+.ua-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+.ua-tabs button {
+  border: 1px solid var(--ua-line); background: transparent; padding: 6px 13px;
+  border-radius: 99px; font-size: 12.5px; font-weight: 500; cursor: pointer; color: var(--ua-ink);
+}
+.ua-tabs button[aria-pressed="true"] { background: var(--ua-ink); color: #fff; border-color: var(--ua-ink); }
+.ua-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 22px; }
+.ua-pc .img { aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: var(--ua-soft); display: grid; place-items: center; }
+.ua-pc .img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ua-pc .img .init { font-size: 44px; font-weight: 600; color: var(--ua-lilac); }
+.ua-pc .nm { margin-top: 10px; font-weight: 500; line-height: 1.35; }
+.ua-pc .meta { color: var(--ua-mut); font-size: 12.5px; display: flex; justify-content: space-between; }
+.ua-acts { display: flex; gap: 4px; margin-top: 6px; }
+.ua-ic {
+  display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent;
+  padding: 6px 8px; border-radius: 8px; color: var(--ua-mut); font-size: 12.5px; cursor: pointer;
+}
+.ua-ic:hover { background: var(--ua-soft); color: var(--ua-ink); }
+.ua-list > div { display: flex; gap: 14px; padding: 15px 0; border-top: 1px solid var(--ua-line); align-items: flex-start; }
+.ua-list > div:first-child { border-top: 0; }
+.ua-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ua-lilac); margin-top: 7px; flex: none; }
+.ua-dot.off { background: transparent; border: 1px solid var(--ua-line); }
+.ua-f { display: grid; gap: 6px; margin-bottom: 14px; }
+.ua-f label { font-size: 12.5px; font-weight: 500; }
+.ua-ov {
+  position: fixed; inset: 0; background: rgba(10, 8, 14, 0.5);
+  display: grid; place-items: center; z-index: 50; padding: 16px;
+}
+.ua-md { background: #fff; border-radius: 16px; width: min(520px, 100%); max-height: 90vh; overflow: auto; padding: 26px; }
+.ua-stars button { background: none; border: 0; font-size: 26px; color: var(--ua-line); padding: 0 2px; cursor: pointer; }
+.ua-stars button.on { color: var(--ua-lilac); }
+.ua-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 0);
+  background: var(--ua-ink); color: #fff; padding: 10px 16px; border-radius: 10px;
+  font-size: 13px; z-index: 60;
+}
+.ua-msg { border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+.ua-msg.ok { background: #eef7f1; color: var(--ua-ok); }
+.ua-msg.err { background: #fbeae8; color: var(--ua-bad); }
+@media (max-width: 860px) {
+  .ua-layout { grid-template-columns: 1fr; gap: 20px; }
+  .ua-rail { position: static; flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .ua-rail a { white-space: nowrap; gap: 8px; }
+  .ua-rail hr { display: none; }
+  .ua-cols { grid-template-columns: 1fr; gap: 10px; }
+  .ua-tiles { grid-template-columns: 1fr; }
+}
