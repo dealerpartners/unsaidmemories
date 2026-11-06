@@ -203,6 +203,9 @@ export interface CanvasEditorProps {
   eraseRadius?: number;
   /** A finished eraser pass: the swept path + radius, design coords. */
   onEraseComplete?: (path: { x: number; y: number }[], radius: number) => void;
+  /** Right-click on a design node: the parent opens its context menu
+   * (the node is selected first, through onSelect). */
+  onNodeContextMenu?: (info: { nodeId: string; clientX: number; clientY: number }) => void;
   /**
    * Blank-page mode: instead of a product silhouette + print zones,
    * the canvas shows a plain sheet of paper at this rect (sketch
@@ -1993,6 +1996,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
       onDrawComplete,
       eraseRadius = 14,
       onEraseComplete,
+      onNodeContextMenu,
       blankPage = null,
       panMode = false,
       onZoomChange,
@@ -2496,6 +2500,26 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
         window.removeEventListener("keyup", up);
       };
     }, []);
+
+    // Right-click: the canvas never shows the browser's menu. When the
+    // press lands on a design node, that node becomes the selection and
+    // the parent opens its context menu at the cursor.
+    const handleContextMenu = (e: Konva.KonvaEventObject<PointerEvent>) => {
+      e.evt.preventDefault();
+      if (!onNodeContextMenu) return;
+      const ids = new Set(nodes.map((n) => n.id));
+      let t: Konva.Node | null = e.target as Konva.Node;
+      const stage = e.target.getStage();
+      while (t && t !== stage) {
+        const id = t.id();
+        if (id && ids.has(id)) {
+          onSelect(id);
+          onNodeContextMenu({ nodeId: id, clientX: e.evt.clientX, clientY: e.evt.clientY });
+          return;
+        }
+        t = t.getParent();
+      }
+    };
 
     const handleWheel = useCallback(
       (e: Konva.KonvaEventObject<WheelEvent>) => {
@@ -3098,6 +3122,7 @@ export const CanvasEditor = forwardRef<CanvasEditorHandle, CanvasEditorProps>(
           x={view.x}
           y={view.y}
           onWheel={handleWheel}
+          onContextMenu={handleContextMenu}
           onMouseDown={handleMouseDownAny}
           onTouchStart={tool === "draw" ? handleDrawStart : handleStageMouseDown}
           onMouseMove={handleMouseMoveAny}

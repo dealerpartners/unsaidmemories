@@ -70,10 +70,13 @@ interface Props {
   selectedItemId: string | null;
   onSelectItem: (id: string | null) => void;
   onChange: (sheet: GangSheet) => void;
+  /** Right-click on an item: the parent opens its context menu
+   * (the item is selected first, through onSelectItem). */
+  onItemContextMenu?: (info: { itemId: string; clientX: number; clientY: number }) => void;
 }
 
 const GangSheetEditor = forwardRef<GangSheetHandle, Props>(function GangSheetEditor(
-  { sheet, selectedItemId, onSelectItem, onChange },
+  { sheet, selectedItemId, onSelectItem, onChange, onItemContextMenu },
   ref,
 ) {
   const viewScale = Math.min(620 / sheet.widthIn, 560 / sheet.heightIn);
@@ -145,6 +148,10 @@ const GangSheetEditor = forwardRef<GangSheetHandle, Props>(function GangSheetEdi
                 else nodeRefs.current.delete(item.id);
               }}
               onSelect={() => onSelectItem(item.id)}
+              onContextMenu={(clientX, clientY) => {
+                onSelectItem(item.id);
+                onItemContextMenu?.({ itemId: item.id, clientX, clientY });
+              }}
               onDragEnd={(xIn, yIn) => patchItem(item.id, { xIn, yIn })}
               onTransformEnd={(patch) => patchItem(item.id, patch)}
             />
@@ -162,13 +169,14 @@ const GangSheetEditor = forwardRef<GangSheetHandle, Props>(function GangSheetEdi
 });
 
 function GangItemView({
-  item, viewScale, selected, registerRef, onSelect, onDragEnd, onTransformEnd,
+  item, viewScale, selected, registerRef, onSelect, onContextMenu, onDragEnd, onTransformEnd,
 }: {
   item: GangItem;
   viewScale: number;
   selected: boolean;
   registerRef: (node: Konva.Image | null) => void;
   onSelect: () => void;
+  onContextMenu: (clientX: number, clientY: number) => void;
   onDragEnd: (xIn: number, yIn: number) => void;
   onTransformEnd: (patch: Partial<GangItem>) => void;
 }) {
@@ -187,6 +195,10 @@ function GangItemView({
       strokeWidth={selected ? 1.5 : 0}
       onMouseDown={onSelect}
       onTap={onSelect}
+      onContextMenu={(e) => {
+        e.evt.preventDefault();
+        onContextMenu(e.evt.clientX, e.evt.clientY);
+      }}
       onDragEnd={(e) => onDragEnd(e.target.x() / viewScale, e.target.y() / viewScale)}
       onTransformEnd={(e) => {
         const node = e.target as Konva.Image;

@@ -370,6 +370,10 @@ export default function DesignStudio() {
     return () => window.removeEventListener("keydown", onKey);
   }, [undo, redo]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Right-click context menu on the canvas (owner order 2026-11-05):
+  // the target node/item is selected by the editor first, then this
+  // menu carries its actions — delete included.
+  const [ctxMenu, setCtxMenu] = useState<{ nodeId: string; x: number; y: number } | null>(null);
   const [tool, setTool] = useState<"select" | "draw" | "erase" | "line" | "arrow">("select");
   const [eraseRadius, setEraseRadius] = useState(14);
   const [drawStroke, setDrawStroke] = useState({ stroke: "#202126", strokeWidth: 4 });
@@ -643,6 +647,82 @@ export default function DesignStudio() {
     },
     [],
   );
+
+  /* ---- Delete: keyboard removal from any tab, in every mode ----
+   * The inspector's Delete button lives only on the Design tab; the
+   * Delete/Backspace keys remove the current selection wherever the
+   * right rail is parked. Gang mode removes the selected sheet item;
+   * every other mode removes the selected node(s) through the same
+   * active-list adapter the inspector uses. */
+  const deleteSelected = useCallback(() => {
+    if (mode === "gang") {
+      if (!gangSel) return;
+      const sheetId = activeSheet?.id ?? null;
+      setGangSheets((prev) =>
+        prev.map((sh) =>
+          sh.id === sheetId
+            ? { ...sh, items: sh.items.filter((x) => x.id !== gangSel) }
+            : sh,
+        ),
+      );
+      setGangSel(null);
+      markDirty();
+      return;
+    }
+    const ids =
+      multiIds.length > 1 && selectedId && multiIds.includes(selectedId)
+        ? multiIds
+        : selectedId
+          ? [selectedId]
+          : [];
+    if (!ids.length) return;
+    replaceEditorNodes((prev) => prev.filter((n) => !ids.includes(n.id)));
+    setSelectedId(null);
+    setMultiIds([]);
+    markDirty();
+  }, [mode, gangSel, activeSheet, multiIds, selectedId, replaceEditorNodes, markDirty]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) ||
+          target.isContentEditable)
+      )
+        return;
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteSelected();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [deleteSelected]);
+
+  /* ---- Context menu: dismissal (click-away / Escape / blur) ---- */
+  const ctxNode =
+    ctxMenu && mode !== "gang"
+      ? (editorNodes.find((n) => n.id === ctxMenu.nodeId) ?? null)
+      : null;
+  useEffect(() => {
+    if (!ctxMenu) return;
+    const close = () => setCtxMenu(null);
+    const onDown = (e: PointerEvent) => {
+      if (!(e.target as HTMLElement | null)?.closest?.("[data-ctx-menu]")) close();
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    window.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("blur", close);
+    return () => {
+      window.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("blur", close);
+    };
+  }, [ctxMenu]);
 
   /* ---- Canvas callbacks ---- */
   const handleSelect = useCallback((id: string | null) => setSelectedId(id), []);
@@ -3148,6 +3228,7 @@ export default function DesignStudio() {
                   selectedItemId={gangSel}
                   onSelectItem={setGangSel}
                   onChange={patchSheet}
+                  onItemContextMenu={(info) => setCtxMenu({ nodeId: info.itemId, x: info.clientX, y: info.clientY })}
                 />
               ) : (
               <CanvasEditor
@@ -3174,6 +3255,7 @@ export default function DesignStudio() {
                 onDrawComplete={handleDrawComplete}
                 eraseRadius={eraseRadius}
                 onEraseComplete={handleEraseComplete}
+                onNodeContextMenu={(info) => setCtxMenu({ nodeId: info.nodeId, x: info.clientX, y: info.clientY })}
               />
               )}
             </div>
@@ -3187,7 +3269,7 @@ export default function DesignStudio() {
                 handleZoomChange={handleZoomChange}
               />
             )}
-            <div className="canvas-tip">{mode === "sketch" ? "✦ Sketch with the pencil, shapes and words — everything on the board is a layer you can move, erase and restyle · When it reads right, Deliver to AI paints it" : mode === "gang" ? "✦ Drag artworks to arrange them on the sheet · Drag a corner to resize, the top handle to rotate · The export is one transparent PNG at exactly 300 DPI" : "✦ Select an element to edit · Drag to reposition · Double-click text to edit · ✎ draws freehand · 🔒 locks a layer in place · Guides: red = bleed, violet = trim, green = safe"}</div>
+            <div className="canvas-tip">{mode === "sketch" ? "✦ Sketch with the pencil, shapes and words — everything on the board is a layer you can move, erase and restyle · When it reads right, Deliver to AI paints it" : mode === "gang" ? "✦ Drag artworks to arrange them on the sheet · Drag a corner to resize, the top handle to rotate · The export is one transparent PNG at exactly 300 DPI" : "✦ Select an element to edit · Drag to reposition · Right-click a piece for its menu (duplicate, lock, delete) · Double-click text to edit · ✎ draws freehand · 🔒 locks a layer in place · Guides: red = bleed, violet = trim, green = safe"}</div>
           </div>
           {/* The black production bar that lived here is gone (owner
               order 2026-10-30: DPI belongs in the publish flow, not in
@@ -3551,6 +3633,7 @@ export default function DesignStudio() {
                       <button type="button" title={n.locked ? "Unlock layer" : "Lock layer in place"} data-tip={n.locked ? "Unlock this layer so it can be moved and edited again." : "Lock this layer in place — it still prints, but it cannot be dragged or changed until you unlock it."} onClick={(e) => { e.stopPropagation(); handleChange(n.id, { locked: !n.locked } as Partial<DesignNode>); }}>{n.locked ? "🔒" : "🔓"}</button>
                       <button type="button" title="Bring forward" data-tip="Bring this layer one step forward — it will cover more of the layers beneath it." onClick={(e) => { e.stopPropagation(); moveLayer(n.id, -1); }}>↑</button>
                       <button type="button" title="Send backward" data-tip="Send this layer one step back — the layers above it will cover more of it." onClick={(e) => { e.stopPropagation(); moveLayer(n.id, 1); }}>↓</button>
+                      <button type="button" title="Remove layer" data-tip="Remove this layer from the design. If you change your mind, Undo brings it back." onClick={(e) => { e.stopPropagation(); replaceEditorNodes((prev) => prev.filter((x) => x.id !== n.id)); if (selectedId === n.id) setSelectedId(null); setMultiIds((prev) => prev.filter((id) => id !== n.id)); markDirty(); }}>✕</button>
                     </span>
                   </div>
                 ))}
@@ -3950,6 +4033,68 @@ export default function DesignStudio() {
               onUploaded={() => toast("Post-processed print file stored")}
             />
           </div>
+        </div>
+      )}
+
+      {/* Canvas context menu (right-click a piece on the canvas) */}
+      {ctxMenu && (mode === "gang" || ctxNode) && (
+        <div
+          data-ctx-menu
+          onContextMenu={(e) => e.preventDefault()}
+          style={{
+            position: "fixed",
+            left: Math.min(ctxMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - 200),
+            top: Math.min(ctxMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - 240),
+            zIndex: 3000,
+            minWidth: 184,
+            display: "grid",
+            gap: 2,
+            padding: 6,
+            background: "#ffffff",
+            border: "1px solid #d9d9e2",
+            borderRadius: 10,
+            boxShadow: "0 12px 32px rgba(20,20,30,0.20)",
+          }}
+        >
+          {mode === "gang" ? (
+            <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#202126", fontSize: 13.5 }} onClick={() => { deleteSelected(); setCtxMenu(null); }}>
+              Remove from sheet
+            </button>
+          ) : ctxNode ? (
+            <>
+              <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#202126", fontSize: 13.5 }} onClick={() => {
+                const copy = { ...ctxNode, id: `${ctxNode.kind}_${Date.now().toString(36)}`, x: ctxNode.x + 18, y: ctxNode.y + 18 } as DesignNode;
+                replaceEditorNodes((prev) => [...prev, copy]);
+                setSelectedId(copy.id);
+                markDirty();
+                setCtxMenu(null);
+              }}>
+                ⧉ Duplicate
+              </button>
+              <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#202126", fontSize: 13.5 }} onClick={() => {
+                handleChange(ctxNode.id, { locked: !ctxNode.locked } as Partial<DesignNode>);
+                setCtxMenu(null);
+              }}>
+                {ctxNode.locked ? "🔓 Unlock layer" : "🔒 Lock layer"}
+              </button>
+              <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#202126", fontSize: 13.5 }} onClick={() => { moveLayer(ctxNode.id, -1); setCtxMenu(null); }}>
+                Bring forward
+              </button>
+              <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#202126", fontSize: 13.5 }} onClick={() => { moveLayer(ctxNode.id, 1); setCtxMenu(null); }}>
+                Send backward
+              </button>
+              <div style={{ height: 1, background: "#e7e7ee", margin: "4px 2px" }} />
+              <button type="button" style={{ display: "block", width: "100%", textAlign: "left", background: "transparent", border: 0, padding: "7px 10px", borderRadius: 6, cursor: "pointer", color: "#b3261e", fontSize: 13.5 }} onClick={() => {
+                replaceEditorNodes((prev) => prev.filter((n) => n.id !== ctxNode.id));
+                if (selectedId === ctxNode.id) setSelectedId(null);
+                setMultiIds((prev) => prev.filter((id) => id !== ctxNode.id));
+                markDirty();
+                setCtxMenu(null);
+              }}>
+                ⌫ Delete
+              </button>
+            </>
+          ) : null}
         </div>
       )}
 
