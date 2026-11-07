@@ -28,6 +28,8 @@ export function revalidateShop(): void {
   // The shopping bag reads cart-only state client-side but also renders
   // product recommendations; clear it too.
   revalidatePath("/shop/bag")
-  // Product detail pages (the live PDP route is /product/[id]).
-  revalidatePath("/product/[id]", "page")
+  // Product detail pages are NOT busted here. A template-wide bust of
+  // /product/[id] rewrote every product page on the next crawl after any
+  // admin edit (brands, coupons, categories included). Product writers
+  // bust the exact product path instead (erp/catalog, designs review).
 }

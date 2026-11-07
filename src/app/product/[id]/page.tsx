@@ -4,9 +4,11 @@
  * FAST-RENDER ARCHITECTURE (the reference repo's exact pdp.ts pattern,
  * ported after the 2026-10 multi-minute-load incident):
  *
- *   1. ISR, not per-view DB: `revalidate = 86400` — the route renders
- *      on-demand on first request, then the cached HTML serves for a day.
- *      The database is OUT of the per-view path.
+ *   1. Static, not per-view DB: the route renders on-demand on first
+ *      request, then the cached HTML serves until the product's own
+ *      write busts this exact path. The database is OUT of the per-view
+ *      path. (Was `revalidate = 86400` until 2026-11-06 — the daily
+ *      timer rewrote every crawled product page every day.)
  *   2. Build-time PDP pre-render stays OFF (`generateStaticParams → []`):
  *      the reference repo's bounded top-200 experiment saturated the
  *      Supabase session pooler (EMAXCONN, 200-connection limit) and killed
@@ -72,8 +74,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://unsaid-leashed.ver
 
 // ── Route caching (the reference repo's exact exports) ───────
 
-/** ISR: render on-demand on first request, cache for a day, edge-served. */
-export const revalidate = 86400;
+/** Static: render on-demand on first request, then serve from cache until
+ * the product's own write busts this exact path (erp/catalog routes and the
+ * design review route revalidate `/product/<id>`). No time-based expiry:
+ * a daily timer rewrote every crawled product page every day. */
 export const dynamicParams = true;
 
 /** Build ZERO product pages (see header comment §2). */

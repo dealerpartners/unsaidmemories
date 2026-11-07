@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuthClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase";
@@ -32,7 +31,6 @@ export async function signIn(
     return { error: error.message };
   }
 
-  revalidatePath("/", "layout");
   // Step 2 of sign-in (Twilio Verify): an account with no verified
   // phone diverts to /verify-phone with its destination preserved.
   const {
@@ -144,7 +142,6 @@ export async function signUp(
     }
   }
 
-  revalidatePath("/", "layout");
   // A live session means the account exists NOW — it verifies its
   // phone before landing (Twilio Verify step 2). When email
   // confirmation is pending there is no session yet; the auth
@@ -158,6 +155,5 @@ export async function signUp(
 export async function signOut() {
   const supabase = await createAuthClient();
   await supabase.auth.signOut();
-  revalidatePath("/", "layout");
   redirect("/login");
 }
