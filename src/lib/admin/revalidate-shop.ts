@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from "next/cache"
+import { revalidatePath } from "next/cache"
 
 // ---------------------------------------------------------------------------
 // Centralized storefront revalidation.
@@ -11,14 +11,12 @@ import { revalidatePath, revalidateTag } from "next/cache"
 // ---------------------------------------------------------------------------
 
 export function revalidateShop(): void {
-  // Data-cache entries (unstable_cache) purge ONLY by tag or by their
-  // revalidate timer — path revalidation alone leaves them stale, which
-  // is why a deleted product used to linger on the storefront. Bust the
-  // tags first so a delete is visible in the same request: "catalog"
-  // covers the shop fetchers and the PDP loader, "home-featured" the
-  // home page rail.
-  revalidateTag("catalog", { expire: 0 })
-  revalidateTag("home-featured", { expire: 0 })
+  // Cached data stays cached. The shared "catalog" data tag is NOT
+  // expired here: expiring it marked every page that renders catalog
+  // data stale, so any admin write (a brand, a coupon, a filter)
+  // re-rendered the whole catalog on the next crawl — the ISR write
+  // bleed measured 2026-11-06. Shared data refreshes on its own TTLs;
+  // a changed product is busted by its exact path in its own writer.
   // Home page may surface featured products / category tiles.
   revalidatePath("/")
   // The shop index + canonical category PLP routes (`/shop/dog`,
