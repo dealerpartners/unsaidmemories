@@ -402,18 +402,6 @@ export const INTEGRATION_SERVICES: IntegrationService[] = [
     ],
   },
   {
-    id: "payload",
-    name: "Payload CMS",
-    category: "Content",
-    blurb: "The content manager behind banners and pop-ups — it runs as its own app next door. This card checks it is reachable at its address.",
-    dashboardUrl: "https://unsaid-cms.vercel.app/admin",
-    dashboardLabel: "Open Payload",
-    fields: [
-      { keyName: "PAYLOAD_URL", label: "Server URL", secret: false, placeholder: "https://unsaid-cms.vercel.app", help: "The address of the Payload app. The test button checks the CMS answers there." },
-      { keyName: "PAYLOAD_API_SECRET", label: "API secret", secret: true, placeholder: "Your Payload API secret", help: "Kept for the server-to-server calls between the store and the CMS." },
-    ],
-  },
-  {
     id: "openai",
     name: "OpenAI",
     category: "AI & model providers",

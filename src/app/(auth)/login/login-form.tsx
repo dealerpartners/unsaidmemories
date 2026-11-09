@@ -65,7 +65,7 @@ function useFragmentSession(next: string) {
           return;
         }
         const target =
-          next.startsWith("/") && !next.startsWith("//") ? next : "/admin";
+          next.startsWith("/") && !next.startsWith("//") ? next : "/account";
         window.location.replace(target);
       })
       .catch(() => setLinkError(true));
@@ -132,7 +132,7 @@ export function LoginForm({ next, confirmError }: { next: string; confirmError: 
       </form>
 
       <div className="auth-alt">
-        New to UnSaid? <a href={`/signup${next !== "/admin" ? `?next=${encodeURIComponent(next)}` : ""}`}>Create an account</a>
+        New to UnSaid? <a href={`/signup${next !== "/account" ? `?next=${encodeURIComponent(next)}` : ""}`}>Create an account</a>
       </div>
     </>
   );

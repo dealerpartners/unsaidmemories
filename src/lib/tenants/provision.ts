@@ -6,7 +6,7 @@ import {
   ensureAuthUser,
   upsertPortalUser,
   issueIdentityGrant,
-} from "@/app/api/admin/onboarding/_provision"
+} from "@/lib/tenants/_provision"
 
 // ============================================================================
 // Leashed business-tenant provisioning (design: tenant-provisioning-design-

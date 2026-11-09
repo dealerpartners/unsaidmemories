@@ -1,8 +1,8 @@
-# Unsaid Memories — storefront and admin platform
+# Unsaid Memories — storefront
 
 The production application for Unsaid Memories (owner: Almeta Rogers; brand line: KIN Score).
-One codebase containing the public storefront, the admin platform, the self-service
-Ad Center, a Payload-powered CMS admin, and the affiliate dashboard.
+One codebase containing the public storefront, the customer account
+portal, and the self-service Ad Center.
 
 - Production: https://unsaid-theta.vercel.app (custom domain cutover is an owner step)
 - Repository: github.com/leashed901-rgb/unsaid — `main` is the production branch
@@ -31,7 +31,6 @@ project settings. Nothing else.
 | Styling | Tailwind CSS 4 via `@tailwindcss/postcss`; design tokens are CSS variables |
 | Runtime / packages | Bun (`bun.lock` is the only lockfile; Vercel installs and builds with Bun) |
 | Database | Supabase Postgres — 735 tables in `public`; access via PostgREST, database RPC functions, and the `pg` driver in a few admin routes |
-| CMS | Payload 3.92 (admin at `/cms-admin`, config in `payload.config.ts`) |
 | Payments | Stripe (keys are the owner's, entered at handover) |
 | Email | Resend (sending requires the owner's verified domain) |
 | Search | Algolia (products index) |
@@ -59,9 +58,7 @@ NODE_OPTIONS=--max-old-space-size=6144 ./node_modules/.bin/tsc --noEmit --increm
 
 ```
 src/app/
-  (portals)/     Admin platform (staff), customer, seller, vet/telemed portals
   (adportal)/    Ad Center — self-service advertiser surface at /ads
-  (cms)/         Payload CMS integration (admin UI at /cms-admin, API under /api/payload)
   (affiliate)/   Affiliate dashboard
   (auth)/        Sign-in and access routes
   shop/          Catalog browsing — static taxonomy tree is the routing source
@@ -144,7 +141,7 @@ Names only — values live in Vercel project settings and the owner's vault.
 Core: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 `NEXT_PUBLIC_SUPABASE_PROJECT_URL`, `SUPABASE_TENANT_ID`, `DATABASE_URL`,
-`DIRECT_URL`, `PAYLOAD_SECRET`, `NEXT_PUBLIC_SITE_URL`, `SITE_URL`,
+`DIRECT_URL`, `NEXT_PUBLIC_SITE_URL`, `SITE_URL`,
 `CRON_SECRET`, `INTEGRATIONS_ENCRYPTION_KEY`, `TOKEN_ENCRYPTION_KEY`
 
 Payments & commerce: `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`,
@@ -170,4 +167,3 @@ Carriers: `FEDEX_CLIENT_ID/SECRET`, `UPS_CLIENT_ID/SECRET`,
 3. Point the custom domain at the Vercel project.
 4. Confirm the Printify fulfillment-approval setting in the Printify
    dashboard (it is a dashboard toggle, not an API setting).
-5. Create the Payload CMS admin account at `/cms-admin` with an owner email.

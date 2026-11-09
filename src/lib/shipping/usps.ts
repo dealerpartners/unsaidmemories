@@ -121,7 +121,6 @@ export async function applyUspsTrackingToOrder(
     })
 
     try {
-      revalidatePath("/admin/orders")
       revalidatePath("/customer/orders")
     } catch {
       /* revalidate is best-effort */

@@ -43,11 +43,11 @@ export default async function AdminLoginPage({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent(safeNext || "/admin")}`);
+    redirect(`/login?next=${encodeURIComponent(safeNext || "/account")}`);
   }
 
   if (await isSupabaseAdmin(user.id)) {
-    redirect(safeNext || "/admin");
+    redirect(safeNext || "/account");
   }
 
   const resolved = await resolvePortalUser(user.id).catch(() => null);

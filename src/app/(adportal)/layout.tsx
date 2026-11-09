@@ -1,5 +1,5 @@
 import "./globals.css";
-import "../(portals)/admin/admin.css";
+import "./portal-theme.css";
 
 // Prerender scope (owner doctrine, 2026-10-22): authenticated interiors
 // are never statically prerendered — the build generates the public

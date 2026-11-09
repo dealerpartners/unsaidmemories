@@ -14,7 +14,6 @@ import { AssistantPanel } from "@/components/assistant-panel";
 import { AccountFlyout } from "@/components/account-flyout";
 import { CookieConsent } from "@/components/consent/cookie-consent";
 import { OPEN_PREFERENCES_EVENT } from "@/lib/consent";
-import { PagePopup } from "@/components/page-popup";
 
 // SiteShell wraps every page with the storefront chrome:
 // - site header + desktop mega menu + backdrop (X closes, backdrop closes, hover does NOT auto-close)
@@ -171,7 +170,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   // and gets the full storefront chrome.
   // (pathname is declared above, with the other hooks.)
   if (
-    pathname.startsWith("/admin") ||
     pathname.startsWith("/ads") ||
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
@@ -548,7 +546,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       {/* Shopping assistant + account flyout + cookie consent. */}
       <AssistantPanel />
       <AccountFlyout />
-      <PagePopup />
       <CookieConsent />
     </>
   );

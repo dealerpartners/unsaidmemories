@@ -347,7 +347,6 @@ export interface GrantDoor {
 }
 
 const GRANT_DOOR_META: Record<string, { label: string; destination: string; door: string | null }> = {
-  admin: { label: "Admin", destination: "/admin/dashboard", door: "/admin-login" },
   employee: { label: "Employee Portal", destination: "/employee/dashboard", door: "/employee" },
   customer: { label: "Customer Portal", destination: "/customer/dashboard", door: "/access-customer" },
   seller: { label: "Seller Center", destination: "/seller/dashboard", door: "/access-seller" },

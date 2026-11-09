@@ -18,7 +18,7 @@ export async function signIn(
 ): Promise<AuthResult> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/admin") || "/admin";
+  const next = String(formData.get("next") ?? "/account") || "/account";
 
   if (!email || !password) {
     return { error: "Enter your email and password." };

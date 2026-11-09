@@ -13,4 +13,4 @@ export const NAV = [
   { n: "11", label: "LEARN", to: "/learn" },
 ] as const
 
-export type Route = (typeof NAV)[number]["to"] | "/admin"
+export type Route = (typeof NAV)[number]["to"]

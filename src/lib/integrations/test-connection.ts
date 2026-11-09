@@ -374,17 +374,6 @@ async function testCj(svc: IntegrationService): Promise<{ proofLine: string; det
   };
 }
 
-async function testPayload(svc: IntegrationService): Promise<{ proofLine: string; detail: string }> {
-  const url = await requireKey(svc, "PAYLOAD_URL", "server URL");
-  const base = url.replace(/\/$/, "");
-  const res = await fetch(`${base}/admin`, { signal: TIMEOUT }).catch(() => null);
-  if (!res || res.status >= 500) throw new TestFailure(`Payload did not answer at ${base} (${res?.status ?? "no response"}).`);
-  return {
-    proofLine: `Connected — ${svc.name} answered at ${new URL(base).host}.`,
-    detail: "The test opened the Payload admin address and the CMS answered.",
-  };
-}
-
 async function testShippo(svc: IntegrationService): Promise<{ proofLine: string; detail: string }> {
   const key = await requireKey(svc, "SHIPPO_API_KEY", "API key");
   const json: any = await readJson("https://api.goshippo.com/addresses/?limit=1", {
@@ -478,7 +467,6 @@ const TESTERS: Record<string, (svc: IntegrationService) => Promise<{ proofLine: 
   anthropic: testAnthropic,
   "google-ai": testGoogleAi,
   "cj-dropshipping": testCj,
-  payload: testPayload,
   shippo: testShippo,
   whatsapp: testWhatsApp,
   line: testLine,

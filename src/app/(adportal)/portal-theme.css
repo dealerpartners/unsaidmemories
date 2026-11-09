@@ -1,0 +1,125 @@
+/* ============================================================================
+   Portal theme tokens (.portal-theme) for the Ad Center (/ads).
+   Canvas #FFFFFF, bars #FFFFFF, ink #171420, radius 0.75rem, primary
+   teal #007C7D, terracotta brand mark #AA3F15, DM Sans canvas +
+   Questrial display. The [data-portal-theme] variants carry the same
+   tokens minus the sidebar/topbar set, which the per-user theme
+   variants own.
+   ============================================================================ */
+/* THEME CONSOLIDATION (2026-11-02): (portals)/portals.css also defines a
+   base .portal-theme (the /ads purple palette) and both sheets load on
+   admin pages, so the winner used to be CSS chunk order — the CMS
+   redesign (this palette) never reliably painted. These selectors carry
+   attribute-level specificity (0,2,0), which beats the portals.css base
+   (0,1,0) regardless of order. The :not() block is the full redesign for
+   unthemed admins; the [data-portal-theme] block carries the same
+   tokens MINUS the sidebar/topbar set, which the per-user theme
+   variants in portals.css own and must keep winning. */
+.portal-theme:not([data-portal-theme]) {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #171420;
+  --card: #ffffff;
+  --card-foreground: #171420;
+  --popover: #ffffff;
+  --popover-foreground: #171420;
+  --primary: #007c7d;
+  --brand-teal: #007c7d;
+  --primary-foreground: #ffffff;
+  --quick: #007c7d;
+  --quick-foreground: #ffffff;
+  --brand: #aa3f15;
+  --brand-foreground: #fbfcfd;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #171420;
+  --sidebar-primary: #f7f5fb;
+  --sidebar-primary-foreground: #171420;
+  --sidebar-accent: #f7f5fb;
+  --sidebar-accent-foreground: #171420;
+  --sidebar-border: #e9e6f0;
+  --sidebar-ring: #007c7d;
+  --topbar: #ffffff;
+  --topbar-foreground: #171420;
+  --topbar-border: #e9e6f0;
+  --secondary: #f7f5fb;
+  --secondary-foreground: #171420;
+  --muted: #f7f5fb;
+  --muted-foreground: #706d7c;
+  --accent: #f7f5fb;
+  --accent-foreground: #171420;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --info: #007c7d;
+  --info-foreground: #ffffff;
+  --border: #e9e6f0;
+  --input: #e9e6f0;
+  --ring: #007c7d;
+  /* Legacy purple token aliases, mapped onto the teal system so every
+     var(--purple)/var(--purple2) usage in the older module CSS resolves
+     to teal under this root (the legacy purple scope is gone). */
+  --purple: #007c7d;
+  --purple2: #e0f2f2;
+  --crm-accent: #007c7d;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Questrial", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+.portal-theme[data-portal-theme] {
+  --radius: 0.75rem;
+  --background: #ffffff;
+  --foreground: #171420;
+  --card: #ffffff;
+  --card-foreground: #171420;
+  --popover: #ffffff;
+  --popover-foreground: #171420;
+  --primary: #007c7d;
+  --brand-teal: #007c7d;
+  --primary-foreground: #ffffff;
+  --quick: #007c7d;
+  --quick-foreground: #ffffff;
+  --brand: #aa3f15;
+  --brand-foreground: #fbfcfd;
+  --secondary: #f7f5fb;
+  --secondary-foreground: #171420;
+  --muted: #f7f5fb;
+  --muted-foreground: #706d7c;
+  --accent: #f7f5fb;
+  --accent-foreground: #171420;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+  --info: #007c7d;
+  --info-foreground: #ffffff;
+  --border: #e9e6f0;
+  --input: #e9e6f0;
+  --ring: #007c7d;
+  /* Legacy purple token aliases, mapped onto the teal system so every
+     var(--purple)/var(--purple2) usage in the older module CSS resolves
+     to teal under this root (the legacy purple scope is gone). */
+  --purple: #007c7d;
+  --purple2: #e0f2f2;
+  --crm-accent: #007c7d;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Questrial", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  background-color: var(--background);
+  color: var(--foreground);
+  font-size: 14px;
+}
+

@@ -1,6 +1,4 @@
 import type { NextConfig } from "next";
-import { withPayload } from "@payloadcms/next/withPayload";
-import path from "path";
 
 // On Vercel, `output: "standalone"` is unnecessary and the custom `cp`
 // commands in the build script would fail. We only enable standalone for
@@ -31,32 +29,11 @@ const nextConfig: NextConfig = {
   // requires it from node_modules instead (used by /api/admin/ensure-indexes
   // and /api/product-questions for pooled DDL).
   serverExternalPackages: ["pg"],
-  // Turbopack equivalent of the webpack alias below (Turbopack ignores
-  // the webpack() callback; without this the Payload routes fail with
-  // "Can't resolve '@payload-config'" — build log dpl_3n2CDmV).
-  turbopack: {
-    resolveAlias: {
-      "@payload-config": "./payload.config.ts",
-    },
-  },
-  webpack: (config) => {
-    config.resolve = config.resolve || {};
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@payload-config": path.resolve(process.cwd(), "payload.config.ts"),
-    };
-    return config;
-  },
   // Audit fix (T126 / claim #73): the FAQ lives at /help/faq; /faq 404'd.
   // Permanent redirect so every published /faq link lands on the real page.
   async redirects() {
     return [
       { source: "/faq", destination: "/help/faq", permanent: true },
-      // Deprecated fabric CRM routes — the mega menu and sidebar now serve
-      // the portals customers page; old fabric customers URLs land there.
-      { source: "/admin/crm", destination: "/admin/customers", permanent: true },
-      { source: "/admin/crm/customers/:id", destination: "/admin/customers", permanent: true },
-      { source: "/admin/customers/:id", destination: "/admin/customers", permanent: true },
       // Owner's routing (2026-11-01): Our World routes to Our Story.
       { source: "/our-world", destination: "/our-story", permanent: true },
       // /occasions is promised by menus/footers but has no page of its
@@ -87,7 +64,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPayload(nextConfig, {
-  // The Payload config path relative to the project root
-  // withPayload will handle loading it
-});
+export default nextConfig;

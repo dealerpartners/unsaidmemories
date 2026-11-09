@@ -119,7 +119,7 @@ export function SignupForm({
       )}
 
       <div className="auth-alt">
-        Already have an account? <a href={`/login${next !== "/admin" ? `?next=${encodeURIComponent(next)}` : ""}`}>Sign in</a>
+        Already have an account? <a href={`/login${next !== "/account" ? `?next=${encodeURIComponent(next)}` : ""}`}>Sign in</a>
       </div>
     </>
   );
