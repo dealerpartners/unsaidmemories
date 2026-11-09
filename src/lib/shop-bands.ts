@@ -241,5 +241,5 @@ export const getShopBands = unstable_cache(
     };
   },
   ["shop-bands-v4"],
-  { revalidate: 600, tags: ["shop-bands"] },
+  { revalidate: 3600, tags: ["shop-bands"] },
 );

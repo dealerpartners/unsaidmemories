@@ -27,7 +27,7 @@ export const getCmsCopy = unstable_cache(
     }
   },
   ["cms-copy"],
-  { revalidate: 60 }
+  { revalidate: 86400, tags: ["cms"] }
 );
 
 // Cache the hero block for 60 seconds
@@ -65,7 +65,7 @@ export const getCmsHero = unstable_cache(
     }
   },
   ["cms-hero"],
-  { revalidate: 60 }
+  { revalidate: 86400, tags: ["cms"] }
 );
 
 // Cache the navigation for 60 seconds
@@ -95,7 +95,7 @@ export const getCmsNavigation = unstable_cache(
     }
   },
   ["cms-nav"],
-  { revalidate: 60 }
+  { revalidate: 86400, tags: ["cms"] }
 );
 
 // Cache the design tokens for 5 minutes (tokens rarely change)
@@ -114,7 +114,7 @@ export const getCmsTokens = unstable_cache(
     }
   },
   ["cms-tokens"],
-  { revalidate: 300 }
+  { revalidate: 86400, tags: ["cms"] }
 );
 
 // Cache website settings for 60 seconds
@@ -127,7 +127,7 @@ export const getCmsSettings = unstable_cache(
     }
   },
   ["cms-settings"],
-  { revalidate: 60 }
+  { revalidate: 86400, tags: ["cms"] }
 );
 
 // Get a single copy value with fallback

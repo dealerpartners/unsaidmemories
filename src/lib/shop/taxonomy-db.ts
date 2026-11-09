@@ -138,7 +138,7 @@ const fetchNodeCountsShared = unstable_cache(
     return rows.map((r) => [r.node_id, Number(r.n) || 0] as [string, number])
   },
   ["ent-node-counts-v2"],
-  { revalidate: 300, tags: ["catalog", "node-counts"] },
+  { revalidate: 3600, tags: ["catalog", "node-counts"] },
 )
 
 async function enterpriseNodeCounts(): Promise<Map<string, number>> {
@@ -333,7 +333,7 @@ export function canonicalDeptSlug(animalSlug: string, groupSlug: string): string
 const fetchTreeShared = unstable_cache(
   async (): Promise<TaxAnimal[]> => fetchTree(),
   ["taxonomy-tree-v2"],
-  { revalidate: 300, tags: ["catalog", "taxonomy-tree"] },
+  { revalidate: 3600, tags: ["catalog", "taxonomy-tree"] },
 )
 
 /** Live taxonomy tree, SHARED Next data cache (one execution serves

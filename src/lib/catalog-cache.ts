@@ -7,7 +7,7 @@
  * useEffect, no fetch, no 'Loading…' state on first paint.
  * fetch() is only used for 'Load More' (subsequent pages)."
  *
- * Every fetcher below is wrapped in `unstable_cache` with a 5-minute
+ * Every fetcher below is wrapped in `unstable_cache` with a 1-hour
  * revalidate. The cache key is derived from the function arguments, so
  * different category paths / pages cache independently.
  */
@@ -25,8 +25,8 @@ import { taxonomy } from "@/lib/taxonomy";
 import type { CatalogProduct } from "@/components/catalog-card";
 import { fetchProductFacets } from "@/lib/product-facets";
 
-/** 5 minutes — matches Kim's revalidate requirement. */
-const REVALIDATE_SECONDS = 300;
+/** 1 hour. */
+const REVALIDATE_SECONDS = 3600;
 
 /** Enriched product shape returned to grids (matches /api/products). */
 export type EnrichedProduct = CatalogProduct;
@@ -116,7 +116,7 @@ async function enrichProducts(
 
 /**
  * Fetch enriched products for a category slug path (e.g. "apparel/hoodies").
- * Empty path = shop root (broad fetch). Cached 5 minutes.
+ * Empty path = shop root (broad fetch). Cached 1 hour.
  */
 async function fetchCategoryProductsUncached(
   path: string,
@@ -153,7 +153,7 @@ export const getCachedCategoryProducts = unstable_cache(
 
 /**
  * Fetch up to 4 related products for the PDP "Things you may like" rail.
- * Same-category products, excluding the current one. Cached 5 minutes.
+ * Same-category products, excluding the current one. Cached 1 hour.
  */
 async function fetchRecommendationsUncached(
   productId: string,
@@ -184,7 +184,7 @@ export const getCachedRecommendations = unstable_cache(
  * UnSaid Picks for the PDP — up to 3 REAL products from OTHER departments
  * (recent first, image required, deduped against the product itself and the
  * "You may also like" rail). Mirrors the reference PDP's picks rail: real
- * catalog items only, never editorial stock cards. Cached 5 minutes.
+ * catalog items only, never editorial stock cards. Cached 1 hour.
  */
 async function fetchPdpPicksUncached(
   productId: string,

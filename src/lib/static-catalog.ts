@@ -64,7 +64,7 @@ import {
 import type { CatalogProduct } from "@/components/catalog-card";
 import { fetchProductFacets } from "./product-facets";
 
-const REVALIDATE_SECONDS = 300;
+const REVALIDATE_SECONDS = 3600;
 const TENANT_SAFE_LIMIT = 1000;
 
 export type EnrichedProduct = CatalogProduct;
