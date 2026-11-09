@@ -20,14 +20,15 @@
 // own TTLs remain the backstop — the same floor live.ts documents).
 // ---------------------------------------------------------------------------
 
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { invalidate } from "@/lib/cache"
 
 export function bustPublicShopFaces(): void {
   try {
     revalidatePath("/shop", "page")
     revalidatePath("/shop/[...slug]", "page")
-    revalidatePath("/products/[slug]", "page")
+    revalidateTag("catalog", { expire: 0 })
+    revalidatePath("/product/[id]", "page")
     revalidatePath("/seller/[slug]", "page")
     revalidatePath("/", "page")
   } catch {

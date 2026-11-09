@@ -933,7 +933,7 @@ async function buildPdpLoadUncached(id: string): Promise<PdpLoad> {
 }
 
 /**
- * THE shared cached load — one DB pass per product id per 5 minutes, and
+ * THE shared cached load — one DB pass per product id per 24 hours, and
  * per-request memoization makes generateMetadata's call a cache hit for
  * the page's call in the same render (the old code ran the product query
  * twice per cold render). unstable_cache does not store rejections, so a
@@ -942,7 +942,7 @@ async function buildPdpLoadUncached(id: string): Promise<PdpLoad> {
 const loadPdp = unstable_cache(
   buildPdpLoadUncached,
   ["pdp-load-v5"],
-  { revalidate: 300, tags: ["catalog"] },
+  { revalidate: 86400, tags: ["catalog"] },
 );
 
 // ── SEO metadata ───────────────────────────────────────────

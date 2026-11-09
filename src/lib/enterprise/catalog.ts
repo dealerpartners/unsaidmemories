@@ -1,6 +1,6 @@
 import "server-only"
 import pg from "pg"
-import { revalidatePath, unstable_cache } from "next/cache"
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache"
 import { cached } from "@/lib/cache"
 import { TENANT_ID, withPg, withPgStrict } from "@/lib/crm/enterprise"
 import { enqueueCatalogItemSync } from "@/lib/sync/handlers"
@@ -2099,9 +2099,10 @@ async function ensureMainWarehouse(client: pg.Client, tenant: string): Promise<s
 
 function revalidateShopPaths() {
   try {
+    revalidateTag("catalog", { expire: 0 })
     revalidatePath("/shop", "page")
     revalidatePath("/shop/[...slug]", "page")
-    revalidatePath("/products/[slug]", "page")
+    revalidatePath("/product/[id]", "page")
     revalidatePath("/seller/[slug]", "page")
     revalidatePath("/", "page")
   } catch { /* non-fatal during build */ }

@@ -1,5 +1,5 @@
 import "server-only"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { TENANT_ID, withPg } from "@/lib/crm/enterprise"
 
 // ============================================================================
@@ -930,7 +930,8 @@ function revalidateShopPaths() {
     revalidatePath("/shop/[...slug]", "page")
     revalidatePath("/shop/bag", "page")
     revalidatePath("/offers", "page")
-    revalidatePath("/products/[slug]", "page")
+    revalidateTag("catalog", { expire: 0 })
+    revalidatePath("/product/[id]", "page")
     revalidatePath("/seller/[slug]", "page")
     revalidatePath("/", "page")
   } catch {
