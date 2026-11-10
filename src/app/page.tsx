@@ -114,8 +114,8 @@ async function withPrices(
 // wins) so the grid shows variety across departments, not 4 of the same.
 const FEATURED_DEPARTMENT_SLUGS = [
   "apparel", "home-and-living", "keepsakes", "accessories",
-  "headwear", "drinkware", "wall-art", "wellness",
-  "games-and-puzzles", "technology",
+  "headwear", "drinkware", "wall-art-2", "wellness",
+  "games", "technology",
   "memory-gifts", "sentimental", "outerwear",
 ] as const;
 
@@ -130,14 +130,17 @@ const FEATURED_SUBCATEGORY_BLOCKLIST = new Set([
 
 async function resolveFeaturedCategoryTree(
   sb: ReturnType<typeof createServerClient>,
-): Promise<{ allowedIds: string[]; childToParent: Map<string, string> }> {
+): Promise<{ allowedIds: string[]; childToParent: Map<string, string>; deptOrder: string[] }> {
   const { data: parents } = await sb
     .from("categories")
     .select("id, slug")
     .in("slug", [...FEATURED_DEPARTMENT_SLUGS]);
   const parentById = new Map((parents ?? []).map((p) => [p.id as string, p.id as string]));
   const parentIds = [...parentById.keys()];
-  if (parentIds.length === 0) return { allowedIds: [], childToParent: new Map() };
+  if (parentIds.length === 0) return { allowedIds: [], childToParent: new Map(), deptOrder: [] };
+  const deptOrder = FEATURED_DEPARTMENT_SLUGS
+    .map((slug) => (parents ?? []).find((p) => p.slug === slug)?.id as string | undefined)
+    .filter((id): id is string => Boolean(id));
 
   const { data: children } = await sb
     .from("categories")
@@ -150,7 +153,7 @@ async function resolveFeaturedCategoryTree(
     allowedIds.push(c.id as string);
     childToParent.set(c.id as string, (c.parent_id as string) ?? c.id as string);
   }
-  return { allowedIds, childToParent };
+  return { allowedIds, childToParent, deptOrder };
 }
 
 const getHomeFeatured = unstable_cache(
@@ -168,37 +171,41 @@ const getHomeFeatured = unstable_cache(
       .limit(12);
     let featured = await withPrices(sb, (studio ?? []) as FeaturedRow[]);
 
-    // Stage 2 — fallback: 1 newest priced product per luxury department.
+    // Stage 2 — fallback: 1 newest product per department. Each
+    // department is queried on its own: a single global "newest 400"
+    // window starved whole departments whenever bulk ingests tied on
+    // created_at, so departments with older stock never appeared.
     if (featured.length < 8) {
-      const { allowedIds, childToParent } = await resolveFeaturedCategoryTree(sb);
+      const { allowedIds, childToParent, deptOrder } = await resolveFeaturedCategoryTree(sb);
       if (allowedIds.length > 0) {
-        const { data: recent } = await sb
-          .from("supplier_catalog_products")
-          .select(cols)
-          .eq("is_hidden", false)
-          .not("image_url", "is", null)
-          .in("category_id", allowedIds)
-          .order("created_at", { ascending: false })
-          .limit(400);
-        // Dedupe raw rows to 1 per parent department BEFORE withPrices
-        // (newest first — the query is already ordered by created_at DESC).
-        const seenParents = new Set<string>();
-        const dedupedRows = (recent ?? []).filter((r) => {
-          const catId = (r as FeaturedRow).category_id;
-          if (!catId) return false;
-          const parent = childToParent.get(catId) ?? catId;
-          if (seenParents.has(parent)) return false;
-          seenParents.add(parent);
-          return true;
-        });
-        const priced = await withPrices(sb, dedupedRows as FeaturedRow[]);
+        const idsByDept = new Map<string, string[]>();
+        for (const id of allowedIds) {
+          const dept = childToParent.get(id) ?? id;
+          if (!idsByDept.has(dept)) idsByDept.set(dept, []);
+          idsByDept.get(dept)!.push(id);
+        }
+        const picks: FeaturedRow[] = [];
+        for (const deptId of deptOrder) {
+          const ids = idsByDept.get(deptId);
+          if (!ids || ids.length === 0) continue;
+          const { data: rows } = await sb
+            .from("supplier_catalog_products")
+            .select(cols)
+            .eq("is_hidden", false)
+            .not("image_url", "is", null)
+            .in("category_id", ids)
+            .order("created_at", { ascending: false })
+            .limit(1);
+          if (rows && rows[0]) picks.push(rows[0] as FeaturedRow);
+        }
+        const priced = await withPrices(sb, picks);
         const seenIds = new Set(featured.map((f) => f.id));
         featured = [...featured, ...priced.filter((f) => !seenIds.has(f.id))];
       }
     }
     return featured.slice(0, 13);
   },
-  ["home-featured-v4"],
+  ["home-featured-v5"],
   { tags: ["home-featured"] },
 );
 
