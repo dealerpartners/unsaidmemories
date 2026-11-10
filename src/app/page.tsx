@@ -151,7 +151,13 @@ async function resolveFeaturedCategoryTree(
   for (const c of children ?? []) {
     if (FEATURED_SUBCATEGORY_BLOCKLIST.has(c.slug as string)) continue;
     allowedIds.push(c.id as string);
-    childToParent.set(c.id as string, (c.parent_id as string) ?? c.id as string);
+    // A department row can itself sit under another department in the
+    // store's tree (Outerwear under Apparel; Memory Gifts and
+    // Sentimental under Keepsakes). Its own products still belong to
+    // it as a department — never remap a department row to its parent.
+    if (!parentById.has(c.id as string)) {
+      childToParent.set(c.id as string, (c.parent_id as string) ?? c.id as string);
+    }
   }
   return { allowedIds, childToParent, deptOrder };
 }
@@ -213,7 +219,7 @@ const getHomeFeatured = unstable_cache(
     }
     return featured.slice(0, 13);
   },
-  ["home-featured-v6"],
+  ["home-featured-v7"],
   { tags: ["home-featured"] },
 );
 
