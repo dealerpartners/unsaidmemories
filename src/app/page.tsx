@@ -199,7 +199,7 @@ const getHomeFeatured = unstable_cache(
     return featured.slice(0, 13);
   },
   ["home-featured-v4"],
-  { revalidate: 3600, tags: ["home-featured"] },
+  { tags: ["home-featured"] },
 );
 
 export default async function Home() {

@@ -68,7 +68,7 @@ const fetchBreedEntries = unstable_cache(
     return assignBreedSlugs(rows.map(entryDataFromRow))
   },
   ["breed-library:catalogue:v1"],
-  { revalidate: 86400 },
+  {},
 )
 
 /** The whole library: every catalogue row with its assigned slug. */

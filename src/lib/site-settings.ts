@@ -76,7 +76,7 @@ const readSettings = unstable_cache(
     }
   },
   ["website-settings"],
-  { revalidate: 86400, tags: ["website-settings"] },
+  { tags: ["website-settings"] },
 );
 
 export async function getWebsiteSettings(): Promise<WebsiteSettings> {

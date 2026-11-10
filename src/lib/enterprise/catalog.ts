@@ -824,7 +824,7 @@ function gridFilterWhere(filters: EntGridFilters, params: unknown[], startIdx: n
 // immediately while one background refresh runs. 5min >> the 90s query cost,
 // so the refresher stays quiet instead of hammering a throttled compute.
 // ---------------------------------------------------------------------------
-const TAX_GRID_TTL_MS = 5 * 60 * 1000;
+
 
 export async function queryEnterpriseTaxProducts(opts: {
   nodeIds: string[]
@@ -855,7 +855,7 @@ export async function queryEnterpriseTaxProducts(opts: {
   return unstable_cache(
     () => queryEnterpriseTaxProductsUncached(opts),
     [key],
-    { revalidate: TAX_GRID_TTL_MS / 1000, tags: ["catalog", "taxgrid"] },
+    { tags: ["catalog", "taxgrid"] },
   )()
 }
 
@@ -1196,7 +1196,7 @@ export async function queryEnterpriseFacetRows(nodeIds: string[]): Promise<
   return unstable_cache(
     () => queryEnterpriseFacetRowsUncached(nodeIds),
     [key],
-    { revalidate: TAX_GRID_TTL_MS / 1000, tags: ["catalog", "taxfacets"] },
+    { tags: ["catalog", "taxfacets"] },
   )()
 }
 

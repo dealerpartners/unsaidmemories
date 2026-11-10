@@ -76,7 +76,7 @@ export const getCategoryProducts = unstable_cache(
     return fetchCategoryProductsUncached(slugs, limit, offset);
   },
   ["category-products-v1"],
-  { revalidate: 3600, tags: ["catalog"] },
+  { tags: ["catalog"] },
 );
 
 // Convenience wrapper — accepts a slugs array directly.

@@ -17,7 +17,6 @@ import { productSlug } from "@/lib/product-slug";
 
 const BASE = (process.env.NEXT_PUBLIC_SITE_URL || "https://unsaidmemories.com").replace(/\/$/, "");
 
-export const revalidate = 3600;
 
 type SitemapUrl = { url: string; lastModified?: Date; changeFrequency?: string; priority?: number };
 

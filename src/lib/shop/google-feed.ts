@@ -156,7 +156,7 @@ export const getGoogleFeedItems = unstable_cache(
     })
   },
   ["google-shopping-feed-items-v2"],
-  { revalidate: 3600, tags: ["catalog", "google-feed"] },
+  { tags: ["catalog", "google-feed"] },
 )
 
 function xmlEscape(s: string): string {

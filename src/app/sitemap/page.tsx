@@ -6,7 +6,6 @@ export const metadata = {
   description: "Every page of UnSaid — the full shop catalog, departments, collections, relationships, and more.",
 };
 
-export const revalidate = 3600;
 
 // Collections come from the database (the same rows /collections
 // serves); departments come from the static taxonomy in the client.

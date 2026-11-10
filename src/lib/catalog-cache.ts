@@ -25,8 +25,7 @@ import { taxonomy } from "@/lib/taxonomy";
 import type { CatalogProduct } from "@/components/catalog-card";
 import { fetchProductFacets } from "@/lib/product-facets";
 
-/** 1 hour. */
-const REVALIDATE_SECONDS = 3600;
+
 
 /** Enriched product shape returned to grids (matches /api/products). */
 export type EnrichedProduct = CatalogProduct;
@@ -116,7 +115,7 @@ async function enrichProducts(
 
 /**
  * Fetch enriched products for a category slug path (e.g. "apparel/hoodies").
- * Empty path = shop root (broad fetch). Cached 1 hour.
+ * Empty path = shop root (broad fetch). Cached until a write busts the catalog tag.
  */
 async function fetchCategoryProductsUncached(
   path: string,
@@ -148,12 +147,12 @@ async function fetchCategoryProductsUncached(
 export const getCachedCategoryProducts = unstable_cache(
   fetchCategoryProductsUncached,
   ["catalog-category-products"],
-  { revalidate: REVALIDATE_SECONDS, tags: ["catalog"] },
+  { tags: ["catalog"] },
 );
 
 /**
  * Fetch up to 4 related products for the PDP "Things you may like" rail.
- * Same-category products, excluding the current one. Cached 1 hour.
+ * Same-category products, excluding the current one. Cached until a write busts the catalog tag.
  */
 async function fetchRecommendationsUncached(
   productId: string,
@@ -177,14 +176,14 @@ async function fetchRecommendationsUncached(
 export const getCachedRecommendations = unstable_cache(
   fetchRecommendationsUncached,
   ["catalog-recommendations"],
-  { revalidate: REVALIDATE_SECONDS, tags: ["catalog"] },
+  { tags: ["catalog"] },
 );
 
 /**
  * UnSaid Picks for the PDP — up to 3 REAL products from OTHER departments
  * (recent first, image required, deduped against the product itself and the
  * "You may also like" rail). Mirrors the reference PDP's picks rail: real
- * catalog items only, never editorial stock cards. Cached 1 hour.
+ * catalog items only, never editorial stock cards. Cached until a write busts the catalog tag.
  */
 async function fetchPdpPicksUncached(
   productId: string,
@@ -212,5 +211,5 @@ async function fetchPdpPicksUncached(
 export const getPdpPicks = unstable_cache(
   fetchPdpPicksUncached,
   ["catalog-pdp-picks"],
-  { revalidate: REVALIDATE_SECONDS, tags: ["catalog"] },
+  { tags: ["catalog"] },
 );

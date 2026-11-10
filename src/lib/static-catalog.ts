@@ -64,7 +64,6 @@ import {
 import type { CatalogProduct } from "@/components/catalog-card";
 import { fetchProductFacets } from "./product-facets";
 
-const REVALIDATE_SECONDS = 3600;
 const TENANT_SAFE_LIMIT = 1000;
 
 export type EnrichedProduct = CatalogProduct;
@@ -82,7 +81,6 @@ async function loadDbCategories(): Promise<Category[]> {
 }
 
 const getDbCategories = unstable_cache(loadDbCategories, ["static-catalog-db-categories"], {
-  revalidate: REVALIDATE_SECONDS,
 });
 
 function dbChildrenMap(cats: Category[]): Map<string | null, Category[]> {
@@ -318,7 +316,7 @@ async function fetchStaticPathProductsUncached(
 export const fetchProductsForStaticPath = unstable_cache(
   fetchStaticPathProductsUncached,
   ["static-catalog-products"],
-  { revalidate: REVALIDATE_SECONDS },
+  {},
 );
 
 /** True when a slug path exists in the static taxonomy. */
