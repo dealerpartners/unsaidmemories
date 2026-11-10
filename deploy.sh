@@ -3,6 +3,7 @@
 # workflow over SSH, or by hand). Pulls main, installs, builds, stages
 # the standalone bundle, restarts the service, and health-checks it.
 set -euo pipefail
+export PATH="$HOME/.bun/bin:$PATH"
 
 cd /home/ubuntu/unsaid
 git fetch origin main
