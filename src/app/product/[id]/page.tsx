@@ -70,7 +70,7 @@ import { parseProductId, productSlug } from "@/lib/product-slug";
 import { displayTitle } from "@/lib/pdp-display";
 import { LicenseeAdSlot } from "@/components/ads/licensee-ad-slot";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://unsaid-leashed.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://unsaidmemories.com";
 
 // ── Route caching (the reference repo's exact exports) ───────
 

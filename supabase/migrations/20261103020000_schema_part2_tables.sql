@@ -3369,7 +3369,7 @@ CREATE TABLE IF NOT EXISTS public."cms_website_settings" (
   "logo_url" text,
   "logo_dark_url" text,
   "favicon_url" text,
-  "canonical_origin" text NOT NULL DEFAULT 'https://unsaid-theta.vercel.app'::text,
+  "canonical_origin" text NOT NULL DEFAULT 'https://unsaidmemories.com'::text,
   "default_locale" text NOT NULL DEFAULT 'en-US'::text,
   "default_currency" text NOT NULL DEFAULT 'USD'::text,
   "gtm_container" text,

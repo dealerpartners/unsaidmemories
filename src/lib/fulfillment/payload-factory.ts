@@ -45,7 +45,7 @@ export function brandProfile(): BrandProfile {
       : undefined;
   return {
     companyName: env.BRAND_NAME || "Unsaid",
-    website: env.NEXT_PUBLIC_SITE_URL || "https://unsaid-theta.vercel.app",
+    website: env.NEXT_PUBLIC_SITE_URL || "https://unsaidmemories.com",
     supportEmail: env.BRAND_SUPPORT_EMAIL || undefined,
     logoUrl: env.BRAND_LOGO_URL || undefined,
     thankYouMessage:

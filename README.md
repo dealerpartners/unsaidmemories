@@ -4,9 +4,9 @@ The production application for Unsaid Memories (owner: Almeta Rogers; brand line
 One codebase containing the public storefront, the customer account
 portal, and the self-service Ad Center.
 
-- Production: https://unsaid-theta.vercel.app (custom domain cutover is an owner step)
-- Repository: github.com/leashed901-rgb/unsaid — `main` is the production branch
-- Hosting: Vercel project `unsaid` — every push to `main` deploys to production
+- Production: https://unsaidmemories.com
+- Repository: github.com/adealyric-blip/unsaid — `main` is the production branch
+- Hosting: Vercel project `unsaid`
 - Database: Supabase project `pcwwvfgxnrglmmpbfqhf` (Postgres)
 
 ## Ownership

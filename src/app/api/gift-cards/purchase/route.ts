@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Your name is required" }, { status: 400 });
   }
 
-  const base = SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://unsaid-theta.vercel.app";
+  const base = SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://unsaidmemories.com";
 
   try {
     const stripe = getStripe();
