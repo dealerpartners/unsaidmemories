@@ -10,6 +10,9 @@ git fetch origin main
 git reset --hard origin/main
 
 bun install
+# The previous deploy's staged standalone bundle lives inside .next/;
+# the build's cleanup chokes on it (ENOTEMPTY). Remove it first.
+rm -rf .next/standalone
 bun run build
 
 # Next standalone output needs public/ and .next/static beside server.js.
