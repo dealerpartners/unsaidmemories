@@ -1,0 +1,702 @@
+    60→    60→  {
+    61→    61→    id: 'est-3',
+    62→    62→    no: '0214',
+    63→    63→    customer: 'Northwind Labs',
+    64→    64→    email: 'finance@northwind.io',
+    65→    65→    avatarLetter: 'N',
+    66→    66→    avatarClass: styles.avatarTeal,
+    67→    67→    sentDate: '10/12/2026',
+    68→    68→    expiryDate: '11/12/2026',
+    69→    69→    amount: 1440,
+    70→    70→    status: 'Viewed',
+    71→    71→    lines: [{ id: 'l1', desc: 'Consulting — 12 hours', qty: 12, rate: 120.0 }],
+    72→    72→  },
+    73→    73→  {
+    74→    74→    id: 'est-4',
+    75→    75→    no: '0212',
+    76→    76→    customer: 'Acme Corp',
+    77→    77→    email: 'ap@acme.com',
+    78→    78→    avatarLetter: 'A',
+    79→    79→    avatarClass: styles.avatarBlue,
+    80→    80→    sentDate: '10/05/2026',
+    81→    81→    expiryDate: '11/05/2026',
+    82→    82→    amount: 4800,
+    83→    83→    status: 'Accepted',
+    84→    84→    lines: [{ id: 'l1', desc: 'Brand identity package', qty: 1, rate: 4800.0 }],
+    85→    85→  },
+    86→    86→  {
+    87→    87→    id: 'est-5',
+    88→    88→    no: '0207',
+    89→    89→    customer: 'Orion Apparel',
+    90→    90→    email: 'hello@orionapparel.com',
+    91→    91→    avatarLetter: 'O',
+    92→    92→    avatarClass: styles.avatarNavy,
+    93→    93→    sentDate: '09/18/2026',
+    94→    94→    expiryDate: '10/18/2026',
+    95→    95→    amount: 2600,
+    96→    96→    status: 'Declined',
+    97→    97→    lines: [{ id: 'l1', desc: 'Spring collection — 30 units', qty: 30, rate: 86.67 }],
+    98→    98→  },
+    99→    99→  {
+   100→   100→    id: 'est-6',
+   101→   101→    no: '0224',
+   102→   102→    customer: 'Maple Supply',
+   103→   103→    email: 'ar@maplesupply.io',
+   104→   104→    avatarLetter: 'M',
+   105→   105→    avatarClass: styles.avatarMaroon,
+   106→   106→    sentDate: '—',
+   107→   107→    expiryDate: '12/01/2026',
+   108→   108→    amount: 2200,
+   109→   109→    status: 'Draft',
+   110→   110→    lines: [{ id: 'l1', desc: 'Custom supply order', qty: 1, rate: 2200.0 }],
+   111→   111→  },
+   112→   112→  {
+   113→   113→    id: 'est-7',
+   114→   114→    no: '0201',
+   115→   115→    customer: 'Blue Ridge Co.',
+   116→   116→    email: 'billing@blueridge.co',
+   117→   117→    avatarLetter: 'B',
+   118→   118→    avatarClass: styles.avatarGreen,
+   119→   119→    sentDate: '08/15/2026',
+   120→   120→    expiryDate: '09/15/2026',
+   121→   121→    amount: 3100,
+   122→   122→    status: 'Expired',
+   123→   123→    lines: [{ id: 'l1', desc: 'Fall collection — 25 units', qty: 25, rate: 124.0 }],
+   124→   124→  },
+   125→   125→  {
+   126→   126→    id: 'est-8',
+   127→   127→    no: '0198',
+   128→   128→    customer: 'Acme Corp',
+   129→   129→    email: 'ap@acme.com',
+   130→   130→    avatarLetter: 'A',
+   131→   131→    avatarClass: styles.avatarBlue,
+   132→   132→    sentDate: '08/12/2026',
+   133→   133→    expiryDate: '09/12/2026',
+   134→   134→    amount: 2400,
+   135→   135→    status: 'Converted',
+   136→   136→    convertedInvoiceNo: '1002',
+   137→   137→    lines: [{ id: 'l1', desc: 'Design retainer', qty: 1, rate: 2400.0 }],
+   138→   138→  },
+   139→   139→];
+   140→   140→
+   141→   141→interface EstimatesScreenProps {
+   142→   142→  onCreateInvoice?: () => void;
+   143→   143→  onCreateCustomer?: () => void;
+   144→   144→  onOpenCreateFlyout?: () => void;
+   145→   145→  onToast?: (message: string) => void;
+   146→   146→}
+   147→   147→
+   148→   148→export default function EstimatesScreen({
+   149→   149→  onCreateInvoice,
+   150→   150→  onCreateCustomer,
+   151→   151→  onOpenCreateFlyout,
+   152→   152→  onToast,
+   153→   153→}: EstimatesScreenProps) {
+   154→   154→  const [estimates, setEstimates] = useState<EstimateItem[]>(INITIAL_ESTIMATES);
+   155→   155→  const [activeTab, setActiveTab] = useState<string>('All');
+   156→   156→  const [searchFilter, setSearchFilter] = useState<string>('');
+   157→   157→  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+   158→   158→
+   159→   159→  // Row context menu state
+   160→   160→  const [menuOpen, setMenuOpen] = useState(false);
+   161→   161→  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+   162→   162→  const [activeMenuEst, setActiveMenuEst] = useState<EstimateItem | null>(null);
+   163→   163→
+   164→   164→  // New estimate split dropdown
+   165→   165→  const [newMenuOpen, setNewMenuOpen] = useState(false);
+   166→   166→  const [newMenuPos, setNewMenuPos] = useState({ top: 0, left: 0 });
+   167→   167→  const newSplitBtnRef = useRef<HTMLButtonElement | null>(null);
+   168→   168→
+   169→   169→  // Drawer state
+   170→   170→  const [drawerOpen, setDrawerOpen] = useState(false);
+   171→   171→  const [editingEst, setEditingEst] = useState<EstimateItem | null>(null);
+   172→   172→
+   173→   173→  // Convert confirmation modal
+   174→   174→  const [convertModalOpen, setConvertModalOpen] = useState(false);
+   175→   175→  const [convertTargetEst, setConvertTargetEst] = useState<EstimateItem | null>(null);
+   176→   176→
+   177→   177→  // Close menus on click outside
+   178→   178→  useEffect(() => {
+   179→   179→    const handleGlobalClick = () => {
+   180→   180→      setMenuOpen(false);
+   181→   181→      setNewMenuOpen(false);
+   182→   182→    };
+   183→   183→    document.addEventListener('click', handleGlobalClick);
+   184→   184→    return () => document.removeEventListener('click', handleGlobalClick);
+   185→   185→  }, []);
+   186→   186→
+   187→   187→  // Filtered estimates list
+   188→   188→  const filteredEstimates = useMemo(() => {
+   189→   189→    const q = searchFilter.trim().toLowerCase();
+   190→   190→    return estimates.filter((est) => {
+   191→   191→      const tabMatch =
+   192→   192→        activeTab === 'All' ||
+   193→   193→        (activeTab === 'Converted' ? est.status === 'Converted' : est.status === activeTab);
+   194→   194→      if (!tabMatch) return false;
+   195→   195→      if (!q) return true;
+   196→   196→      return (
+   197→   197→        est.no.toLowerCase().includes(q) ||
+   198→   198→        est.customer.toLowerCase().includes(q) ||
+   199→   199→        est.email.toLowerCase().includes(q) ||
+   200→   200→        est.status.toLowerCase().includes(q)
+   201→   201→      );
+   202→   202→    });
+   203→   203→  }, [estimates, activeTab, searchFilter]);
+   204→   204→
+   205→   205→  // Bulk selection handlers
+   206→   206→  const handleCheckAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+   207→   207→    if (e.target.checked) {
+   208→   208→      setSelectedIds(filteredEstimates.map((e) => e.id));
+   209→   209→    } else {
+   210→   210→      setSelectedIds([]);
+   211→   211→    }
+   212→   212→  };
+   213→   213→
+   214→   214→  const handleToggleCheck = (id: string, e: React.MouseEvent) => {
+   215→   215→    e.stopPropagation();
+   216→   216→    setSelectedIds((prev) =>
+   217→   217→      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+   218→   218→    );
+   219→   219→  };
+   220→   220→
+   221→   221→  const handleBulkAction = (action: string) => {
+   222→   222→    const count = selectedIds.length;
+   223→   223→    if (action === 'delete') {
+   224→   224→      setEstimates((prev) => prev.filter((e) => !selectedIds.includes(e.id)));
+   225→   225→      setSelectedIds([]);
+   226→   226→      onToast?.(`Deleted ${count} estimate(s)`);
+   227→   227→      return;
+   228→   228→    }
+   229→   229→    if (action === 'convert') {
+   230→   230→      setEstimates((prev) =>
+   231→   231→        prev.map((e) =>
+   232→   232→          selectedIds.includes(e.id)
+   233→   233→            ? { ...e, status: 'Converted', convertedInvoiceNo: `10${Math.floor(Math.random() * 90) + 10}` }
+   234→   234→            : e
+   235→   235→        )
+   236→   236→      );
+   237→   237→      setSelectedIds([]);
+   238→   238→      onToast?.(`Converted ${count} estimate(s) to invoice`);
+   239→   239→      return;
+   240→   240→    }
+   241→   241→    setSelectedIds([]);
+   242→   242→    onToast?.(`${action.charAt(0).toUpperCase() + action.slice(1)} on ${count} estimate(s)`);
+   243→   243→  };
+   244→   244→
+   245→   245→  // Open Drawer for Create / Edit
+   246→   246→  const handleOpenDrawer = (est: EstimateItem | null) => {
+   247→   247→    if (est) {
+   248→   248→      setEditingEst({ ...est });
+   249→   249→    } else {
+   250→   250→      const nextNo = `02${estimates.length + 20}`;
+   251→   251→      setEditingEst({
+   252→   252→        id: `est-${Date.now()}`,
+   253→   253→        no: nextNo,
+   254→   254→        customer: 'Acme Corp',
+   255→   255→        email: 'ap@acme.com',
+   256→   256→        avatarLetter: 'A',
+   257→   257→        avatarClass: styles.avatarBlue,
+   258→   258→        sentDate: '11/04/2026',
+   259→   259→        expiryDate: '12/04/2026',
+   260→   260→        amount: 2800,
+   261→   261→        status: 'Draft',
+   262→   262→        note: 'Thanks for the opportunity — let us know if you have questions.',
+   263→   263→        lines: [
+   264→   264→          { id: 'l1', desc: 'Custom design — 3 concepts', qty: 3, rate: 800.0 },
+   265→   265→          { id: 'l2', desc: 'Print setup + samples', qty: 1, rate: 400.0 },
+   266→   266→        ],
+   267→   267→      });
+   268→   268→    }
+   269→   269→    setDrawerOpen(true);
+   270→   270→  };
+   271→   271→
+   272→   272→  const handleDrawerSave = () => {
+   273→   273→    if (!editingEst) return;
+   274→   274→    const lineTotal = editingEst.lines.reduce((acc, l) => acc + l.qty * l.rate, 0);
+   275→   275→    const updated = { ...editingEst, amount: lineTotal };
+   276→   276→
+   277→   277→    setEstimates((prev) => {
+   278→   278→      const exists = prev.some((e) => e.id === updated.id);
+   279→   279→      if (exists) {
+   280→   280→        return prev.map((e) => (e.id === updated.id ? updated : e));
+   281→   281→      }
+   282→   282→      return [updated, ...prev];
+   283→   283→    });
+   284→   284→    setDrawerOpen(false);
+   285→   285→    onToast?.(`Estimate ${updated.no} saved`);
+   286→   286→  };
+   287→   287→
+   288→   288→  const handleDrawerSend = () => {
+   289→   289→    if (!editingEst) return;
+   290→   290→    const lineTotal = editingEst.lines.reduce((acc, l) => acc + l.qty * l.rate, 0);
+   291→   291→    const updated: EstimateItem = { ...editingEst, amount: lineTotal, status: 'Sent' };
+   292→   292→
+   293→   293→    setEstimates((prev) => {
+   294→   294→      const exists = prev.some((e) => e.id === updated.id);
+   295→   295→      if (exists) {
+   296→   296→        return prev.map((e) => (e.id === updated.id ? updated : e));
+   297→   297→      }
+   298→   298→      return [updated, ...prev];
+   299→   299→    });
+   300→   300→    setDrawerOpen(false);
+   301→   301→    onToast?.(`Estimate ${updated.no} sent to customer`);
+   302→   302→  };
+   303→   303→
+   304→   304→  const handlePromptConvert = (est: EstimateItem) => {
+   305→   305→    setConvertTargetEst(est);
+   306→   306→    setConvertModalOpen(true);
+   307→   307→  };
+   308→   308→
+   309→   309→  const handleConfirmConvert = () => {
+   310→   310→    if (!convertTargetEst) return;
+   311→   311→    const newInvoiceNo = `10${Math.floor(Math.random() * 90) + 10}`;
+   312→   312→    setEstimates((prev) =>
+   313→   313→      prev.map((e) =>
+   314→   314→        e.id === convertTargetEst.id
+   315→   315→          ? { ...e, status: 'Converted', convertedInvoiceNo: newInvoiceNo }
+   316→   316→          : e
+   317→   317→      )
+   318→   318→    );
+   319→   319→    setConvertModalOpen(false);
+   320→   320→    setDrawerOpen(false);
+   321→   321→    onToast?.(`Estimate ${convertTargetEst.no} converted to invoice ${newInvoiceNo}`);
+   322→   322→  };
+   323→   323→
+   324→   324→  // Row More Menu
+   325→   325→  const handleOpenRowMenu = (e: React.MouseEvent, est: EstimateItem) => {
+   326→   326→    e.stopPropagation();
+   327→   327→    const rect = e.currentTarget.getBoundingClientRect();
+   328→   328→    setMenuPos({
+   329→   329→      top: rect.bottom + 4,
+   330→   330→      left: Math.min(rect.right - 230, window.innerWidth - 250),
+   331→   331→    });
+   332→   332→    setActiveMenuEst(est);
+   333→   333→    setMenuOpen(true);
+   334→   334→  };
+   335→   335→
+   336→   336→  const handleRowMenuAction = (action: string) => {
+   337→   337→    if (!activeMenuEst) return;
+   338→   338→    const est = activeMenuEst;
+   339→   339→    setMenuOpen(false);
+   340→   340→
+   341→   341→    switch (action) {
+   342→   342→      case 'view':
+   343→   343→      case 'edit':
+   344→   344→        handleOpenDrawer(est);
+   345→   345→        break;
+   346→   346→      case 'duplicate': {
+   347→   347→        const copy: EstimateItem = {
+   348→   348→          ...est,
+   349→   349→          id: `est-${Date.now()}`,
+   350→   350→          no: `${est.no}-copy`,
+   351→   351→          status: 'Draft',
+   352→   352→        };
+   353→   353→        setEstimates((prev) => [copy, ...prev]);
+   354→   354→        onToast?.(`Duplicated estimate ${est.no}`);
+   355→   355→        break;
+   356→   356→      }
+   357→   357→      case 'send':
+   358→   358→        setEstimates((prev) =>
+   359→   359→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Sent' } : e))
+   360→   360→        );
+   361→   361→        onToast?.(`Sent estimate ${est.no}`);
+   362→   362→        break;
+   363→   363→      case 'remind':
+   364→   364→        onToast?.(`Reminder sent for estimate ${est.no}`);
+   365→   365→        break;
+   366→   366→      case 'print':
+   367→   367→        onToast?.(`Printing estimate ${est.no} PDF`);
+   368→   368→        break;
+   369→   369→      case 'convert':
+   370→   370→        handlePromptConvert(est);
+   371→   371→        break;
+   372→   372→      case 'mark-accepted':
+   373→   373→        setEstimates((prev) =>
+   374→   374→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Accepted' } : e))
+   375→   375→        );
+   376→   376→        onToast?.(`Estimate ${est.no} marked accepted`);
+   377→   377→        break;
+   378→   378→      case 'mark-declined':
+   379→   379→        setEstimates((prev) =>
+   380→   380→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Declined' } : e))
+   381→   381→        );
+   382→   382→        onToast?.(`Estimate ${est.no} marked declined`);
+   383→   383→        break;
+   384→   384→      case 'delete':
+   385→   385→        setEstimates((prev) => prev.filter((e) => e.id !== est.id));
+   386→   386→        onToast?.(`Deleted estimate ${est.no}`);
+   387→   387→        break;
+   388→   388→    }
+   389→   389→  };
+   390→   390→
+   391→   391→  const formatCurrency = (amt: number) => {
+   392→   392→    return new Intl.NumberFormat('en-US', {
+   393→   393→      style: 'currency',
+   394→   394→      currency: 'USD',
+   395→   395→      minimumFractionDigits: 2,
+   396→   396→    }).format(amt);
+   397→   397→  };
+   398→   398→
+   399→   399→  const getStatusBadge = (est: EstimateItem) => {
+   400→   400→    if (est.status === 'Converted') {
+   401→   401→      return (
+   402→   402→        <span className={`${styles.statusPill} ${styles.statusConverted}`}>
+   403→   403→          Converted → {est.convertedInvoiceNo || '1002'}
+   404→   404→        </span>
+   405→   405→      );
+   406→   406→    }
+   407→   407→    switch (est.status) {
+   408→   408→      case 'Draft':
+   409→   409→        return <span className={`${styles.statusPill} ${styles.statusDraft}`}>Draft</span>;
+   410→   410→      case 'Sent':
+   411→   411→        return <span className={`${styles.statusPill} ${styles.statusSent}`}>Sent</span>;
+   412→   412→      case 'Viewed':
+   413→   413→        return <span className={`${styles.statusPill} ${styles.statusViewed}`}>Viewed</span>;
+   414→   414→      case 'Accepted':
+   415→   415→        return <span className={`${styles.statusPill} ${styles.statusAccepted}`}>Accepted</span>;
+   416→   416→      case 'Declined':
+   417→   417→        return <span className={`${styles.statusPill} ${styles.statusDeclined}`}>Declined</span>;
+   418→   418→      case 'Expired':
+   419→   419→        return <span className={`${styles.statusPill} ${styles.statusExpired}`}>Expired</span>;
+   420→   420→      default:
+   421→   421→        return <span className={`${styles.statusPill} ${styles.statusDraft}`}>{est.status}</span>;
+   422→   422→    }
+   423→   423→  };
+   424→   424→
+   425→   425→  return (
+   426→   426→    <div className={styles.container}>
+   427→   427→      {/* Context Header */}
+   428→   428→      <div className={styles.contextHeader}>
+   429→   429→        <div className={styles.breadcrumbGroup}>
+   430→   430→          <span className={`material-symbols-outlined ${styles.domainIcon}`}>
+   431→   431→            account_balance
+   432→   432→          </span>
+   433→   433→          <span className={styles.breadcrumbLabel}>Finance</span>
+   434→   434→          <span className={styles.breadcrumbSep}>/</span>
+   435→   435→          <span className={styles.breadcrumbLabel}>Sales &amp; Get Paid</span>
+   436→   436→          <span className={styles.breadcrumbSep}>/</span>
+   437→   437→          <span className={styles.breadcrumbActive}>Estimates</span>
+   438→   438→        </div>
+   439→   439→        <div className={styles.previewBadge}>Quotes · standalone</div>
+   440→   440→      </div>
+   441→   441→
+   442→   442→      <div className={styles.mainContent}>
+   443→   443→        {/* Page Header */}
+   444→   444→        <div className={styles.pageHeader}>
+   445→   445→          <div>
+   446→   446→            <h1 className={styles.title}>Estimates</h1>
+   447→   447→            <p className={styles.subtitle}>
+   448→   448→              Quotes sent to customers · convert to invoice when accepted
+   449→   449→            </p>
+   450→   450→          </div>
+   451→   451→
+   452→   452→          <div className={styles.headerActions}>
+   453→   453→            <div className={styles.splitBtn}>
+   454→   454→              <button
+   455→   455→                type="button"
+   456→   456→                className={styles.splitBtnMain}
+   457→   457→                onClick={() => handleOpenDrawer(null)}
+   458→   458→              >
+   459→   459→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   460→   460→                  add
+   461→   461→                </span>
+   462→   462→                New estimate
+   463→   463→              </button>
+   464→   464→              <button
+   465→   465→                ref={newSplitBtnRef}
+   466→   466→                type="button"
+   467→   467→                className={styles.splitBtnArrow}
+   468→   468→                onClick={(e) => {
+   469→   469→                  e.stopPropagation();
+   470→   470→                  const rect = e.currentTarget.getBoundingClientRect();
+   471→   471→                  setNewMenuPos({
+   472→   472→                    top: rect.bottom + 4,
+   473→   473→                    left: Math.min(rect.right - 220, window.innerWidth - 240),
+   474→   474→                  });
+   475→   475→                  setNewMenuOpen((prev) => !prev);
+   476→   476→                }}
+   477→   477→              >
+   478→   478→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   479→   479→                  expand_more
+   480→   480→                </span>
+   481→   481→              </button>
+   482→   482→            </div>
+   483→   483→
+   484→   484→            <button
+   485→   485→              type="button"
+   486→   486→              className={styles.secondaryBtn}
+   487→   487→              onClick={() => {
+   488→   488→                const cols = [
+   489→   489→                  { key: 'no', label: 'Estimate No.' },
+   490→   490→                  { key: 'customer', label: 'Customer' },
+   491→   491→                  { key: 'email', label: 'Email' },
+   492→   492→                  { key: 'sentDate', label: 'Sent date' },
+   493→   493→                  { key: 'expiryDate', label: 'Expiry date' },
+   494→   494→                  { key: 'amount', label: 'Amount' },
+   495→   495→                  { key: 'status', label: 'Status' },
+   496→   496→                ];
+   497→   497→                exportToCsv(estimates as unknown as Record<string, unknown>[], cols, 'estimates');
+   498→   498→                onToast?.(`Exported ${estimates.length} records to CSV`);
+   499→   499→              }}
+   500→   500→            >
+   501→   501→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   502→   502→                download
+   503→   503→              </span>
+   504→   504→              Export
+   505→   505→            </button>
+   506→   506→
+   507→   507→            <button
+   508→   508→              type="button"
+   509→   509→              className={styles.secondaryBtn}
+   510→   510→              onClick={() => onToast?.('Customize panel opened')}
+   511→   511→            >
+   512→   512→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   513→   513→                tune
+   514→   514→              </span>
+   515→   515→              Customize
+   516→   516→            </button>
+   517→   517→          </div>
+   518→   518→        </div>
+   519→   519→
+   520→   520→        {/* KPI Strip */}
+   521→   521→        <div className={styles.kpiStrip}>
+   522→   522→          <div className={styles.kpiCard}>
+   523→   523→            <div className={styles.kpiLabel}>Open estimates</div>
+   524→   524→            <div className={styles.kpiValue}>3</div>
+   525→   525→            <div className={styles.kpiMeta}>$9,240 · awaiting response</div>
+   526→   526→          </div>
+   527→   527→          <div className={styles.kpiCard}>
+   528→   528→            <div className={styles.kpiLabel}>Sent this month</div>
+   529→   529→            <div className={styles.kpiValue}>5</div>
+   530→   530→            <div className={styles.kpiMeta}>$14,800 total</div>
+   531→   531→          </div>
+   532→   532→          <div className={styles.kpiCard}>
+   533→   533→            <div className={styles.kpiLabel}>Acceptance rate</div>
+   534→   534→            <div className={`${styles.kpiValue} ${styles.kpiValueGreen}`}>42%</div>
+   535→   535→            <div className={styles.kpiMeta}>Last 30 days</div>
+   536→   536→          </div>
+   537→   537→          <div className={styles.kpiCard}>
+   538→   538→            <div className={styles.kpiLabel}>Converted to invoice</div>
+   539→   539→            <div className={styles.kpiValue}>2</div>
+   540→   540→            <div className={styles.kpiMeta}>$5,040 this month</div>
+   541→   541→          </div>
+   542→   542→        </div>
+   543→   543→
+   544→   544→        {/* Create Actions Row */}
+   545→   545→        <div className={styles.createActionsRow}>
+   546→   546→          <span className={styles.createActionsLabel}>Create actions:</span>
+   547→   547→          <button
+   548→   548→            type="button"
+   549→   549→            className={styles.actionChip}
+   550→   550→            onClick={() => handleOpenDrawer(null)}
+   551→   551→          >
+   552→   552→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   553→   553→              request_quote
+   554→   554→            </span>
+   555→   555→            Estimate
+   556→   556→          </button>
+   557→   557→          <button
+   558→   558→            type="button"
+   559→   559→            className={styles.actionChip}
+   560→   560→            onClick={() => {
+   561→   561→              if (onCreateInvoice) onCreateInvoice();
+   562→   562→              else onToast?.('Create invoice triggered');
+   563→   563→            }}
+   564→   564→          >
+   565→   565→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   566→   566→              receipt_long
+   567→   567→            </span>
+   568→   568→            Invoice
+   569→   569→          </button>
+   570→   570→          <button
+   571→   571→            type="button"
+   572→   572→            className={styles.actionChip}
+   573→   573→            onClick={() => {
+   574→   574→              if (onCreateCustomer) onCreateCustomer();
+   575→   575→              else onToast?.('Add customer drawer opened');
+   576→   576→            }}
+   577→   577→          >
+   578→   578→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   579→   579→              person_add
+   580→   580→            </span>
+   581→   581→            Customer
+   582→   582→          </button>
+   583→   583→          <button
+   584→   584→            type="button"
+   585→   585→            className={styles.actionChip}
+   586→   586→            onClick={() => onToast?.('Template picker — 4 saved estimates')}
+   587→   587→          >
+   588→   588→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   589→   589→              content_copy
+   590→   590→            </span>
+   591→   591→            From template
+   592→   592→          </button>
+   593→   593→          <button
+   594→   594→            type="button"
+   595→   595→            className={styles.actionChipMuted}
+   596→   596→            onClick={() => {
+   597→   597→              if (onOpenCreateFlyout) onOpenCreateFlyout();
+   598→   598→              else onToast?.('Global Create flyout');
+   599→   599→            }}
+   600→   600→          >
+   601→   601→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   602→   602→              apps
+   603→   603→            </span>
+   604→   604→            Show all
+   605→   605→          </button>
+   606→   606→        </div>
+   607→   607→
+   608→   608→        {/* Table Card */}
+   609→   609→        <div className={styles.tableCard}>
+   610→   610→          {/* Tabs */}
+   611→   611→          <div className={styles.tabStrip}>
+   612→   612→            {['All', 'Draft', 'Sent', 'Accepted', 'Declined', 'Expired', 'Converted'].map(
+   613→   613→              (tab) => (
+   614→   614→                <button
+   615→   615→                  key={tab}
+   616→   616→                  type="button"
+   617→   617→                  className={`${styles.tabUnderline} ${
+   618→   618→                    activeTab === tab ? styles.tabUnderlineActive : ''
+   619→   619→                  }`}
+   620→   620→                  onClick={() => setActiveTab(tab)}
+   621→   621→                >
+   622→   622→                  {tab}
+   623→   623→                </button>
+   624→   624→              )
+   625→   625→            )}
+   626→   626→          </div>
+   627→   627→
+   628→   628→          {/* Filter Bar */}
+   629→   629→          <div className={styles.filterBar}>
+   630→   630→            <div className={styles.searchWrapper}>
+   631→   631→              <span className={`material-symbols-outlined ${styles.searchIcon}`}>
+   632→   632→                search
+   633→   633→              </span>
+   634→   634→              <input
+   635→   635→                type="text"
+   636→   636→                placeholder="Filter by estimate, customer…"
+   637→   637→                value={searchFilter}
+   638→   638→                onChange={(e) => setSearchFilter(e.target.value)}
+   639→   639→                className={styles.searchInput}
+   640→   640→              />
+   641→   641→            </div>
+   642→   642→
+   643→   643→            <button
+   644→   644→              type="button"
+   645→   645→              className={styles.filterBtn}
+   646→   646→              onClick={() => onToast?.('Date range filter')}
+   647→   647→            >
+   648→   648→              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   649→   649→                calendar_today
+   650→   650→              </span>
+   651→   651→              Date range
+   652→   652→            </button>
+   653→   653→
+   654→   654→            <button
+   655→   655→              type="button"
+   656→   656→              className={styles.filterBtn}
+   657→   657→              onClick={() => onToast?.('Saved views')}
+   658→   658→            >
+   659→   659→              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   660→   660→                bookmark
+   661→   661→              </span>
+   662→   662→              Saved views
+   663→   663→            </button>
+   664→   664→
+   665→   665→            <span className={styles.countIndicator}>
+   666→   666→              {filteredEstimates.length} of {estimates.length}
+   667→   667→            </span>
+   668→   668→          </div>
+   669→   669→
+   670→   670→          {/* Bulk Bar */}
+   671→   671→          {selectedIds.length > 0 && (
+   672→   672→            <div className={styles.bulkBar}>
+   673→   673→              <span className={styles.bulkCount}>{selectedIds.length} selected</span>
+   674→   674→              <span className={styles.bulkSep} />
+   675→   675→              <button
+   676→   676→                type="button"
+   677→   677→                className={styles.bulkActionBtn}
+   678→   678→                onClick={() => handleBulkAction('send')}
+   679→   679→              >
+   680→   680→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   681→   681→                  send
+   682→   682→                </span>
+   683→   683→                Send
+   684→   684→              </button>
+   685→   685→              <button
+   686→   686→                type="button"
+   687→   687→                className={styles.bulkActionBtn}
+   688→   688→                onClick={() => handleBulkAction('remind')}
+   689→   689→              >
+   690→   690→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   691→   691→                  notifications_active
+   692→   692→                </span>
+   693→   693→                Remind
+   694→   694→              </button>
+   695→   695→              <button
+   696→   696→                type="button"
+   697→   697→                className={styles.bulkActionBtn}
+   698→   698→                onClick={() => handleBulkAction('convert')}
+   699→   699→              >
+   700→   700→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   701→   701→                  sync_alt
+   702→   702→                </span>
+   703→   703→                Convert to invoice
+   704→   704→              </button>
+   705→   705→              <button
+   706→   706→                type="button"
+   707→   707→                className={styles.bulkActionBtn}
+   708→   708→                onClick={() => handleBulkAction('print')}
+   709→   709→              >
+   710→   710→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   711→   711→                  print
+   712→   712→                </span>
+   713→   713→                Print
+   714→   714→              </button>
+   715→   715→              <span className={styles.bulkSep} />
+   716→   716→              <button
+   717→   717→                type="button"
+   718→   718→                className={styles.bulkActionBtn}
+   719→   719→                onClick={() => handleBulkAction('delete')}
+   720→   720→              >
+   721→   721→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   722→   722→                  delete
+   723→   723→                </span>
+   724→   724→                Delete
+   725→   725→              </button>
+   726→   726→              <button
+   727→   727→                type="button"
+   728→   728→                className={styles.bulkCloseBtn}
+   729→   729→                onClick={() => setSelectedIds([])}
+   730→   730→              >
+   731→   731→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   732→   732→                  close
+   733→   733→                </span>
+   734→   734→              </button>
+   735→   735→            </div>
+   736→   736→          )}
+   737→   737→
+   738→   738→          {/* Table */}
+   739→   739→          <table className={styles.table}>
+   740→   740→            <thead className={styles.tableHeader}>
+   741→   741→              <tr>
+   742→   742→                <th style={{ width: 32 }}>
+   743→   743→                  <input
+   744→   744→                    type="checkbox"
+   745→   745→                    className={styles.rowCheck}
+   746→   746→                    checked={
+   747→   747→                      filteredEstimates.length > 0 &&
+   748→   748→                      selectedIds.length === filteredEstimates.length
+   749→   749→                    }
+   750→   750→                    onChange={handleCheckAll}
+   751→   751→                  />
+   752→   752→                </th>
+   753→   753→                <th>Estimate</th>
+   754→   754→                <th>Customer</th>
+   755→   755→                <th>Sent</th>
+   756→   756→                <th>Expires</th>
+   757→   757→                <th style={{ textAlign: 'right' }}>Amount</th>
+   758→   758→                <th>Status</th>
+   759→   759→                <th style={{ width: 36 }}></th>
+
+[showing lines 60-759 of 1392; use offset=760 with limit to continue reading]

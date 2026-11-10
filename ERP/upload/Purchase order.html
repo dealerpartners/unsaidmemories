@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Purchase Order — PO-1001</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0a6400;color:#0a6400;font-weight:600}
+  .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(255,255,255,.2)}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:200px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  
+  /* Toggle Switch */
+  .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+  .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: #0a6400; }
+  input:checked + .slider:before { transform: translateX(14px); }
+
+  /* Dotted lines for table */
+  .line-row td { border-bottom: 1px dashed #dad9dd; }
+  .line-row:last-child td { border-bottom: 1px solid #dad9dd; }
+  
+  /* Highlight vendor block */
+  .vendor-block { background-color: #f8fafb; border: 1px solid #e2e8f0; }
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased overflow-hidden flex flex-col h-screen w-screen">
+
+  <!-- ═══════════ TOP HEADER ═══════════ -->
+  <header class="bg-white border-b border-surface-dim shrink-0 flex flex-col z-20">
+    <!-- Top utility row -->
+    <div class="h-14 px-6 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined">history</span></button>
+        <h1 class="text-[20px] font-semibold text-on-surface">Purchase Order 1001</h1>
+        <span class="bg-[#e8f5e9] text-[#0a6400] text-[10px] font-bold px-2 py-0.5 rounded uppercase ml-2">Open</span>
+      </div>
+      <div class="flex items-center gap-4 text-on-surface-variant">
+        <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">help_outline</span></button>
+        <button class="w-8 h-8 rounded-full bg-[#0077c5] text-white flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">star</span></button>
+        <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[20px]">close</span></button>
+      </div>
+    </div>
+    
+    <!-- Tabs & Actions row -->
+    <div class="h-12 px-6 flex items-center justify-between border-t border-surface-dim">
+      <div class="flex items-center gap-6 h-full">
+        <button class="h-full px-1 text-[14px] tab-underline active" data-view="edit">Edit</button>
+        <button class="h-full px-1 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-view="email">Email view</button>
+        <button class="h-full px-1 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-view="vendor">Vendor view</button>
+        <button class="h-full px-1 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-view="pdf">PDF view</button>
+      </div>
+      <div class="flex items-center gap-4 text-[13px] font-semibold text-on-surface-variant">
+        <button class="flex items-center gap-1 hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">settings</span>Manage</button>
+        <button class="flex items-center gap-1 hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">local_shipping</span>Receive items</button>
+        <button class="flex items-center gap-1 hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>Feedback</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN SCROLLABLE AREA ═══════════ -->
+  <div class="flex-1 flex overflow-hidden bg-[#faf9fc]">
+    
+    <!-- Left Side: Document Canvas -->
+    <div class="flex-1 overflow-y-auto p-6 flex justify-center">
+      
+      <!-- EDIT VIEW -->
+      <div class="w-full max-w-[1000px] space-y-4" id="view-edit">
+        
+        <!-- Document Paper -->
+        <div class="bg-white border border-surface-dim shadow-sm rounded-sm min-h-[800px] flex flex-col relative p-8 pb-12">
+          
+          <!-- Header: Business Info & PO Number -->
+          <div class="flex justify-between items-start mb-8">
+            <div>
+              <h2 class="text-[24px] font-bold text-primary mb-1">PURCHASE ORDER</h2>
+              <div class="text-[13px] font-semibold text-on-surface">ManageKube LLC</div>
+              <div class="text-[12px] text-on-surface-variant">123 Business Rd, Suite 100<br>hello@managekube.com</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">PO Number</div>
+              <div class="text-[18px] font-semibold text-on-surface">PO-1001</div>
+            </div>
+          </div>
+
+          <!-- Vendor / Ship To Grid -->
+          <div class="grid grid-cols-2 gap-8 mb-8">
+            <div class="vendor-block p-4 rounded-md">
+              <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Vendor</div>
+              <div class="relative w-full mb-2">
+                <select class="w-full h-8 pl-2 pr-8 border border-[#dad9dd] rounded bg-white text-[13px] appearance-none focus:outline-none focus:border-primary">
+                  <option>Printful Inc.</option>
+                  <option>Gelato Pty Ltd</option>
+                  <option>Printify</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2 top-1.5 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+              </div>
+              <div class="text-[12px] text-on-surface-variant">support@printful.com<br>+1 (555) 000-1111</div>
+            </div>
+            
+            <div>
+              <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Ship To</div>
+              <div class="text-[13px] font-semibold text-on-surface mb-1">ManageKube Warehouse</div>
+              <div class="text-[12px] text-on-surface-variant leading-relaxed">
+                456 Warehouse Way<br>
+                Dock 4<br>
+                Springfield, IL 62701
+              </div>
+            </div>
+          </div>
+
+          <!-- Dates & Terms Row -->
+          <div class="grid grid-cols-4 gap-4 mb-8 bg-[#faf9fc] p-4 rounded-md border border-surface-dim">
+            <div>
+              <label class="block text-[11px] text-on-surface-variant mb-1">Order Date</label>
+              <input class="w-full h-8 px-2 border border-[#dad9dd] rounded text-[13px] focus:outline-none focus:border-primary bg-white" value="11/03/2026"/>
+            </div>
+            <div>
+              <label class="block text-[11px] text-on-surface-variant mb-1">Expected Delivery</label>
+              <input class="w-full h-8 px-2 border border-[#dad9dd] rounded text-[13px] focus:outline-none focus:border-primary bg-white" value="11/15/2026"/>
+            </div>
+            <div>
+              <label class="block text-[11px] text-on-surface-variant mb-1">Payment Terms</label>
+              <input class="w-full h-8 px-2 border border-[#dad9dd] rounded text-[13px] focus:outline-none focus:border-primary bg-white" value="Net 30"/>
+            </div>
+            <div>
+              <label class="block text-[11px] text-on-surface-variant mb-1">Ship Via</label>
+              <input class="w-full h-8 px-2 border border-[#dad9dd] rounded text-[13px] focus:outline-none focus:border-primary bg-white" value="FedEx Ground"/>
+            </div>
+          </div>
+
+          <!-- Product Lines -->
+          <div class="flex-1">
+            <table class="w-full text-left text-[13px]">
+              <thead>
+                <tr class="text-[11px] text-on-surface-variant font-semibold border-b border-surface-dim bg-[#faf9fc]">
+                  <th class="py-2 px-2 w-10 border-r border-surface-dim border-dashed"></th>
+                  <th class="py-2 px-2 w-10 border-r border-surface-dim border-dashed">#</th>
+                  <th class="py-2 px-2 border-r border-surface-dim border-dashed">Item / SKU</th>
+                  <th class="py-2 px-2 border-r border-surface-dim border-dashed">Description</th>
+                  <th class="py-2 px-2 w-16 text-right border-r border-surface-dim border-dashed">Qty Ord</th>
+                  <th class="py-2 px-2 w-16 text-right border-r border-surface-dim border-dashed">Qty Rcvd</th>
+                  <th class="py-2 px-2 w-24 text-right border-r border-surface-dim border-dashed">Unit Cost</th>
+                  <th class="py-2 px-2 w-24 text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Line 1 -->
+                <tr class="line-row">
+                  <td class="py-3 px-2 text-on-surface-variant text-center border-r border-surface-dim border-dashed"><span class="material-symbols-outlined text-[16px] cursor-grab">drag_indicator</span></td>
+                  <td class="py-3 px-2 text-on-surface-variant border-r border-surface-dim border-dashed">1</td>
+                  <td class="py-3 px-2 border-r border-surface-dim border-dashed">
+                    <input class="w-full bg-transparent focus:outline-none font-medium" value="Classic Tee - White"/>
+                    <div class="text-[11px] text-on-surface-variant mt-0.5">SKU: TEE-001</div>
+                  </td>
+                  <td class="py-3 px-2 border-r border-surface-dim border-dashed"><input class="w-full bg-transparent focus:outline-none text-on-surface-variant" value="Size L"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none" value="100"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none text-[#0a6400] font-semibold" value="0"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none" value="$8.50"/></td>
+                  <td class="py-3 px-2 text-right font-medium">$850.00</td>
+                </tr>
+                <!-- Line 2 -->
+                <tr class="line-row">
+                  <td class="py-3 px-2 text-on-surface-variant text-center border-r border-surface-dim border-dashed"><span class="material-symbols-outlined text-[16px] cursor-grab">drag_indicator</span></td>
+                  <td class="py-3 px-2 text-on-surface-variant border-r border-surface-dim border-dashed">2</td>
+                  <td class="py-3 px-2 border-r border-surface-dim border-dashed">
+                    <input class="w-full bg-transparent focus:outline-none font-medium" value="Canvas Tote"/>
+                    <div class="text-[11px] text-on-surface-variant mt-0.5">SKU: TOTE-014</div>
+                  </td>
+                  <td class="py-3 px-2 border-r border-surface-dim border-dashed"><input class="w-full bg-transparent focus:outline-none text-on-surface-variant" value="Natural"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none" value="50"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none text-[#0a6400] font-semibold" value="0"/></td>
+                  <td class="py-3 px-2 text-right border-r border-surface-dim border-dashed"><input class="w-full bg-transparent text-right focus:outline-none" value="$6.00"/></td>
+                  <td class="py-3 px-2 text-right font-medium">$300.00</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <div class="flex items-center gap-2 mt-3 mb-8">
+              <button class="h-8 px-3 border border-surface-dim rounded bg-[#f4f3f7] text-[12px] font-semibold text-on-surface-variant flex items-center gap-1 hover:bg-surface-container">
+                Add line item <span class="material-symbols-outlined text-[16px]">expand_more</span>
+              </button>
+              <button class="h-8 px-3 border border-surface-dim rounded bg-[#f4f3f7] text-[12px] font-semibold text-on-surface-variant hover:bg-surface-container">Clear all lines</button>
+            </div>
+            
+            <!-- Bottom section: Memo & Totals -->
+            <div class="grid grid-cols-2 gap-12 mt-4">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-[12px] font-semibold text-on-surface mb-1">Vendor Instructions / Notes</label>
+                  <textarea class="w-full h-24 p-2 border border-[#dad9dd] rounded text-[13px] focus:outline-none focus:border-primary resize-y placeholder:text-on-surface-variant" placeholder="Include packing slip with PO number. Do not substitute items without approval."></textarea>
+                </div>
+                <div>
+                  <label class="block text-[12px] font-semibold text-on-surface mb-1">Attachments</label>
+                  <div class="border border-dashed border-[#dad9dd] rounded-lg p-4 text-center cursor-pointer hover:bg-surface-container-low">
+                    <div class="text-[12px] font-semibold text-primary mb-1">Add attachment</div>
+                    <div class="text-[11px] text-on-surface-variant">Max file size: 20 MB</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex flex-col gap-3 pt-6">
+                <div class="flex justify-between items-center text-[13px]">
+                  <span class="text-on-surface-variant">Subtotal</span>
+                  <span class="font-medium">$1,150.00</span>
+                </div>
+                <div class="flex justify-between items-center text-[13px]">
+                  <span class="text-on-surface-variant">Shipping</span>
+                  <span class="font-medium">$45.00</span>
+                </div>
+                <div class="flex justify-between items-center text-[13px]">
+                  <span class="text-on-surface-variant">Tax</span>
+                  <span class="font-medium">$0.00</span>
+                </div>
+                <div class="flex justify-between items-center text-[15px] font-semibold border-t border-surface-dim pt-2 mt-1">
+                  <span>PO Total</span>
+                  <span>$1,195.00</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL VIEW -->
+      <div class="w-full max-w-[800px] hidden-imp" id="view-email">
+        <div class="bg-white border border-surface-dim shadow-sm rounded-xl overflow-hidden">
+          <div class="bg-[#f4fbfa] p-8 text-center border-b border-[#d9eae8]">
+            <h2 class="text-[24px] font-semibold text-on-surface mb-2">Purchase Order PO-1001</h2>
+            <div class="text-[14px] text-on-surface-variant mb-6">ManageKube LLC</div>
+            <div class="inline-flex flex-col items-center justify-center p-6 bg-white rounded-lg border border-surface-dim shadow-sm min-w-[240px]">
+              <div class="text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">PO Total</div>
+              <div class="text-[32px] font-semibold text-on-surface">$1,195.00</div>
+            </div>
+          </div>
+          <div class="p-8">
+            <div class="text-[14px] text-on-surface mb-6">
+              <p class="mb-4">Hi Printful Inc.,</p>
+              <p class="mb-4">Please find attached our purchase order PO-1001. Please confirm receipt and expected delivery date.</p>
+            </div>
+            <div class="text-center mb-8">
+              <button class="h-10 px-6 bg-primary text-white rounded-full text-[14px] font-semibold hover:bg-primary-container">View Purchase Order</button>
+            </div>
+            <div class="border-t border-surface-dim pt-6 mt-8 text-[12px] text-on-surface-variant text-center">
+              <p class="font-semibold text-on-surface mb-1">ManageKube LLC</p>
+              <p>123 Business Rd, Suite 100</p>
+              <p>hello@managekube.com</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VENDOR VIEW (Payor) -->
+      <div class="w-full max-w-[900px] hidden-imp" id="view-vendor">
+        <div class="bg-white border border-surface-dim shadow-sm rounded-sm p-8">
+          <div class="flex justify-between items-start mb-8">
+            <div>
+              <h1 class="text-[28px] font-semibold text-primary mb-1">PURCHASE ORDER</h1>
+              <div class="text-[14px] font-semibold">ManageKube LLC</div>
+            </div>
+            <div class="text-right text-[13px]">
+              <div class="text-on-surface-variant uppercase font-semibold mb-1">PO Total</div>
+              <div class="text-[24px] font-semibold">$1,195.00</div>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-8 mb-8 text-[13px]">
+            <div>
+              <div class="text-on-surface-variant font-semibold mb-1 uppercase tracking-wider text-[11px]">Vendor</div>
+              <div class="font-semibold mb-1">Printful Inc.</div>
+              <div class="text-on-surface-variant">support@printful.com<br>+1 (555) 000-1111</div>
+            </div>
+            <div>
+              <div class="text-on-surface-variant font-semibold mb-1 uppercase tracking-wider text-[11px]">Ship To</div>
+              <div class="font-semibold mb-1">ManageKube Warehouse</div>
+              <div class="text-on-surface-variant">456 Warehouse Way, Dock 4<br>Springfield, IL 62701</div>
+            </div>
+          </div>
+          
+          <div class="bg-[#faf9fc] rounded p-4 mb-8 text-[13px] grid grid-cols-4 gap-4">
+            <div><span class="block text-on-surface-variant text-[11px] uppercase mb-1">PO Number</span><span class="font-medium">PO-1001</span></div>
+            <div><span class="block text-on-surface-variant text-[11px] uppercase mb-1">Order Date</span><span class="font-medium">11/03/2026</span></div>
+            <div><span class="block text-on-surface-variant text-[11px] uppercase mb-1">Expected Delivery</span><span class="font-medium">11/15/2026</span></div>
+            <div><span class="block text-on-surface-variant text-[11px] uppercase mb-1">Terms</span><span class="font-medium">Net 30</span></div>
+          </div>
+          
+          <table class="w-full text-left text-[13px] mb-8">
+            <thead>
+              <tr class="border-b-2 border-surface-dim text-[11px] text-on-surface-variant uppercase font-semibold">
+                <th class="py-2">Item</th>
+                <th class="py-2">Description</th>
+                <th class="py-2 text-right">Qty Ord</th>
+                <th class="py-2 text-right">Unit Cost</th>
+                <th class="py-2 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-surface-dim"><td class="py-4 font-medium">Classic Tee - White</td><td class="py-4 text-on-surface-variant">SKU: TEE-001 · Size L</td><td class="py-4 text-right">100</td><td class="py-4 text-right">$8.50</td><td class="py-4 text-right">$850.00</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-4 font-medium">Canvas Tote</td><td class="py-4 text-on-surface-variant">SKU: TOTE-014 · Natural</td><td class="py-4 text-right">50</td><td class="py-4 text-right">$6.00</td><td class="py-4 text-right">$300.00</td></tr>
+            </tbody>
+          </table>
+          
+          <div class="flex justify-end mb-12">
+            <div class="w-64 space-y-2 text-[13px]">
+              <div class="flex justify-between"><span class="text-on-surface-variant">Subtotal</span><span>$1,150.00</span></div>
+              <div class="flex justify-between"><span class="text-on-surface-variant">Shipping</span><span>$45.00</span></div>
+              <div class="flex justify-between font-semibold border-t border-surface-dim pt-2 mt-2"><span>Total</span><span>$1,195.00</span></div>
+            </div>
+          </div>
+          
+          <div class="border-t border-surface-dim pt-8 text-center text-[12px] text-on-surface-variant">
+            <p>Please include PO Number <strong>PO-1001</strong> on all packing slips and invoices.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF VIEW -->
+      <div class="w-full max-w-[900px] hidden-imp" id="view-pdf">
+        <div class="bg-white shadow-lg w-full max-w-[850px] min-h-[1100px] mx-auto p-[0.75in]">
+          <div class="flex justify-between items-start mb-12">
+            <div>
+              <div class="text-[24px] font-bold text-primary mb-1">PURCHASE ORDER</div>
+              <div class="text-[14px] font-semibold text-gray-800">ManageKube LLC</div>
+              <div class="text-[12px] text-gray-500 mt-1">123 Business Rd, Suite 100</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[12px] font-semibold text-gray-500 uppercase tracking-widest mb-1">PO Total</div>
+              <div class="text-[28px] font-bold text-gray-900">$1,195.00</div>
+            </div>
+          </div>
+          
+          <div class="flex justify-between mb-12">
+            <div>
+              <div class="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-widest">Vendor</div>
+              <div class="text-[14px] font-semibold text-gray-800">Printful Inc.</div>
+              <div class="text-[12px] text-gray-500">support@printful.com</div>
+              <div class="text-[12px] text-gray-500">+1 (555) 000-1111</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] uppercase font-bold text-gray-400 mb-2 tracking-widest">Ship To</div>
+              <div class="text-[14px] font-semibold text-gray-800">ManageKube Warehouse</div>
+              <div class="text-[12px] text-gray-500">456 Warehouse Way, Dock 4</div>
+              <div class="text-[12px] text-gray-500">Springfield, IL 62701</div>
+            </div>
+          </div>
+
+          <div class="flex justify-between mb-12">
+            <table class="text-[12px]">
+              <tr><td class="text-gray-500 pr-4 pb-1">PO Number</td><td class="font-semibold text-gray-800 pb-1">PO-1001</td></tr>
+              <tr><td class="text-gray-500 pr-4 pb-1">Order Date</td><td class="font-semibold text-gray-800 pb-1">11/03/2026</td></tr>
+            </table>
+            <table class="text-[12px]">
+              <tr><td class="text-gray-500 pr-4 pb-1">Expected Delivery</td><td class="font-semibold text-gray-800 pb-1">11/15/2026</td></tr>
+              <tr><td class="text-gray-500 pr-4 pb-1">Terms</td><td class="font-semibold text-gray-800 pb-1">Net 30</td></tr>
+            </table>
+          </div>
+
+          <table class="w-full text-left text-[12px] mb-8">
+            <thead>
+              <tr class="border-b-2 border-gray-300 text-[10px] text-gray-500 uppercase font-bold tracking-widest">
+                <th class="py-3">Item / SKU</th>
+                <th class="py-3">Description</th>
+                <th class="py-3 text-right">Qty</th>
+                <th class="py-3 text-right">Unit Cost</th>
+                <th class="py-3 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-gray-200"><td class="py-4 font-medium text-gray-800">Classic Tee - White<br><span class="text-gray-500 font-normal">SKU: TEE-001</span></td><td class="py-4 text-gray-600">Size L</td><td class="py-4 text-right text-gray-800">100</td><td class="py-4 text-right text-gray-800">$8.50</td><td class="py-4 text-right text-gray-800 font-medium">$850.00</td></tr>
+              <tr class="border-b border-gray-200"><td class="py-4 font-medium text-gray-800">Canvas Tote<br><span class="text-gray-500 font-normal">SKU: TOTE-014</span></td><td class="py-4 text-gray-600">Natural</td><td class="py-4 text-right text-gray-800">50</td><td class="py-4 text-right text-gray-800">$6.00</td><td class="py-4 text-right text-gray-800 font-medium">$300.00</td></tr>
+            </tbody>
+          </table>
+
+          <div class="flex justify-end border-t-2 border-gray-300 pt-4">
+            <div class="w-64">
+              <div class="flex justify-between py-1 text-[12px]"><span class="text-gray-500">Subtotal</span><span class="font-semibold text-gray-800">$1,150.00</span></div>
+              <div class="flex justify-between py-1 text-[12px]"><span class="text-gray-500">Shipping</span><span class="font-semibold text-gray-800">$45.00</span></div>
+              <div class="flex justify-between py-2 text-[14px] font-bold border-t border-gray-200 mt-1"><span class="text-gray-800">Total</span><span class="text-gray-900">$1,195.00</span></div>
+            </div>
+          </div>
+          
+          <div class="mt-16 text-center text-[10px] text-gray-400">
+            <p>Please include PO Number PO-1001 on all packing slips.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Side: Sidebar Controls -->
+    <aside class="w-[340px] bg-white border-l border-surface-dim flex flex-col shrink-0 overflow-y-auto">
+      <div class="p-5 border-b border-surface-dim flex items-center justify-between">
+        <h2 class="text-[16px] font-semibold">PO-1001</h2>
+        <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      
+      <div class="p-5 flex-1 space-y-4">
+        
+        <!-- Status Dropdown -->
+        <div class="relative inline-block w-full mb-4">
+          <button class="h-8 px-3 border border-surface-dim rounded bg-white text-[12px] font-semibold flex items-center justify-between w-32 hover:bg-surface-container" id="statusBtn">
+            Open <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </button>
+          <div class="row-menu" id="statusMenu" style="position:absolute; top:36px; left:0; width:140px;">
+            <button data-status="Open" class="font-semibold">Open</button>
+            <button data-status="Sent to Vendor">Sent to Vendor</button>
+            <button data-status="Partially Received">Partially Received</button>
+            <button data-status="Fully Received">Fully Received</button>
+            <button data-status="Cancelled">Cancelled</button>
+          </div>
+        </div>
+
+        <!-- Accordions -->
+        <div class="space-y-3">
+          
+          <!-- Customization -->
+          <div class="border border-surface-dim rounded-lg bg-white overflow-hidden">
+            <button class="w-full px-4 py-3 flex items-center justify-between text-[14px] font-semibold hover:bg-surface-container-low" data-accordion="customization">
+              Customization
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div class="hidden-imp border-t border-surface-dim p-4 space-y-4" id="acc-customization">
+              <div class="space-y-3 text-[13px]">
+                <div class="flex items-center justify-between"><span>Show SKU</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="flex items-center justify-between"><span>Show Unit Cost</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="flex items-center justify-between"><span>Show Receiving Status</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                <div class="flex items-center justify-between"><span>Show Vendor Part No.</span><label class="switch"><input type="checkbox"><span class="slider"></span></label></div>
+              </div>
+              
+              <div class="pt-3 border-t border-surface-dim mt-3">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-[13px] font-semibold">Table content</span>
+                  <a href="#" class="text-[12px] text-primary hover:underline">Edit labels</a>
+                </div>
+                <div class="space-y-3 text-[13px]">
+                  <div class="flex items-center justify-between"><span>#</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Item / SKU</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Description</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Qty Ordered</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Qty Received</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Unit Cost</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                  <div class="flex items-center justify-between"><span>Amount</span><label class="switch"><input type="checkbox" checked><span class="slider"></span></label></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Receiving -->
+          <div class="border border-surface-dim rounded-lg bg-white overflow-hidden">
+            <button class="w-full px-4 py-3 flex items-center justify-between text-[14px] font-semibold hover:bg-surface-container-low" data-accordion="receiving">
+              Receiving
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div class="hidden-imp border-t border-surface-dim p-4" id="acc-receiving">
+              <div class="space-y-3 text-[13px] mb-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant">Items ordered</span>
+                  <span class="font-medium">150</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant">Items received</span>
+                  <span class="font-medium text-[#0a6400]">0</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-on-surface-variant">Items remaining</span>
+                  <span class="font-medium text-[#ba1a1a]">150</span>
+                </div>
+              </div>
+              <button class="w-full h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container flex items-center justify-center gap-1" onclick="toast('Opening receive items flow...')">
+                <span class="material-symbols-outlined text-[16px]">local_shipping</span> Receive items
+              </button>
+            </div>
+          </div>
+          
+          <!-- Billing & Terms -->
+          <div class="border border-surface-dim rounded-lg bg-white overflow-hidden">
+            <button class="w-full px-4 py-3 flex items-center justify-between text-[14px] font-semibold hover:bg-surface-container-low" data-accordion="billing">
+              Billing &amp; Terms
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div class="hidden-imp border-t border-surface-dim p-4 text-[13px]" id="acc-billing">
+              <div class="space-y-2">
+                <div class="flex justify-between"><span class="text-on-surface-variant">Payment Terms</span><span class="font-medium">Net 30</span></div>
+                <div class="flex justify-between"><span class="text-on-surface-variant">Ship Via</span><span class="font-medium">FedEx Ground</span></div>
+                <div class="flex justify-between"><span class="text-on-surface-variant">FOB</span><span class="font-medium">Destination</span></div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Attachments -->
+          <div class="border border-surface-dim rounded-lg bg-white overflow-hidden">
+            <button class="w-full px-4 py-3 flex items-center justify-between text-[14px] font-semibold hover:bg-surface-container-low" data-accordion="attachments">
+              Attachments
+              <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+            </button>
+            <div class="hidden-imp border-t border-surface-dim p-4 text-[13px] text-on-surface-variant" id="acc-attachments">
+              No attachments.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </aside>
+  </div>
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <footer class="h-16 bg-white border-t border-surface-dim px-6 flex items-center justify-between shrink-0 z-20">
+    <div class="w-1/3"></div>
+    <div class="flex-1 flex justify-center">
+      <button class="text-[13px] text-on-surface font-semibold hover:underline" onclick="toast('Printing or downloading PO...')">Print or download</button>
+    </div>
+    <div class="w-1/3 flex justify-end items-center gap-3">
+      <div class="flex">
+        <button class="h-9 px-4 border border-surface-dim rounded-l bg-white text-[13px] font-semibold hover:bg-surface-container" onclick="toast('Saving PO...')">Save</button>
+        <button class="h-9 px-2 border border-l-0 border-surface-dim rounded-r bg-white hover:bg-surface-container" id="saveArrow">
+          <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+        </button>
+      </div>
+      <div class="flex">
+        <button class="h-9 px-5 bg-primary text-white text-[13px] font-semibold rounded-l hover:bg-primary-container flex items-center gap-1" onclick="toast('Preparing to send PO to Vendor...')">
+          Send to Vendor
+        </button>
+        <button class="h-9 px-2 bg-primary text-white rounded-r hover:bg-primary-container border-l border-primary-container" id="sendArrow">
+          <span class="material-symbols-outlined text-[18px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════ OVERLAYS ═══════════ -->
+  <!-- Save Menu -->
+  <div class="row-menu" id="saveMenu">
+    <button onclick="toast('Saved and new PO started')">Save and new</button>
+    <button onclick="toast('Saved and closed')">Save and close</button>
+  </div>
+  
+  <!-- Send Menu -->
+  <div class="row-menu" id="sendMenu">
+    <button onclick="toast('Opening send flow')">Send to Vendor</button>
+    <button onclick="toast('Downloading PDF...')">Download PDF</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  /* Helpers */
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2500);}
+
+  /* View Switching Logic */
+  document.querySelectorAll('[data-view]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      // Update tab states
+      document.querySelectorAll('[data-view]').forEach(t => {
+        t.classList.remove('active');
+        t.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('active');
+      btn.classList.remove('text-on-surface-variant');
+
+      // Hide all views
+      ['edit', 'email', 'vendor', 'pdf'].forEach(v => {
+        document.getElementById('view-' + v).classList.add('hidden-imp');
+      });
+      
+      // Show target view
+      const targetView = btn.dataset.view;
+      document.getElementById('view-' + targetView).classList.remove('hidden-imp');
+      
+      // Toggle sidebar visibility based on view
+      const sidebar = document.querySelector('aside');
+      if (targetView === 'edit') {
+        sidebar.classList.remove('hidden-imp');
+      } else {
+        sidebar.classList.add('hidden-imp');
+      }
+    });
+  });
+
+  /* Status Dropdown */
+  const statusBtn = document.getElementById('statusBtn');
+  const statusMenu = document.getElementById('statusMenu');
+  
+  statusBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    statusMenu.classList.toggle('open');
+  });
+  
+  document.querySelectorAll('#statusMenu [data-status]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      statusBtn.innerHTML = `${btn.dataset.status} <span class="material-symbols-outlined text-[16px]">expand_more</span>`;
+      statusMenu.classList.remove('open');
+      toast(`Status changed to ${btn.dataset.status}`);
+    });
+  });
+
+  /* Accordions */
+  document.querySelectorAll('[data-accordion]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = 'acc-' + btn.dataset.accordion;
+      const content = document.getElementById(targetId);
+      const icon = btn.querySelector('.material-symbols-outlined');
+      
+      if (content.classList.contains('hidden-imp')) {
+        content.classList.remove('hidden-imp');
+        icon.textContent = 'expand_less';
+      } else {
+        content.classList.add('hidden-imp');
+        icon.textContent = 'expand_more';
+      }
+    });
+  });
+
+  /* Save & Send Menus */
+  const saveArrow = document.getElementById('saveArrow');
+  const saveMenu = document.getElementById('saveMenu');
+  
+  saveArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const rect = saveArrow.getBoundingClientRect();
+    saveMenu.style.top = (rect.top - 80) + 'px';
+    saveMenu.style.left = Math.min(rect.right - 200, window.innerWidth - 220) + 'px';
+    saveMenu.classList.toggle('open');
+  });
+
+  const sendArrow = document.getElementById('sendArrow');
+  const sendMenu = document.getElementById('sendMenu');
+  
+  sendArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const rect = sendArrow.getBoundingClientRect();
+    sendMenu.style.top = (rect.top - 80) + 'px';
+    sendMenu.style.left = Math.min(rect.right - 200, window.innerWidth - 220) + 'px';
+    sendMenu.classList.toggle('open');
+  });
+
+  /* Global click to close menus */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#statusBtn')) statusMenu.classList.remove('open');
+    if (!e.target.closest('#saveArrow')) saveMenu.classList.remove('open');
+    if (!e.target.closest('#sendArrow')) sendMenu.classList.remove('open');
+  });
+</script>
+</body>
+</html>

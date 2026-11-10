@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Product Details — Classic Unisex Heavyweight Tee</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0a6400;color:#0a6400;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;color:#5a6355;cursor:pointer;border:1px solid transparent;}
+  .icon-btn:hover{background:#f4f3f7;color:#1a1c1e;border-color:#dad9dd;}
+  
+  /* Product Specific CSS */
+  .color-swatch { width: 24px; height: 24px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; position: relative; }
+  .color-swatch.active { border-color: #0a6400; }
+  .color-swatch.active::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; border: 2px solid #fff; }
+  .mockup-card { border: 1px solid #dad9dd; border-radius: 8px; overflow: hidden; transition: box-shadow 0.2s; }
+  .mockup-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .rating-bar { height: 8px; background: #eeedf1; border-radius: 4px; overflow: hidden; }
+  .rating-bar-fill { height: 100%; background: #f59e0b; }
+  
+  /* Supplier Comparison Specific */
+  .supplier-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .supplier-printify { background: #e0f2fe; color: #0369a1; }
+  .supplier-printful { background: #f3e8ff; color: #6b21a8; }
+  
+  /* Design Area Preview */
+  .print-area-box { border: 1px dashed #becab6; background: #faf9fc; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 80px; cursor: pointer; transition: all 0.2s; }
+  .print-area-box:hover { border-color: #0a6400; background: #f0fdf4; }
+  .print-area-box.active { border: 2px solid #0a6400; background: #f0fdf4; }
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased overflow-hidden">
+
+<div class="flex flex-col h-screen w-screen">
+  
+  <!-- Top Action Bar (Sticky Header) -->
+  <header class="h-14 px-6 flex items-center justify-between bg-white border-b border-surface-dim shrink-0 z-10">
+    <div class="flex items-center gap-4">
+      <a href="#" class="flex items-center gap-1 text-primary font-semibold text-[13px] hover:underline">
+        <span class="material-symbols-outlined text-[16px]">arrow_back_ios</span>Products
+      </a>
+      <div class="h-4 w-px bg-surface-dim"></div>
+      <span class="text-[13px] text-on-surface-variant font-medium">Classic Unisex Heavyweight Tee</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <!-- PERSISTENT ACTIONS -->
+      <button class="h-8 px-3 border border-surface-dim rounded bg-white text-[13px] font-semibold hover:bg-surface-container flex items-center gap-1" onclick="toast('Downloading print file...')">
+        <span class="material-symbols-outlined text-[16px]">download</span>Download
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded bg-white text-[13px] font-semibold hover:bg-surface-container flex items-center gap-1" onclick="toast('Opening print view...')">
+        <span class="material-symbols-outlined text-[16px]">print</span>Print
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded bg-white text-[13px] font-semibold hover:bg-surface-container flex items-center gap-1" onclick="toast('Opening product editor...')">
+        <span class="material-symbols-outlined text-[16px]">edit</span>Edit
+      </button>
+      <div class="w-px h-4 bg-surface-dim mx-1"></div>
+      <button class="h-8 px-4 rounded text-[13px] font-semibold bg-[#1e6dc9] text-white hover:bg-[#0055a5] flex items-center gap-1" onclick="toast('Opening Design Studio...')">
+        <span class="material-symbols-outlined text-[18px]">palette</span>Design Now
+      </button>
+    </div>
+  </header>
+
+  <!-- Scrollable Content Area -->
+  <main class="flex-1 overflow-y-auto">
+    <div class="max-w-[1500px] mx-auto p-6">
+      
+      <!-- MAIN LAYOUT: Left Gallery, Center Info, Right Summary Box -->
+      <div class="flex gap-6 mb-6">
+        
+        <!-- Column 1: Gallery & Previous Designs -->
+        <div class="w-[340px] shrink-0 space-y-4">
+          <!-- Main Image -->
+          <div class="w-full h-[340px] bg-surface-container-low rounded-xl border border-surface-dim flex items-center justify-center overflow-hidden">
+             <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=500&h=500" alt="Product" class="object-cover w-full h-full"/>
+          </div>
+          
+          <!-- Thumbnails -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="aspect-square bg-surface-container-low rounded-lg border-2 border-primary overflow-hidden cursor-pointer"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=100&h=100" class="object-cover w-full h-full"/></div>
+            <div class="aspect-square bg-surface-container-low rounded-lg border border-surface-dim overflow-hidden cursor-pointer hover:border-outline"><img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=100&h=100" class="object-cover w-full h-full"/></div>
+            <div class="aspect-square bg-surface-container-low rounded-lg border border-surface-dim overflow-hidden cursor-pointer hover:border-outline"><img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=100&h=100" class="object-cover w-full h-full"/></div>
+            <div class="aspect-square bg-surface-container-low rounded-lg border border-surface-dim overflow-hidden cursor-pointer hover:border-outline"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=100&h=100" class="object-cover w-full h-full"/></div>
+          </div>
+          
+          <!-- PREVIOUS DESIGNS SWITCHER -->
+          <div class="bg-surface-container-lowest border border-surface-dim rounded-xl p-3">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider">Previous Designs</span>
+              <a href="#" class="text-[11px] text-primary hover:underline">View All</a>
+            </div>
+            <div class="flex gap-2 overflow-x-auto pb-1">
+              <div class="w-12 h-12 shrink-0 rounded-lg border-2 border-primary bg-white flex items-center justify-center cursor-pointer">
+                <span class="text-[10px] font-bold text-primary">V1</span>
+              </div>
+              <div class="w-12 h-12 shrink-0 rounded-lg border border-surface-dim bg-white flex items-center justify-center cursor-pointer hover:border-outline">
+                <span class="text-[10px] font-bold text-on-surface-variant">V2</span>
+              </div>
+              <div class="w-12 h-12 shrink-0 rounded-lg border border-surface-dim bg-white flex items-center justify-center cursor-pointer hover:border-outline">
+                <span class="text-[10px] font-bold text-on-surface-variant">V3</span>
+              </div>
+              <div class="w-12 h-12 shrink-0 rounded-lg border border-dashed border-surface-dim bg-white flex items-center justify-center cursor-pointer hover:border-primary text-on-surface-variant">
+                <span class="material-symbols-outlined text-[16px]">add</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Product Info, Print Areas, Suppliers -->
+        <div class="flex-1 space-y-6">
+          
+          <!-- Title & Desc -->
+          <div>
+            <h1 class="text-[28px] font-semibold text-on-surface leading-tight mb-1">Classic Unisex Heavyweight Tee</h1>
+            <div class="text-[14px] text-on-surface-variant mb-3">Bella+Canvas 3001 • Multi-Supplier Product</div>
+            <div class="flex items-center gap-2 mb-4">
+              <span class="bg-surface-container text-on-surface px-2.5 py-1 rounded text-[11px] font-semibold">Unisex</span>
+              <span class="bg-surface-container text-on-surface px-2.5 py-1 rounded text-[11px] font-semibold">100% Cotton</span>
+              <span class="bg-surface-container text-on-surface px-2.5 py-1 rounded text-[11px] font-semibold">DTG Print</span>
+            </div>
+            <p class="text-[13px] text-on-surface-variant leading-relaxed">The classic heavyweight tee. Made from 100% ring-spun cotton, this t-shirt feels soft and light, with just the right amount of stretch. It's comfortable and the unisex cut is flattering for both men and women. Double-needle stitched sleeves and bottom hem.</p>
+          </div>
+
+          <!-- PRINT AREAS -->
+          <div>
+            <h3 class="text-[14px] font-semibold text-on-surface mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline">crop</span> Available Print Areas
+            </h3>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="print-area-box active" onclick="selectPrintArea(this)">
+                <span class="material-symbols-outlined text-[24px] text-primary mb-1">check_circle</span>
+                <span class="text-[12px] font-semibold text-on-surface">Front</span>
+                <span class="text-[10px] text-on-surface-variant">12" x 16"</span>
+              </div>
+              <div class="print-area-box" onclick="selectPrintArea(this)">
+                <span class="material-symbols-outlined text-[24px] text-outline mb-1">radio_button_unchecked</span>
+                <span class="text-[12px] font-semibold text-on-surface">Back</span>
+                <span class="text-[10px] text-on-surface-variant">12" x 16"</span>
+              </div>
+              <div class="print-area-box" onclick="selectPrintArea(this)">
+                <span class="material-symbols-outlined text-[24px] text-outline mb-1">radio_button_unchecked</span>
+                <span class="text-[12px] font-semibold text-on-surface">Left Sleeve</span>
+                <span class="text-[10px] text-on-surface-variant">3" x 3"</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supplier Costs -->
+          <div class="price-comparison-box bg-white border border-surface-dim">
+            <div class="font-semibold text-on-surface mb-3 flex items-center gap-2 text-[14px]">
+              <span class="material-symbols-outlined text-[18px] text-primary">compare_arrows</span>
+              Supplier Cost Comparison
+            </div>
+            <div class="flex items-center justify-between bg-surface-container-lowest border border-surface-dim p-2.5 rounded mb-2">
+              <div class="flex items-center gap-2">
+                <span class="supplier-badge supplier-printify">Printify</span>
+                <span class="text-[12px] text-on-surface-variant">Printify Choice</span>
+              </div>
+              <span class="font-semibold text-[15px]">$8.50</span>
+            </div>
+            <div class="flex items-center justify-between bg-surface-container-lowest border border-surface-dim p-2.5 rounded">
+              <div class="flex items-center gap-2">
+                <span class="supplier-badge supplier-printful">Printful</span>
+                <span class="text-[12px] text-on-surface-variant">Printful US</span>
+              </div>
+              <span class="font-semibold text-[15px]">$9.25</span>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Column 3: SUMMARY BOX -->
+        <div class="w-[320px] shrink-0">
+          <div class="bg-white border border-surface-dim rounded-xl p-5 shadow-sm sticky top-6">
+            <h2 class="text-[16px] font-semibold text-on-surface mb-4 border-b border-surface-dim pb-2">Order Summary</h2>
+            
+            <div class="space-y-3 text-[13px] mb-6">
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Base Supplier Cost</span>
+                <span class="font-medium" id="summaryBaseCost">$8.50</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Selected Variant</span>
+                <span class="font-medium">White / M</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Print Area</span>
+                <span class="font-medium text-primary">Front (12"x16")</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-on-surface-variant">Active Supplier</span>
+                <span class="font-medium text-primary">Printify Choice</span>
+              </div>
+            </div>
+
+            <!-- EDITABLE RETAIL PRICE -->
+            <div class="bg-surface-container-lowest border border-surface-dim rounded-lg p-4 mb-6">
+              <label class="block text-[12px] font-semibold text-on-surface-variant mb-1">Set Retail Price</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant font-medium">$</span>
+                <input type="number" id="retailPriceInput" value="24.99" step="0.01" class="w-full h-10 pl-7 pr-3 border border-surface-dim rounded text-[18px] font-semibold focus:outline-none focus:border-primary bg-white"/>
+              </div>
+            </div>
+
+            <!-- PROFIT CALCULATION -->
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-[13px] text-on-surface-variant">Est. Profit per unit</span>
+              <span class="text-[20px] font-semibold text-primary" id="summaryProfit">$16.49</span>
+            </div>
+
+            <!-- MAIN ACTION -->
+            <button class="w-full h-10 bg-[#1e6dc9] text-white text-[14px] font-semibold rounded-lg hover:bg-[#0055a5] flex items-center justify-center gap-2 mb-3" onclick="toast('Opening Design Studio...')">
+              <span class="material-symbols-outlined text-[20px]">palette</span>Design Now
+            </button>
+            
+            <div class="text-[11px] text-center text-on-surface-variant mt-2">Changes to design or price will apply to all active sales channels.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trusted Network Bar (Full Width below main layout) -->
+      <div class="bg-white border border-surface-dim rounded-xl p-4 mb-8">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-[13px] font-semibold flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">verified</span>Fulfillment Network Status</h3>
+          <a href="#" class="text-[12px] text-primary hover:underline">Manage providers</a>
+        </div>
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-surface-container-low p-3 rounded-lg border border-surface-dim flex flex-col gap-1">
+            <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">Best quality</span>
+            <span class="font-semibold text-[13px] text-on-surface">Printful (Top rated)</span>
+          </div>
+          <div class="bg-surface-container-low p-3 rounded-lg border border-surface-dim flex flex-col gap-1">
+            <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">Lowest price</span>
+            <span class="font-semibold text-[13px] text-on-surface">Printify ($8.50)</span>
+          </div>
+          <div class="bg-surface-container-low p-3 rounded-lg border border-surface-dim flex flex-col gap-1">
+            <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">Most shipping options</span>
+            <span class="font-semibold text-[13px] text-on-surface">Printify (3 Locations)</span>
+          </div>
+          <div class="bg-surface-container-low p-3 rounded-lg border border-surface-dim flex flex-col gap-1">
+            <span class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">Fastest delivery</span>
+            <span class="font-semibold text-[13px] text-on-surface">Printful (2.5 days)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="border-b border-surface-dim mb-6 overflow-x-auto">
+        <div class="flex items-center gap-8 min-w-max px-2">
+          <button class="pb-3 text-[14px] tab-underline active" data-tab="details">Product Details</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="variants">Variants & Inventory</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="pricing">Supplier Costs</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="fulfillment">Fulfillment Routing</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="mockups">Mockups</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="reviews">Reviews</button>
+        </div>
+      </div>
+
+      <!-- ═══════════ TAB CONTENT ═══════════ -->
+      
+      <!-- 1. Product Details -->
+      <div id="pane-details" class="tab-pane bg-white border border-surface-dim rounded-xl p-8">
+        <div class="grid grid-cols-3 gap-12 text-[13px]">
+          <div class="col-span-2 space-y-10">
+            <div>
+              <h3 class="font-semibold text-[18px] mb-4 text-on-surface">About this product</h3>
+              <ul class="list-disc pl-5 space-y-2 text-on-surface-variant mb-5">
+                <li>Material: 100% ring-spun cotton</li>
+                <li>Fabric weight: 6.1 oz/yd² (206.8 g/m²)</li>
+                <li>Relaxed fit, unisex sizing</li>
+                <li>Double-needle stitched sleeves and bottom hem</li>
+                <li>Tear-away label for custom rebranding</li>
+              </ul>
+              <p class="text-on-surface leading-relaxed">This classic unisex jersey short sleeve tee fits like a well-loved favorite. Soft cotton and quality print make users fall in love with it over and over again. These t-shirts have-ribbed knit collars to bolster shaping. The shoulders are tapered for a better fit over time.</p>
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-[18px] mb-5 text-on-surface">Key Features</h3>
+              <div class="grid grid-cols-2 gap-8">
+                <div class="flex gap-4">
+                  <span class="material-symbols-outlined text-[28px] text-outline">eco</span>
+                  <div>
+                    <h4 class="font-semibold text-on-surface text-[14px] mb-1">100% Cotton</h4>
+                    <p class="text-on-surface-variant text-[13px]">Made with sustainably sourced USA grown cotton.</p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <span class="material-symbols-outlined text-[28px] text-outline">public</span>
+                  <div>
+                    <h4 class="font-semibold text-on-surface text-[14px] mb-1">Ethically Sourced</h4>
+                    <p class="text-on-surface-variant text-[13px]">Manufactured in facilities verified by the Fair Labor Association.</p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <span class="material-symbols-outlined text-[28px] text-outline">dry_cleaning</span>
+                  <div>
+                    <h4 class="font-semibold text-on-surface text-[14px] mb-1">Durable Print</h4>
+                    <p class="text-on-surface-variant text-[13px]">DTG printing ensures the design won't crack or peel after washing.</p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <span class="material-symbols-outlined text-[28px] text-outline">straighten</span>
+                  <div>
+                    <h4 class="font-semibold text-on-surface text-[14px] mb-1">Retail Fit</h4>
+                    <p class="text-on-surface-variant text-[13px]">Modern classic fit, seamless body, and high stitch density.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="font-semibold text-[18px] mb-4 text-on-surface">Care Instructions</h3>
+              <div class="flex gap-5 mb-4 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[28px]" title="Machine wash cold">local_laundry_service</span>
+                <span class="material-symbols-outlined text-[28px]" title="Do not bleach">no_drinks</span>
+                <span class="material-symbols-outlined text-[28px]" title="Tumble dry low">dry</span>
+                <span class="material-symbols-outlined text-[28px]" title="Iron low heat">iron</span>
+                <span class="material-symbols-outlined text-[28px]" title="Do not dry clean">dangerous</span>
+              </div>
+              <p class="text-on-surface-variant text-[13px]">Machine wash: cold (max 30C or 90F); Non-chlorine: bleach as needed; Do not tumble dry; Do not iron; Do not dryclean.</p>
+            </div>
+          </div>
+
+          <div class="col-span-1">
+            <h3 class="font-semibold text-[18px] mb-4 text-on-surface">Size Guide</h3>
+            <div class="border border-surface-dim rounded-lg overflow-hidden mb-3">
+              <table class="w-full text-[13px] text-center">
+                <thead class="bg-surface-container-low text-on-surface-variant">
+                  <tr>
+                    <th class="py-3 border-b border-surface-dim border-r">Size</th>
+                    <th class="py-3 border-b border-surface-dim border-r">Chest (in)</th>
+                    <th class="py-3 border-b border-surface-dim">Length (in)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="border-b border-surface-dim"><td class="py-3 border-r">S</td><td class="py-3 border-r">34-37</td><td class="py-3">28</td></tr>
+                  <tr class="border-b border-surface-dim bg-surface-container-lowest"><td class="py-3 border-r">M</td><td class="py-3 border-r">38-41</td><td class="py-3">29</td></tr>
+                  <tr class="border-b border-surface-dim"><td class="py-3 border-r">L</td><td class="py-3 border-r">42-45</td><td class="py-3">30</td></tr>
+                  <tr class="border-b border-surface-dim bg-surface-container-lowest"><td class="py-3 border-r">XL</td><td class="py-3 border-r">46-49</td><td class="py-3">31</td></tr>
+                  <tr><td class="py-3 border-r">2XL</td><td class="py-3 border-r">50-53</td><td class="py-3">32</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-[12px] text-on-surface-variant">Measurements are provided by suppliers. Product measurements may vary by up to 2" (5 cm).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Variants & Inventory -->
+      <div id="pane-variants" class="tab-pane hidden-imp bg-white border border-surface-dim rounded-xl p-8">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+             <button class="h-9 px-4 border border-surface-dim rounded text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container">Bulk Edit</button>
+             <button class="h-9 px-4 border border-surface-dim rounded text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container">Update Inventory</button>
+          </div>
+          <div class="text-[13px] text-on-surface-variant">Showing 14 active variants</div>
+        </div>
+
+        <div class="bg-surface-container-lowest border border-surface-dim rounded-lg p-5 mb-6">
+          <div class="text-[13px] font-semibold text-on-surface-variant mb-3">Colors (5 active)</div>
+          <div class="flex gap-4">
+             <div class="color-swatch active" style="background:#ffffff; border:1px solid #dad9dd" title="White"></div>
+             <div class="color-swatch" style="background:#1a1c1e" title="Black"></div>
+             <div class="color-swatch" style="background:#5a6355" title="Military Green"></div>
+             <div class="color-swatch" style="background:#6b1e28" title="Maroon"></div>
+             <div class="color-swatch" style="background:#0077c5" title="Royal Blue"></div>
+          </div>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="w-8"><input type="checkbox" class="accent-primary"/></th>
+              <th>Variant</th>
+              <th>SKU</th>
+              <th>Active Supplier</th>
+              <th class="text-right">Cost</th>
+              <th class="text-right">Retail</th>
+              <th>Status</th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="accent-primary" checked/></td>
+              <td><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full border border-surface-dim" style="background:#ffffff"></div>White / S</div></td>
+              <td class="font-mono text-[12px] text-on-surface-variant">BC-3001-WHT-S</td>
+              <td><span class="supplier-badge supplier-printify">Printify Choice</span></td>
+              <td class="text-right tabular-nums">$8.50</td>
+              <td class="text-right tabular-nums">$24.99</td>
+              <td><span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-semibold">Active</span></td>
+              <td class="text-right"><a href="#" class="action-link">Edit</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="accent-primary" checked/></td>
+              <td><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full border border-surface-dim" style="background:#ffffff"></div>White / M</div></td>
+              <td class="font-mono text-[12px] text-on-surface-variant">BC-3001-WHT-M</td>
+              <td><span class="supplier-badge supplier-printify">Printify Choice</span></td>
+              <td class="text-right tabular-nums">$8.50</td>
+              <td class="text-right tabular-nums">$24.99</td>
+              <td><span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-semibold">Active</span></td>
+              <td class="text-right"><a href="#" class="action-link">Edit</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="accent-primary" checked/></td>
+              <td><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full border border-surface-dim" style="background:#1a1c1e"></div>Black / L</div></td>
+              <td class="font-mono text-[12px] text-on-surface-variant">BC-3001-BLK-L</td>
+              <td><span class="supplier-badge supplier-printful">Printful US</span></td>
+              <td class="text-right tabular-nums">$9.25</td>
+              <td class="text-right tabular-nums">$24.99</td>
+              <td><span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-semibold">Active</span></td>
+              <td class="text-right"><a href="#" class="action-link">Edit</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="accent-primary" checked/></td>
+              <td><div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full border border-surface-dim" style="background:#5a6355"></div>Military Green / XL</div></td>
+              <td class="font-mono text-[12px] text-on-surface-variant">BC-3001-GRN-XL</td>
+              <td><span class="supplier-badge supplier-printful">Printful US</span></td>
+              <td class="text-right tabular-nums">$9.25</td>
+              <td class="text-right tabular-nums">$24.99</td>
+              <td><span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-semibold">Active</span></td>
+              <td class="text-right"><a href="#" class="action-link">Edit</a></td>
+            </tr>
+          </tbody>
+          <tfoot>
+             <tr class="bg-surface-container-low font-semibold">
+               <td colspan="4" class="text-right">Total Active Variants</td>
+               <td colspan="4" class="text-left pl-6">14</td>
+             </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- 3. Supplier Costs -->
+      <div id="pane-pricing" class="tab-pane hidden-imp bg-white border border-surface-dim rounded-xl p-8">
+        <div class="flex justify-between items-center mb-8">
+          <div>
+            <h2 class="text-[20px] font-semibold mb-2">Supplier Cost Breakdown</h2>
+            <p class="text-[14px] text-on-surface-variant">Compare base costs, shipping, and production times across suppliers for this product.</p>
+          </div>
+          <button class="h-9 px-4 bg-primary text-white rounded text-[13px] font-semibold hover:bg-primary-container">Auto-Route Cheapest</button>
+        </div>
+        
+        <table class="data-table border border-surface-dim rounded-lg overflow-hidden mb-6">
+          <thead class="bg-surface-container-low">
+            <tr>
+              <th class="py-4">Supplier</th>
+              <th class="py-4">Network Status</th>
+              <th class="text-right py-4">Base Cost (S-2XL)</th>
+              <th class="text-right py-4">Shipping (US)</th>
+              <th class="text-right py-4">Avg. Production Time</th>
+              <th class="text-center py-4">Routing Priority</th>
+              <th class="text-right py-4">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Printify Row -->
+            <tr>
+              <td class="py-4">
+                <div class="flex items-center gap-2">
+                  <span class="supplier-badge supplier-printify text-[13px] py-1 px-3">Printify</span>
+                  <span class="text-[13px] text-on-surface-variant">Printify Choice</span>
+                </div>
+              </td>
+              <td class="py-4">
+                <div class="flex items-center gap-1 text-[13px] text-primary">
+                  <span class="material-symbols-outlined text-[18px]">verified</span> Trusted Partner
+                </div>
+              </td>
+              <td class="text-right tabular-nums font-semibold text-[14px] py-4">$8.50</td>
+              <td class="text-right tabular-nums text-[14px] py-4">$4.99</td>
+              <td class="text-right tabular-nums text-[14px] py-4">2.8 Days</td>
+              <td class="text-center py-4">
+                <select class="h-8 border border-surface-dim rounded text-[13px] px-2 bg-white focus:outline-none focus:border-primary">
+                  <option>Primary</option>
+                  <option>Backup</option>
+                </select>
+              </td>
+              <td class="text-right py-4"><a href="#" class="action-link">Edit Rules</a></td>
+            </tr>
+            <!-- Printful Row -->
+            <tr class="bg-surface-container-lowest">
+              <td class="py-4">
+                <div class="flex items-center gap-2">
+                  <span class="supplier-badge supplier-printful text-[13px] py-1 px-3">Printful</span>
+                  <span class="text-[13px] text-on-surface-variant">Printful US</span>
+                </div>
+              </td>
+              <td class="py-4">
+                <div class="flex items-center gap-1 text-[13px] text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[18px]">check_circle</span> Connected
+                </div>
+              </td>
+              <td class="text-right tabular-nums font-semibold text-[14px] py-4">$9.25</td>
+              <td class="text-right tabular-nums text-[14px] py-4">$5.50</td>
+              <td class="text-right tabular-nums text-[14px] py-4">2.5 Days</td>
+              <td class="text-center py-4">
+                <select class="h-8 border border-surface-dim rounded text-[13px] px-2 bg-white focus:outline-none focus:border-primary">
+                  <option>Backup</option>
+                  <option>Primary</option>
+                </select>
+              </td>
+              <td class="text-right py-4"><a href="#" class="action-link">Edit Rules</a></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="bg-surface-container-low p-5 rounded-lg border border-surface-dim flex items-start gap-4">
+           <span class="material-symbols-outlined text-[24px] text-primary">info</span>
+           <div class="text-[14px] text-on-surface leading-relaxed">
+              <strong>Smart Routing Active:</strong> Orders for White variants will route to <strong>Printify</strong> for lower costs. Orders for Black and Green variants will route to <strong>Printful</strong> for faster production times and higher quality control.
+           </div>
+        </div>
+      </div>
+
+      <!-- 4. Fulfillment & Providers -->
+      <div id="pane-fulfillment" class="tab-pane hidden-imp bg-white border border-surface-dim rounded-xl p-8">
+         <div class="flex justify-between items-center mb-8">
+           <div>
+             <h2 class="text-[20px] font-semibold mb-2">Fulfillment Routing</h2>
+             <p class="text-[14px] text-on-surface-variant">Manage where your orders are routed and printed.</p>
+           </div>
+           <button class="h-9 px-4 border border-surface-dim rounded text-[13px] font-semibold hover:bg-surface-container">+ Add Provider</button>
+         </div>
+         
+         <div class="space-y-4">
+           <!-- Provider 1 -->
+           <div class="border border-surface-dim rounded-lg p-5 flex items-center justify-between">
+             <div class="flex items-center gap-5">
+               <div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center font-bold text-primary text-[16px]">PC</div>
+               <div>
+                 <div class="font-semibold text-[15px]">Printify Choice</div>
+                 <div class="text-[13px] text-on-surface-variant">Primary Routing • Top rated quality</div>
+               </div>
+             </div>
+             <div class="flex items-center gap-8 text-[14px]">
+               <div class="text-right">
+                 <div class="text-on-surface-variant text-[12px]">Avg. Production</div>
+                 <div class="font-semibold">2.8 days</div>
+               </div>
+               <div class="text-right">
+                 <div class="text-on-surface-variant text-[12px]">Locations</div>
+                 <div class="font-semibold">US, EU</div>
+               </div>
+               <button class="icon-btn"><span class="material-symbols-outlined">more_vert</span></button>
+             </div>
+           </div>
+           
+           <!-- Provider 2 -->
+           <div class="border border-surface-dim rounded-lg p-5 flex items-center justify-between opacity-60">
+             <div class="flex items-center gap-5">
+               <div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center font-bold text-on-surface-variant text-[16px]">PF</div>
+               <div>
+                 <div class="font-semibold text-[15px]">Printful US</div>
+                 <div class="text-[13px] text-on-surface-variant">Backup Routing • Fastest shipping</div>
+               </div>
+             </div>
+             <div class="flex items-center gap-8 text-[14px]">
+               <div class="text-right">
+                 <div class="text-on-surface-variant text-[12px]">Avg. Production</div>
+                 <div class="font-semibold">2.5 days</div>
+               </div>
+               <div class="text-right">
+                 <div class="text-on-surface-variant text-[12px]">Locations</div>
+                 <div class="font-semibold">US</div>
+               </div>
+               <button class="icon-btn"><span class="material-symbols-outlined">more_vert</span></button>
+             </div>
+           </div>
+         </div>
+      </div>
+
+      <!-- 5. Mockups -->
+      <div id="pane-mockups" class="tab-pane hidden-imp">
+        <div class="flex items-center justify-between mb-5 px-2">
+          <div class="text-[14px] text-on-surface-variant">Showing mockups for <strong class="text-on-surface">Classic Unisex Heavyweight Tee</strong></div>
+          <div class="flex items-center gap-2">
+             <select class="h-9 pl-3 pr-8 border border-surface-dim rounded text-[13px] bg-white appearance-none focus:outline-none focus:border-primary">
+                <option>All Colors</option>
+                <option>White</option>
+                <option>Black</option>
+             </select>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-4 gap-6">
+          <div class="mockup-card bg-white flex flex-col">
+            <div class="aspect-[4/5] bg-surface-container-low relative">
+              <span class="absolute top-3 right-3 bg-[#1a1c1e] text-white text-[10px] font-bold px-2 py-1 rounded">PRINTIFY</span>
+              <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=400&h=500" class="w-full h-full object-cover"/>
+            </div>
+            <div class="p-4 border-t border-surface-dim flex-1 flex flex-col justify-between">
+              <div class="mb-3">
+                <div class="text-[13px] font-semibold text-on-surface leading-tight mb-1">White Tee - Front Mockup</div>
+                <div class="text-[12px] text-on-surface-variant">Bella+Canvas 3001</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex-1 h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">View</button>
+                <button class="flex-1 h-8 bg-primary text-white rounded text-[12px] font-semibold hover:bg-primary-container">Design</button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mockup-card bg-white flex flex-col">
+            <div class="aspect-[4/5] bg-surface-container-low relative">
+              <span class="absolute top-3 right-3 bg-[#1a1c1e] text-white text-[10px] font-bold px-2 py-1 rounded">PRINTFUL</span>
+              <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=400&h=500" class="w-full h-full object-cover"/>
+            </div>
+            <div class="p-4 border-t border-surface-dim flex-1 flex flex-col justify-between">
+              <div class="mb-3">
+                <div class="text-[13px] font-semibold text-on-surface leading-tight mb-1">Black Tee - Lifestyle</div>
+                <div class="text-[12px] text-on-surface-variant">Bella+Canvas 3001</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex-1 h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">View</button>
+                <button class="flex-1 h-8 bg-primary text-white rounded text-[12px] font-semibold hover:bg-primary-container">Design</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup-card bg-white flex flex-col">
+            <div class="aspect-[4/5] bg-surface-container-low relative">
+              <span class="absolute top-3 right-3 bg-[#1a1c1e] text-white text-[10px] font-bold px-2 py-1 rounded">PRINTIFY</span>
+              <img src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=400&h=500" class="w-full h-full object-cover"/>
+            </div>
+            <div class="p-4 border-t border-surface-dim flex-1 flex flex-col justify-between">
+              <div class="mb-3">
+                <div class="text-[13px] font-semibold text-on-surface leading-tight mb-1">White Tee - Back Mockup</div>
+                <div class="text-[12px] text-on-surface-variant">Bella+Canvas 3001</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex-1 h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">View</button>
+                <button class="flex-1 h-8 bg-primary text-white rounded text-[12px] font-semibold hover:bg-primary-container">Design</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="mockup-card bg-white flex flex-col">
+            <div class="aspect-[4/5] bg-surface-container-low relative">
+              <span class="absolute top-3 right-3 bg-[#1a1c1e] text-white text-[10px] font-bold px-2 py-1 rounded">PRINTFUL</span>
+              <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=400&h=500" class="w-full h-full object-cover"/>
+            </div>
+            <div class="p-4 border-t border-surface-dim flex-1 flex flex-col justify-between">
+              <div class="mb-3">
+                <div class="text-[13px] font-semibold text-on-surface leading-tight mb-1">Green Tee - Flat Lay</div>
+                <div class="text-[12px] text-on-surface-variant">Bella+Canvas 3001</div>
+              </div>
+              <div class="flex gap-2">
+                <button class="flex-1 h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">View</button>
+                <button class="flex-1 h-8 bg-primary text-white rounded text-[12px] font-semibold hover:bg-primary-container">Design</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Reviews -->
+      <div id="pane-reviews" class="tab-pane hidden-imp bg-white border border-surface-dim rounded-xl p-8">
+         <div class="flex gap-12">
+            <div class="w-72 shrink-0">
+              <div class="flex items-end gap-3 mb-3">
+                <div class="text-[48px] font-bold leading-none text-on-surface">4.5</div>
+                <div class="flex text-yellow-400 mb-1">
+                  <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">star</span>
+                  <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">star</span>
+                  <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">star</span>
+                  <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">star</span>
+                  <span class="material-symbols-outlined text-[24px]">star_half</span>
+                </div>
+              </div>
+              <div class="text-[13px] text-on-surface-variant mb-8">Based on 24 reviews</div>
+              
+              <button class="w-full h-10 bg-primary text-white text-[14px] font-semibold rounded hover:bg-primary-container mb-8">Write a Review</button>
+              
+              <div class="space-y-3">
+                <div class="flex items-center text-[13px] gap-3">
+                  <span class="w-16 text-on-surface-variant">Printing</span>
+                  <div class="flex-1 rating-bar"><div class="rating-bar-fill" style="width: 90%"></div></div>
+                  <span class="w-8 text-right font-medium">4.7</span>
+                </div>
+                <div class="flex items-center text-[13px] gap-3">
+                  <span class="w-16 text-on-surface-variant">Material</span>
+                  <div class="flex-1 rating-bar"><div class="rating-bar-fill" style="width: 80%"></div></div>
+                  <span class="w-8 text-right font-medium">4.4</span>
+                </div>
+                <div class="flex items-center text-[13px] gap-3">
+                  <span class="w-16 text-on-surface-variant">Fit</span>
+                  <div class="flex-1 rating-bar"><div class="rating-bar-fill" style="width: 85%"></div></div>
+                  <span class="w-8 text-right font-medium">4.5</span>
+                </div>
+                <div class="flex items-center text-[13px] gap-3">
+                  <span class="w-16 text-on-surface-variant">Shipping</span>
+                  <div class="flex-1 rating-bar"><div class="rating-bar-fill" style="width: 75%"></div></div>
+                  <span class="w-8 text-right font-medium">4.2</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-1 space-y-8">
+              <div class="flex items-center justify-between mb-2 pb-4 border-b border-surface-dim">
+                <div class="flex gap-2">
+                  <button class="px-4 py-1.5 bg-surface-container border border-surface-dim rounded-full text-[12px] font-semibold">All</button>
+                  <button class="px-4 py-1.5 hover:bg-surface-container rounded-full text-[12px] text-on-surface-variant">5 Star</button>
+                  <button class="px-4 py-1.5 hover:bg-surface-container rounded-full text-[12px] text-on-surface-variant">4 Star</button>
+                </div>
+                <div class="flex items-center gap-2 text-[12px] text-on-surface-variant">
+                  <span>Sort by:</span>
+                  <select class="bg-transparent font-semibold text-on-surface outline-none"><option>Most Recent</option></select>
+                </div>
+              </div>
+
+              <div class="border-b border-surface-dim pb-6">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex text-yellow-400">
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                    </div>
+                    <span class="font-semibold text-[14px] text-on-surface">Excellent Quality</span>
+                    <span class="bg-surface-container px-2 py-0.5 rounded text-[11px] text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span>Verified Purchase</span>
+                  </div>
+                  <span class="text-[13px] text-on-surface-variant">Nov 12, 2025</span>
+                </div>
+                <p class="text-[14px] text-on-surface mb-3">I ordered a sample of this tee for my brand. The print quality is fantastic, and the fabric is super soft. Will definitely be ordering more.</p>
+                <div class="text-[12px] text-on-surface-variant flex items-center gap-2">
+                  <span>Sarah A.</span> • <span>White / M (Fulfilled by Printify)</span>
+                </div>
+              </div>
+
+              <div class="border-b border-surface-dim pb-6">
+                <div class="flex items-center justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="flex text-yellow-400">
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1">star</span>
+                      <span class="material-symbols-outlined text-[18px]">star</span>
+                      <span class="material-symbols-outlined text-[18px]">star</span>
+                    </div>
+                    <span class="font-semibold text-[14px] text-on-surface">Runs a bit small</span>
+                  </div>
+                  <span class="text-[13px] text-on-surface-variant">Oct 28, 2025</span>
+                </div>
+                <p class="text-[14px] text-on-surface mb-3">Great print quality, but definitely size up. The medium fits like a small. Customer service was quick to respond though.</p>
+                <div class="text-[12px] text-on-surface-variant flex items-center gap-2">
+                  <span>John D.</span> • <span>Black / M (Fulfilled by Printful)</span>
+                </div>
+              </div>
+            </div>
+         </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* Helpers */
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+  
+  /* Tabs Logic */
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('[data-tab]').forEach(t => {
+        t.classList.remove('active');
+        t.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('active');
+      btn.classList.remove('text-on-surface-variant');
+
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden-imp'));
+      const target = btn.dataset.tab;
+      document.getElementById('pane-' + target).classList.remove('hidden-imp');
+    });
+  });
+
+  /* Print Area Selection */
+  function selectPrintArea(element) {
+    // Remove active from all
+    document.querySelectorAll('.print-area-box').forEach(box => {
+      box.classList.remove('active');
+      box.querySelector('.material-symbols-outlined').textContent = 'radio_button_unchecked';
+      box.querySelector('.material-symbols-outlined').classList.remove('text-primary');
+      box.querySelector('.material-symbols-outlined').classList.add('text-outline');
+    });
+    
+    // Add active to clicked
+    element.classList.add('active');
+    const icon = element.querySelector('.material-symbols-outlined');
+    icon.textContent = 'check_circle';
+    icon.classList.remove('text-outline');
+    icon.classList.add('text-primary');
+  }
+
+  /* Dynamic Pricing Logic */
+  const retailInput = document.getElementById('retailPriceInput');
+  const profitDisplay = document.getElementById('summaryProfit');
+  const baseCost = 8.50; // Assuming Printify is active
+
+  retailInput.addEventListener('input', function() {
+    const retail = parseFloat(this.value);
+    if (!isNaN(retail) && retail >= baseCost) {
+      const profit = (retail - baseCost).toFixed(2);
+      profitDisplay.textContent = `$${profit}`;
+      profitDisplay.classList.remove('text-error');
+      profitDisplay.classList.add('text-primary');
+    } else if (retail < baseCost) {
+      profitDisplay.textContent = `-$${(baseCost - retail).toFixed(2)}`;
+      profitDisplay.classList.remove('text-primary');
+      profitDisplay.classList.add('text-error');
+    } else {
+      profitDisplay.textContent = '$0.00';
+    }
+  });
+
+  /* Mockup Interactions */
+  document.querySelectorAll('.mockup-card button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      toast(`Opening design editor...`);
+    });
+  });
+</script>
+</body>
+</html>

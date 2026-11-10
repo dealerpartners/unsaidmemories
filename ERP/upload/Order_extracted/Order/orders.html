@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orders — Orders list</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  /* Status pills (matches §F Orders) */
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.unfulfilled{background:#fff4dc;color:#8a5a00}
+  .stat.ready{background:#e8f0fb;color:#0055a5}
+  .stat.pickup{background:#f4e8f8;color:#6b1e8a}
+  .stat.shipped{background:#e8e8f8;color:#4a3fc4}
+  .stat.delivered{background:#8af5be;color:#00714b}
+  .stat.problem{background:#ffdad6;color:#93000a}
+  /* Avatar */
+  .o-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  /* Row menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Modal */
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  /* Workspace / drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:720px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:34px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:6px;border-bottom:1px solid #dad9dd;margin-bottom:10px}
+  /* Pick list rows */
+  .pick-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f4f3f7}
+  .pick-row:last-child{border-bottom:none}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">local_shipping</span>
+    <span class="text-label-md font-semibold">Orders</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Orders</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header with §F action set -->
+  <div class="flex items-start justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Orders</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">All orders across channels · 36 active · SLAs enforced</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-create-order>
+          <span class="material-symbols-outlined text-[16px]">add</span>Create order
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-create-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-report-problem>
+        <span class="material-symbols-outlined text-[16px]">report_problem</span>Report a problem</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-create-po>
+        <span class="material-symbols-outlined text-[16px]">shopping_bag</span>Create PO</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-restock>
+        <span class="material-symbols-outlined text-[16px]">sync</span>Restock</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-batch-slips>
+        <span class="material-symbols-outlined text-[16px]">receipt</span>Batch slips</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-pick-list>
+        <span class="material-symbols-outlined text-[16px]">checklist</span>Pick list</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- 6 status tabs per §F -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All <span class="ml-1 text-[10px] text-outline">36</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Unfulfilled">Unfulfilled <span class="ml-1 text-[10px] text-outline">8</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Ready to Ship">Ready to ship <span class="ml-1 text-[10px] text-outline">4</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Local Pickup">Local pickup <span class="ml-1 text-[10px] text-outline">2</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Shipped">Shipped <span class="ml-1 text-[10px] text-outline">12</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Delivered">Delivered <span class="ml-1 text-[10px] text-outline">10</span></button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by order #, customer…" data-filter/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-o-count>—</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="slips"><span class="material-symbols-outlined text-[14px] align-middle mr-1">receipt</span>Print slips</button>
+      <button data-bulk="labels"><span class="material-symbols-outlined text-[14px] align-middle mr-1">print</span>Print labels</button>
+      <button data-bulk="ship"><span class="material-symbols-outlined text-[14px] align-middle mr-1">local_shipping</span>Mark shipped</button>
+      <button data-bulk="pickup"><span class="material-symbols-outlined text-[14px] align-middle mr-1">storefront</span>Mark picked up</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Cancel</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Order</th>
+          <th class="px-3 py-2">Customer</th>
+          <th class="px-3 py-2">Items</th>
+          <th class="px-3 py-2">Supplier</th>
+          <th class="px-3 py-2 text-right">Total</th>
+          <th class="px-3 py-2">SLA</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-o-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Unfulfilled" data-id="1047" data-customer="Acme Corp" data-items="Classic Tee ×2, Canvas Tote ×1" data-supplier="Printful" data-total="184.00" data-sla="Past SLA">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1047</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-blue">A</div>
+              <div class="min-w-0"><div class="font-medium truncate">Acme Corp</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Classic Tee ×2, Canvas Tote ×1</td>
+          <td class="px-3 py-2 text-on-surface-variant">Printful</td>
+          <td class="px-3 py-2 text-right tabular-nums">$184.00</td>
+          <td class="px-3 py-2"><span class="text-[11px] text-error font-semibold">Past SLA</span></td>
+          <td class="px-3 py-2"><span class="stat unfulfilled">Unfulfilled</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Ready to Ship" data-id="1046" data-customer="Blue Ridge Co." data-items="Hoodie ×1" data-supplier="Gelato" data-total="92.00" data-sla="1d left">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1046</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-green">B</div>
+              <div class="min-w-0"><div class="font-medium truncate">Blue Ridge Co.</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Hoodie — Heavyweight ×1</td>
+          <td class="px-3 py-2 text-on-surface-variant">Gelato</td>
+          <td class="px-3 py-2 text-right tabular-nums">$92.00</td>
+          <td class="px-3 py-2 text-on-surface-variant">1d left</td>
+          <td class="px-3 py-2"><span class="stat ready">Ready to ship</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Local Pickup" data-id="1045" data-customer="Northwind Labs" data-items="Mug ×4, Classic Tee ×2" data-supplier="Printify" data-total="246.00" data-sla="2d left">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1045</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-teal">N</div>
+              <div class="min-w-0"><div class="font-medium truncate">Northwind Labs</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Mug 11oz ×4, Classic Tee ×2</td>
+          <td class="px-3 py-2 text-on-surface-variant">Printify</td>
+          <td class="px-3 py-2 text-right tabular-nums">$246.00</td>
+          <td class="px-3 py-2 text-on-surface-variant">2d left</td>
+          <td class="px-3 py-2"><span class="stat pickup">Local pickup</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Shipped" data-id="1044" data-customer="Orion Apparel" data-items="Canvas Tote ×4" data-supplier="Printful" data-total="128.00" data-sla="Ships 11/01">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1044</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-navy">O</div>
+              <div class="min-w-0"><div class="font-medium truncate">Orion Apparel</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Canvas Tote ×4</td>
+          <td class="px-3 py-2 text-on-surface-variant">Printful</td>
+          <td class="px-3 py-2 text-right tabular-nums">$128.00</td>
+          <td class="px-3 py-2 text-on-surface-variant">Ships 11/01</td>
+          <td class="px-3 py-2"><span class="stat shipped">Shipped</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Delivered" data-id="1043" data-customer="Maple Supply" data-items="Mug 11oz ×6, Sticker pack ×2" data-supplier="Gelato" data-total="210.00" data-sla="Delivered 10/30">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1043</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-maroon">M</div>
+              <div class="min-w-0"><div class="font-medium truncate">Maple Supply</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Mug 11oz ×6, Sticker pack ×2</td>
+          <td class="px-3 py-2 text-on-surface-variant">Gelato</td>
+          <td class="px-3 py-2 text-right tabular-nums">$210.00</td>
+          <td class="px-3 py-2 text-on-surface-variant">Delivered 10/30</td>
+          <td class="px-3 py-2"><span class="stat delivered">Delivered</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Unfulfilled" data-id="1042" data-customer="Lakeside Design" data-items="Classic Tee ×1, Hoodie ×1" data-supplier="Printful" data-total="156.00" data-sla="Past SLA">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1042</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-blue">L</div>
+              <div class="min-w-0"><div class="font-medium truncate">Lakeside Design</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Classic Tee ×1, Hoodie ×1</td>
+          <td class="px-3 py-2 text-on-surface-variant">Printful</td>
+          <td class="px-3 py-2 text-right tabular-nums">$156.00</td>
+          <td class="px-3 py-2"><span class="text-[11px] text-error font-semibold">Past SLA</span></td>
+          <td class="px-3 py-2"><span class="stat unfulfilled">Unfulfilled</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer o-row" data-status="Ready to Ship" data-id="1041" data-customer="Acme Corp" data-items="Canvas Tote ×3" data-supplier="Gelato" data-total="54.00" data-sla="1d left">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check o-check"/></td>
+          <td class="px-3 py-2 font-medium">#1041</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="o-avatar bg-qb-blue">A</div>
+              <div class="min-w-0"><div class="font-medium truncate">Acme Corp</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Canvas Tote ×3</td>
+          <td class="px-3 py-2 text-on-surface-variant">Gelato</td>
+          <td class="px-3 py-2 text-right tabular-nums">$54.00</td>
+          <td class="px-3 py-2 text-on-surface-variant">1d left</td>
+          <td class="px-3 py-2"><span class="stat ready">Ready to ship</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- Create split menu -->
+<div class="row-menu" id="create-split-menu">
+  <div class="menu-header">Create</div>
+  <button data-create-kind="Order"><span class="material-symbols-outlined">add_shopping_cart</span>New order</button>
+  <button data-create-kind="Manual order"><span class="material-symbols-outlined">edit_note</span>Manual order</button>
+  <button data-create-kind="From invoice"><span class="material-symbols-outlined">receipt_long</span>From invoice…</button>
+  <div class="sep"></div>
+  <button data-create-kind="Create PO"><span class="material-symbols-outlined">shopping_bag</span>Purchase order…</button>
+  <button data-create-kind="Draft"><span class="material-symbols-outlined">drafts</span>Draft order</button>
+</div>
+
+<!-- Row ⋯ menu — §F: View, Slip, Label, Refund -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This order</div>
+  <button data-action="view"><span class="material-symbols-outlined">open_in_new</span>View order</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit</button>
+  <div class="sep"></div>
+  <div class="menu-header">Fulfill</div>
+  <button data-action="slip"><span class="material-symbols-outlined">receipt</span>Print slip</button>
+  <button data-action="label"><span class="material-symbols-outlined">print</span>Print shipping label</button>
+  <button data-action="ship"><span class="material-symbols-outlined">local_shipping</span>Mark shipped</button>
+  <div class="sep"></div>
+  <div class="menu-header">Post-order</div>
+  <button data-action="refund"><span class="material-symbols-outlined">undo</span>Refund…</button>
+  <button data-action="problem"><span class="material-symbols-outlined">report_problem</span>Report a problem…</button>
+  <div class="sep"></div>
+  <button class="danger" data-action="cancel"><span class="material-symbols-outlined">block</span>Cancel order</button>
+</div>
+
+<!-- ═══════════ WORKSPACES & MODALS ═══════════ -->
+
+<!-- Create order drawer -->
+<div class="drawer-scrim" id="create-scrim"></div>
+<div class="drawer" id="create-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">add_shopping_cart</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-create-title>Create order</div>
+        <div class="text-[11px] text-on-surface-variant">New order — customer, items, shipping</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-create>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div>
+      <div class="section-h">Customer & shipping</div>
+      <div class="space-y-3">
+        <div class="relative flex items-center">
+          <input class="field-input" placeholder="Search customers…"/>
+          <span class="material-symbols-outlined absolute right-2 text-[16px] text-outline">expand_more</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-1"><label class="field-label">City</label><input class="field-input" value="Charlotte"/></div>
+          <div><label class="field-label">State</label><input class="field-input" value="NC"/></div>
+          <div><label class="field-label">ZIP</label><input class="field-input" value="28206"/></div>
+        </div>
+      </div>
+    </div>
+    <div class="pt-2">
+      <div class="section-h">Line items</div>
+      <div class="space-y-2">
+        <div class="flex items-center gap-2 text-body-sm border border-surface-dim rounded p-2">
+          <div class="w-10 h-10 rounded bg-gradient-to-br from-qb-blue to-qb-navy shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="font-medium truncate">Classic Tee — M / White</div>
+            <div class="text-[11px] text-on-surface-variant">TEE-001 · Printful</div>
+          </div>
+          <input class="w-14 h-8 px-1 border border-surface-dim rounded text-body-sm text-right tabular-nums" value="2"/>
+          <span class="text-body-sm tabular-nums font-semibold w-16 text-right">$48.00</span>
+        </div>
+        <button class="w-full h-9 border border-dashed border-surface-dim rounded text-label-sm text-primary font-semibold hover:bg-surface-container-low flex items-center justify-center gap-1" data-add-item>
+          <span class="material-symbols-outlined text-[14px]">add</span>Add line item</button>
+      </div>
+    </div>
+    <div class="pt-2">
+      <div class="section-h">Notes</div>
+      <textarea class="field-input" style="height:60px;padding:8px 10px;font-family:inherit" placeholder="Gift message, special instructions…"></textarea>
+    </div>
+  </div>
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-create>Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-create-draft>Save draft</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-create-confirm>Create order</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report a problem modal -->
+<div class="modal-scrim" id="problem-modal">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-error">report_problem</span>
+        <h2 class="text-headline-sm">Report a problem</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Tell us what's wrong with an order. We'll create a support case and link it.</p>
+      <div class="space-y-3">
+        <div><label class="field-label">Order</label><input class="field-input" placeholder="#1047"/></div>
+        <div><label class="field-label">Problem type</label>
+          <select class="field-input">
+            <option>Wrong item received</option>
+            <option>Missing items</option>
+            <option>Damaged on arrival</option>
+            <option>Lost in transit</option>
+            <option>Wrong address</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div><label class="field-label">Notes</label>
+          <textarea class="field-input" style="height:64px;padding:8px 10px;font-family:inherit" placeholder="Tell us what happened…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-problem>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-problem>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">send</span>Create case</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create PO drawer -->
+<div class="drawer-scrim" id="po-scrim"></div>
+<div class="drawer" id="po-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">shopping_bag</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate">Create purchase order</div>
+        <div class="text-[11px] text-on-surface-variant">Restock inventory from supplier</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-po>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div>
+      <label class="field-label">Supplier</label>
+      <select class="field-input">
+        <option>Printful</option><option>Gelato</option><option>Printify</option>
+      </select>
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="field-label">PO date</label><input class="field-input" type="date" value="2026-11-03"/></div>
+      <div><label class="field-label">Expected delivery</label><input class="field-input" type="date" value="2026-11-17"/></div>
+    </div>
+    <div>
+      <div class="section-h">Items</div>
+      <div class="pick-row">
+        <div class="w-10 h-10 rounded bg-gradient-to-br from-qb-teal to-qb-green shrink-0"></div>
+        <div class="min-w-0 flex-1">
+          <div class="text-body-sm font-medium truncate">Classic Tee — M / White</div>
+          <div class="text-[11px] text-on-surface-variant">TEE-001 · 0 on hand</div>
+        </div>
+        <input class="w-16 h-8 px-1 border border-surface-dim rounded text-body-sm text-right tabular-nums" value="50"/>
+        <span class="text-body-sm tabular-nums text-on-surface-variant">×</span>
+        <span class="text-body-sm tabular-nums font-semibold w-16 text-right">$9.12</span>
+      </div>
+      <div class="pick-row">
+        <div class="w-10 h-10 rounded bg-gradient-to-br from-qb-maroon to-qb-navy shrink-0"></div>
+        <div class="min-w-0 flex-1">
+          <div class="text-body-sm font-medium truncate">Mug 11oz</div>
+          <div class="text-[11px] text-on-surface-variant">MUG-003 · 0 on hand</div>
+        </div>
+        <input class="w-16 h-8 px-1 border border-surface-dim rounded text-body-sm text-right tabular-nums" value="100"/>
+        <span class="text-body-sm tabular-nums text-on-surface-variant">×</span>
+        <span class="text-body-sm tabular-nums font-semibold w-16 text-right">$3.80</span>
+      </div>
+    </div>
+    <div class="flex items-center justify-between pt-3 border-t border-surface-dim">
+      <span class="text-body-sm text-on-surface-variant">Estimated total</span>
+      <span class="text-headline-sm tabular-nums">$836.00</span>
+    </div>
+  </div>
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-po>Cancel</button>
+    <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-po>
+      <span class="material-symbols-outlined text-[16px] align-middle mr-1">send</span>Send PO to supplier</button>
+  </div>
+</div>
+
+<!-- Restock modal -->
+<div class="modal-scrim" id="restock-modal">
+  <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-primary">sync</span>
+        <h2 class="text-headline-sm">Restock suggestions</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Products below reorder point. Select to add to a PO.</p>
+      <div class="space-y-1">
+        <div class="pick-row">
+          <input type="checkbox" class="row-check" checked/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-maroon to-qb-navy shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Mug 11oz</div>
+            <div class="text-[11px] text-on-surface-variant">0 on hand · reorder at 20</div>
+          </div>
+          <span class="text-[11px] text-error font-semibold">Needs 50+</span>
+        </div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check" checked/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-teal to-qb-green shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Classic Tee — M / White</div>
+            <div class="text-[11px] text-on-surface-variant">3 on hand · reorder at 15</div>
+          </div>
+          <span class="text-[11px] text-error font-semibold">Needs 12+</span>
+        </div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check"/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-blue to-qb-green shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Canvas Tote</div>
+            <div class="text-[11px] text-on-surface-variant">18 on hand · reorder at 20</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">2 below</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-restock>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-restock>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">shopping_bag</span>Create PO from selection</button>
+    </div>
+  </div>
+</div>
+
+<!-- Batch slips modal -->
+<div class="modal-scrim" id="batch-modal">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-primary">receipt</span>
+        <h2 class="text-headline-sm">Print batch slips</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Generate packing slips for all Ready to Ship orders in one PDF.</p>
+      <div class="bg-surface-container-low rounded-lg p-3 mb-2 text-body-sm">
+        <div class="flex justify-between py-1"><span class="text-on-surface-variant">Orders in batch</span><span class="font-semibold">4</span></div>
+        <div class="flex justify-between py-1"><span class="text-on-surface-variant">Pages</span><span class="font-semibold">4</span></div>
+        <div class="flex justify-between py-1"><span class="text-on-surface-variant">Format</span><span class="font-semibold">Letter · single-sided</span></div>
+      </div>
+      <div class="flex items-center gap-2 text-[11px] text-on-surface-variant">
+        <input type="checkbox" class="row-check" checked/><span>Include return address labels</span>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-batch>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-batch>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">print</span>Generate &amp; print</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pick list modal -->
+<div class="modal-scrim" id="pick-modal">
+  <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-primary">checklist</span>
+        <h2 class="text-headline-sm">Pick list</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Aggregated SKUs across 4 open orders. Check items off as you pick.</p>
+      <div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check"/>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Classic Tee — M / White</div>
+            <div class="text-[11px] text-on-surface-variant">TEE-001 · Bin A3</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums">×4</span>
+        </div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check"/>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Hoodie — Heavyweight — L / Black</div>
+            <div class="text-[11px] text-on-surface-variant">HD-211 · Bin B1</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums">×2</span>
+        </div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check"/>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Canvas Tote</div>
+            <div class="text-[11px] text-on-surface-variant">TOTE-014 · Bin C2</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums">×4</span>
+        </div>
+        <div class="pick-row">
+          <input type="checkbox" class="row-check"/>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Mug 11oz</div>
+            <div class="text-[11px] text-on-surface-variant">MUG-003 · <span class="text-error">Bin D1 · 0 on hand</span></div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums">×4</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-pick>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-pick>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">print</span>Print pick list</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* Create split */
+const createSplit = document.getElementById("create-split-menu");
+document.querySelector("[data-create-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createSplit.style.top = (r.bottom + 4) + "px";
+  createSplit.style.left = Math.min(r.right - 240, window.innerWidth - 260) + "px";
+  createSplit.classList.toggle("open");
+});
+document.querySelectorAll("#create-split-menu [data-create-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  createSplit.classList.remove("open");
+  const k = b.dataset.createKind;
+  if (k === "Create PO") return openPO();
+  openCreateDrawer(k);
+}));
+document.querySelector("[data-create-order]").addEventListener("click", ()=>openCreateDrawer("Order"));
+
+/* Create drawer */
+function openCreateDrawer(kind){
+  document.querySelector("[data-create-title]").textContent = `Create ${kind.toLowerCase()}`;
+  document.getElementById("create-scrim").classList.add("open");
+  document.getElementById("create-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-create]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("create-scrim").classList.remove("open");
+  document.getElementById("create-drawer").classList.remove("open");
+}));
+document.getElementById("create-scrim").addEventListener("click", ()=>{
+  document.getElementById("create-scrim").classList.remove("open");
+  document.getElementById("create-drawer").classList.remove("open");
+});
+document.querySelector("[data-add-item]").addEventListener("click", ()=>toast("Item picker — search SKU or product"));
+document.querySelector("[data-create-draft]").addEventListener("click", ()=>{ closeCreate(); toast("Order saved as draft"); });
+document.querySelector("[data-create-confirm]").addEventListener("click", ()=>{ closeCreate(); toast("Order created"); });
+function closeCreate(){
+  document.getElementById("create-scrim").classList.remove("open");
+  document.getElementById("create-drawer").classList.remove("open");
+}
+
+/* Report a problem */
+document.querySelector("[data-report-problem]").addEventListener("click", ()=>document.getElementById("problem-modal").classList.add("open"));
+document.querySelector("[data-close-problem]").addEventListener("click", ()=>document.getElementById("problem-modal").classList.remove("open"));
+document.querySelector("[data-confirm-problem]").addEventListener("click", ()=>{
+  document.getElementById("problem-modal").classList.remove("open");
+  toast("Support case created and linked to order");
+});
+
+/* Create PO */
+function openPO(){
+  document.getElementById("po-scrim").classList.add("open");
+  document.getElementById("po-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-create-po]").forEach(b=>b.addEventListener("click", openPO));
+document.querySelectorAll("[data-close-po]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+}));
+document.getElementById("po-scrim").addEventListener("click", ()=>{
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+});
+document.querySelector("[data-confirm-po]").addEventListener("click", ()=>{
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+  toast("Purchase order sent to supplier");
+});
+
+/* Restock */
+document.querySelector("[data-restock]").addEventListener("click", ()=>document.getElementById("restock-modal").classList.add("open"));
+document.querySelector("[data-close-restock]").addEventListener("click", ()=>document.getElementById("restock-modal").classList.remove("open"));
+document.querySelector("[data-confirm-restock]").addEventListener("click", ()=>{
+  document.getElementById("restock-modal").classList.remove("open");
+  openPO();
+});
+
+/* Batch slips */
+document.querySelector("[data-batch-slips]").addEventListener("click", ()=>document.getElementById("batch-modal").classList.add("open"));
+document.querySelector("[data-close-batch]").addEventListener("click", ()=>document.getElementById("batch-modal").classList.remove("open"));
+document.querySelector("[data-confirm-batch]").addEventListener("click", ()=>{
+  document.getElementById("batch-modal").classList.remove("open");
+  toast("Generated 4 packing slips — sending to print");
+});
+
+/* Pick list */
+document.querySelector("[data-pick-list]").addEventListener("click", ()=>document.getElementById("pick-modal").classList.add("open"));
+document.querySelector("[data-close-pick]").addEventListener("click", ()=>document.getElementById("pick-modal").classList.remove("open"));
+document.querySelector("[data-confirm-pick]").addEventListener("click", ()=>{
+  document.getElementById("pick-modal").classList.remove("open");
+  toast("Pick list sent to print");
+});
+
+/* Row menu — §F: View, Slip, Label, Refund */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+document.querySelectorAll(".o-row").forEach(tr=>{
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-row-menu]")) return;
+    openRowOrder(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    currentMenuRow = tr;
+    const status = tr.dataset.status;
+    // Context: hide irrelevant actions
+    rowMenu.querySelector('[data-action="slip"]').style.display = (status === "Delivered" || status === "Shipped") ? "none" : "";
+    rowMenu.querySelector('[data-action="label"]').style.display = (status === "Delivered" || status === "Shipped") ? "none" : "";
+    rowMenu.querySelector('[data-action="ship"]').style.display = status === "Ready to Ship" ? "" : "none";
+    const r = e.currentTarget.getBoundingClientRect();
+    rowMenu.style.top = (r.bottom + 4) + "px";
+    rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+    rowMenu.classList.add("open");
+  });
+});
+
+function openRowOrder(tr){
+  toast(`Open order #${tr.dataset.id} — ${tr.dataset.customer} · ${tr.dataset.total}`);
+}
+
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  const id = tr.dataset.id;
+  switch(act){
+    case "view": case "edit": openRowOrder(tr); break;
+    case "slip": toast(`Printing packing slip for #${id}`); break;
+    case "label": toast(`Printing shipping label for #${id}`); break;
+    case "ship": {
+      tr.dataset.status = "Shipped";
+      const pill = tr.querySelector(".stat");
+      pill.className = "stat shipped";
+      pill.textContent = "Shipped";
+      toast(`Marked #${id} as shipped`); break;
+    }
+    case "refund": toast(`Refund modal — pick reason, amount, method for #${id}`); break;
+    case "problem": document.getElementById("problem-modal").classList.add("open"); break;
+    case "cancel":
+      tr.remove();
+      applyFilters();
+      toast(`Order #${id} cancelled`); break;
+  }
+}));
+
+/* Tabs + filter */
+let currentTab = "All";
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentTab = b.dataset.viewtab;
+  applyFilters();
+}));
+document.querySelector("[data-filter]").addEventListener("input", applyFilters);
+function applyFilters(){
+  const q = document.querySelector("[data-filter]").value.toLowerCase();
+  let shown = 0, total = 0;
+  document.querySelectorAll(".o-row").forEach(tr=>{
+    total++;
+    const tabOk = currentTab === "All" || tr.dataset.status === currentTab;
+    const qOk = !q || tr.textContent.toLowerCase().includes(q);
+    const vis = tabOk && qOk;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-o-count]").textContent = `${shown} of ${total}`;
+}
+
+/* Bulk */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".o-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{ if (e.target.matches(".o-check")) updateBulk(); });
+document.querySelector("[data-check-all]").addEventListener("change", e=>{
+  document.querySelectorAll(".o-check").forEach(c=>{ if (c.closest("tr").style.display !== "none") c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".o-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked = false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".o-check:checked").length;
+  if (act === "ship"){
+    document.querySelectorAll(".o-check:checked").forEach(c=>{
+      const tr = c.closest("tr");
+      tr.dataset.status = "Shipped";
+      const pill = tr.querySelector(".stat");
+      pill.className = "stat shipped";
+      pill.textContent = "Shipped";
+    });
+  }
+  if (act === "pickup"){
+    document.querySelectorAll(".o-check:checked").forEach(c=>{
+      const tr = c.closest("tr");
+      tr.dataset.status = "Delivered";
+      const pill = tr.querySelector(".stat");
+      pill.className = "stat delivered";
+      pill.textContent = "Delivered";
+    });
+  }
+  if (act === "delete"){
+    document.querySelectorAll(".o-check:checked").forEach(c=>{const tr=c.closest("tr"); if(tr) tr.remove();});
+    applyFilters();
+  }
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} order${n!==1?"s":""}`);
+  document.querySelectorAll(".o-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked = false;
+  updateBulk();
+}));
+
+/* Export */
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Export orders as CSV"));
+
+/* Close on outside click */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#create-split-menu") && !e.target.closest("[data-create-split]")) createSplit.classList.remove("open");
+});
+
+/* Init */
+applyFilters();
+</script>
+</body>
+</html>

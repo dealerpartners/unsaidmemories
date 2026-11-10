@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Expenses & Pay Bills — Bills</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0a6400;color:#0a6400;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  
+  /* Drawer / Panel for Customize */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .drawer.open{transform:translateX(0)}
+
+  /* Popovers (Date, Filter) */
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:120;display:none}
+  .popover.open{display:block}
+  
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0a6400;box-shadow:0 0 0 3px rgba(10,100,0,.1)}
+  .field-select{width:100%;height:36px;padding:0 30px 0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff;appearance:none;cursor:pointer}
+  .field-select:focus{outline:none;border-color:#0a6400;box-shadow:0 0 0 3px rgba(10,100,0,.1)}
+
+  .icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;color:#5a6355;cursor:pointer;}
+  .icon-btn:hover{background:#f4f3f7;color:#1a1c1e;}
+
+  /* Toggle Switch */
+  .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+  .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: #0a6400; }
+  input:checked + .slider:before { transform: translateX(14px); }
+</style>
+</head>
+<body class="bg-white font-sans text-body-md text-on-surface antialiased overflow-hidden flex flex-col h-screen w-screen">
+
+  <!-- ═══════════ TOP HEADER ═══════════ -->
+  <header class="bg-white px-6 pt-4 shrink-0 flex flex-col z-20">
+    
+    <!-- Breadcrumbs & Utility -->
+    <div class="flex items-center justify-between mb-2">
+      <div class="text-[11px] text-on-surface-variant font-medium">
+        Expenses & Pay Bills / Bills
+      </div>
+      <div class="flex items-center gap-4 text-on-surface-variant">
+        <button class="flex items-center gap-1 hover:text-on-surface text-[12px]"><span class="material-symbols-outlined text-[16px]">chat_bubble_outline</span>Give feedback</button>
+        <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">open_in_new</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">fullscreen</span></button>
+      </div>
+    </div>
+
+    <!-- Title & Main Actions -->
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-[32px] font-semibold text-on-surface">Bills</h1>
+      <div class="flex items-center gap-3">
+        <a href="#" class="text-[13px] font-semibold text-on-surface hover:underline">Manage email settings</a>
+        <button class="h-8 px-4 border border-surface-dim rounded bg-white text-[13px] font-semibold hover:bg-surface-container-low" onclick="toast('Opening Pay Bills workspace...')">Pay bills</button>
+        <div class="flex">
+          <button class="h-8 px-3 bg-primary text-white text-[13px] font-semibold rounded-l hover:bg-primary-container flex items-center gap-1" onclick="toast('Opening New Bill drawer...')">
+            Add bill
+          </button>
+          <button class="h-8 px-1.5 bg-primary text-white rounded-r hover:bg-primary-container border-l border-[#084e00]" id="addBillArrow">
+            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Bill Menu -->
+    <div class="row-menu" id="addBillMenu" style="top:110px; right:24px;">
+      <button onclick="toast('Creating bill...')">Create bill</button>
+    </div>
+
+    <!-- Email Forwarding Banner -->
+    <div class="bg-white border border-[#0077c5] rounded-lg p-3 flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2 text-[13px]">
+        <span class="material-symbols-outlined text-[#0077c5] text-[18px]">auto_awesome</span>
+        <span class="font-semibold text-on-surface">Anyone can autofill multiple receipts</span>
+        <span class="text-on-surface-variant">or create bills and expenses by sending files to:</span>
+        <span class="font-semibold text-on-surface">managekube_llc+expenses@assist.intuit.com</span>
+        <button class="text-[#0077c5] hover:bg-[#eef5fa] p-1 rounded" title="Copy email"><span class="material-symbols-outlined text-[16px]">content_copy</span></button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex items-center justify-between border-b border-surface-dim">
+      <div class="flex items-center gap-6 h-10">
+        <button class="h-full px-1 text-[14px] tab-underline active" data-tab="For review">For review</button>
+        <button class="h-full px-1 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="Unpaid">Unpaid</button>
+        <button class="h-full px-1 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="Paid">Paid</button>
+      </div>
+      <a href="#" class="text-[13px] text-primary hover:underline">How to manage bills</a>
+    </div>
+  </header>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="flex-1 overflow-y-auto px-6 py-4 relative">
+    
+    <!-- Filter Bar -->
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-4">
+          
+          <!-- Vendor Filter -->
+          <div class="w-48">
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Vendor</label>
+            <div class="relative">
+              <select class="field-select">
+                <option>All</option>
+                <option>Printful</option>
+                <option>Gelato</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Bill Date Filter (Opens Popover) -->
+          <div class="w-48 relative">
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Bill Date</label>
+            <div class="relative cursor-pointer" id="dateFilterTrigger">
+              <div class="field-select flex items-center justify-between">
+                <span id="dateFilterLabel">This Year</span>
+                <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_today</span>
+              </div>
+            </div>
+            
+            <!-- Date Popover -->
+            <div class="popover" id="datePopover" style="top: 60px; left: 0; width: 500px; padding: 20px;">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[16px] font-semibold">Bill Date</h3>
+                <button class="icon-btn" onclick="document.getElementById('datePopover').classList.remove('open')"><span class="material-symbols-outlined text-[18px]">close</span></button>
+              </div>
+              <div class="flex items-end gap-4 mb-6">
+                <div class="flex-1">
+                  <label class="block text-[12px] text-on-surface-variant mb-1">Bill Date</label>
+                  <select class="field-select">
+                    <option>This Year</option>
+                    <option>Last Year</option>
+                    <option>Custom</option>
+                  </select>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[12px] text-on-surface-variant mb-1">From</label>
+                  <div class="relative">
+                    <input class="field-input" value="01/01/2026"/>
+                    <span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-on-surface-variant">calendar_today</span>
+                  </div>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-[12px] text-on-surface-variant mb-1">To</label>
+                  <div class="relative">
+                    <input class="field-input" value="12/31/2026"/>
+                    <span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-on-surface-variant">calendar_today</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-between items-center">
+                <button class="h-8 px-4 border border-surface-dim rounded text-[13px] font-semibold hover:bg-surface-container" onclick="document.getElementById('datePopover').classList.remove('open')">Reset</button>
+                <button class="h-8 px-4 bg-primary text-white rounded text-[13px] font-semibold hover:bg-primary-container" onclick="applyDateFilter()">Apply</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter By Button (Opens Popover) -->
+          <div class="relative mt-5">
+            <button class="h-9 px-3 border border-surface-dim rounded bg-[#f4f3f7] text-[13px] font-semibold flex items-center gap-1 hover:bg-[#e3e2e6]" id="filterTrigger">
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant">filter_list</span> Filters
+            </button>
+            
+            <!-- Filter By Popover -->
+            <div class="popover" id="filterPopover" style="top: 44px; left: 0; width: 320px; padding: 20px;">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-[16px] font-semibold">Filter By</h3>
+                <button class="icon-btn" onclick="document.getElementById('filterPopover').classList.remove('open')"><span class="material-symbols-outlined text-[18px]">close</span></button>
+              </div>
+              <div class="space-y-4 mb-6">
+                <div>
+                  <label class="block text-[12px] text-on-surface-variant mb-1">Status</label>
+                  <div class="relative">
+                    <select class="field-select"><option>All</option><option>Open</option><option>Overdue</option></select>
+                    <span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-[12px] text-on-surface-variant mb-1">Category</label>
+                  <div class="relative">
+                    <select class="field-select"><option>All</option><option>Shipping</option><option>Software</option></select>
+                    <span class="material-symbols-outlined absolute right-2 top-2 text-[16px] text-on-surface-variant pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <button class="h-9 w-full bg-primary text-white rounded text-[13px] font-semibold hover:bg-primary-container" onclick="toast('Filters applied'); document.getElementById('filterPopover').classList.remove('open')">Apply</button>
+                <button class="h-9 w-full border border-surface-dim rounded text-[13px] font-semibold hover:bg-surface-container" onclick="document.getElementById('filterPopover').classList.remove('open')">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Date Pill -->
+        <div class="mt-1 hidden-imp" id="activeDatePill">
+          <button class="h-7 px-3 rounded-full bg-[#eef5fa] text-[12px] font-semibold text-on-surface flex items-center gap-2 hover:bg-[#dce8f2]">
+            Bill Date: 01/01/2026-12/31/2026 <span class="material-symbols-outlined text-[14px] text-on-surface-variant" onclick="resetDateFilter(event)">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Right side icons -->
+      <div class="flex items-center gap-4 mt-2">
+        <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">print</span></button>
+        <button class="h-8 px-3 text-[13px] font-semibold text-on-surface flex items-center gap-2 hover:bg-surface-container rounded" id="customizeBtn">
+          <span class="material-symbols-outlined text-[18px]">tune</span> Customize
+        </button>
+      </div>
+    </div>
+
+    <!-- Empty State / Table Area -->
+    <div class="border-t border-surface-dim mt-2">
+      
+      <!-- Table Header (hidden if empty, but shown here to match your screenshot's empty table layout) -->
+      <table class="w-full text-left text-[12px] text-on-surface-variant uppercase tracking-wider font-semibold">
+        <thead>
+          <tr class="border-b border-surface-dim">
+            <th class="py-3 px-3 w-10"><input type="checkbox" class="accent-primary"/></th>
+            <th class="py-3 px-3">Vendor</th>
+            <th class="py-3 px-3">Source</th>
+            <th class="py-3 px-3">Bill No.</th>
+            <th class="py-3 px-3">Bill Date</th>
+            <th class="py-3 px-3">Category</th>
+            <th class="py-3 px-3">Memo</th>
+            <th class="py-3 px-3">Due Date</th>
+            <th class="py-3 px-3 text-right">Bill Amount</th>
+            <th class="py-3 px-3 text-right">Attachments</th>
+            <th class="py-3 px-3 text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State Row -->
+          <tr>
+            <td colspan="11" class="py-24 text-center">
+              <h3 class="text-[18px] font-semibold text-on-surface mb-2">No bills found</h3>
+              <p class="text-[13px] text-on-surface-variant mb-4">Select Upload files to create bills automatically.</p>
+              <button class="h-8 px-4 text-[13px] font-semibold text-primary hover:underline" onclick="toast('Opening file picker...')">Upload files</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-4 text-[12px] text-on-surface-variant">
+      <div>0 - 0 of 0 items</div>
+      <div class="flex items-center gap-2">
+        <button class="icon-btn opacity-50" disabled><span class="material-symbols-outlined text-[18px]">chevron_left</span></button>
+        <span>Page</span>
+        <input class="w-10 h-7 border border-surface-dim rounded text-center" value="1"/>
+        <span>of 1</span>
+        <button class="icon-btn opacity-50" disabled><span class="material-symbols-outlined text-[18px]">chevron_right</span></button>
+        <button class="icon-btn opacity-50" disabled><span class="material-symbols-outlined text-[18px]">last_page</span></button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ═══════════ CUSTOMIZE DRAWER ═══════════ -->
+  <div class="drawer-scrim" id="scrim"></div>
+  <div class="drawer" id="customizeDrawer">
+    <div class="p-5 border-b border-surface-dim flex items-center justify-between">
+      <h2 class="text-[16px] font-semibold text-on-surface">Customize</h2>
+      <button class="icon-btn" id="closeCustomize"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto p-5 space-y-6">
+      
+      <!-- Sort Section -->
+      <div>
+        <div class="flex items-center gap-2 text-[14px] font-semibold text-on-surface mb-3 cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">expand_less</span> Sort
+        </div>
+        <div class="border border-surface-dim rounded-lg p-3 space-y-3">
+          <div>
+            <label class="block text-[11px] text-on-surface-variant mb-1">Sort by</label>
+            <select class="field-select"><option>Bill Date</option><option>Due Date</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-on-surface-variant mb-1">Direction</label>
+            <select class="field-select"><option>Ascending</option><option>Descending</option></select>
+          </div>
+        </div>
+        <button class="mt-2 text-[12px] text-primary font-semibold flex items-center gap-1 hover:underline"><span class="material-symbols-outlined text-[16px]">add</span> Add sort</button>
+      </div>
+
+      <!-- Rows Section -->
+      <div>
+        <div class="flex items-center gap-2 text-[14px] font-semibold text-on-surface mb-3 cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">expand_less</span> Rows
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[11px] text-on-surface-variant mb-1">Rows per page</label>
+            <select class="field-select"><option>50</option><option>75</option><option>100</option></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-on-surface-variant mb-1">Row height</label>
+            <select class="field-select"><option>Cozy</option><option>Compact</option></select>
+          </div>
+          <label class="flex items-center gap-2 text-[13px]"><input type="checkbox" class="accent-primary"/> Alternate row color</label>
+        </div>
+      </div>
+
+      <!-- Columns Section -->
+      <div>
+        <div class="flex items-center gap-2 text-[14px] font-semibold text-on-surface mb-3 cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">expand_less</span> Columns
+        </div>
+        <p class="text-[11px] text-on-surface-variant mb-3">Drag to change the order of columns</p>
+        
+        <div class="space-y-1">
+          <!-- Column items -->
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Vendor</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Source</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Bill No.</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Bill Date</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Category</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Class</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Location</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Memo</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Due Date</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Bill Amount</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1 hover:bg-surface-container rounded px-1 -mx-1">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-outline cursor-grab">drag_indicator</span>
+              <input type="checkbox" class="accent-primary" checked/>
+              <span class="text-[13px]">Attachments</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+  /* Helpers */
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2500);}
+
+  /* Tabs */
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('[data-tab]').forEach(t => {
+        t.classList.remove('active');
+        t.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('active');
+      btn.classList.remove('text-on-surface-variant');
+      toast(`Switched to ${btn.dataset.tab} tab`);
+    });
+  });
+
+  /* Add Bill Split Menu */
+  const addBillArrow = document.getElementById('addBillArrow');
+  const addBillMenu = document.getElementById('addBillMenu');
+  
+  addBillArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    addBillMenu.classList.toggle('open');
+  });
+
+  /* Popovers */
+  const dateFilterTrigger = document.getElementById('dateFilterTrigger');
+  const datePopover = document.getElementById('datePopover');
+  const activeDatePill = document.getElementById('activeDatePill');
+
+  dateFilterTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    datePopover.classList.toggle('open');
+    document.getElementById('filterPopover').classList.remove('open');
+  });
+
+  const filterTrigger = document.getElementById('filterTrigger');
+  const filterPopover = document.getElementById('filterPopover');
+
+  filterTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    filterPopover.classList.toggle('open');
+    datePopover.classList.remove('open');
+  });
+
+  window.applyDateFilter = function() {
+    datePopover.classList.remove('open');
+    activeDatePill.classList.remove('hidden-imp');
+    document.getElementById('dateFilterLabel').textContent = "Custom Range";
+    toast('Date filter applied');
+  }
+
+  window.resetDateFilter = function(e) {
+    if (e) e.stopPropagation();
+    activeDatePill.classList.add('hidden-imp');
+    document.getElementById('dateFilterLabel').textContent = "This Year";
+    toast('Date filter reset');
+  }
+
+  /* Customize Drawer */
+  const customizeBtn = document.getElementById('customizeBtn');
+  const customizeDrawer = document.getElementById('customizeDrawer');
+  const scrim = document.getElementById('scrim');
+  const closeCustomize = document.getElementById('closeCustomize');
+
+  function openDrawer() {
+    customizeDrawer.classList.add('open');
+    scrim.classList.add('open');
+  }
+
+  function closeDrawer() {
+    customizeDrawer.classList.remove('open');
+    scrim.classList.remove('open');
+  }
+
+  customizeBtn.addEventListener('click', openDrawer);
+  closeCustomize.addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+
+  /* Close Popovers on outside click */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#addBillArrow')) {
+      addBillMenu.classList.remove('open');
+    }
+    if (!e.target.closest('#dateFilterTrigger') && !e.target.closest('#datePopover')) {
+      datePopover.classList.remove('open');
+    }
+    if (!e.target.closest('#filterTrigger') && !e.target.closest('#filterPopover')) {
+      filterPopover.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

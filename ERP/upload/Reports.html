@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports — Accounting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* Report cards */
+  .report-card{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px;transition:all .12s;cursor:pointer;display:flex;flex-direction:column;gap:8px}
+  .report-card:hover{border-color:#0077c5;box-shadow:0 2px 12px rgba(0,119,197,.08);transform:translateY(-1px)}
+  .report-card .icon-wrap{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+  /* Customize panel */
+  .cust-tab{display:flex;gap:2px;border-bottom:1px solid #dad9dd;padding:0 12px}
+  .cust-tab button{padding:10px 14px;font-size:12px;font-weight:600;color:#5a6355;border-bottom:2px solid transparent}
+  .cust-tab button.active{color:#0077c5;border-bottom-color:#0077c5}
+  .col-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f4f3f7;cursor:pointer;user-select:none}
+  .col-item:hover{background:#f4f3f7}
+  .col-item .drag{color:#becab6;cursor:grab;font-size:16px}
+  .col-item.dragging{background:#e8f0fb;opacity:.7}
+  /* Report table cells */
+  .rpt-table th{background:#f4f3f7;text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:.06em;color:#5a6355;padding:8px 12px;text-align:left}
+  .rpt-table th.right{text-align:right}
+  .rpt-table td{padding:8px 12px;border-bottom:1px solid #eeedf1;font-size:13px}
+  .rpt-table td.right{text-align:right;font-variant-numeric:tabular-nums}
+  .rpt-table tr.section td{background:#f9f9fb;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#1a1c1e}
+  .rpt-table tr.total td{font-weight:700;border-top:2px solid #dad9dd;border-bottom:none}
+  .rpt-table tr.sub td{padding-left:32px;color:#5a6355}
+  .num-neg{color:#ba1a1a}
+  /* Drawn drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  /* Row ⋯ menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:230px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Number format segments */
+  .seg{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .seg button{padding:4px 10px;font-size:11px;font-weight:600;color:#5a6355;border-radius:4px}
+  .seg button.active{background:#0077c5;color:#fff}
+  /* Date range */
+  .date-range{display:flex;align-items:center;gap:6px}
+  .date-range input{height:30px;padding:0 8px;border:1px solid #dad9dd;border-radius:4px;font-size:12px}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold" data-breadcrumb>Reports</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- VIEW 1 — REPORT LIBRARY                                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main id="library-view" class="px-6 pb-12">
+
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Reports</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Standard reports, custom reports, saved views.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-new-report>
+        <span class="material-symbols-outlined text-[16px]">add</span>Custom report</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-saved-views>
+        <span class="material-symbols-outlined text-[16px]">bookmark</span>Saved views</button>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="relative flex items-center max-w-lg mb-5">
+    <span class="material-symbols-outlined absolute left-3 text-[16px] text-outline">search</span>
+    <input class="w-full h-9 pl-9 pr-3 bg-white border border-surface-dim rounded-lg text-body-sm focus:outline-none focus:border-primary" placeholder="Search reports…" data-report-search/>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="flex items-center gap-1 mb-4 border-b border-surface-dim overflow-x-auto">
+    <button class="px-3 py-2 text-label-md tab-underline active" data-rpt-tab="all">All</button>
+    <button class="px-3 py-2 text-label-md tab-underline text-on-surface-variant" data-rpt-tab="financial">Financial statements</button>
+    <button class="px-3 py-2 text-label-md tab-underline text-on-surface-variant" data-rpt-tab="sales">Sales & customers</button>
+    <button class="px-3 py-2 text-label-md tab-underline text-on-surface-variant" data-rpt-tab="expenses">Expenses & vendors</button>
+    <button class="px-3 py-2 text-label-md tab-underline text-on-surface-variant" data-rpt-tab="accounting">Accounting</button>
+    <button class="px-3 py-2 text-label-md tab-underline text-on-surface-variant" data-rpt-tab="tax">Tax</button>
+  </div>
+
+  <!-- Report grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3" data-report-grid>
+
+    <!-- P&L -->
+    <div class="report-card" data-report="pnl" data-category="financial" data-title="Profit and Loss">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-blue"><span class="material-symbols-outlined text-[20px]">trending_up</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Profit and Loss</div>
+          <div class="text-[11px] text-on-surface-variant">Income and expenses</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Revenue minus costs, broken down by account.</p>
+    </div>
+
+    <!-- Balance Sheet -->
+    <div class="report-card" data-report="bs" data-category="financial" data-title="Balance Sheet">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-teal"><span class="material-symbols-outlined text-[20px]">balance</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Balance Sheet</div>
+          <div class="text-[11px] text-on-surface-variant">Assets = Liabilities + Equity</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Snapshot of what you own, owe, and are worth.</p>
+    </div>
+
+    <!-- Cash Flow -->
+    <div class="report-card" data-report="cashflow" data-category="financial" data-title="Statement of Cash Flows">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-green"><span class="material-symbols-outlined text-[20px]">waterfall_chart</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Statement of Cash Flows</div>
+          <div class="text-[11px] text-on-surface-variant">Operating / investing / financing</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Where cash came from and where it went.</p>
+    </div>
+
+    <!-- A/R aging -->
+    <div class="report-card" data-report="araging" data-category="sales" data-title="A/R Aging Summary">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-maroon"><span class="material-symbols-outlined text-[20px]">hourglass_top</span></div>
+        <div>
+          <div class="text-body-md font-semibold">A/R Aging Summary</div>
+          <div class="text-[11px] text-on-surface-variant">Who owes you, and how long</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Outstanding invoices by aging bucket.</p>
+    </div>
+
+    <!-- Sales by customer -->
+    <div class="report-card" data-report="salesbycustomer" data-category="sales" data-title="Sales by Customer Summary">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-navy"><span class="material-symbols-outlined text-[20px]">groups</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Sales by Customer</div>
+          <div class="text-[11px] text-on-surface-variant">Ranked by revenue</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Revenue per customer for the period.</p>
+    </div>
+
+    <!-- Expenses by vendor -->
+    <div class="report-card" data-report="expensesbyvendor" data-category="expenses" data-title="Expenses by Vendor Summary">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-maroon"><span class="material-symbols-outlined text-[20px]">receipt_long</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Expenses by Vendor</div>
+          <div class="text-[11px] text-on-surface-variant">Where money went</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Spend per vendor for the period.</p>
+    </div>
+
+    <!-- General Ledger -->
+    <div class="report-card" data-report="gl" data-category="accounting" data-title="General Ledger">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-blue"><span class="material-symbols-outlined text-[20px]">menu_book</span></div>
+        <div>
+          <div class="text-body-md font-semibold">General Ledger</div>
+          <div class="text-[11px] text-on-surface-variant">Every posted transaction</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">All account activity for the period.</p>
+    </div>
+
+    <!-- Trial Balance -->
+    <div class="report-card" data-report="tb" data-category="accounting" data-title="Trial Balance">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-teal"><span class="material-symbols-outlined text-[20px]">rule</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Trial Balance</div>
+          <div class="text-[11px] text-on-surface-variant">Debits = Credits</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Account balances at a point in time.</p>
+    </div>
+
+    <!-- Sales tax -->
+    <div class="report-card" data-report="salestax" data-category="tax" data-title="Sales Tax Liability">
+      <div class="flex items-center gap-2">
+        <div class="icon-wrap bg-qb-green"><span class="material-symbols-outlined text-[20px]">gavel</span></div>
+        <div>
+          <div class="text-body-md font-semibold">Sales Tax Liability</div>
+          <div class="text-[11px] text-on-surface-variant">What you owe the state</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-on-surface-variant">Sales tax collected minus paid.</p>
+    </div>
+
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- VIEW 2 — REPORT VIEWER                                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main id="viewer-view" class="hidden-imp pb-12">
+
+  <!-- Viewer header -->
+  <div class="px-6 py-3 flex items-center justify-between gap-3 flex-wrap border-b border-surface-dim bg-white">
+    <div class="flex items-center gap-3">
+      <button class="h-8 w-8 rounded hover:bg-surface-container-low flex items-center justify-center" data-back>
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span></button>
+      <div>
+        <div class="text-headline-sm" data-viewer-title>Profit and Loss</div>
+        <div class="text-[11px] text-on-surface-variant" data-viewer-sub>Nov 1 – Nov 30, 2026</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="date-range">
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_today</span>
+        <input type="date" value="2026-11-01" data-range-from/>
+        <span class="text-on-surface-variant text-[11px]">to</span>
+        <input type="date" value="2026-11-30" data-range-to/>
+        <select class="h-[30px] px-2 border border-surface-dim rounded text-[12px] bg-white" data-range-preset>
+          <option>Custom</option>
+          <option>This month</option>
+          <option>Last month</option>
+          <option>This quarter</option>
+          <option>This year</option>
+          <option>Last year</option>
+        </select>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-customize>
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export ▾</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-print>
+        <span class="material-symbols-outlined text-[16px]">print</span>Print</button>
+    </div>
+  </div>
+
+  <!-- Report body -->
+  <div class="px-6 py-6">
+    <div class="bg-white rounded-lg border border-surface-dim overflow-hidden max-w-5xl mx-auto">
+      <div class="p-6 border-b border-surface-dim text-center">
+        <div class="text-headline-md" data-report-company>ManageKube LLC</div>
+        <div class="text-headline-sm mt-1" data-report-title>Profit and Loss</div>
+        <div class="text-body-sm text-on-surface-variant mt-1" data-report-range>November 1 – 30, 2026</div>
+        <div class="text-body-sm text-on-surface-variant">Accrual basis</div>
+      </div>
+
+      <table class="w-full rpt-table" data-report-body>
+        <!-- injected -->
+      </table>
+
+      <div class="p-4 border-t border-surface-dim bg-surface-container-low flex items-center justify-between text-[11px] text-on-surface-variant">
+        <span data-report-updated>Last updated 2 minutes ago</span>
+        <span>Categorized 94% · 6 accounts pending review</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- CUSTOMIZE DRAWER (§A report-customizer — Data / Visual)    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="drawer-scrim" id="cust-scrim"></div>
+<div class="drawer" id="cust-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+      <div>
+        <div class="text-headline-sm">Customize report</div>
+        <div class="text-[11px] text-on-surface-variant">Data · Visual · Save as view</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-cust>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <!-- Customize tabs -->
+  <div class="cust-tab">
+    <button class="active" data-cust-tab="data">Data</button>
+    <button data-cust-tab="visual">Visual</button>
+    <button data-cust-tab="saved">Saved views</button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto">
+    <!-- DATA tab -->
+    <div data-cust-panel="data">
+      <div class="px-4 py-3 border-b border-surface-dim">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Rows</div>
+        <select class="w-full h-8 px-2 border border-surface-dim rounded text-[12px]">
+          <option>All accounts</option>
+          <option>Income accounts only</option>
+          <option>Expense accounts only</option>
+          <option>Non-zero only</option>
+        </select>
+      </div>
+      <div class="px-4 py-3 border-b border-surface-dim">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Columns</div>
+        <p class="text-[11px] text-on-surface-variant mb-2">Drag to reorder. Toggle to show/hide.</p>
+        <div class="col-item" draggable="true" data-col="account">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check" checked/>
+          <span class="text-body-sm flex-1">Account</span>
+        </div>
+        <div class="col-item" draggable="true" data-col="period">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check" checked/>
+          <span class="text-body-sm flex-1">Nov 2026</span>
+        </div>
+        <div class="col-item" draggable="true" data-col="ytd">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check" checked/>
+          <span class="text-body-sm flex-1">Jan – Nov 2026 (YTD)</span>
+        </div>
+        <div class="col-item" draggable="true" data-col="pct">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check"/>
+          <span class="text-body-sm flex-1">% of income</span>
+        </div>
+        <div class="col-item" draggable="true" data-col="budget">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check"/>
+          <span class="text-body-sm flex-1">Budget</span>
+        </div>
+        <div class="col-item" draggable="true" data-col="variance">
+          <span class="material-symbols-outlined drag">drag_indicator</span>
+          <input type="checkbox" class="row-check"/>
+          <span class="text-body-sm flex-1">Variance</span>
+        </div>
+      </div>
+      <div class="px-4 py-3">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Filters</div>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Exclude zero rows</label>
+          <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Compare to prior period</label>
+          <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Show percentages</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISUAL tab -->
+    <div class="hidden-imp" data-cust-panel="visual">
+      <div class="px-4 py-4 border-b border-surface-dim">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Number format</div>
+        <div class="seg" data-num-format>
+          <button class="active" data-num="dollars">1,234.56</button>
+          <button data-num="thousands">1.2K</button>
+          <button data-num="no-cents">1,235</button>
+          <button data-num="percent">12.3%</button>
+        </div>
+      </div>
+      <div class="px-4 py-4 border-b border-surface-dim">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Negatives</div>
+        <div class="seg" data-neg-format>
+          <button class="active" data-neg="red">Red</button>
+          <button data-neg="paren">(1,234)</button>
+          <button data-neg="minus">−1,234</button>
+        </div>
+      </div>
+      <div class="px-4 py-4 border-b border-surface-dim">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Decimals</div>
+        <div class="seg" data-decimals>
+          <button data-dec="0">0</button>
+          <button class="active" data-dec="2">2</button>
+        </div>
+      </div>
+      <div class="px-4 py-4 border-b border-surface-dim">
+        <label class="flex items-center gap-2 text-body-sm">
+          <input type="checkbox" class="row-check"/>
+          Divide by 1,000 (show in thousands)
+        </label>
+      </div>
+      <div class="px-4 py-4">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Highlight</div>
+        <label class="flex items-center gap-2 text-body-sm mb-2"><input type="checkbox" class="row-check" checked/> Highlight negative values</label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Compare-to-column highlight</label>
+      </div>
+    </div>
+
+    <!-- SAVED tab -->
+    <div class="hidden-imp" data-cust-panel="saved">
+      <div class="px-4 py-4">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Save current configuration as</div>
+        <input class="w-full h-8 px-2 border border-surface-dim rounded text-[12px] mb-2" placeholder="e.g. P&L — monthly mgmt" data-save-name/>
+        <button class="w-full h-8 bg-primary text-white rounded text-[12px] font-semibold hover:bg-primary-container mb-4" data-save-view>
+          <span class="material-symbols-outlined text-[14px] align-middle mr-1">bookmark_add</span>Save as view</button>
+
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Existing views</div>
+        <div class="text-[11px] text-on-surface-variant text-center py-4">No saved views yet.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-cust>Cancel</button>
+    <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-apply-cust>Apply</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* REPORT DATA                                                */
+/* ═══════════════════════════════════════════════════════════ */
+const REPORTS = {
+  pnl: {
+    title: "Profit and Loss",
+    range: "November 1 – 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Income", "", ""] },
+      { kind: "sub",     cells: ["Sales — Apparel", "$8,420.00", "$62,180.00"] },
+      { kind: "sub",     cells: ["Shipping income", "$1,204.00", "$8,204.00"] },
+      { kind: "sub",     cells: ["Sales — Wall Art", "$2,110.00", "$18,940.00"] },
+      { kind: "total",   label: "Total income", cells: ["$11,734.00", "$89,324.00"] },
+      { kind: "section", cells: ["Cost of goods sold", "", ""] },
+      { kind: "sub",     cells: ["COGS — Apparel", "$3,120.00", "$18,140.00"] },
+      { kind: "sub",     cells: ["COGS — Wall Art", "$870.00", "$7,240.00"] },
+      { kind: "total",   label: "Total COGS", cells: ["$3,990.00", "$25,380.00"] },
+      { kind: "total",   label: "Gross profit", cells: ["$7,744.00", "$63,944.00"] },
+      { kind: "section", cells: ["Expenses", "", ""] },
+      { kind: "sub",     cells: ["Office supplies", "$142.50", "$1,418.00"] },
+      { kind: "sub",     cells: ["Software & subscriptions", "$59.99", "$719.88"] },
+      { kind: "sub",     cells: ["Shipping & delivery", "$84.20", "$1,410.00"] },
+      { kind: "sub",     cells: ["Advertising", "$1,240.00", "$9,240.00"] },
+      { kind: "sub",     cells: ["Bank fees", "$12.00", "$124.00"] },
+      { kind: "total",   label: "Total expenses", cells: ["$1,538.69", "$12,911.88"] },
+      { kind: "final",   label: "Net operating income", cells: ["$6,205.31", "$51,032.12"] },
+    ]
+  },
+  bs: {
+    title: "Balance Sheet",
+    range: "As of November 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Assets", ""] },
+      { kind: "sub",     cells: ["Business checking", "$84,210.40"] },
+      { kind: "sub",     cells: ["Accounts receivable", "$8,420.00"] },
+      { kind: "sub",     cells: ["Stripe clearing", "$1,842.60"] },
+      { kind: "total",   label: "Total assets", cells: ["$94,473.00"] },
+      { kind: "section", cells: ["Liabilities", ""] },
+      { kind: "sub",     cells: ["Accounts payable", "$4,080.00"] },
+      { kind: "sub",     cells: ["Sales tax payable", "$1,880.00"] },
+      { kind: "total",   label: "Total liabilities", cells: ["$5,960.00"] },
+      { kind: "section", cells: ["Equity", ""] },
+      { kind: "sub",     cells: ["Owner's equity", "$66,010.00"] },
+      { kind: "sub",     cells: ["Retained earnings", "$22,503.00"] },
+      { kind: "total",   label: "Total equity", cells: ["$88,513.00"] },
+      { kind: "final",   label: "Total liabilities + equity", cells: ["$94,473.00"] },
+    ]
+  },
+  cashflow: {
+    title: "Statement of Cash Flows",
+    range: "November 1 – 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Operating activities", ""] },
+      { kind: "sub",     cells: ["Net income", "$6,205.31"] },
+      { kind: "sub",     cells: ["Increase in A/R", "−$8,420.00"] },
+      { kind: "sub",     cells: ["Increase in A/P", "$4,080.00"] },
+      { kind: "total",   label: "Net from operating", cells: ["$1,865.31"] },
+      { kind: "section", cells: ["Investing activities", ""] },
+      { kind: "sub",     cells: ["Purchase of equipment", "−$2,400.00"] },
+      { kind: "total",   label: "Net from investing", cells: ["−$2,400.00"] },
+      { kind: "section", cells: ["Financing activities", ""] },
+      { kind: "sub",     cells: ["Owner contribution", "$5,000.00"] },
+      { kind: "total",   label: "Net from financing", cells: ["$5,000.00"] },
+      { kind: "final",   label: "Net change in cash", cells: ["$4,465.31"] },
+    ]
+  },
+  araing: {
+    title: "A/R Aging Summary",
+    range: "As of November 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Customer", "Current", "1–30", "31–60", "61+", "Total"] },
+      { kind: "sub",     cells: ["Acme Corp", "$1,240.00", "—", "—", "—", "$1,240.00"] },
+      { kind: "sub",     cells: ["Maple Supply", "—", "$890.00", "—", "—", "$890.00"] },
+      { kind: "sub",     cells: ["Northwind Labs", "—", "—", "$2,100.00", "—", "$2,100.00"] },
+      { kind: "sub",     cells: ["Lakeside Design", "—", "—", "—", "$1,850.00", "$1,850.00"] },
+      { kind: "final",   label: "Total", cells: ["$1,240.00", "$890.00", "$2,100.00", "$1,850.00", "$6,080.00"] },
+    ]
+  },
+  salesbycustomer: {
+    title: "Sales by Customer Summary",
+    range: "November 1 – 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Customer", "Revenue", "% of total"] },
+      { kind: "sub",     cells: ["Acme Corp", "$8,640.00", "34%"] },
+      { kind: "sub",     cells: ["Blue Ridge Co.", "$7,410.00", "29%"] },
+      { kind: "sub",     cells: ["Northwind Labs", "$4,240.00", "17%"] },
+      { kind: "sub",     cells: ["Orion Apparel", "$3,890.00", "15%"] },
+      { kind: "sub",     cells: ["Maple Supply", "$1,180.00", "5%"] },
+      { kind: "final",   label: "Total", cells: ["$25,360.00", "100%"] },
+    ]
+  },
+  expensesbyvendor: {
+    title: "Expenses by Vendor Summary",
+    range: "November 1 – 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Vendor", "Expenses", "Bills"] },
+      { kind: "sub",     cells: ["Printful", "$12,410.00", "8"] },
+      { kind: "sub",     cells: ["Gelato", "$6,240.00", "4"] },
+      { kind: "sub",     cells: ["Printify", "$4,180.00", "3"] },
+      { kind: "sub",     cells: ["Adobe", "$719.88", "12"] },
+      { kind: "sub",     cells: ["Staples", "$1,418.00", "9"] },
+      { kind: "final",   label: "Total", cells: ["$24,967.88", "36"] },
+    ]
+  },
+  gl: {
+    title: "General Ledger",
+    range: "November 1 – 30, 2026 · All accounts",
+    rows: [
+      { kind: "section", cells: ["Date", "Description", "Account", "Debit", "Credit"] },
+      { kind: "sub",     cells: ["11/01/2026", "Invoice 1002", "Sales — Apparel", "—", "$1,240.00"] },
+      { kind: "sub",     cells: ["11/01/2026", "Invoice 1002", "A/R", "$1,240.00", "—"] },
+      { kind: "sub",     cells: ["11/03/2026", "Staples receipt", "Office supplies", "$142.50", "—"] },
+      { kind: "sub",     cells: ["11/03/2026", "Staples receipt", "Business checking", "—", "$142.50"] },
+      { kind: "sub",     cells: ["11/10/2026", "Stripe payout", "Business checking", "$1,842.60", "—"] },
+      { kind: "sub",     cells: ["11/10/2026", "Stripe payout", "Stripe clearing", "—", "$1,842.60"] },
+      { kind: "final",   label: "Total for period", cells: ["", "", "$3,225.10", "$3,225.10"] },
+    ]
+  },
+  tb: {
+    title: "Trial Balance",
+    range: "As of November 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Account", "Debit", "Credit"] },
+      { kind: "sub",     cells: ["1000 · Business checking", "$84,210.40", "—"] },
+      { kind: "sub",     cells: ["1100 · Accounts receivable", "$8,420.00", "—"] },
+      { kind: "sub",     cells: ["2000 · Accounts payable", "—", "$4,080.00"] },
+      { kind: "sub",     cells: ["2200 · Sales tax payable", "—", "$1,880.00"] },
+      { kind: "sub",     cells: ["3000 · Owner's equity", "—", "$66,010.00"] },
+      { kind: "sub",     cells: ["4000 · Sales — Apparel", "—", "$42,180.00"] },
+      { kind: "sub",     cells: ["5000 · COGS — Apparel", "$8,140.00", "—"] },
+      { kind: "final",   label: "Total", cells: ["$100,770.40", "$114,150.00"] },
+    ]
+  },
+  salestax: {
+    title: "Sales Tax Liability",
+    range: "November 1 – 30, 2026",
+    rows: [
+      { kind: "section", cells: ["Jurisdiction", "Collected", "Paid", "Owed"] },
+      { kind: "sub",     cells: ["Tennessee", "$1,410.00", "$920.00", "$490.00"] },
+      { kind: "sub",     cells: ["California", "$840.00", "$0.00", "$840.00"] },
+      { kind: "sub",     cells: ["New York", "$550.00", "$0.00", "$550.00"] },
+      { kind: "final",   label: "Total", cells: ["$2,800.00", "$920.00", "$1,880.00"] },
+    ]
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════ */
+/* LIBRARY: filter + open                                     */
+/* ═══════════════════════════════════════════════════════════ */
+let currentReportId = null;
+document.querySelectorAll("[data-rpt-tab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-rpt-tab]").forEach(x=>x.classList.toggle("active", x===b));
+  filterReports();
+}));
+document.querySelector("[data-report-search]").addEventListener("input", filterReports);
+function filterReports(){
+  const q = document.querySelector("[data-report-search]").value.toLowerCase();
+  const tab = document.querySelector("[data-rpt-tab].active").dataset.rptTab;
+  document.querySelectorAll(".report-card").forEach(card=>{
+    const matchQ = !q || card.querySelector(".font-semibold").textContent.toLowerCase().includes(q);
+    const matchTab = tab==="all" || card.dataset.category===tab;
+    card.style.display = (matchQ && matchTab) ? "" : "none";
+  });
+}
+document.querySelectorAll(".report-card").forEach(card=>{
+  card.addEventListener("click", ()=>openReport(card.dataset.report));
+});
+
+/* ═══════════════════════════════════════════════════════════ */
+/* VIEWER: render a report                                    */
+/* ═══════════════════════════════════════════════════════════ */
+let numFormat = "dollars";
+let negFormat = "red";
+let decimals = "2";
+function formatValue(v){
+  if (!v || v === "—" || v === "") return v;
+  // numbers already formatted as strings; re-format if needed
+  return v;
+}
+function openReport(id){
+  const r = REPORTS[id];
+  if (!r) return;
+  currentReportId = id;
+  document.getElementById("library-view").classList.add("hidden-imp");
+  document.getElementById("viewer-view").classList.remove("hidden-imp");
+  document.querySelector("[data-breadcrumb]").textContent = r.title;
+  document.querySelector("[data-viewer-title]").textContent = r.title;
+  document.querySelector("[data-viewer-sub]").textContent = r.range;
+  document.querySelector("[data-report-title]").textContent = r.title;
+  document.querySelector("[data-report-range]").textContent = r.range;
+  renderReportBody(r);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderReportBody(r){
+  const body = document.querySelector("[data-report-body]");
+  // headers depend on shape (some reports have 2 cols, some 3, some 5)
+  const maxCells = Math.max(...r.rows.map(row => row.cells.length));
+  // Build a header row for section kind if it has non-empty strings (some use it as header)
+  let html = "";
+  r.rows.forEach(row=>{
+    if (row.kind === "section"){
+      const cells = row.cells.map(c => `<th>${c}</th>`).join("");
+      // if section cells look like a header (all string, no number), render as header row
+      html += `<tr class="section">${cells}</tr>`;
+    } else if (row.kind === "sub"){
+      html += `<tr class="sub">${row.cells.map((c,i)=>`<td class="${i===0?"":"right"}">${formatNeg(c)}</td>`).join("")}</tr>`;
+    } else if (row.kind === "total"){
+      const label = row.label || "";
+      const cells = row.cells.map((c,i)=>`<td class="right">${formatNeg(c)}</td>`).join("");
+      html += `<tr class="total"><td>${label}</td>${cells}</tr>`;
+    } else if (row.kind === "final"){
+      const label = row.label || "";
+      const cells = row.cells.map((c,i)=>`<td class="right">${formatNeg(c)}</td>`).join("");
+      html += `<tr class="total" style="background:#f4f3f7"><td>${label}</td>${cells}</tr>`;
+    }
+  });
+  body.innerHTML = html;
+}
+function formatNeg(v){
+  if (!v || v === "—" || v === "") return v;
+  if (negFormat === "red" && v.startsWith("−")) return `<span class="num-neg">${v}</span>`;
+  if (negFormat === "paren" && v.startsWith("−")) return `<span class="num-neg">(${v.slice(1)})</span>`;
+  return v;
+}
+
+/* Back to library */
+document.querySelector("[data-back]").addEventListener("click", ()=>{
+  document.getElementById("viewer-view").classList.add("hidden-imp");
+  document.getElementById("library-view").classList.remove("hidden-imp");
+  document.querySelector("[data-breadcrumb]").textContent = "Reports";
+});
+
+/* Date range preset */
+document.querySelector("[data-range-preset]").addEventListener("change", e=>{
+  const preset = e.target.value;
+  const from = document.querySelector("[data-range-from]");
+  const to = document.querySelector("[data-range-to]");
+  if (preset === "This month"){ from.value="2026-11-01"; to.value="2026-11-30"; }
+  if (preset === "Last month"){ from.value="2026-10-01"; to.value="2026-10-31"; }
+  if (preset === "This quarter"){ from.value="2026-10-01"; to.value="2026-12-31"; }
+  if (preset === "This year"){ from.value="2026-01-01"; to.value="2026-12-31"; }
+  if (preset === "Last year"){ from.value="2025-01-01"; to.value="2025-12-31"; }
+  document.querySelector("[data-viewer-sub]").textContent = `${from.value} – ${to.value}`;
+  document.querySelector("[data-report-range]").textContent = `${from.value} – ${to.value}`;
+});
+document.querySelector("[data-range-from]").addEventListener("change", updateRange);
+document.querySelector("[data-range-to]").addEventListener("change", updateRange);
+function updateRange(){
+  const from = document.querySelector("[data-range-from]").value;
+  const to = document.querySelector("[data-range-to]").value;
+  document.querySelector("[data-viewer-sub]").textContent = `${from} – ${to}`;
+  document.querySelector("[data-report-range]").textContent = `${from} – ${to}`;
+}
+
+/* Export & Print */
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Export as PDF / XLSX — chooser opens"));
+document.querySelector("[data-print]").addEventListener("click", ()=>toast("Sending to print…"));
+
+/* ═══════════════════════════════════════════════════════════ */
+/* CUSTOMIZE DRAWER                                          */
+/* ═══════════════════════════════════════════════════════════ */
+document.querySelector("[data-customize]").addEventListener("click", ()=>{
+  document.getElementById("cust-scrim").classList.add("open");
+  document.getElementById("cust-drawer").classList.add("open");
+});
+document.querySelectorAll("[data-close-cust]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("cust-scrim").classList.remove("open");
+  document.getElementById("cust-drawer").classList.remove("open");
+}));
+document.getElementById("cust-scrim").addEventListener("click", ()=>{
+  document.getElementById("cust-scrim").classList.remove("open");
+  document.getElementById("cust-drawer").classList.remove("open");
+});
+
+/* Customize tabs */
+document.querySelectorAll("[data-cust-tab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-cust-tab]").forEach(x=>x.classList.toggle("active", x===b));
+  document.querySelectorAll("[data-cust-panel]").forEach(p=>p.classList.add("hidden-imp"));
+  document.querySelector(`[data-cust-panel="${b.dataset.custTab}"]`).classList.remove("hidden-imp");
+}));
+
+/* Column drag reorder */
+let dragSrc = null;
+document.querySelectorAll(".col-item").forEach(item=>{
+  item.addEventListener("dragstart", e=>{ dragSrc = item; item.classList.add("dragging"); });
+  item.addEventListener("dragend", ()=>{ item.classList.remove("dragging"); dragSrc = null; });
+  item.addEventListener("dragover", e=>{
+    e.preventDefault();
+    if (!dragSrc || dragSrc === item) return;
+    const rect = item.getBoundingClientRect();
+    const after = (e.clientY - rect.top) > rect.height/2;
+    item.parentNode.insertBefore(dragSrc, after ? item.nextSibling : item);
+  });
+});
+
+/* Column visibility affects report */
+document.querySelectorAll(".col-item input[type='checkbox']").forEach(cb=>{
+  cb.addEventListener("change", ()=>{
+    // in this demo, only Account / Period / YTD exist in the table; toggling hides the column if present
+    const col = cb.closest(".col-item").dataset.col;
+    const body = document.querySelector("[data-report-body]");
+    if (!body) return;
+    // crude: since our reports are pre-rendered, we just note the change
+  });
+});
+
+/* Number / negative / decimal seg toggles */
+document.querySelectorAll("[data-num-format] button").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-num-format] button").forEach(x=>x.classList.toggle("active", x===b));
+  numFormat = b.dataset.num;
+}));
+document.querySelectorAll("[data-neg-format] button").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-neg-format] button").forEach(x=>x.classList.toggle("active", x===b));
+  negFormat = b.dataset.neg;
+  if (currentReportId) renderReportBody(REPORTS[currentReportId]);
+}));
+document.querySelectorAll("[data-decimals] button").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-decimals] button").forEach(x=>x.classList.toggle("active", x===b));
+  decimals = b.dataset.dec;
+}));
+
+/* Save view */
+document.querySelector("[data-save-view]").addEventListener("click", ()=>{
+  const name = document.querySelector("[data-save-name]").value.trim();
+  if (!name){ toast("Name required"); return; }
+  toast(`Saved view "${name}"`);
+});
+document.querySelector("[data-apply-cust]").addEventListener("click", ()=>{
+  if (currentReportId) renderReportBody(REPORTS[currentReportId]);
+  document.getElementById("cust-scrim").classList.remove("open");
+  document.getElementById("cust-drawer").classList.remove("open");
+  toast("Customization applied");
+});
+
+/* ═══════════════════════════════════════════════════════════ */
+/* LIBRARY ACTION BUTTONS                                     */
+/* ═══════════════════════════════════════════════════════════ */
+document.querySelector("[data-new-report]").addEventListener("click", ()=>toast("Custom report builder — coming in diligence pass"));
+document.querySelector("[data-saved-views]").addEventListener("click", ()=>toast("Saved views drawer"));
+</script>
+</body>
+</html>

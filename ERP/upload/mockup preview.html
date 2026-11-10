@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Studio Preview Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf9fc; --card:#fff; --ink:#1a1c1e; --mut:#5f6b5a; --line:#dad9dd; --lo:#f4f3f7; 
+  --pri:#0a6400; --prit:#fff; --blue:#0077c5; --soft:#e8f5e9; --warn:#a85a00; --warnb:#fff3e0; 
+  --bad:#ba1a1a; --badb:#ffdad6; --ok:#2e7d32; --maroon:#6b1e28; --tee:#d9d7df;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121214; --card:#1a1b1e; --ink:#ecedee; --mut:#a3aaa0; --line:#2e3033; --lo:#222427; 
+    --pri:#2f9e1f; --soft:#1b2a19; --warn:#f0a649; --warnb:#33260f; --bad:#ff8a80; --badb:#3a1a18; 
+    --ok:#7fd48a; --tee:#3b3944; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121214; --card:#1a1b1e; --ink:#ecedee; --mut:#a3aaa0; --line:#2e3033; --lo:#222427; 
+  --pri:#2f9e1f; --soft:#1b2a19; --warn:#f0a649; --warnb:#33260f; --bad:#ff8a80; --badb:#3a1a18; 
+  --ok:#7fd48a; --tee:#3b3944; color-scheme:dark;
+}
+html,body{height:100%}*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 13px/1.45 var(--sans);display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ms{font-family:"Material Symbols Outlined";font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;letter-spacing:normal;text-transform:none;white-space:nowrap;-webkit-font-smoothing:antialiased;font-feature-settings:"liga"}
+
+/* FULL SCREEN PREVIEW LAYOUT */
+.preview-shell { display: flex; height: 100vh; width: 100vw; background: var(--bg); }
+
+/* CENTER CANVAS (The Mockup) */
+.canvas-center { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; background: #f4f4f4; }
+.mockup-image { max-height: 80%; max-width: 80%; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1)); }
+
+/* RIGHT RAIL (Mockup Controls) */
+.right-rail { width: 420px; background: var(--card); border-left: 1px solid var(--line); display: flex; flex-direction: column; z-index: 10; }
+.rail-header { padding: 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; }
+.rail-header h2 { margin: 0; font-size: 16px; font-weight: 600; flex: 1; }
+.rail-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+
+/* TOP TOGGLE */
+.top-toggle-container { position: absolute; top: 16px; right: 450px; z-index: 20; }
+.mode-toggle { display: flex; background: var(--card); border-radius: 6px; padding: 2px; border: 1px solid var(--line); box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+.mode-toggle button { border: 0; background: none; padding: 6px 24px; border-radius: 4px; font-weight: 600; font-size: 13px; color: var(--mut); cursor: pointer; }
+.mode-toggle button.on { background: var(--lo); color: var(--ink); }
+
+/* BOTTOM BAR */
+.bottom-bar { position: absolute; bottom: 0; left: 0; right: 420px; height: 56px; background: var(--card); border-top: 1px solid var(--line); display: flex; align-items: center; padding: 0 24px; gap: 16px; z-index: 10; }
+.bottom-bar .sp { flex: 1; }
+.btn-download { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; color: var(--ink); background: none; border: 0; cursor: pointer; }
+.btn-save { background: var(--card); border: 1px solid var(--line); color: var(--ink); padding: 8px 32px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-save:hover { background: var(--lo); }
+
+/* BUTTONS FOR THE 3 REQUESTED SCREENS */
+.action-overlay { position: absolute; top: 64px; left: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 20; }
+.action-btn { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 10px 16px; font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.action-btn:hover { background: var(--lo); }
+
+/* MOCKUP THUMBS */
+.mockup-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+.mockup-thumb { width: 64px; height: 64px; flex-shrink: 0; border: 2px solid transparent; border-radius: 6px; overflow: hidden; cursor: pointer; background: var(--lo); }
+.mockup-thumb.active { border-color: var(--ink); }
+.mockup-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* GENERAL UI */
+.btn-outline { display: inline-flex; align-items: center; gap: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font-weight: 600; font-size: 13px; justify-content: center; cursor: pointer; }
+.btn-outline:hover { background: var(--lo); }
+.kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--lo); font-size: 13px; }
+.kv:last-child { border: 0; }
+.kv span:first-child { color: var(--mut); }
+.kv b { font-weight: 600; }
+
+/* MODALS */
+.ov{position:fixed;inset:0;background:rgba(10,10,12,.5);display:none;z-index:300;justify-content:center;align-items:center;padding:16px}
+.ov.on{display:flex}
+.pk{background:var(--card);width:100%;max-width:500px;max-height:90vh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.2)}
+.pk-header{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.pk-header h2{margin:0;font-size:16px;font-weight:600}
+.pk-body{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.pk-footer{padding:16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+
+/* VARIANT MODAL SPECIFIC */
+.var-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.var-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--ink)}
+.var-row .swatch{width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+.var-row .name{flex:1;font-weight:500;font-size:14px}
+.var-row .ms{color:var(--mut)}
+.var-header-tabs { display: flex; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 12px; }
+.var-header-tabs button { background: none; border: 0; padding: 8px 0; font-weight: 600; font-size: 14px; color: var(--mut); border-bottom: 2px solid transparent; cursor: pointer; }
+.var-header-tabs button.active { color: var(--ink); border-bottom-color: var(--ink); }
+
+/* PRODUCT INFO MODAL SPECIFIC */
+.info-hero { display: flex; gap: 16px; margin-bottom: 16px; }
+.info-hero img { width: 80px; height: 80px; border-radius: 8px; background: var(--lo); }
+.info-hero div { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.info-hero b { font-size: 15px; }
+.info-hero span { font-size: 13px; color: var(--mut); }
+.info-hero .stock { color: var(--warn); font-weight: 600; font-size: 12px; }
+.acc-item { border-bottom: 1px solid var(--line); }
+.acc-head { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 14px 0; background: none; border: 0; font-weight: 600; font-size: 14px; cursor: pointer; }
+.acc-body { display: none; padding-bottom: 14px; font-size: 13px; color: var(--mut); line-height: 1.6; }
+.acc-item.open .acc-body { display: block; }
+.acc-item.open .acc-head .ms { transform: rotate(180deg); }
+.guidelines-box { background: var(--lo); padding: 16px; border-radius: 8px; margin-top: 8px; font-size: 13px; color: var(--ink); }
+.guidelines-box p { margin: 0 0 12px; }
+.guidelines-box ul { padding-left: 20px; margin: 0 0 12px; }
+
+/* DESIGN SCALING MODAL */
+.scaling-diagram { display: flex; justify-content: space-between; align-items: flex-end; padding: 20px 0; gap: 4px; }
+.scaling-item { text-align: center; font-size: 12px; font-weight: 600; flex: 1; }
+.scaling-item svg { height: 80px; width: auto; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="preview-shell">
+  
+  <!-- CENTER CANVAS (The actual mockup) -->
+  <main class="canvas-center">
+    <!-- High-quality 3D Mockup SVG -->
+    <svg class="mockup-image" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+          <feDropShadow dx="0" dy="15" stdDeviation="20" flood-opacity="0.15"/>
+        </filter>
+        <linearGradient id="fabric" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="100%" stop-color="#f0f0f0" />
+        </linearGradient>
+      </defs>
+      <!-- Background -->
+      <rect width="500" height="500" fill="#f4f4f4"/>
+      <!-- 3D Shirt Shape -->
+      <g filter="url(#shadow)">
+        <path d="M150 140 Q250 100 350 140 L360 440 Q250 480 140 440 Z" fill="url(#fabric)" stroke="#e0e0e0" stroke-width="1"/>
+        <path d="M150 140 Q250 100 350 140" fill="none" stroke="#d0d0d0" stroke-width="2"/>
+        <path d="M150 140 L140 440" fill="none" stroke="#d0d0d0" stroke-width="1"/>
+        <path d="M350 140 L360 440" fill="none" stroke="#d0d0d0" stroke-width="1"/>
+        <!-- Fabric folds/draping -->
+        <path d="M200 200 Q220 300 200 400" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+        <path d="M300 200 Q280 300 300 400" fill="none" stroke="#e8e8e8" stroke-width="2"/>
+      </g>
+    </svg>
+  </main>
+
+  <!-- TOP TOGGLE (Edit / Preview) -->
+  <div class="top-toggle-container">
+    <div class="mode-toggle">
+      <button onclick="alert('Switch to Edit Mode')">Edit</button>
+      <button class="on">Preview</button>
+    </div>
+  </div>
+
+  <!-- ACTION OVERLAY (The 3 buttons requested) -->
+  <div class="action-overlay">
+    <button class="action-btn" onclick="openVariantModal()"><span class="ms">palette</span> Variant Screen</button>
+    <button class="action-btn" onclick="openInfoModal()"><span class="ms">info</span> Product Info Screen</button>
+  </div>
+
+  <!-- RIGHT RAIL (Mockup view controls) -->
+  <aside class="right-rail">
+    <div class="rail-header">
+      <h2>Mockup view</h2>
+    </div>
+    <div class="rail-body">
+      <!-- Mockup Thumbs -->
+      <div class="mockup-thumbs">
+        <div class="mockup-thumb active"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e8e8'/><path d='M30 30 L30 90 L45 90 L45 50 L50 40 L55 50 L55 90 L70 90 L70 30 Z' fill='%23fff' stroke='%23ccc'/></svg>"></div>
+        <div class="mockup-thumb"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e8e8'/><path d='M30 30 L30 90 L45 90 L45 50 L50 40 L55 50 L55 90 L70 90 L70 30 Z' fill='%23e5e5e5' stroke='%23ccc'/></svg>"></div>
+        <div class="mockup-thumb"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e8e8'/><path d='M30 30 L30 90 L45 90 L45 50 L50 40 L55 50 L55 90 L70 90 L70 30 Z' fill='%23000' stroke='%23ccc'/></svg>"></div>
+        <div class="mockup-thumb"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e8e8'/><path d='M30 30 L30 90 L45 90 L45 50 L50 40 L55 50 L55 90 L70 90 L70 30 Z' fill='%23fff' stroke='%23ccc'/></svg>"></div>
+      </div>
+      <button class="btn-outline" style="width:100%"><span class="ms">add</span> Show more</button>
+      
+      <div style="font-size:13px;color:var(--mut);margin-top:8px">
+        Preview product size: L<br>
+        Design is scaled down on smaller sizes.
+      </div>
+      <button class="btn-outline" style="width:100%" onclick="openScalingModal()">Design scaling</button>
+
+      <div style="font-size:13px;font-weight:600;margin-top:8px">Mockup color mode <span class="ms" style="font-size:14px;vertical-align:middle">open_in_new</span></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="radio" name="color-mode"> Realistic (CMYK)</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="radio" name="color-mode" checked> Bright/colourful (RGB)</label>
+
+      <div style="font-size:13px;font-weight:600;margin-top:8px">Gildan Colors</div>
+      <div style="display:flex;gap:8px">
+        <div style="width:28px;height:28px;border-radius:50%;background:#fff;border:1px solid var(--line)"></div>
+        <div style="width:28px;height:28px;border-radius:50%;background:#000;border:1px solid var(--line)"></div>
+        <div style="width:28px;height:28px;border-radius:50%;background:#a32b3d;border:1px solid var(--line)"></div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;margin-top:8px">Mockup background</div>
+      <p style="font-size:12px;color:var(--mut);margin:0">Recommended resolution 2048 x 2048px. Max resolution 30000 x 30000px. JPG and PNG up to 100 MiB. SVG up to 20 MiB.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn-outline" style="flex:1"><span class="ms">add_photo_alternate</span> Add image</button>
+        <button class="btn-outline" style="flex:1;background:var(--bg)">White</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <button class="btn-download"><span class="ms">download</span> Download mockup</button>
+    <div class="sp"></div>
+    <button class="btn-save">Save product</button>
+  </div>
+
+</div>
+
+<!-- VARIANTS MODAL -->
+<div class="ov" id="variant-modal">
+  <div class="pk">
+    <div class="pk-header">
+      <h2>Select variants</h2>
+      <button class="btn-outline" onclick="closeVariantModal()" style="border:0;padding:4px"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body">
+      <div class="var-header-tabs">
+        <button class="active">Color</button>
+        <button>Size</button>
+      </div>
+      <p style="font-size:12px;color:var(--mut);margin:0 0 12px">Optimal listings have between 5-15 variants</p>
+      
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <input type="checkbox" id="select-all" checked onchange="toggleAllVariants(this)" style="width:18px;height:18px;accent-color:var(--ink)">
+        <label for="select-all" style="font-weight:600;font-size:13px;flex:1">Select all (max 100)</label>
+        <span style="font-size:12px;color:var(--mut)">8 variants selected</span>
+      </div>
+
+      <div id="variant-list">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+    <div class="pk-footer">
+      <button class="btn-outline" onclick="closeVariantModal()">Cancel</button>
+      <button class="btn-outline" style="background:var(--ink);color:var(--card);border-color:var(--ink)" onclick="closeVariantModal()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT INFO MODAL -->
+<div class="ov" id="info-modal">
+  <div class="pk" style="max-width:600px">
+    <div class="pk-header">
+      <h2>Important product information</h2>
+      <button class="btn-outline" onclick="closeInfoModal()" style="border:0;padding:4px"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body">
+      <div class="info-hero">
+        <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e8e8e8'/><path d='M30 30 L30 90 L45 90 L45 50 L50 40 L55 50 L55 90 L70 90 L70 30 Z' fill='%23fff' stroke='%23ccc'/></svg>">
+        <div>
+          <b>Unisex Heavy Blend Crewneck Sweatshirt</b>
+          <span>Gildan · 18000</span>
+          <span>Fulfilled by Printify Choice</span>
+          <span class="stock">3 of 277 out of stock</span>
+          <button class="btn-outline" style="width:fit-content;padding:4px 10px;font-size:12px;margin-top:4px">See details</button>
+        </div>
+      </div>
+
+      <button class="btn-outline" style="width:100%"><span class="ms">download</span> Download design template</button>
+
+      <div class="acc-item open">
+        <button class="acc-head" onclick="toggleAcc(this)">Production cost: USD 17.87–25.32 <span class="ms">expand_more</span></button>
+        <div class="acc-body">
+          <div class="kv"><span>Blank product</span><span>USD 11.48–19.13</span></div>
+          <div class="kv"><span>Print front side</span><span>USD 6.38–6.19</span></div>
+          <div class="kv" style="border-top:1px solid var(--line);margin-top:8px;padding-top:8px"><b>Subtotal</b><b>USD 17.87–25.32</b></div>
+        </div>
+      </div>
+
+      <div class="acc-item open">
+        <button class="acc-head" onclick="toggleAcc(this)">Print area size: 3852 × 4398 px <span class="ms">expand_more</span></button>
+        <div class="acc-body">
+          <div class="kv"><span>DPI</span><span>300</span></div>
+          <div class="kv"><span>Product size</span><span>L</span></div>
+        </div>
+      </div>
+
+      <div class="guidelines-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:600">
+          <span class="ms">info</span> Product and design guidelines
+        </div>
+        <p><b>Semi-transparencies and gradients may not print as shown</b></p>
+        <p>Please note: DTF prints have a white underbase and cannot offer full transparency. When gradients and semi-transparencies are used in a design, the printed outcome will differ from what is seen in the mockups.</p>
+        
+        <p><b>Design limitations (Single-color prints)</b></p>
+        <p>The process used for creating single-color print products will impact the final look of colors and designs. Before creating this product, please review the guide here.</p>
+        
+        <p><b>Multiple decoration methods</b></p>
+        <p><b>DTG decoration method</b></p>
+        <p>Using this technique, pigmented water-based inks are applied to the garment’s surface and are absorbed by the product’s fibers and can accommodate precise and detailed designs.</p>
+        
+        <p><b>Embroidery decoration method</b></p>
+        <p>We recommend using designs with full shapes that are spaced from each other (instead of overlapping or being close together).</p>
+        
+        <p>Your design should NOT contain:</p>
+        <ul>
+          <li>Photos</li>
+          <li>Gradients</li>
+          <li>Small details (< 0.05" (1.3 mm))</li>
+          <li>Small text (< 0.25" (6.4 mm))</li>
+          <li>Small negative spaces</li>
+          <li>Transparency around the edges</li>
+        </ul>
+        <p>Also, please only use predefined embroidery thread colors (up to 6 from 15 available). For more precise designs, please use our downloadable templates.</p>
+        <p><i>Important: Products that don't meet the requirements above may be automatically changed or rejected. See the embroidery guide here.</i></p>
+      </div>
+
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-top:12px;color:var(--mut)">
+        <input type="checkbox"> Hide this info in the future
+      </label>
+    </div>
+  </div>
+</div>
+
+<!-- DESIGN SCALING MODAL -->
+<div class="ov" id="scaling-modal">
+  <div class="pk" style="max-width:600px">
+    <div class="pk-header">
+      <h2>Design scaling</h2>
+      <button class="btn-outline" onclick="closeScalingModal()" style="border:0;padding:4px"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body">
+      <p>Our Product Creator shows the L apparel size and allows you to place the design on that size only. While we scale down the design automatically for smaller apparel sizes, as shown in the image below, it will not be scaled up for sizes larger than L.</p>
+      <div class="scaling-diagram">
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="35" y="40" width="30" height="30" fill="var(--ink)"/></svg><br>S</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="30" y="35" width="40" height="40" fill="var(--ink)"/></svg><br>M</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>L</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>XL</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>XXL</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- MODAL LOGIC ---
+function openVariantModal() {
+  const list = document.getElementById('variant-list');
+  const colors = [
+    { name: 'White', hex: '#ffffff' },
+    { name: 'Ash', hex: '#e5e5e5' },
+    { name: 'Sport Grey', hex: '#b0b0b0' },
+    { name: 'Graphite Heather', hex: '#555' },
+    { name: 'Dark Heather', hex: '#444' },
+    { name: 'Charcoal', hex: '#333' },
+    { name: 'Black', hex: '#000000' },
+    { name: 'Antique Cherry Red', hex: '#a32b3d' }
+  ];
+
+  list.innerHTML = colors.map((c, i) => `
+    <div class="var-row">
+      <input type="checkbox" ${i === 0 ? 'checked' : ''}>
+      <div class="swatch" style="background:${c.hex}"></div>
+      <div class="name">${c.name}</div>
+      <span class="ms">expand_more</span>
+    </div>
+  `).join('');
+
+  document.getElementById('variant-modal').classList.add('on');
+}
+function closeVariantModal() {
+  document.getElementById('variant-modal').classList.remove('on');
+}
+function toggleAllVariants(cb) {
+  document.querySelectorAll('#variant-list input[type=checkbox]').forEach(c => c.checked = cb.checked);
+}
+
+function openInfoModal() {
+  document.getElementById('info-modal').classList.add('on');
+}
+function closeInfoModal() {
+  document.getElementById('info-modal').classList.remove('on');
+}
+
+function toggleAcc(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+function openScalingModal() {
+  document.getElementById('scaling-modal').classList.add('on');
+}
+function closeScalingModal() {
+  document.getElementById('scaling-modal').classList.remove('on');
+}
+</script>
+</body>
+</html>

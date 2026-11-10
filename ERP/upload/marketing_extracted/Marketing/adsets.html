@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Advertising — Ad sets</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.active{background:#8af5be;color:#00714b}
+  .stat.paused{background:#fbf5ec;color:#98713e}
+  .stat.review{background:#eaf3fb;color:#4e7b9d}
+  .stat.draft{background:#f4f3f7;color:#5a6355}
+  .stat.ended{background:#f4f3f7;color:#5a6355}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff;min-height:70px;resize:vertical}
+  .field-textarea:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:12px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .net-chip{display:inline-flex;align-items:center;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600}
+  .net-Meta{background:#edf3fc;color:#4b77b8}
+  .net-TikTok{background:#eef1f2;color:#27353a}
+  .net-Google{background:#f8f0ee;color:#c45c5b}
+  .net-Pinterest{background:#f9eeee;color:#bd5558}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+  .target-card{border:1px solid #dad9dd;border-radius:8px;padding:8px;background:#fff;display:flex;align-items:center;gap:8px}
+  .target-card .material-symbols-outlined{font-size:16px;color:#0a6400}
+  .audience-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Advertising</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">Ad sets</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Ad sets</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Every ad set across campaigns — audiences, placements, bid strategies, and delivery.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="export">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="customize">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-adset>
+          <span class="material-symbols-outlined text-[16px]">add</span>New ad set
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total ad sets</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statTotal">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across all campaigns</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Active delivery</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="statActive">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Currently spending</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Avg. ROAS</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statRoas">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across active sets</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Audience saturation</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statSat">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Highest frequency</div>
+    </div>
+  </div>
+
+  <!-- ─── LIST CARD ─── -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- Status tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Active">Active</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Paused">Paused</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="In review">In review</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Draft">Draft</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Ended">Ended</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter ad sets…" data-filter/>
+      </div>
+      <div class="relative">
+        <button id="btnCampaign" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">campaign</span>Campaign
+        </button>
+        <div id="popCampaign" class="row-menu" style="min-width:260px">
+          <div class="menu-header">Filter by campaign</div>
+          <div id="campaignFilterList" class="max-h-[220px] overflow-y-auto"></div>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="campaignClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="campaignApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnPlacement" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">grid_view</span>Placement
+        </button>
+        <div id="popPlacement" class="row-menu" style="min-width:220px">
+          <div class="menu-header">Filter by placement</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-placement" value="Auto" checked/>Auto</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-placement" value="Feed" checked/>Feed</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-placement" value="Stories / Reels" checked/>Stories / Reels</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-placement" value="Search" checked/>Search</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="placementClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="placementApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnBid" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">price_change</span>Bid
+        </button>
+        <div id="popBid" class="row-menu" style="min-width:220px">
+          <div class="menu-header">Filter by bid strategy</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-bid" value="Lowest cost" checked/>Lowest cost</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-bid" value="Cost cap" checked/>Cost cap</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-bid" value="ROAS goal" checked/>ROAS goal</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="bidClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="bidApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <button id="btnSaved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+      </button>
+      <button id="btnClearAll" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 hidden-imp">
+        <span class="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-b-count>—</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="pause"><span class="material-symbols-outlined text-[14px] align-middle mr-1">pause_circle</span>Pause</button>
+      <button data-bulk="resume"><span class="material-symbols-outlined text-[14px] align-middle mr-1">play_circle</span>Resume</button>
+      <button data-bulk="duplicate"><span class="material-symbols-outlined text-[14px] align-middle mr-1">content_copy</span>Duplicate</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Ad set</th>
+          <th class="px-3 py-2">Campaign</th>
+          <th class="px-3 py-2">Audience</th>
+          <th class="px-3 py-2">Placement</th>
+          <th class="px-3 py-2">Bid</th>
+          <th class="px-3 py-2 text-right">Budget (daily)</th>
+          <th class="px-3 py-2 text-right">Spend (30d)</th>
+          <th class="px-3 py-2 text-right">ROAS</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-adset-tbody></tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="hidden-imp py-12 px-6 text-center" data-adset-empty>
+      <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+        <span class="material-symbols-outlined text-[28px] text-outline">tune</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No ad sets match</h3>
+      <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or create a new ad set.</p>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="emptyClear">Clear filters</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white" id="rowsPerPage">
+          <option>25</option><option>50</option><option>75</option><option>100</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pagePrev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span id="pageLabel">Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pageNext"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     OVERLAYS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New</div>
+  <button data-create-kind="adset"><span class="material-symbols-outlined">tune</span>Ad set</button>
+  <button data-create-kind="campaign"><span class="material-symbols-outlined">campaign</span>Campaign</button>
+  <button data-create-kind="creative"><span class="material-symbols-outlined">perm_media</span>Creative</button>
+  <button data-create-kind="audience"><span class="material-symbols-outlined">groups</span>Audience</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="rowMenu">
+  <div class="menu-header">This ad set</div>
+  <button data-row-act="edit"><span class="material-symbols-outlined">edit</span>Edit ad set</button>
+  <button data-row-act="view"><span class="material-symbols-outlined">visibility</span>View details</button>
+  <button data-row-act="duplicate"><span class="material-symbols-outlined">content_copy</span>Duplicate</button>
+  <div class="sep"></div>
+  <div class="menu-header">Status</div>
+  <button data-row-act="pause"><span class="material-symbols-outlined">pause_circle</span>Pause</button>
+  <button data-row-act="resume"><span class="material-symbols-outlined">play_circle</span>Resume</button>
+  <button data-row-act="archive"><span class="material-symbols-outlined">archive</span>Archive</button>
+  <div class="sep"></div>
+  <button class="danger" data-row-act="delete"><span class="material-symbols-outlined">delete</span>Delete</button>
+</div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">tune</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Ad set</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekEdit" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Ad set drawer -->
+<div class="drawer" id="adsetDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="adsetDrawerTitle">New ad set</div>
+        <div class="text-[11px] text-on-surface-variant" id="adsetDrawerSub">Draft · not yet active</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="adsetDrawerClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+    <!-- Basics -->
+    <section>
+      <div class="section-h">Ad set basics</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Name</label>
+          <input class="field-input" id="asName" placeholder="e.g. Site visitors — 30d — Fall"/>
+        </div>
+        <div>
+          <label class="field-label">Campaign</label>
+          <select class="field-input" id="asCampaign"></select>
+        </div>
+        <div>
+          <label class="field-label">Status</label>
+          <select class="field-input" id="asStatus">
+            <option value="Active">Active</option>
+            <option value="Paused">Paused</option>
+            <option value="Draft">Draft</option>
+            <option value="In review">In review</option>
+            <option value="Ended">Ended</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audience -->
+    <section>
+      <div class="section-h">Audience</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Audience</label>
+          <select class="field-input" id="asAudience"></select>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Age</label>
+            <select class="field-input" id="asAge">
+              <option>All ages</option><option>18-24</option><option>25-34</option><option>35-44</option><option>45-54</option><option>55+</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Gender</label>
+            <select class="field-input" id="asGender">
+              <option>All</option><option>Women</option><option>Men</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Locations</label>
+          <input class="field-input" id="asLocations" placeholder="e.g. United States, Canada"/>
+        </div>
+      </div>
+    </section>
+
+    <!-- Placement & bid -->
+    <section>
+      <div class="section-h">Placement &amp; bid</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Placement</label>
+          <select class="field-input" id="asPlacement">
+            <option>Auto</option><option>Feed</option><option>Stories / Reels</option><option>Search</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Bid strategy</label>
+          <select class="field-input" id="asBid">
+            <option>Lowest cost</option><option>Cost cap</option><option>ROAS goal</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Daily budget</label>
+          <input type="number" class="field-input" id="asBudget" value="100"/>
+        </div>
+        <div>
+          <label class="field-label">Frequency cap</label>
+          <input type="number" class="field-input" id="asFrequency" value="2"/>
+        </div>
+      </div>
+    </section>
+
+    <!-- Schedule -->
+    <section>
+      <div class="section-h">Schedule</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Start</label>
+          <input type="datetime-local" class="field-input" id="asStart"/>
+        </div>
+        <div>
+          <label class="field-label">End (optional)</label>
+          <input type="datetime-local" class="field-input" id="asEnd"/>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="adsetCancel">Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" id="adsetSaveNew">Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" id="adsetSave">Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pillFor(status){
+  const cls = status==="Active"?"active":status==="Paused"?"paused":status==="In review"?"review":status==="Draft"?"draft":status==="Ended"?"ended":"draft";
+  return `<span class="stat ${cls}">${status}</span>`;
+}
+function netChip(n){ return `<span class="net-chip net-${n}">${n}</span>`; }
+function fmtDate(iso){
+  if (!iso) return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+
+/* ─── data ─── */
+const PLACEMENTS = ["Auto","Feed","Stories / Reels","Search"];
+const BIDS = ["Lowest cost","Cost cap","ROAS goal"];
+const AUDIENCES = ["Site visitors 30d","Abandoned cart 7d","Lookalike — VIPs","TikTok engagement 90d","New customers"];
+
+const CAMPAIGNS = [
+  { id:"CMP-3001", name:"Fall launch — Prospecting", network:"Meta" },
+  { id:"CMP-3002", name:"TikTok creator drop", network:"TikTok" },
+  { id:"CMP-3003", name:"Brand search — Non-brand", network:"Google" },
+  { id:"CMP-3004", name:"Holiday capsule lookalike", network:"Meta" },
+  { id:"CMP-3005", name:"Pinterest — Evergreen inspo", network:"Pinterest" },
+  { id:"CMP-3006", name:"Summer clearance (ended)", network:"Meta" }
+];
+
+const ADSETS = [
+  { id:"AS-5001", name:"Fall — Retargeting 30d", campaignId:"CMP-3001", campaignName:"Fall launch — Prospecting", network:"Meta", audience:"Site visitors 30d", placement:"Feed", bid:"Lowest cost", budget:120, spend:4210, revenue:18240, roas:4.33, frequency:2.1, status:"Active", start:"2026-10-15T00:00", end:"2026-11-30T23:59" },
+  { id:"AS-5002", name:"Fall — Lookalike 2%", campaignId:"CMP-3001", campaignName:"Fall launch — Prospecting", network:"Meta", audience:"Lookalike — VIPs", placement:"Auto", bid:"ROAS goal", budget:130, spend:4410, revenue:18480, roas:4.19, frequency:2.8, status:"Active", start:"2026-10-15T00:00", end:"2026-11-30T23:59" },
+  { id:"AS-5003", name:"TikTok — Spark ads 25-44", campaignId:"CMP-3002", campaignName:"TikTok creator drop", network:"TikTok", audience:"TikTok engagement 90d", placement:"Stories / Reels", bid:"Lowest cost", budget:180, spend:4210, revenue:12890, roas:3.06, frequency:3.4, status:"Active", start:"2026-10-20T00:00", end:"2026-11-20T23:59" },
+  { id:"AS-5004", name:"Search — Non-brand exact", campaignId:"CMP-3003", campaignName:"Brand search — Non-brand", network:"Google", audience:"New customers", placement:"Search", bid:"Cost cap", budget:120, spend:2310, revenue:9280, roas:4.02, frequency:1.4, status:"Active", start:"2026-10-01T00:00", end:"2026-12-31T23:59" },
+  { id:"AS-5005", name:"Holiday — Lookalike 1%", campaignId:"CMP-3004", campaignName:"Holiday capsule lookalike", network:"Meta", audience:"Lookalike — VIPs", placement:"Auto", bid:"Lowest cost", budget:300, spend:3280, revenue:14840, roas:4.53, frequency:2.4, status:"In review", start:"2026-11-05T00:00", end:"2026-12-24T23:59" },
+  { id:"AS-5006", name:"Pinterest — Evergreen", campaignId:"CMP-3005", campaignName:"Pinterest — Evergreen inspo", network:"Pinterest", audience:"Site visitors 30d", placement:"Feed", bid:"Lowest cost", budget:80, spend:0, revenue:0, roas:0, frequency:0, status:"Draft", start:null, end:null },
+  { id:"AS-5007", name:"Summer — Retargeting cart", campaignId:"CMP-3006", campaignName:"Summer clearance (ended)", network:"Meta", audience:"Abandoned cart 7d", placement:"Feed", bid:"Lowest cost", budget:200, spend:12400, revenue:38210, roas:3.08, frequency:5.8, status:"Ended", start:"2026-08-01T00:00", end:"2026-09-15T23:59" }
+];
+
+/* ─── state ─── */
+const filters = {
+  q:"",
+  tab:"All",
+  campaigns:new Set(CAMPAIGNS.map(c=>c.id)),
+  placements:new Set(PLACEMENTS),
+  bids:new Set(BIDS)
+};
+let editing = null;
+let peekId = null;
+let rowMenuForId = null;
+
+/* ─── render ─── */
+function filteredAds(){
+  return ADSETS.filter(a=>{
+    const q = filters.q.toLowerCase();
+    const qOK = !q || (a.id + " " + a.name + " " + a.campaignName + " " + a.audience + " " + a.network).toLowerCase().includes(q);
+    const tabOK = filters.tab === "All" || a.status === filters.tab;
+    const campOK = filters.campaigns.has(a.campaignId);
+    const placeOK = filters.placements.has(a.placement);
+    const bidOK = filters.bids.has(a.bid);
+    return qOK && tabOK && campOK && placeOK && bidOK;
+  });
+}
+
+function renderTable(){
+  const rows = filteredAds();
+  const tbody = document.querySelector("[data-adset-tbody]");
+  tbody.innerHTML = rows.map(a=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${a.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check as-check" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2">
+        <div class="font-medium">${esc(a.name)}</div>
+        <div class="text-[11px] text-on-surface-variant">${a.id}</div>
+      </td>
+      <td class="px-3 py-2">
+        <div class="text-[12px]">${esc(a.campaignName)}</div>
+        <div class="text-[11px] text-on-surface-variant">${netChip(a.network)}</div>
+      </td>
+      <td class="px-3 py-2 text-[12px]">${esc(a.audience)}</td>
+      <td class="px-3 py-2 text-[12px]">${esc(a.placement)}</td>
+      <td class="px-3 py-2 text-[12px]">${esc(a.bid)}</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${a.budget}/d</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${a.spend.toLocaleString()}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${a.roas ? a.roas.toFixed(2)+"×" : "—"}</td>
+      <td class="px-3 py-2">${pillFor(a.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu="${a.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelector("[data-b-count]").textContent = `${rows.length} of ${ADSETS.length}`;
+  document.querySelector("[data-adset-empty]").classList.toggle("hidden-imp", rows.length > 0);
+  tbody.classList.toggle("hidden-imp", rows.length === 0);
+  syncCounts();
+  syncSelectAll();
+  syncBulk();
+  syncClearAll();
+}
+
+function syncCounts(){
+  const active = ADSETS.filter(a=>a.status === "Active");
+  const avgRoas = active.length ? (active.reduce((s,a)=>s + a.roas, 0) / active.length) : 0;
+  const maxFreq = ADSETS.reduce((m,a)=>Math.max(m, a.frequency || 0), 0);
+  document.getElementById("statTotal").textContent = ADSETS.length;
+  document.getElementById("statActive").textContent = active.length;
+  document.getElementById("statRoas").textContent = avgRoas.toFixed(2) + "×";
+  document.getElementById("statSat").textContent = maxFreq.toFixed(1) + "×";
+}
+
+/* ─── row click → peek ─── */
+document.querySelector("[data-adset-tbody]").addEventListener("click", e=>{
+  const row = e.target.closest("[data-row]");
+  if (!row) return;
+  if (e.target.closest("button") || e.target.closest("input")) return;
+  openPeek(row.dataset.row);
+});
+
+/* ─── row ⋯ menu ─── */
+const rowMenu = document.getElementById("rowMenu");
+document.querySelector("[data-adset-tbody]").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-row-menu]");
+  if (!btn) return;
+  e.stopPropagation();
+  rowMenuForId = btn.dataset.rowMenu;
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+});
+rowMenu.querySelectorAll("[data-row-act]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.rowAct;
+  const a = ADSETS.find(x=>x.id === rowMenuForId);
+  rowMenu.classList.remove("open");
+  if (!a) return;
+  switch(act){
+    case "edit": openAdsetDrawer(a.id); break;
+    case "view": openPeek(a.id); break;
+    case "duplicate":
+      ADSETS.unshift({...a, id:"AS-"+(5000 + ADSETS.length + 1), name:a.name + " (copy)", status:"Draft", spend:0, revenue:0, roas:0, frequency:0});
+      renderTable(); toast(`Duplicated: ${a.name}`); break;
+    case "pause": a.status = "Paused"; renderTable(); toast(`Paused: ${a.name}`); break;
+    case "resume": a.status = "Active"; renderTable(); toast(`Resumed: ${a.name}`); break;
+    case "archive": a.status = "Ended"; renderTable(); toast(`Archived: ${a.name}`); break;
+    case "delete":
+      if (confirm(`Delete ad set "${a.name}"?`)){
+        const idx = ADSETS.findIndex(x=>x.id === a.id);
+        if (idx >= 0) ADSETS.splice(idx, 1);
+        renderTable(); toast(`Deleted: ${a.name}`);
+      }
+      break;
+  }
+}));
+
+/* ─── outside click ─── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#rowMenu") && !e.target.closest("[data-row-menu]")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+  if (!e.target.closest("#popCampaign") && !e.target.closest("#btnCampaign")) popCampaign.classList.remove("open");
+  if (!e.target.closest("#popPlacement") && !e.target.closest("#btnPlacement")) popPlacement.classList.remove("open");
+  if (!e.target.closest("#popBid") && !e.target.closest("#btnBid")) popBid.classList.remove("open");
+});
+
+/* ─── tabs ─── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  filters.tab = b.dataset.viewtab;
+  renderTable();
+}));
+
+/* ─── search ─── */
+document.querySelector("[data-filter]").addEventListener("input", e=>{ filters.q = e.target.value; renderTable(); });
+
+/* ─── campaign popover ─── */
+const popCampaign = document.getElementById("popCampaign");
+const popPlacement = document.getElementById("popPlacement");
+const popBid = document.getElementById("popBid");
+
+/* build campaign checkboxes */
+document.getElementById("campaignFilterList").innerHTML = CAMPAIGNS.map(c=>`
+  <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-campaign" value="${c.id}" checked/>${esc(c.name)}</label>
+`).join("");
+
+function openPop(pop, btn){
+  const r = btn.getBoundingClientRect();
+  [popCampaign, popPlacement, popBid].forEach(p=>{ if (p !== pop) p.classList.remove("open"); });
+  pop.style.top = (r.bottom + 4) + "px";
+  pop.style.left = Math.min(r.left, window.innerWidth - 260) + "px";
+  pop.classList.toggle("open");
+}
+document.getElementById("btnCampaign").addEventListener("click", e=>{e.stopPropagation(); openPop(popCampaign, e.currentTarget);});
+document.getElementById("btnPlacement").addEventListener("click", e=>{e.stopPropagation(); openPop(popPlacement, e.currentTarget);});
+document.getElementById("btnBid").addEventListener("click", e=>{e.stopPropagation(); openPop(popBid, e.currentTarget);});
+
+document.getElementById("campaignApply").addEventListener("click", ()=>{
+  filters.campaigns = new Set([...document.querySelectorAll(".filter-campaign:checked")].map(cb=>cb.value));
+  popCampaign.classList.remove("open");
+  renderTable();
+});
+document.getElementById("campaignClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-campaign").forEach(cb=>cb.checked = true);
+  filters.campaigns = new Set(CAMPAIGNS.map(c=>c.id));
+  popCampaign.classList.remove("open");
+  renderTable();
+});
+document.getElementById("placementApply").addEventListener("click", ()=>{
+  filters.placements = new Set([...document.querySelectorAll(".filter-placement:checked")].map(cb=>cb.value));
+  popPlacement.classList.remove("open");
+  renderTable();
+});
+document.getElementById("placementClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-placement").forEach(cb=>cb.checked = true);
+  filters.placements = new Set(PLACEMENTS);
+  popPlacement.classList.remove("open");
+  renderTable();
+});
+document.getElementById("bidApply").addEventListener("click", ()=>{
+  filters.bids = new Set([...document.querySelectorAll(".filter-bid:checked")].map(cb=>cb.value));
+  popBid.classList.remove("open");
+  renderTable();
+});
+document.getElementById("bidClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-bid").forEach(cb=>cb.checked = true);
+  filters.bids = new Set(BIDS);
+  popBid.classList.remove("open");
+  renderTable();
+});
+
+/* ─── clear all ─── */
+function syncClearAll(){
+  const active = filters.q || filters.tab !== "All" || filters.campaigns.size !== CAMPAIGNS.length || filters.placements.size !== PLACEMENTS.length || filters.bids.size !== BIDS.length;
+  document.getElementById("btnClearAll").classList.toggle("hidden-imp", !active);
+}
+document.getElementById("btnClearAll").addEventListener("click", ()=>{
+  filters.q = ""; document.querySelector("[data-filter]").value = "";
+  filters.tab = "All";
+  document.querySelectorAll("[data-viewtab]").forEach(b=>b.classList.toggle("active", b.dataset.viewtab === "All"));
+  filters.campaigns = new Set(CAMPAIGNS.map(c=>c.id));
+  filters.placements = new Set(PLACEMENTS);
+  filters.bids = new Set(BIDS);
+  document.querySelectorAll(".filter-campaign").forEach(cb=>cb.checked = true);
+  document.querySelectorAll(".filter-placement").forEach(cb=>cb.checked = true);
+  document.querySelectorAll(".filter-bid").forEach(cb=>cb.checked = true);
+  renderTable();
+});
+document.getElementById("emptyClear").addEventListener("click", ()=>document.getElementById("btnClearAll").click());
+document.getElementById("btnSaved").addEventListener("click", ()=>toast("Saved views — pick or save current filters"));
+
+/* ─── bulk ─── */
+function syncSelectAll(){
+  const all = document.querySelector("[data-check-all]");
+  const rows = [...document.querySelectorAll(".as-check")].filter(cb=>cb.closest("tr").style.display !== "none");
+  const checked = rows.filter(cb=>cb.checked);
+  all.checked = rows.length > 0 && checked.length === rows.length;
+  all.indeterminate = checked.length > 0 && checked.length < rows.length;
+}
+function syncBulk(){
+  const n = [...document.querySelectorAll(".as-check")].filter(cb=>cb.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  bar.classList.toggle("show", n > 0);
+  document.querySelector("[data-bulk-count]").textContent = `${n} selected`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.classList.contains("as-check")) syncBulk();
+  if (e.target.matches("[data-check-all]")){
+    const on = e.target.checked;
+    document.querySelectorAll(".as-check").forEach(cb=>{
+      if (cb.closest("tr").style.display !== "none") cb.checked = on;
+    });
+    syncBulk();
+  }
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".as-check").forEach(cb=>cb.checked = false);
+    document.querySelector("[data-check-all]").checked = false;
+    syncBulk(); return;
+  }
+  const selected = [...document.querySelectorAll(".as-check:checked")].map(cb=>cb.closest("tr").dataset.row);
+  const n = selected.length;
+  if (act === "pause"){ selected.forEach(id=>{ const a = ADSETS.find(x=>x.id===id); if (a) a.status = "Paused"; }); toast(`Paused ${n} ad set(s)`); }
+  else if (act === "resume"){ selected.forEach(id=>{ const a = ADSETS.find(x=>x.id===id); if (a) a.status = "Active"; }); toast(`Resumed ${n} ad set(s)`); }
+  else if (act === "duplicate"){
+    selected.forEach(id=>{
+      const a = ADSETS.find(x=>x.id===id);
+      if (a) ADSETS.unshift({...a, id:"AS-"+(5000 + ADSETS.length + 1), name:a.name + " (copy)", status:"Draft", spend:0, revenue:0, roas:0, frequency:0});
+    });
+    toast(`Duplicated ${n} ad set(s)`);
+  }
+  else if (act === "delete"){
+    if (confirm(`Delete ${n} ad set(s)?`)){
+      selected.forEach(id=>{
+        const idx = ADSETS.findIndex(x=>x.id===id);
+        if (idx >= 0) ADSETS.splice(idx, 1);
+      });
+      toast(`Deleted ${n} ad set(s)`);
+    }
+  }
+  renderTable();
+  document.querySelectorAll(".as-check").forEach(cb=>cb.checked = false);
+  document.querySelector("[data-check-all]").checked = false;
+  syncBulk();
+}));
+
+/* ─── peek ─── */
+function openPeek(id){
+  peekId = id;
+  const a = ADSETS.find(x=>x.id === id);
+  if (!a) return;
+  document.getElementById("peekTitle").textContent = a.name;
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-3 flex items-center gap-2">${pillFor(a.status)}${netChip(a.network)}</div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3 grid grid-cols-3 gap-2 text-center">
+      <div><div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Spend</div><div class="text-body-md font-semibold tabular-nums">$${a.spend.toLocaleString()}</div></div>
+      <div><div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Revenue</div><div class="text-body-md font-semibold tabular-nums">$${a.revenue.toLocaleString()}</div></div>
+      <div><div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">ROAS</div><div class="text-body-md font-semibold tabular-nums">${a.roas ? a.roas.toFixed(2)+"×" : "—"}</div></div>
+    </div>
+    <dl class="text-body-sm">
+      <div class="kv"><dt>Ad set ID</dt><dd class="code-mono">${a.id}</dd></div>
+      <div class="kv"><dt>Campaign</dt><dd>${esc(a.campaignName)}</dd></div>
+      <div class="kv"><dt>Audience</dt><dd>${esc(a.audience)}</dd></div>
+      <div class="kv"><dt>Placement</dt><dd>${esc(a.placement)}</dd></div>
+      <div class="kv"><dt>Bid strategy</dt><dd>${esc(a.bid)}</dd></div>
+      <div class="kv"><dt>Daily budget</dt><dd class="tabular-nums">$${a.budget}</dd></div>
+      <div class="kv"><dt>Frequency</dt><dd class="tabular-nums">${a.frequency.toFixed(1)}×</dd></div>
+      <div class="kv"><dt>Start</dt><dd>${fmtDate(a.start)}</dd></div>
+      <div class="kv"><dt>End</dt><dd>${fmtDate(a.end)}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="edit"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="resume"><span class="material-symbols-outlined text-[16px]">play_circle</span>Resume</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    const act = b.dataset.peek;
+    if (act === "edit"){ closePeek(); openAdsetDrawer(a.id); }
+    else if (act === "duplicate"){
+      ADSETS.unshift({...a, id:"AS-"+(5000 + ADSETS.length + 1), name:a.name + " (copy)", status:"Draft", spend:0, revenue:0, roas:0, frequency:0});
+      closePeek(); renderTable(); toast("Duplicated");
+    }
+    else if (act === "pause"){ a.status = "Paused"; closePeek(); renderTable(); toast("Paused"); }
+    else if (act === "resume"){ a.status = "Active"; closePeek(); renderTable(); toast("Resumed"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", ()=>{
+  if (document.getElementById("adsetDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peekEdit").addEventListener("click", ()=>{
+  if (!peekId) return;
+  const id = peekId; closePeek(); openAdsetDrawer(id);
+});
+
+/* ─── drawer ─── */
+function openAdsetDrawer(id){
+  editing = id ? ADSETS.find(a=>a.id === id) : null;
+  document.getElementById("adsetDrawerTitle").textContent = editing ? "Edit ad set" : "New ad set";
+  document.getElementById("adsetDrawerSub").textContent = editing ? editing.status + " · " + editing.id : "Draft · not yet active";
+
+  document.getElementById("asName").value = editing ? editing.name : "";
+  document.getElementById("asStatus").value = editing ? editing.status : "Draft";
+  document.getElementById("asAudience").innerHTML = AUDIENCES.map(a=>`<option>${a}</option>`).join("");
+  document.getElementById("asAudience").value = editing ? editing.audience : AUDIENCES[0];
+  document.getElementById("asPlacement").value = editing ? editing.placement : "Auto";
+  document.getElementById("asBid").value = editing ? editing.bid : "Lowest cost";
+  document.getElementById("asBudget").value = editing ? editing.budget : 100;
+  document.getElementById("asFrequency").value = editing ? editing.frequency : 2;
+  document.getElementById("asAge").value = "All ages";
+  document.getElementById("asGender").value = "All";
+  document.getElementById("asLocations").value = "United States";
+  document.getElementById("asStart").value = editing && editing.start ? editing.start.slice(0,16) : new Date().toISOString().slice(0,16);
+  document.getElementById("asEnd").value = editing && editing.end ? editing.end.slice(0,16) : "";
+
+  // campaigns
+  document.getElementById("asCampaign").innerHTML = CAMPAIGNS.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  document.getElementById("asCampaign").value = editing ? editing.campaignId : CAMPAIGNS[0].id;
+
+  document.getElementById("adsetDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closeAdsetDrawer(){
+  document.getElementById("adsetDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing = null;
+}
+document.getElementById("adsetDrawerClose").addEventListener("click", closeAdsetDrawer);
+document.getElementById("adsetCancel").addEventListener("click", closeAdsetDrawer);
+
+/* save */
+function collectAdset(){
+  const name = document.getElementById("asName").value.trim();
+  if (!name){ toast("Ad set name is required"); return null; }
+  const campaignId = document.getElementById("asCampaign").value;
+  const campaign = CAMPAIGNS.find(c=>c.id === campaignId);
+  const start = document.getElementById("asStart").value;
+  const end = document.getElementById("asEnd").value;
+  return {
+    id: editing ? editing.id : "AS-" + (5000 + ADSETS.length + 1),
+    name,
+    campaignId,
+    campaignName: campaign ? campaign.name : "—",
+    network: campaign ? campaign.network : "Meta",
+    audience: document.getElementById("asAudience").value,
+    placement: document.getElementById("asPlacement").value,
+    bid: document.getElementById("asBid").value,
+    budget: parseInt(document.getElementById("asBudget").value || "0", 10),
+    spend: editing ? editing.spend : 0,
+    revenue: editing ? editing.revenue : 0,
+    roas: editing ? editing.roas : 0,
+    frequency: parseFloat(document.getElementById("asFrequency").value || "0"),
+    status: document.getElementById("asStatus").value,
+    start: start || null,
+    end: end || null
+  };
+}
+document.getElementById("adsetSave").addEventListener("click", ()=>{
+  const a = collectAdset(); if (!a) return;
+  if (editing){ const idx = ADSETS.findIndex(x=>x.id === editing.id); if (idx >= 0) ADSETS[idx] = a; }
+  else ADSETS.unshift(a);
+  closeAdsetDrawer(); renderTable();
+  toast(editing ? "Ad set updated" : "Ad set created");
+});
+document.getElementById("adsetSaveNew").addEventListener("click", ()=>{
+  const a = collectAdset(); if (!a) return;
+  if (editing){ const idx = ADSETS.findIndex(x=>x.id === editing.id); if (idx >= 0) ADSETS[idx] = a; }
+  else ADSETS.unshift(a);
+  editing = null;
+  document.getElementById("adsetDrawerTitle").textContent = "New ad set";
+  document.getElementById("adsetDrawerSub").textContent = "Draft · not yet active";
+  document.getElementById("asName").value = "";
+  renderTable();
+  toast("Saved. New ad set form ready.");
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.querySelectorAll("[data-new-adset]").forEach(b=>b.addEventListener("click", ()=>openAdsetDrawer(null)));
+document.querySelectorAll("[data-create-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  const kind = b.dataset.createKind;
+  createMenu.classList.remove("open");
+  if (kind === "adset") openAdsetDrawer(null);
+  else toast("Create " + kind + " — will route to that dedicated page");
+}));
+
+/* ─── toolbar ─── */
+document.querySelector("[data-action='export']").addEventListener("click", ()=>toast("Exporting ad sets…"));
+document.querySelector("[data-action='customize']").addEventListener("click", ()=>toast("Customize panel — Data / Visual tabs"));
+
+/* ─── pagination ─── */
+document.getElementById("rowsPerPage").addEventListener("change", ()=>toast("Rows per page updated"));
+document.getElementById("pagePrev").addEventListener("click", ()=>toast("Previous page"));
+document.getElementById("pageNext").addEventListener("click", ()=>toast("Next page"));
+
+/* ─── boot ─── */
+renderTable();
+</script>
+</body>
+</html>

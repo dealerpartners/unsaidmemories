@@ -1,0 +1,1392 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useMemo, useRef, useEffect } from 'react';
+     4→import { exportToCsv } from '@/lib/csvExport';
+     5→import styles from './EstimatesScreen.module.css';
+     6→
+     7→export interface EstimateLine {
+     8→  id: string;
+     9→  desc: string;
+    10→  qty: number;
+    11→  rate: number;
+    12→}
+    13→
+    14→export interface EstimateItem {
+    15→  id: string;
+    16→  no: string;
+    17→  customer: string;
+    18→  email: string;
+    19→  avatarLetter: string;
+    20→  avatarClass: string;
+    21→  sentDate: string;
+    22→  expiryDate: string;
+    23→  amount: number;
+    24→  status: 'Draft' | 'Sent' | 'Viewed' | 'Accepted' | 'Declined' | 'Expired' | 'Converted';
+    25→  convertedInvoiceNo?: string;
+    26→  lines: EstimateLine[];
+    27→  note?: string;
+    28→}
+    29→
+    30→const INITIAL_ESTIMATES: EstimateItem[] = [
+    31→  {
+    32→    id: 'est-1',
+    33→    no: '0221',
+    34→    customer: 'Orion Apparel',
+    35→    email: 'hello@orionapparel.com',
+    36→    avatarLetter: 'O',
+    37→    avatarClass: styles.avatarNavy,
+    38→    sentDate: '10/26/2026',
+    39→    expiryDate: '11/26/2026',
+    40→    amount: 3600,
+    41→    status: 'Sent',
+    42→    lines: [
+    43→      { id: 'l1', desc: 'Custom apparel — 40 units', qty: 40, rate: 80.0 },
+    44→      { id: 'l2', desc: 'Rush fee', qty: 1, rate: 400.0 },
+    45→    ],
+    46→  },
+    47→  {
+    48→    id: 'est-2',
+    49→    no: '0219',
+    50→    customer: 'Lakeside Design',
+    51→    email: 'hello@lakeside.design',
+    52→    avatarLetter: 'L',
+    53→    avatarClass: styles.avatarBlue,
+    54→    sentDate: '10/18/2026',
+    55→    expiryDate: '11/18/2026',
+    56→    amount: 4200,
+    57→    status: 'Viewed',
+    58→    lines: [{ id: 'l1', desc: 'Website redesign', qty: 1, rate: 4200.0 }],
+    59→  },
+    60→  {
+    61→    id: 'est-3',
+    62→    no: '0214',
+    63→    customer: 'Northwind Labs',
+    64→    email: 'finance@northwind.io',
+    65→    avatarLetter: 'N',
+    66→    avatarClass: styles.avatarTeal,
+    67→    sentDate: '10/12/2026',
+    68→    expiryDate: '11/12/2026',
+    69→    amount: 1440,
+    70→    status: 'Viewed',
+    71→    lines: [{ id: 'l1', desc: 'Consulting — 12 hours', qty: 12, rate: 120.0 }],
+    72→  },
+    73→  {
+    74→    id: 'est-4',
+    75→    no: '0212',
+    76→    customer: 'Acme Corp',
+    77→    email: 'ap@acme.com',
+    78→    avatarLetter: 'A',
+    79→    avatarClass: styles.avatarBlue,
+    80→    sentDate: '10/05/2026',
+    81→    expiryDate: '11/05/2026',
+    82→    amount: 4800,
+    83→    status: 'Accepted',
+    84→    lines: [{ id: 'l1', desc: 'Brand identity package', qty: 1, rate: 4800.0 }],
+    85→  },
+    86→  {
+    87→    id: 'est-5',
+    88→    no: '0207',
+    89→    customer: 'Orion Apparel',
+    90→    email: 'hello@orionapparel.com',
+    91→    avatarLetter: 'O',
+    92→    avatarClass: styles.avatarNavy,
+    93→    sentDate: '09/18/2026',
+    94→    expiryDate: '10/18/2026',
+    95→    amount: 2600,
+    96→    status: 'Declined',
+    97→    lines: [{ id: 'l1', desc: 'Spring collection — 30 units', qty: 30, rate: 86.67 }],
+    98→  },
+    99→  {
+   100→    id: 'est-6',
+   101→    no: '0224',
+   102→    customer: 'Maple Supply',
+   103→    email: 'ar@maplesupply.io',
+   104→    avatarLetter: 'M',
+   105→    avatarClass: styles.avatarMaroon,
+   106→    sentDate: '—',
+   107→    expiryDate: '12/01/2026',
+   108→    amount: 2200,
+   109→    status: 'Draft',
+   110→    lines: [{ id: 'l1', desc: 'Custom supply order', qty: 1, rate: 2200.0 }],
+   111→  },
+   112→  {
+   113→    id: 'est-7',
+   114→    no: '0201',
+   115→    customer: 'Blue Ridge Co.',
+   116→    email: 'billing@blueridge.co',
+   117→    avatarLetter: 'B',
+   118→    avatarClass: styles.avatarGreen,
+   119→    sentDate: '08/15/2026',
+   120→    expiryDate: '09/15/2026',
+   121→    amount: 3100,
+   122→    status: 'Expired',
+   123→    lines: [{ id: 'l1', desc: 'Fall collection — 25 units', qty: 25, rate: 124.0 }],
+   124→  },
+   125→  {
+   126→    id: 'est-8',
+   127→    no: '0198',
+   128→    customer: 'Acme Corp',
+   129→    email: 'ap@acme.com',
+   130→    avatarLetter: 'A',
+   131→    avatarClass: styles.avatarBlue,
+   132→    sentDate: '08/12/2026',
+   133→    expiryDate: '09/12/2026',
+   134→    amount: 2400,
+   135→    status: 'Converted',
+   136→    convertedInvoiceNo: '1002',
+   137→    lines: [{ id: 'l1', desc: 'Design retainer', qty: 1, rate: 2400.0 }],
+   138→  },
+   139→];
+   140→
+   141→interface EstimatesScreenProps {
+   142→  onCreateInvoice?: () => void;
+   143→  onCreateCustomer?: () => void;
+   144→  onOpenCreateFlyout?: () => void;
+   145→  onToast?: (message: string) => void;
+   146→}
+   147→
+   148→export default function EstimatesScreen({
+   149→  onCreateInvoice,
+   150→  onCreateCustomer,
+   151→  onOpenCreateFlyout,
+   152→  onToast,
+   153→}: EstimatesScreenProps) {
+   154→  const [estimates, setEstimates] = useState<EstimateItem[]>(INITIAL_ESTIMATES);
+   155→  const [activeTab, setActiveTab] = useState<string>('All');
+   156→  const [searchFilter, setSearchFilter] = useState<string>('');
+   157→  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+   158→
+   159→  // Row context menu state
+   160→  const [menuOpen, setMenuOpen] = useState(false);
+   161→  const [menuPos, setMenuPos] = useState({ top: 0, left: 0 });
+   162→  const [activeMenuEst, setActiveMenuEst] = useState<EstimateItem | null>(null);
+   163→
+   164→  // New estimate split dropdown
+   165→  const [newMenuOpen, setNewMenuOpen] = useState(false);
+   166→  const [newMenuPos, setNewMenuPos] = useState({ top: 0, left: 0 });
+   167→  const newSplitBtnRef = useRef<HTMLButtonElement | null>(null);
+   168→
+   169→  // Drawer state
+   170→  const [drawerOpen, setDrawerOpen] = useState(false);
+   171→  const [editingEst, setEditingEst] = useState<EstimateItem | null>(null);
+   172→
+   173→  // Convert confirmation modal
+   174→  const [convertModalOpen, setConvertModalOpen] = useState(false);
+   175→  const [convertTargetEst, setConvertTargetEst] = useState<EstimateItem | null>(null);
+   176→
+   177→  // Close menus on click outside
+   178→  useEffect(() => {
+   179→    const handleGlobalClick = () => {
+   180→      setMenuOpen(false);
+   181→      setNewMenuOpen(false);
+   182→    };
+   183→    document.addEventListener('click', handleGlobalClick);
+   184→    return () => document.removeEventListener('click', handleGlobalClick);
+   185→  }, []);
+   186→
+   187→  // Filtered estimates list
+   188→  const filteredEstimates = useMemo(() => {
+   189→    const q = searchFilter.trim().toLowerCase();
+   190→    return estimates.filter((est) => {
+   191→      const tabMatch =
+   192→        activeTab === 'All' ||
+   193→        (activeTab === 'Converted' ? est.status === 'Converted' : est.status === activeTab);
+   194→      if (!tabMatch) return false;
+   195→      if (!q) return true;
+   196→      return (
+   197→        est.no.toLowerCase().includes(q) ||
+   198→        est.customer.toLowerCase().includes(q) ||
+   199→        est.email.toLowerCase().includes(q) ||
+   200→        est.status.toLowerCase().includes(q)
+   201→      );
+   202→    });
+   203→  }, [estimates, activeTab, searchFilter]);
+   204→
+   205→  // Bulk selection handlers
+   206→  const handleCheckAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+   207→    if (e.target.checked) {
+   208→      setSelectedIds(filteredEstimates.map((e) => e.id));
+   209→    } else {
+   210→      setSelectedIds([]);
+   211→    }
+   212→  };
+   213→
+   214→  const handleToggleCheck = (id: string, e: React.MouseEvent) => {
+   215→    e.stopPropagation();
+   216→    setSelectedIds((prev) =>
+   217→      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+   218→    );
+   219→  };
+   220→
+   221→  const handleBulkAction = (action: string) => {
+   222→    const count = selectedIds.length;
+   223→    if (action === 'delete') {
+   224→      setEstimates((prev) => prev.filter((e) => !selectedIds.includes(e.id)));
+   225→      setSelectedIds([]);
+   226→      onToast?.(`Deleted ${count} estimate(s)`);
+   227→      return;
+   228→    }
+   229→    if (action === 'convert') {
+   230→      setEstimates((prev) =>
+   231→        prev.map((e) =>
+   232→          selectedIds.includes(e.id)
+   233→            ? { ...e, status: 'Converted', convertedInvoiceNo: `10${Math.floor(Math.random() * 90) + 10}` }
+   234→            : e
+   235→        )
+   236→      );
+   237→      setSelectedIds([]);
+   238→      onToast?.(`Converted ${count} estimate(s) to invoice`);
+   239→      return;
+   240→    }
+   241→    setSelectedIds([]);
+   242→    onToast?.(`${action.charAt(0).toUpperCase() + action.slice(1)} on ${count} estimate(s)`);
+   243→  };
+   244→
+   245→  // Open Drawer for Create / Edit
+   246→  const handleOpenDrawer = (est: EstimateItem | null) => {
+   247→    if (est) {
+   248→      setEditingEst({ ...est });
+   249→    } else {
+   250→      const nextNo = `02${estimates.length + 20}`;
+   251→      setEditingEst({
+   252→        id: `est-${Date.now()}`,
+   253→        no: nextNo,
+   254→        customer: 'Acme Corp',
+   255→        email: 'ap@acme.com',
+   256→        avatarLetter: 'A',
+   257→        avatarClass: styles.avatarBlue,
+   258→        sentDate: '11/04/2026',
+   259→        expiryDate: '12/04/2026',
+   260→        amount: 2800,
+   261→        status: 'Draft',
+   262→        note: 'Thanks for the opportunity — let us know if you have questions.',
+   263→        lines: [
+   264→          { id: 'l1', desc: 'Custom design — 3 concepts', qty: 3, rate: 800.0 },
+   265→          { id: 'l2', desc: 'Print setup + samples', qty: 1, rate: 400.0 },
+   266→        ],
+   267→      });
+   268→    }
+   269→    setDrawerOpen(true);
+   270→  };
+   271→
+   272→  const handleDrawerSave = () => {
+   273→    if (!editingEst) return;
+   274→    const lineTotal = editingEst.lines.reduce((acc, l) => acc + l.qty * l.rate, 0);
+   275→    const updated = { ...editingEst, amount: lineTotal };
+   276→
+   277→    setEstimates((prev) => {
+   278→      const exists = prev.some((e) => e.id === updated.id);
+   279→      if (exists) {
+   280→        return prev.map((e) => (e.id === updated.id ? updated : e));
+   281→      }
+   282→      return [updated, ...prev];
+   283→    });
+   284→    setDrawerOpen(false);
+   285→    onToast?.(`Estimate ${updated.no} saved`);
+   286→  };
+   287→
+   288→  const handleDrawerSend = () => {
+   289→    if (!editingEst) return;
+   290→    const lineTotal = editingEst.lines.reduce((acc, l) => acc + l.qty * l.rate, 0);
+   291→    const updated: EstimateItem = { ...editingEst, amount: lineTotal, status: 'Sent' };
+   292→
+   293→    setEstimates((prev) => {
+   294→      const exists = prev.some((e) => e.id === updated.id);
+   295→      if (exists) {
+   296→        return prev.map((e) => (e.id === updated.id ? updated : e));
+   297→      }
+   298→      return [updated, ...prev];
+   299→    });
+   300→    setDrawerOpen(false);
+   301→    onToast?.(`Estimate ${updated.no} sent to customer`);
+   302→  };
+   303→
+   304→  const handlePromptConvert = (est: EstimateItem) => {
+   305→    setConvertTargetEst(est);
+   306→    setConvertModalOpen(true);
+   307→  };
+   308→
+   309→  const handleConfirmConvert = () => {
+   310→    if (!convertTargetEst) return;
+   311→    const newInvoiceNo = `10${Math.floor(Math.random() * 90) + 10}`;
+   312→    setEstimates((prev) =>
+   313→      prev.map((e) =>
+   314→        e.id === convertTargetEst.id
+   315→          ? { ...e, status: 'Converted', convertedInvoiceNo: newInvoiceNo }
+   316→          : e
+   317→      )
+   318→    );
+   319→    setConvertModalOpen(false);
+   320→    setDrawerOpen(false);
+   321→    onToast?.(`Estimate ${convertTargetEst.no} converted to invoice ${newInvoiceNo}`);
+   322→  };
+   323→
+   324→  // Row More Menu
+   325→  const handleOpenRowMenu = (e: React.MouseEvent, est: EstimateItem) => {
+   326→    e.stopPropagation();
+   327→    const rect = e.currentTarget.getBoundingClientRect();
+   328→    setMenuPos({
+   329→      top: rect.bottom + 4,
+   330→      left: Math.min(rect.right - 230, window.innerWidth - 250),
+   331→    });
+   332→    setActiveMenuEst(est);
+   333→    setMenuOpen(true);
+   334→  };
+   335→
+   336→  const handleRowMenuAction = (action: string) => {
+   337→    if (!activeMenuEst) return;
+   338→    const est = activeMenuEst;
+   339→    setMenuOpen(false);
+   340→
+   341→    switch (action) {
+   342→      case 'view':
+   343→      case 'edit':
+   344→        handleOpenDrawer(est);
+   345→        break;
+   346→      case 'duplicate': {
+   347→        const copy: EstimateItem = {
+   348→          ...est,
+   349→          id: `est-${Date.now()}`,
+   350→          no: `${est.no}-copy`,
+   351→          status: 'Draft',
+   352→        };
+   353→        setEstimates((prev) => [copy, ...prev]);
+   354→        onToast?.(`Duplicated estimate ${est.no}`);
+   355→        break;
+   356→      }
+   357→      case 'send':
+   358→        setEstimates((prev) =>
+   359→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Sent' } : e))
+   360→        );
+   361→        onToast?.(`Sent estimate ${est.no}`);
+   362→        break;
+   363→      case 'remind':
+   364→        onToast?.(`Reminder sent for estimate ${est.no}`);
+   365→        break;
+   366→      case 'print':
+   367→        onToast?.(`Printing estimate ${est.no} PDF`);
+   368→        break;
+   369→      case 'convert':
+   370→        handlePromptConvert(est);
+   371→        break;
+   372→      case 'mark-accepted':
+   373→        setEstimates((prev) =>
+   374→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Accepted' } : e))
+   375→        );
+   376→        onToast?.(`Estimate ${est.no} marked accepted`);
+   377→        break;
+   378→      case 'mark-declined':
+   379→        setEstimates((prev) =>
+   380→          prev.map((e) => (e.id === est.id ? { ...e, status: 'Declined' } : e))
+   381→        );
+   382→        onToast?.(`Estimate ${est.no} marked declined`);
+   383→        break;
+   384→      case 'delete':
+   385→        setEstimates((prev) => prev.filter((e) => e.id !== est.id));
+   386→        onToast?.(`Deleted estimate ${est.no}`);
+   387→        break;
+   388→    }
+   389→  };
+   390→
+   391→  const formatCurrency = (amt: number) => {
+   392→    return new Intl.NumberFormat('en-US', {
+   393→      style: 'currency',
+   394→      currency: 'USD',
+   395→      minimumFractionDigits: 2,
+   396→    }).format(amt);
+   397→  };
+   398→
+   399→  const getStatusBadge = (est: EstimateItem) => {
+   400→    if (est.status === 'Converted') {
+   401→      return (
+   402→        <span className={`${styles.statusPill} ${styles.statusConverted}`}>
+   403→          Converted → {est.convertedInvoiceNo || '1002'}
+   404→        </span>
+   405→      );
+   406→    }
+   407→    switch (est.status) {
+   408→      case 'Draft':
+   409→        return <span className={`${styles.statusPill} ${styles.statusDraft}`}>Draft</span>;
+   410→      case 'Sent':
+   411→        return <span className={`${styles.statusPill} ${styles.statusSent}`}>Sent</span>;
+   412→      case 'Viewed':
+   413→        return <span className={`${styles.statusPill} ${styles.statusViewed}`}>Viewed</span>;
+   414→      case 'Accepted':
+   415→        return <span className={`${styles.statusPill} ${styles.statusAccepted}`}>Accepted</span>;
+   416→      case 'Declined':
+   417→        return <span className={`${styles.statusPill} ${styles.statusDeclined}`}>Declined</span>;
+   418→      case 'Expired':
+   419→        return <span className={`${styles.statusPill} ${styles.statusExpired}`}>Expired</span>;
+   420→      default:
+   421→        return <span className={`${styles.statusPill} ${styles.statusDraft}`}>{est.status}</span>;
+   422→    }
+   423→  };
+   424→
+   425→  return (
+   426→    <div className={styles.container}>
+   427→      {/* Context Header */}
+   428→      <div className={styles.contextHeader}>
+   429→        <div className={styles.breadcrumbGroup}>
+   430→          <span className={`material-symbols-outlined ${styles.domainIcon}`}>
+   431→            account_balance
+   432→          </span>
+   433→          <span className={styles.breadcrumbLabel}>Finance</span>
+   434→          <span className={styles.breadcrumbSep}>/</span>
+   435→          <span className={styles.breadcrumbLabel}>Sales &amp; Get Paid</span>
+   436→          <span className={styles.breadcrumbSep}>/</span>
+   437→          <span className={styles.breadcrumbActive}>Estimates</span>
+   438→        </div>
+   439→        <div className={styles.previewBadge}>Quotes · standalone</div>
+   440→      </div>
+   441→
+   442→      <div className={styles.mainContent}>
+   443→        {/* Page Header */}
+   444→        <div className={styles.pageHeader}>
+   445→          <div>
+   446→            <h1 className={styles.title}>Estimates</h1>
+   447→            <p className={styles.subtitle}>
+   448→              Quotes sent to customers · convert to invoice when accepted
+   449→            </p>
+   450→          </div>
+   451→
+   452→          <div className={styles.headerActions}>
+   453→            <div className={styles.splitBtn}>
+   454→              <button
+   455→                type="button"
+   456→                className={styles.splitBtnMain}
+   457→                onClick={() => handleOpenDrawer(null)}
+   458→              >
+   459→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   460→                  add
+   461→                </span>
+   462→                New estimate
+   463→              </button>
+   464→              <button
+   465→                ref={newSplitBtnRef}
+   466→                type="button"
+   467→                className={styles.splitBtnArrow}
+   468→                onClick={(e) => {
+   469→                  e.stopPropagation();
+   470→                  const rect = e.currentTarget.getBoundingClientRect();
+   471→                  setNewMenuPos({
+   472→                    top: rect.bottom + 4,
+   473→                    left: Math.min(rect.right - 220, window.innerWidth - 240),
+   474→                  });
+   475→                  setNewMenuOpen((prev) => !prev);
+   476→                }}
+   477→              >
+   478→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   479→                  expand_more
+   480→                </span>
+   481→              </button>
+   482→            </div>
+   483→
+   484→            <button
+   485→              type="button"
+   486→              className={styles.secondaryBtn}
+   487→              onClick={() => {
+   488→                const cols = [
+   489→                  { key: 'no', label: 'Estimate No.' },
+   490→                  { key: 'customer', label: 'Customer' },
+   491→                  { key: 'email', label: 'Email' },
+   492→                  { key: 'sentDate', label: 'Sent date' },
+   493→                  { key: 'expiryDate', label: 'Expiry date' },
+   494→                  { key: 'amount', label: 'Amount' },
+   495→                  { key: 'status', label: 'Status' },
+   496→                ];
+   497→                exportToCsv(estimates as unknown as Record<string, unknown>[], cols, 'estimates');
+   498→                onToast?.(`Exported ${estimates.length} records to CSV`);
+   499→              }}
+   500→            >
+   501→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   502→                download
+   503→              </span>
+   504→              Export
+   505→            </button>
+   506→
+   507→            <button
+   508→              type="button"
+   509→              className={styles.secondaryBtn}
+   510→              onClick={() => onToast?.('Customize panel opened')}
+   511→            >
+   512→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   513→                tune
+   514→              </span>
+   515→              Customize
+   516→            </button>
+   517→          </div>
+   518→        </div>
+   519→
+   520→        {/* KPI Strip */}
+   521→        <div className={styles.kpiStrip}>
+   522→          <div className={styles.kpiCard}>
+   523→            <div className={styles.kpiLabel}>Open estimates</div>
+   524→            <div className={styles.kpiValue}>3</div>
+   525→            <div className={styles.kpiMeta}>$9,240 · awaiting response</div>
+   526→          </div>
+   527→          <div className={styles.kpiCard}>
+   528→            <div className={styles.kpiLabel}>Sent this month</div>
+   529→            <div className={styles.kpiValue}>5</div>
+   530→            <div className={styles.kpiMeta}>$14,800 total</div>
+   531→          </div>
+   532→          <div className={styles.kpiCard}>
+   533→            <div className={styles.kpiLabel}>Acceptance rate</div>
+   534→            <div className={`${styles.kpiValue} ${styles.kpiValueGreen}`}>42%</div>
+   535→            <div className={styles.kpiMeta}>Last 30 days</div>
+   536→          </div>
+   537→          <div className={styles.kpiCard}>
+   538→            <div className={styles.kpiLabel}>Converted to invoice</div>
+   539→            <div className={styles.kpiValue}>2</div>
+   540→            <div className={styles.kpiMeta}>$5,040 this month</div>
+   541→          </div>
+   542→        </div>
+   543→
+   544→        {/* Create Actions Row */}
+   545→        <div className={styles.createActionsRow}>
+   546→          <span className={styles.createActionsLabel}>Create actions:</span>
+   547→          <button
+   548→            type="button"
+   549→            className={styles.actionChip}
+   550→            onClick={() => handleOpenDrawer(null)}
+   551→          >
+   552→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   553→              request_quote
+   554→            </span>
+   555→            Estimate
+   556→          </button>
+   557→          <button
+   558→            type="button"
+   559→            className={styles.actionChip}
+   560→            onClick={() => {
+   561→              if (onCreateInvoice) onCreateInvoice();
+   562→              else onToast?.('Create invoice triggered');
+   563→            }}
+   564→          >
+   565→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   566→              receipt_long
+   567→            </span>
+   568→            Invoice
+   569→          </button>
+   570→          <button
+   571→            type="button"
+   572→            className={styles.actionChip}
+   573→            onClick={() => {
+   574→              if (onCreateCustomer) onCreateCustomer();
+   575→              else onToast?.('Add customer drawer opened');
+   576→            }}
+   577→          >
+   578→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   579→              person_add
+   580→            </span>
+   581→            Customer
+   582→          </button>
+   583→          <button
+   584→            type="button"
+   585→            className={styles.actionChip}
+   586→            onClick={() => onToast?.('Template picker — 4 saved estimates')}
+   587→          >
+   588→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   589→              content_copy
+   590→            </span>
+   591→            From template
+   592→          </button>
+   593→          <button
+   594→            type="button"
+   595→            className={styles.actionChipMuted}
+   596→            onClick={() => {
+   597→              if (onOpenCreateFlyout) onOpenCreateFlyout();
+   598→              else onToast?.('Global Create flyout');
+   599→            }}
+   600→          >
+   601→            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   602→              apps
+   603→            </span>
+   604→            Show all
+   605→          </button>
+   606→        </div>
+   607→
+   608→        {/* Table Card */}
+   609→        <div className={styles.tableCard}>
+   610→          {/* Tabs */}
+   611→          <div className={styles.tabStrip}>
+   612→            {['All', 'Draft', 'Sent', 'Accepted', 'Declined', 'Expired', 'Converted'].map(
+   613→              (tab) => (
+   614→                <button
+   615→                  key={tab}
+   616→                  type="button"
+   617→                  className={`${styles.tabUnderline} ${
+   618→                    activeTab === tab ? styles.tabUnderlineActive : ''
+   619→                  }`}
+   620→                  onClick={() => setActiveTab(tab)}
+   621→                >
+   622→                  {tab}
+   623→                </button>
+   624→              )
+   625→            )}
+   626→          </div>
+   627→
+   628→          {/* Filter Bar */}
+   629→          <div className={styles.filterBar}>
+   630→            <div className={styles.searchWrapper}>
+   631→              <span className={`material-symbols-outlined ${styles.searchIcon}`}>
+   632→                search
+   633→              </span>
+   634→              <input
+   635→                type="text"
+   636→                placeholder="Filter by estimate, customer…"
+   637→                value={searchFilter}
+   638→                onChange={(e) => setSearchFilter(e.target.value)}
+   639→                className={styles.searchInput}
+   640→              />
+   641→            </div>
+   642→
+   643→            <button
+   644→              type="button"
+   645→              className={styles.filterBtn}
+   646→              onClick={() => onToast?.('Date range filter')}
+   647→            >
+   648→              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   649→                calendar_today
+   650→              </span>
+   651→              Date range
+   652→            </button>
+   653→
+   654→            <button
+   655→              type="button"
+   656→              className={styles.filterBtn}
+   657→              onClick={() => onToast?.('Saved views')}
+   658→            >
+   659→              <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   660→                bookmark
+   661→              </span>
+   662→              Saved views
+   663→            </button>
+   664→
+   665→            <span className={styles.countIndicator}>
+   666→              {filteredEstimates.length} of {estimates.length}
+   667→            </span>
+   668→          </div>
+   669→
+   670→          {/* Bulk Bar */}
+   671→          {selectedIds.length > 0 && (
+   672→            <div className={styles.bulkBar}>
+   673→              <span className={styles.bulkCount}>{selectedIds.length} selected</span>
+   674→              <span className={styles.bulkSep} />
+   675→              <button
+   676→                type="button"
+   677→                className={styles.bulkActionBtn}
+   678→                onClick={() => handleBulkAction('send')}
+   679→              >
+   680→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   681→                  send
+   682→                </span>
+   683→                Send
+   684→              </button>
+   685→              <button
+   686→                type="button"
+   687→                className={styles.bulkActionBtn}
+   688→                onClick={() => handleBulkAction('remind')}
+   689→              >
+   690→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   691→                  notifications_active
+   692→                </span>
+   693→                Remind
+   694→              </button>
+   695→              <button
+   696→                type="button"
+   697→                className={styles.bulkActionBtn}
+   698→                onClick={() => handleBulkAction('convert')}
+   699→              >
+   700→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   701→                  sync_alt
+   702→                </span>
+   703→                Convert to invoice
+   704→              </button>
+   705→              <button
+   706→                type="button"
+   707→                className={styles.bulkActionBtn}
+   708→                onClick={() => handleBulkAction('print')}
+   709→              >
+   710→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   711→                  print
+   712→                </span>
+   713→                Print
+   714→              </button>
+   715→              <span className={styles.bulkSep} />
+   716→              <button
+   717→                type="button"
+   718→                className={styles.bulkActionBtn}
+   719→                onClick={() => handleBulkAction('delete')}
+   720→              >
+   721→                <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+   722→                  delete
+   723→                </span>
+   724→                Delete
+   725→              </button>
+   726→              <button
+   727→                type="button"
+   728→                className={styles.bulkCloseBtn}
+   729→                onClick={() => setSelectedIds([])}
+   730→              >
+   731→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   732→                  close
+   733→                </span>
+   734→              </button>
+   735→            </div>
+   736→          )}
+   737→
+   738→          {/* Table */}
+   739→          <table className={styles.table}>
+   740→            <thead className={styles.tableHeader}>
+   741→              <tr>
+   742→                <th style={{ width: 32 }}>
+   743→                  <input
+   744→                    type="checkbox"
+   745→                    className={styles.rowCheck}
+   746→                    checked={
+   747→                      filteredEstimates.length > 0 &&
+   748→                      selectedIds.length === filteredEstimates.length
+   749→                    }
+   750→                    onChange={handleCheckAll}
+   751→                  />
+   752→                </th>
+   753→                <th>Estimate</th>
+   754→                <th>Customer</th>
+   755→                <th>Sent</th>
+   756→                <th>Expires</th>
+   757→                <th style={{ textAlign: 'right' }}>Amount</th>
+   758→                <th>Status</th>
+   759→                <th style={{ width: 36 }}></th>
+   760→              </tr>
+   761→            </thead>
+   762→            <tbody>
+   763→              {filteredEstimates.map((est) => {
+   764→                const isChecked = selectedIds.includes(est.id);
+   765→                return (
+   766→                  <tr
+   767→                    key={est.id}
+   768→                    className={styles.row}
+   769→                    onClick={() => handleOpenDrawer(est)}
+   770→                  >
+   771→                    <td>
+   772→                      <input
+   773→                        type="checkbox"
+   774→                        className={styles.rowCheck}
+   775→                        checked={isChecked}
+   776→                        onClick={(e) => handleToggleCheck(est.id, e)}
+   777→                        onChange={() => {}}
+   778→                      />
+   779→                    </td>
+   780→                    <td style={{ fontWeight: 500 }}>{est.no}</td>
+   781→                    <td>
+   782→                      <div className={styles.customerCell}>
+   783→                        <div className={`${styles.avatar} ${est.avatarClass}`}>
+   784→                          {est.avatarLetter}
+   785→                        </div>
+   786→                        <div style={{ minWidth: 0 }}>
+   787→                          <div className={styles.customerName}>{est.customer}</div>
+   788→                          <div className={styles.customerEmail}>{est.email}</div>
+   789→                        </div>
+   790→                      </div>
+   791→                    </td>
+   792→                    <td className={styles.textMuted}>{est.sentDate}</td>
+   793→                    <td
+   794→                      className={
+   795→                        est.status === 'Expired'
+   796→                          ? styles.textExpired
+   797→                          : styles.textMuted
+   798→                      }
+   799→                    >
+   800→                      {est.expiryDate}
+   801→                    </td>
+   802→                    <td className={styles.textRight}>
+   803→                      {formatCurrency(est.amount)}
+   804→                    </td>
+   805→                    <td>{getStatusBadge(est)}</td>
+   806→                    <td style={{ textAlign: 'right' }}>
+   807→                      <button
+   808→                        type="button"
+   809→                        className={styles.moreBtn}
+   810→                        onClick={(e) => handleOpenRowMenu(e, est)}
+   811→                        title="Row options"
+   812→                      >
+   813→                        <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   814→                          more_horiz
+   815→                        </span>
+   816→                      </button>
+   817→                    </td>
+   818→                  </tr>
+   819→                );
+   820→              })}
+   821→            </tbody>
+   822→          </table>
+   823→        </div>
+   824→      </div>
+   825→
+   826→      {/* New Split Menu */}
+   827→      {newMenuOpen && (
+   828→        <div
+   829→          className={styles.floatingMenu}
+   830→          style={{ top: newMenuPos.top, left: newMenuPos.left }}
+   831→          onClick={(e) => e.stopPropagation()}
+   832→        >
+   833→          <div className={styles.menuHeader}>New estimate</div>
+   834→          <button
+   835→            type="button"
+   836→            className={styles.menuItem}
+   837→            onClick={() => {
+   838→              setNewMenuOpen(false);
+   839→              handleOpenDrawer(null);
+   840→            }}
+   841→          >
+   842→            <span className="material-symbols-outlined">request_quote</span>
+   843→            Blank estimate
+   844→          </button>
+   845→          <button
+   846→            type="button"
+   847→            className={styles.menuItem}
+   848→            onClick={() => {
+   849→              setNewMenuOpen(false);
+   850→              onToast?.('Template picker — 4 saved estimates');
+   851→            }}
+   852→          >
+   853→            <span className="material-symbols-outlined">content_copy</span>
+   854→            From template…
+   855→          </button>
+   856→          <button
+   857→            type="button"
+   858→            className={styles.menuItem}
+   859→            onClick={() => {
+   860→              setNewMenuOpen(false);
+   861→              onToast?.('Reverse from invoice — pick source invoice');
+   862→            }}
+   863→          >
+   864→            <span className="material-symbols-outlined">receipt_long</span>
+   865→            Reverse from invoice…
+   866→          </button>
+   867→        </div>
+   868→      )}
+   869→
+   870→      {/* Row Context Menu */}
+   871→      {menuOpen && activeMenuEst && (
+   872→        <div
+   873→          className={styles.floatingMenu}
+   874→          style={{ top: menuPos.top, left: menuPos.left }}
+   875→          onClick={(e) => e.stopPropagation()}
+   876→        >
+   877→          <div className={styles.menuHeader}>This estimate</div>
+   878→          <button
+   879→            type="button"
+   880→            className={styles.menuItem}
+   881→            onClick={() => handleRowMenuAction('view')}
+   882→          >
+   883→            <span className="material-symbols-outlined">open_in_new</span>
+   884→            Open estimate
+   885→          </button>
+   886→          <button
+   887→            type="button"
+   888→            className={styles.menuItem}
+   889→            onClick={() => handleRowMenuAction('edit')}
+   890→          >
+   891→            <span className="material-symbols-outlined">edit</span>
+   892→            Edit
+   893→          </button>
+   894→          <button
+   895→            type="button"
+   896→            className={styles.menuItem}
+   897→            onClick={() => handleRowMenuAction('duplicate')}
+   898→          >
+   899→            <span className="material-symbols-outlined">content_copy</span>
+   900→            Duplicate
+   901→          </button>
+   902→
+   903→          <div className={styles.menuSep} />
+   904→          <div className={styles.menuHeader}>Send</div>
+   905→          <button
+   906→            type="button"
+   907→            className={styles.menuItem}
+   908→            onClick={() => handleRowMenuAction('send')}
+   909→          >
+   910→            <span className="material-symbols-outlined">send</span>
+   911→            Send
+   912→          </button>
+   913→          <button
+   914→            type="button"
+   915→            className={styles.menuItem}
+   916→            onClick={() => handleRowMenuAction('remind')}
+   917→          >
+   918→            <span className="material-symbols-outlined">notifications_active</span>
+   919→            Send reminder
+   920→          </button>
+   921→          <button
+   922→            type="button"
+   923→            className={styles.menuItem}
+   924→            onClick={() => handleRowMenuAction('print')}
+   925→          >
+   926→            <span className="material-symbols-outlined">print</span>
+   927→            Print / download PDF
+   928→          </button>
+   929→
+   930→          <div className={styles.menuSep} />
+   931→          <div className={styles.menuHeader}>Close the deal</div>
+   932→          <button
+   933→            type="button"
+   934→            className={styles.menuItem}
+   935→            onClick={() => handleRowMenuAction('convert')}
+   936→          >
+   937→            <span className="material-symbols-outlined">sync_alt</span>
+   938→            Convert to invoice
+   939→          </button>
+   940→          <button
+   941→            type="button"
+   942→            className={styles.menuItem}
+   943→            onClick={() => handleRowMenuAction('mark-accepted')}
+   944→          >
+   945→            <span className="material-symbols-outlined">check_circle</span>
+   946→            Mark accepted
+   947→          </button>
+   948→          <button
+   949→            type="button"
+   950→            className={styles.menuItem}
+   951→            onClick={() => handleRowMenuAction('mark-declined')}
+   952→          >
+   953→            <span className="material-symbols-outlined">cancel</span>
+   954→            Mark declined
+   955→          </button>
+   956→
+   957→          <div className={styles.menuSep} />
+   958→          <button
+   959→            type="button"
+   960→            className={`${styles.menuItem} ${styles.menuItemDanger}`}
+   961→            onClick={() => handleRowMenuAction('delete')}
+   962→          >
+   963→            <span className="material-symbols-outlined">delete</span>
+   964→            Delete
+   965→          </button>
+   966→        </div>
+   967→      )}
+   968→
+   969→      {/* ═══════════ ESTIMATE DRAWER ═══════════ */}
+   970→      <div
+   971→        className={`${styles.drawerScrim} ${drawerOpen ? styles.drawerScrimOpen : ''}`}
+   972→        onClick={() => setDrawerOpen(false)}
+   973→      />
+   974→      <div className={`${styles.drawer} ${drawerOpen ? styles.drawerOpen : ''}`}>
+   975→        {editingEst && (
+   976→          <>
+   977→            <div className={styles.drawerHeader}>
+   978→              <div className={styles.drawerHeaderLeft}>
+   979→                <span className="material-symbols-outlined" style={{ fontSize: 20, color: '#0a6400' }}>
+   980→                  request_quote
+   981→                </span>
+   982→                <div>
+   983→                  <div className={styles.drawerTitle}>Estimate {editingEst.no}</div>
+   984→                  <div className={styles.drawerSubtitle}>
+   985→                    {editingEst.customer} · {editingEst.status}
+   986→                  </div>
+   987→                </div>
+   988→              </div>
+   989→              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+   990→                <button
+   991→                  type="button"
+   992→                  className={styles.drawerCloseBtn}
+   993→                  onClick={() => onToast?.(`Downloading Estimate ${editingEst.no} PDF`)}
+   994→                  title="Download PDF"
+   995→                >
+   996→                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+   997→                    download
+   998→                  </span>
+   999→                </button>
+  1000→                <button
+  1001→                  type="button"
+  1002→                  className={styles.drawerCloseBtn}
+  1003→                  onClick={() => setDrawerOpen(false)}
+  1004→                  title="Close"
+  1005→                >
+  1006→                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1007→                    close
+  1008→                  </span>
+  1009→                </button>
+  1010→              </div>
+  1011→            </div>
+  1012→
+  1013→            <div className={styles.drawerBody}>
+  1014→              {/* Customer Banner */}
+  1015→              <div className={styles.customerBanner}>
+  1016→                <div className={styles.customerBannerLabel}>Customer</div>
+  1017→                <div className={styles.customerBannerName}>{editingEst.customer}</div>
+  1018→                <div className={styles.customerBannerEmail}>{editingEst.email}</div>
+  1019→              </div>
+  1020→
+  1021→              {/* Estimate Details Grid */}
+  1022→              <div className={styles.detailsGrid}>
+  1023→                <div className={styles.fieldGroup}>
+  1024→                  <label className={styles.fieldLabel}>Estimate no.</label>
+  1025→                  <input
+  1026→                    type="text"
+  1027→                    className={styles.fieldInput}
+  1028→                    value={editingEst.no}
+  1029→                    onChange={(e) =>
+  1030→                      setEditingEst({ ...editingEst, no: e.target.value })
+  1031→                    }
+  1032→                  />
+  1033→                </div>
+  1034→                <div className={styles.fieldGroup}>
+  1035→                  <label className={styles.fieldLabel}>Status</label>
+  1036→                  <select
+  1037→                    className={styles.fieldInput}
+  1038→                    value={editingEst.status}
+  1039→                    onChange={(e) =>
+  1040→                      setEditingEst({
+  1041→                        ...editingEst,
+  1042→                        status: e.target.value as EstimateItem['status'],
+  1043→                      })
+  1044→                    }
+  1045→                  >
+  1046→                    <option>Draft</option>
+  1047→                    <option>Sent</option>
+  1048→                    <option>Viewed</option>
+  1049→                    <option>Accepted</option>
+  1050→                    <option>Declined</option>
+  1051→                    <option>Expired</option>
+  1052→                    <option>Converted</option>
+  1053→                  </select>
+  1054→                </div>
+  1055→                <div className={styles.fieldGroup}>
+  1056→                  <label className={styles.fieldLabel}>Estimate date</label>
+  1057→                  <input
+  1058→                    type="date"
+  1059→                    className={styles.fieldInput}
+  1060→                    value={editingEst.sentDate !== '—' ? '2026-10-26' : '2026-11-04'}
+  1061→                    onChange={(e) =>
+  1062→                      setEditingEst({ ...editingEst, sentDate: e.target.value })
+  1063→                    }
+  1064→                  />
+  1065→                </div>
+  1066→                <div className={styles.fieldGroup}>
+  1067→                  <label className={styles.fieldLabel}>Expires</label>
+  1068→                  <input
+  1069→                    type="date"
+  1070→                    className={styles.fieldInput}
+  1071→                    value="2026-11-26"
+  1072→                    onChange={(e) =>
+  1073→                      setEditingEst({ ...editingEst, expiryDate: e.target.value })
+  1074→                    }
+  1075→                  />
+  1076→                </div>
+  1077→              </div>
+  1078→
+  1079→              {/* Line Items */}
+  1080→              <div className={styles.linesSection}>
+  1081→                <div className={styles.linesHeaderRow}>
+  1082→                  <span className={styles.linesSectionTitle}>Line items</span>
+  1083→                  <button
+  1084→                    type="button"
+  1085→                    className={styles.addLineBtn}
+  1086→                    onClick={() => {
+  1087→                      const nextLine: EstimateLine = {
+  1088→                        id: `l-${Date.now()}`,
+  1089→                        desc: 'Additional service / product',
+  1090→                        qty: 1,
+  1091→                        rate: 150.0,
+  1092→                      };
+  1093→                      setEditingEst({
+  1094→                        ...editingEst,
+  1095→                        lines: [...editingEst.lines, nextLine],
+  1096→                      });
+  1097→                    }}
+  1098→                  >
+  1099→                    + Add line
+  1100→                  </button>
+  1101→                </div>
+  1102→
+  1103→                <div className={styles.linesTableHead}>
+  1104→                  <span>#</span>
+  1105→                  <span>Description</span>
+  1106→                  <span style={{ textAlign: 'right' }}>Qty</span>
+  1107→                  <span style={{ textAlign: 'right' }}>Rate</span>
+  1108→                  <span style={{ textAlign: 'right' }}>Amount</span>
+  1109→                  <span></span>
+  1110→                </div>
+  1111→
+  1112→                {editingEst.lines.map((line, idx) => (
+  1113→                  <div key={line.id} className={styles.lineRowItem}>
+  1114→                    <span style={{ fontSize: 11, color: '#5a6355' }}>{idx + 1}</span>
+  1115→                    <input
+  1116→                      type="text"
+  1117→                      className={styles.lineInput}
+  1118→                      value={line.desc}
+  1119→                      onChange={(e) => {
+  1120→                        const newLines = editingEst.lines.map((l) =>
+  1121→                          l.id === line.id ? { ...l, desc: e.target.value } : l
+  1122→                        );
+  1123→                        setEditingEst({ ...editingEst, lines: newLines });
+  1124→                      }}
+  1125→                    />
+  1126→                    <input
+  1127→                      type="number"
+  1128→                      className={`${styles.lineInput} ${styles.lineInputNum}`}
+  1129→                      value={line.qty}
+  1130→                      onChange={(e) => {
+  1131→                        const newLines = editingEst.lines.map((l) =>
+  1132→                          l.id === line.id
+  1133→                            ? { ...l, qty: Number(e.target.value) || 0 }
+  1134→                            : l
+  1135→                        );
+  1136→                        setEditingEst({ ...editingEst, lines: newLines });
+  1137→                      }}
+  1138→                    />
+  1139→                    <input
+  1140→                      type="number"
+  1141→                      step="50"
+  1142→                      className={`${styles.lineInput} ${styles.lineInputNum}`}
+  1143→                      value={line.rate}
+  1144→                      onChange={(e) => {
+  1145→                        const newLines = editingEst.lines.map((l) =>
+  1146→                          l.id === line.id
+  1147→                            ? { ...l, rate: Number(e.target.value) || 0 }
+  1148→                            : l
+  1149→                        );
+  1150→                        setEditingEst({ ...editingEst, lines: newLines });
+  1151→                      }}
+  1152→                    />
+  1153→                    <input
+  1154→                      type="text"
+  1155→                      readOnly
+  1156→                      className={`${styles.lineInput} ${styles.lineInputNum}`}
+  1157→                      value={formatCurrency(line.qty * line.rate)}
+  1158→                    />
+  1159→                    <button
+  1160→                      type="button"
+  1161→                      className={styles.lineDeleteBtn}
+  1162→                      onClick={() => {
+  1163→                        if (editingEst.lines.length <= 1) return;
+  1164→                        const newLines = editingEst.lines.filter((l) => l.id !== line.id);
+  1165→                        setEditingEst({ ...editingEst, lines: newLines });
+  1166→                      }}
+  1167→                    >
+  1168→                      <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+  1169→                        close
+  1170→                      </span>
+  1171→                    </button>
+  1172→                  </div>
+  1173→                ))}
+  1174→              </div>
+  1175→
+  1176→              {/* Totals */}
+  1177→              <div className={styles.totalsBox}>
+  1178→                <div className={styles.totalsInner}>
+  1179→                  <div className={styles.totalsRow}>
+  1180→                    <span style={{ color: '#5a6355' }}>Subtotal</span>
+  1181→                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+  1182→                      {formatCurrency(
+  1183→                        editingEst.lines.reduce((a, b) => a + b.qty * b.rate, 0)
+  1184→                      )}
+  1185→                    </span>
+  1186→                  </div>
+  1187→                  <div className={styles.totalsRow}>
+  1188→                    <span style={{ color: '#5a6355' }}>Tax (est.)</span>
+  1189→                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>$0.00</span>
+  1190→                  </div>
+  1191→                  <div className={styles.totalsRowFinal}>
+  1192→                    <span>Estimate total</span>
+  1193→                    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+  1194→                      {formatCurrency(
+  1195→                        editingEst.lines.reduce((a, b) => a + b.qty * b.rate, 0)
+  1196→                      )}
+  1197→                    </span>
+  1198→                  </div>
+  1199→                </div>
+  1200→              </div>
+  1201→
+  1202→              {/* Note to customer */}
+  1203→              <div style={{ borderTop: '1px solid #dad9dd', paddingTop: 12 }}>
+  1204→                <label className={styles.fieldLabel} style={{ marginBottom: 4 }}>
+  1205→                  Note to customer
+  1206→                </label>
+  1207→                <textarea
+  1208→                  className={styles.noteTextarea}
+  1209→                  placeholder="Optional note visible to the customer"
+  1210→                  value={editingEst.note || ''}
+  1211→                  onChange={(e) =>
+  1212→                    setEditingEst({ ...editingEst, note: e.target.value })
+  1213→                  }
+  1214→                />
+  1215→              </div>
+  1216→
+  1217→              {/* Activity log */}
+  1218→              <div style={{ borderTop: '1px solid #dad9dd', paddingTop: 12 }}>
+  1219→                <div
+  1220→                  className={styles.fieldLabel}
+  1221→                  style={{ marginBottom: 8 }}
+  1222→                >
+  1223→                  Activity
+  1224→                </div>
+  1225→                <div className={styles.activityList}>
+  1226→                  <div className={styles.activityItem}>
+  1227→                    <span
+  1228→                      className="material-symbols-outlined"
+  1229→                      style={{ fontSize: 14, color: '#006c47', marginTop: 2 }}
+  1230→                    >
+  1231→                      send
+  1232→                    </span>
+  1233→                    <div>
+  1234→                      <div className={styles.activityTitle}>Sent to customer</div>
+  1235→                      <div className={styles.activityTime}>10/26/2026 · 9:42 AM</div>
+  1236→                    </div>
+  1237→                  </div>
+  1238→                  <div className={styles.activityItem}>
+  1239→                    <span
+  1240→                      className="material-symbols-outlined"
+  1241→                      style={{ fontSize: 14, color: '#0055a5', marginTop: 2 }}
+  1242→                    >
+  1243→                      visibility
+  1244→                    </span>
+  1245→                    <div>
+  1246→                      <div className={styles.activityTitle}>Viewed by customer</div>
+  1247→                      <div className={styles.activityTime}>10/28/2026 · 3:15 PM</div>
+  1248→                    </div>
+  1249→                  </div>
+  1250→                </div>
+  1251→              </div>
+  1252→            </div>
+  1253→
+  1254→            {/* Drawer Footer */}
+  1255→            <div className={styles.drawerFooter}>
+  1256→              <button
+  1257→                type="button"
+  1258→                className={styles.secondaryBtn}
+  1259→                onClick={() => setDrawerOpen(false)}
+  1260→              >
+  1261→                Cancel
+  1262→              </button>
+  1263→
+  1264→              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+  1265→                <button
+  1266→                  type="button"
+  1267→                  className={styles.secondaryBtn}
+  1268→                  onClick={handleDrawerSend}
+  1269→                  style={{ fontWeight: 600 }}
+  1270→                >
+  1271→                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1272→                    send
+  1273→                  </span>
+  1274→                  Send
+  1275→                </button>
+  1276→
+  1277→                <div className={styles.splitBtn}>
+  1278→                  <button
+  1279→                    type="button"
+  1280→                    className={styles.secondaryBtn}
+  1281→                    style={{
+  1282→                      borderTopRightRadius: 0,
+  1283→                      borderBottomRightRadius: 0,
+  1284→                      fontWeight: 600,
+  1285→                    }}
+  1286→                    onClick={handleDrawerSave}
+  1287→                  >
+  1288→                    Save
+  1289→                  </button>
+  1290→                  <button
+  1291→                    type="button"
+  1292→                    className={styles.secondaryBtn}
+  1293→                    style={{
+  1294→                      borderTopLeftRadius: 0,
+  1295→                      borderBottomLeftRadius: 0,
+  1296→                      borderLeft: 'none',
+  1297→                      padding: '0 4px',
+  1298→                    }}
+  1299→                    onClick={handleDrawerSave}
+  1300→                  >
+  1301→                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1302→                      expand_more
+  1303→                    </span>
+  1304→                  </button>
+  1305→                </div>
+  1306→
+  1307→                <div className={styles.splitBtn}>
+  1308→                  <button
+  1309→                    type="button"
+  1310→                    className={styles.splitBtnMain}
+  1311→                    onClick={() => handlePromptConvert(editingEst)}
+  1312→                  >
+  1313→                    Convert to invoice
+  1314→                  </button>
+  1315→                  <button
+  1316→                    type="button"
+  1317→                    className={styles.splitBtnArrow}
+  1318→                    onClick={() => handlePromptConvert(editingEst)}
+  1319→                  >
+  1320→                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1321→                      expand_more
+  1322→                    </span>
+  1323→                  </button>
+  1324→                </div>
+  1325→              </div>
+  1326→            </div>
+  1327→          </>
+  1328→        )}
+  1329→      </div>
+  1330→
+  1331→      {/* ═══════════ CONVERT CONFIRMATION MODAL ═══════════ */}
+  1332→      {convertModalOpen && convertTargetEst && (
+  1333→        <div className={styles.modalScrim}>
+  1334→          <div className={styles.modalCard}>
+  1335→            <div className={styles.modalBody}>
+  1336→              <div className={styles.modalIconBox}>
+  1337→                <span className="material-symbols-outlined" style={{ fontSize: 28 }}>
+  1338→                  sync_alt
+  1339→                </span>
+  1340→              </div>
+  1341→              <h2 className={styles.modalTitle}>Convert estimate to invoice?</h2>
+  1342→              <p className={styles.modalSummary}>
+  1343→                Estimate {convertTargetEst.no} · {convertTargetEst.customer} ·{' '}
+  1344→                {formatCurrency(convertTargetEst.amount)}
+  1345→              </p>
+  1346→              <div className={styles.modalBenefitsBox}>
+  1347→                <div className={styles.benefitItem}>
+  1348→                  <span className={`material-symbols-outlined ${styles.benefitCheck}`}>
+  1349→                    check
+  1350→                  </span>
+  1351→                  Customer, line items, and totals carry over
+  1352→                </div>
+  1353→                <div className={styles.benefitItem}>
+  1354→                  <span className={`material-symbols-outlined ${styles.benefitCheck}`}>
+  1355→                    check
+  1356→                  </span>
+  1357→                  Estimate marked Converted with a link to the invoice
+  1358→                </div>
+  1359→                <div className={styles.benefitItem}>
+  1360→                  <span className={`material-symbols-outlined ${styles.benefitCheck}`}>
+  1361→                    check
+  1362→                  </span>
+  1363→                  Invoice starts as Draft — send when you&apos;re ready
+  1364→                </div>
+  1365→              </div>
+  1366→            </div>
+  1367→            <div className={styles.modalActions}>
+  1368→              <button
+  1369→                type="button"
+  1370→                className={styles.modalCancelBtn}
+  1371→                onClick={() => setConvertModalOpen(false)}
+  1372→              >
+  1373→                Cancel
+  1374→              </button>
+  1375→              <button
+  1376→                type="button"
+  1377→                className={styles.modalConfirmBtn}
+  1378→                onClick={handleConfirmConvert}
+  1379→              >
+  1380→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1381→                  sync_alt
+  1382→                </span>
+  1383→                Convert
+  1384→              </button>
+  1385→            </div>
+  1386→          </div>
+  1387→        </div>
+  1388→      )}
+  1389→    </div>
+  1390→  );
+  1391→}
+  1392→

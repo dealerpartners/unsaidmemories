@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Global Shell (merged)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode:"class",
+  theme:{ extend:{
+    colors:{
+      "surface-variant":"#e3e2e6","surface-container":"#eeedf1","on-tertiary":"#ffffff",
+      "tertiary-container":"#1e6dc9","secondary-fixed":"#8df7c1","on-primary-container":"#cfffbc",
+      "surface-bright":"#faf9fc","surface-dim":"#dad9dd","on-background":"#1a1c1e",
+      "surface-container-lowest":"#ffffff","error-container":"#ffdad6","primary-container":"#108000",
+      "secondary-fixed-dim":"#71dba6","surface-tint":"#0c6e00","surface-container-low":"#f4f3f7",
+      "tertiary":"#0055a5","inverse-surface":"#2f3033","on-secondary":"#ffffff",
+      "on-surface-variant":"#3f4a3a","background":"#faf9fc","surface-container-highest":"#e3e2e6",
+      "on-secondary-container":"#00714b","surface-container-high":"#e9e8eb","primary-fixed-dim":"#76de5e",
+      "on-primary":"#ffffff","secondary-container":"#8af5be","secondary":"#006c47",
+      "on-error-container":"#93000a","surface":"#faf9fc","error":"#ba1a1a","on-surface":"#1a1c1e",
+      "primary":"#0a6400","on-error":"#ffffff","primary-fixed":"#91fb77","outline-variant":"#becab6",
+      "outline":"#6f7a69"
+    },
+    borderRadius:{ DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem" },
+    spacing:{ "space-sm":"0.5rem","space-xl":"1.5rem","gutter":"1rem","space-xs":"0.25rem","space-md":"0.75rem","margin":"1.5rem","space-lg":"1rem" },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}],
+      "headline-xl":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "body-md":["14px",{lineHeight:"20px",fontWeight:"400"}],
+      "body-sm":["12px",{lineHeight:"16px",fontWeight:"400"}],
+      "label-lg":["14px",{lineHeight:"20px",fontWeight:"500"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  ::-webkit-scrollbar-track{background:transparent}
+  body{overscroll-behavior:none}
+  .flyout-hidden{display:none!important}
+  .flyout-scrim{position:fixed;inset:0;background:rgba(26,28,30,0.4);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px}
+  @keyframes zoomIn{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
+  .flyout-panel{animation:zoomIn .2s ease-out}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#ffffff;padding:10px 16px;border-radius:8px;font:500 13px Inter,sans-serif;z-index:200;opacity:0;transition:opacity .2s ease;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-col bg-surface-container-lowest border-b border-surface-dim">
+  <div class="h-[52px] px-margin flex items-center justify-between border-b border-surface-dim">
+    <div class="flex items-center gap-space-md">
+      <button id="btn-hamburger" class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" type="button" title="Enterprise Navigation Hub">
+        <span class="material-symbols-outlined text-[20px]">menu</span>
+      </button>
+      <button class="flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md transition-colors" type="button">
+        <span>ManageKube LLC — Unsaid</span>
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">arrow_drop_down</span>
+      </button>
+    </div>
+    <div class="flex-1 max-w-[520px] mx-space-xl">
+      <div class="relative flex items-center w-full">
+        <span class="material-symbols-outlined absolute left-space-md text-[18px] text-outline pointer-events-none">search</span>
+        <input class="w-full h-8 pl-9 pr-8 bg-surface-container-low border border-surface-dim rounded font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Search transactions, contacts, reports, ⌘K" type="search"/>
+        <span class="absolute right-space-sm font-label-sm text-outline border border-surface-dim px-1 rounded bg-surface-container-lowest pointer-events-none">⌘K</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-space-md">
+      <button class="flex items-center gap-space-xs px-space-md h-8 rounded bg-tertiary text-on-tertiary font-label-sm hover:bg-tertiary-container transition-colors" type="button">
+        <span class="material-symbols-outlined text-[16px]">auto_awesome</span><span>Kinnect AI</span>
+      </button>
+      <button id="btn-create-header" class="flex items-center gap-space-xs px-space-md h-8 rounded bg-primary text-on-primary font-label-sm hover:bg-primary-container transition-colors" type="button">
+        <span class="material-symbols-outlined text-[16px]">add</span><span>Create</span>
+      </button>
+      <span class="hidden xl:inline-block font-label-sm text-on-surface-variant">Sunday, Nov 1, 2026</span>
+      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-label-sm text-on-primary">SA</div>
+    </div>
+  </div>
+  <div class="h-[44px] px-space-sm flex items-center gap-1 bg-surface-container-low overflow-x-auto">
+    <nav id="tabstrip" class="flex items-center gap-1 h-full"></nav>
+    <button class="w-7 h-7 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" type="button">
+      <span class="material-symbols-outlined text-[18px]">add</span>
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ MAIN RAIL ═══════════════ -->
+<aside class="fixed left-0 top-[96px] bottom-0 w-[72px] bg-surface-container-low border-r border-surface-dim flex flex-col justify-between items-center py-space-sm z-40">
+  <div class="flex flex-col items-center gap-space-xs w-full">
+    <div class="w-10 h-10 rounded bg-primary flex items-center justify-center text-on-primary font-headline-sm mb-space-sm">U</div>
+    <nav id="mainrail" class="flex flex-col items-center gap-1 w-full px-space-xs"></nav>
+  </div>
+  <div class="flex flex-col items-center gap-1 w-full px-space-xs border-t border-surface-dim pt-space-xs">
+    <button data-utility="modules" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Master Modules" type="button"><span class="material-symbols-outlined text-[20px]">menu_open</span></button>
+    <button id="btn-create-rail" data-utility="create" class="w-10 h-10 flex items-center justify-center rounded text-primary hover:bg-surface-container transition-colors" title="Persistent Create" type="button"><span class="material-symbols-outlined text-[20px]">add_circle</span></button>
+    <button data-utility="favorites" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Favorites" type="button"><span class="material-symbols-outlined text-[20px]">star</span></button>
+    <button data-utility="reports" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Reports" type="button"><span class="material-symbols-outlined text-[20px]">bar_chart</span></button>
+    <button data-utility="inbox" class="relative w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Inbox" type="button">
+      <span class="material-symbols-outlined text-[20px]">mail</span>
+      <span class="absolute top-1 right-1 w-4 h-4 bg-error text-on-error rounded-full font-label-sm text-[10px] flex items-center justify-center leading-none">4</span>
+    </button>
+    <button data-utility="settings" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Settings" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button>
+    <button data-utility="help" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container transition-colors" title="Help" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button>
+    <button data-utility="profile" class="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-label-sm text-on-primary my-1" title="Profile" type="button">SA</button>
+  </div>
+</aside>
+
+<!-- ═══════════════ SIDE RAIL ═══════════════ -->
+<aside class="fixed left-[72px] top-[96px] bottom-0 w-[260px] bg-surface-container-lowest border-r border-surface-dim flex flex-col z-30">
+  <div class="p-space-md border-b border-surface-dim shrink-0 flex flex-col gap-space-sm">
+    <div class="flex items-center justify-between">
+      <span id="siderail-title" class="font-label-lg text-on-surface">Dashboard</span>
+      <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm">Core ERP</span>
+    </div>
+    <div class="relative flex items-center">
+      <span class="material-symbols-outlined absolute left-2 text-[16px] text-outline pointer-events-none">filter_list</span>
+      <input id="route-filter" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Filter routes... (⌘F)" type="text"/>
+    </div>
+  </div>
+  <div class="flex-1 min-h-0 overflow-y-auto p-space-sm">
+    <nav id="siderail" class="flex flex-col gap-space-xs"></nav>
+  </div>
+  <div class="shrink-0 border-t border-surface-dim p-3 bg-surface-bright flex flex-col gap-2">
+    <div class="grid grid-cols-2 gap-2">
+      <button class="h-7 px-2 border border-surface-dim bg-surface-container-lowest text-on-surface font-label-sm rounded hover:bg-surface-container-low flex items-center justify-center gap-1 transition-colors" type="button">
+        <span class="material-symbols-outlined text-[14px]">add_box</span><span>Workspace</span>
+      </button>
+      <button class="h-7 px-2 border border-surface-dim bg-surface-container-lowest text-on-surface font-label-sm rounded hover:bg-surface-container-low flex items-center justify-center gap-1 transition-colors" type="button">
+        <span class="material-symbols-outlined text-[14px]">download</span><span>Export</span>
+      </button>
+    </div>
+    <div class="flex items-center justify-between pt-1 font-label-sm text-[11px] text-on-surface-variant">
+      <span><span class="inline-block w-2 h-2 rounded-full bg-primary mr-1"></span>Sync: 2s ago</span>
+      <span>v3.8.4</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════ CONTENT ═══════════════ -->
+<div class="pl-[332px]">
+  <main class="pt-[96px] w-full px-8 min-h-screen bg-background">
+    <div class="flex flex-col w-full pb-16">
+      <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4 px-1">
+        <div class="flex flex-col gap-1 min-w-0">
+          <div id="breadcrumb" class="flex items-center gap-2 text-on-surface-variant font-label-sm"></div>
+          <div class="flex items-center gap-3 mt-0.5">
+            <h1 id="page-title" class="font-headline-lg text-on-surface tracking-tight">Route Map</h1>
+            <span id="state-pill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-2" id="summary-cards"></section>
+
+      <section class="mt-6 bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-surface-dim">
+          <div>
+            <h2 class="font-headline-sm text-on-surface">Every sidebar / expandable candidate</h2>
+            <p class="font-body-sm text-on-surface-variant">All pillars, groups, and routes in one flat, filterable list.</p>
+          </div>
+          <span id="child-count" class="font-label-sm px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant"></span>
+        </div>
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-2 text-[16px] text-outline pointer-events-none">search</span>
+            <input id="flat-filter" class="w-full h-8 pl-8 pr-2 bg-surface-container-low border border-surface-dim rounded font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Filter the flat list — pillar, group, route, type, component…" type="text"/>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead class="bg-surface-container-low font-label-sm text-on-surface-variant uppercase tracking-wider">
+              <tr>
+                <th class="px-5 py-2.5">Pillar</th>
+                <th class="px-5 py-2.5">Group</th>
+                <th class="px-5 py-2.5">Label</th>
+                <th class="px-5 py-2.5">Route</th>
+                <th class="px-5 py-2.5">Type</th>
+                <th class="px-5 py-2.5">State</th>
+                <th class="px-5 py-2.5">Overview</th>
+                <th class="px-5 py-2.5">Component</th>
+              </tr>
+            </thead>
+            <tbody id="flat-table" class="font-body-sm divide-y divide-surface-dim"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════ FLYOUT 1: Enterprise Navigation Hub (hamburger) ═══════════════ -->
+<div id="flyout-hub" class="flyout-scrim flyout-hidden">
+  <div class="flyout-panel relative w-full max-w-[1520px] bg-surface-container-lowest rounded-2xl shadow-2xl flex flex-col overflow-hidden my-3 md:my-5">
+    
+    <!-- Header -->
+    <div class="px-space-xl pt-space-lg pb-space-md">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-md">
+        <div class="flex items-center gap-space-lg">
+          <div class="w-11 h-11 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-[26px]">grid_view</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-space-sm">
+              <h1 class="font-headline-lg text-on-surface font-bold tracking-tight">Enterprise Navigation Hub</h1>
+              <span class="font-label-sm px-2 py-0.5 rounded-full bg-primary/10 text-primary uppercase font-bold tracking-wide">Production Spine v4.2</span>
+            </div>
+            <p class="font-body-md text-on-surface-variant">Master command center • Unified multi-pillar operational architecture</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-space-md">
+          <div class="relative flex items-center w-full sm:w-[420px]">
+            <span class="material-symbols-outlined absolute left-space-md text-[20px] text-primary">search</span>
+            <input id="hub-search" class="w-full pl-11 pr-24 py-2.5 bg-surface-container-low rounded-xl font-body-md text-on-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:bg-surface-container-lowest focus:shadow-md transition-all" placeholder="Jump to module, tool, ledger, or queue... (Cmd+K)" type="text"/>
+            <div class="absolute right-space-sm flex items-center gap-1 pointer-events-none">
+              <kbd class="font-label-sm text-[11px] text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">⌘K</kbd>
+              <kbd class="font-label-sm text-[11px] text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">ESC</kbd>
+            </div>
+          </div>
+          <button data-close-flyout class="w-10 h-10 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors group" title="Close (Esc)">
+            <span class="material-symbols-outlined text-[22px] group-hover:rotate-90 transition-transform duration-200">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- RAPID ACTION STRIP -->
+      <div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-sm pb-space-xs bg-surface-container-low px-space-md rounded-xl">
+        <div class="flex items-center gap-space-xs overflow-x-auto py-1">
+          <span class="font-label-sm text-on-surface-variant uppercase tracking-wider pr-space-sm flex items-center gap-1 font-bold">
+            <span class="material-symbols-outlined text-[15px] text-primary">bolt</span> Quick Launch:
+          </span>
+          <button data-hub-quick="invoice" class="h-8 px-3 rounded-lg bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface font-label-md flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-primary">post_add</span> + New Invoice
+          </button>
+          <button data-hub-quick="product" class="h-8 px-3 rounded-lg bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface font-label-md flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-primary">add_shopping_cart</span> + Create Product
+          </button>
+          <button data-hub-quick="konva" class="h-8 px-3 rounded-lg bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface font-label-md flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-primary">palette</span> Konva Studio
+          </button>
+          <button data-hub-quick="banner" class="h-8 px-3 rounded-lg bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface font-label-md flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-primary">campaign</span> + Create Promo Banner
+          </button>
+          <button data-hub-quick="ticket" class="h-8 px-3 rounded-lg bg-surface-container-lowest hover:bg-primary hover:text-on-primary text-on-surface font-label-md flex items-center gap-1.5 transition-colors shadow-sm whitespace-nowrap">
+            <span class="material-symbols-outlined text-[16px] text-primary">support_agent</span> + Log Support Ticket
+          </button>
+        </div>
+        <div class="hidden xl:flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+          <span class="font-label-sm text-on-surface-variant font-medium">Auto-Router Active • Latency 28ms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="px-space-xl pb-space-xl">
+      <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-lg"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-space-xl py-space-md bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md">
+      <div class="flex flex-wrap items-center gap-space-lg text-on-surface-variant">
+        <span class="font-label-sm uppercase tracking-wider text-outline font-bold flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">construction</span> Utilities:
+        </span>
+        <button data-utility="settings" class="font-label-md hover:text-primary flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[18px]">settings</span> Global Settings</button>
+        <button data-utility="settings" class="font-label-md hover:text-primary flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[18px]">shield_person</span> Staff &amp; Roles</button>
+        <button class="font-label-md hover:text-primary flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[18px]">code</span> API Keys &amp; Webhooks</button>
+        <button data-utility="help" class="font-label-md hover:text-primary flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[18px]">menu_book</span> Documentation</button>
+        <button class="font-label-md hover:text-primary flex items-center gap-1.5 transition-colors"><span class="material-symbols-outlined text-[18px]">help</span> Enterprise Support</button>
+      </div>
+      <div class="flex items-center gap-space-md">
+        <div class="flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm">
+          <div class="w-2 h-2 rounded-full bg-primary ring-2 ring-primary-container/20"></div>
+          <span class="font-label-sm text-on-surface font-semibold">Production US-East</span>
+          <span class="font-label-sm text-[10px] text-on-surface-variant bg-surface-container-high px-1.5 py-0.5 rounded">Tenant #00281</span>
+        </div>
+        <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">swap_horiz</span> Switch Org</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FLYOUT 2: Universal Create (Create buttons) ═══════════════ -->
+<div id="flyout-create" class="flyout-scrim flyout-hidden">
+  <div class="flyout-panel relative w-full max-w-[940px] bg-surface-container-lowest rounded-xl shadow-2xl overflow-hidden flex flex-col my-3 md:my-5">
+    <div class="h-1 w-full bg-gradient-to-r from-primary via-primary-container to-secondary"></div>
+    
+    <div class="px-space-xl pt-space-lg pb-space-md">
+      <div class="flex items-start justify-between gap-space-md">
+        <div class="flex items-center gap-space-md">
+          <div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-[24px]">add_box</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-headline-lg text-on-surface font-bold">Create New</span>
+              <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-[11px] font-semibold">P1 Universal Factory</span>
+              <span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-[11px]">38 Entities</span>
+            </div>
+            <p class="font-body-sm text-on-surface-variant mt-0.5">Universal enterprise creation suite across commerce, accounts, banking &amp; production pipelines.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="h-8 px-2 rounded text-on-surface-variant hover:bg-surface-container flex items-center gap-1 font-label-sm"><span class="material-symbols-outlined text-[16px]">keep</span> Pin</button>
+          <button data-close-flyout class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="Close (Esc)">
+            <span class="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="relative flex items-center w-full mt-3">
+        <span class="material-symbols-outlined absolute left-3.5 text-[20px] text-primary pointer-events-none">search</span>
+        <input id="create-search" class="w-full h-11 pl-11 pr-24 rounded-lg bg-surface-container-low font-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:bg-surface-container-lowest shadow-inner transition-all" placeholder="Search all 38 creates... (invoice, product, lead, PO, bill)" type="text"/>
+        <div class="absolute right-3 flex items-center gap-1.5">
+          <kbd class="px-1.5 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-[10px] uppercase font-bold tracking-wider">TAB</kbd>
+          <span class="text-on-surface-variant text-[11px] font-label-sm">to jump</span>
+        </div>
+      </div>
+
+      <!-- FREQUENTLY USED STRIP -->
+      <div class="flex items-center gap-2 pt-3 overflow-x-auto pb-1">
+        <span class="font-label-sm text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider shrink-0 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px] text-primary">history</span> Frequently Used:
+        </span>
+        <button data-create-item="Invoice" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">receipt_long</span> Invoice
+          <span class="font-tabular-sm text-[9px] opacity-60 bg-surface-container-high px-1 rounded group-hover:bg-primary-container group-hover:text-on-primary">⌘I</span>
+        </button>
+        <button data-create-item="Customer" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">person_add</span> Customer
+        </button>
+        <button data-create-item="Product" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">checkroom</span> Product
+          <span class="font-tabular-sm text-[9px] opacity-60 bg-surface-container-high px-1 rounded group-hover:bg-primary-container group-hover:text-on-primary">POD</span>
+        </button>
+        <button data-create-item="Bill" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">payments</span> Bill
+        </button>
+        <button data-create-item="Ticket" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">confirmation_number</span> Ticket
+        </button>
+        <button data-create-item="Order" class="group flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container hover:bg-primary hover:text-on-primary text-on-surface font-label-sm text-[11px] font-medium transition-all shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-[14px] text-primary group-hover:text-on-primary">shopping_cart_checkout</span> Order
+        </button>
+      </div>
+    </div>
+
+    <div class="px-space-xl py-space-lg bg-surface-container-low grid grid-cols-1 md:grid-cols-4 gap-space-lg max-h-[500px] overflow-y-auto" id="create-grid"></div>
+    
+    <div class="px-space-xl py-space-md bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-md">
+      <div class="flex items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+        <span class="font-label-sm text-[12px] font-medium text-on-surface">Universal Save Grammar: <strong class="text-primary">Save</strong> • <strong class="text-primary">Save &amp; New</strong> • <strong class="text-primary">Save &amp; Close</strong></span>
+      </div>
+      <div class="flex items-center gap-space-md">
+        <button class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-sm text-[12px] font-medium">
+          <span class="material-symbols-outlined text-[16px]">tune</span> Customize Flyout (Pick 10)
+        </button>
+        <span class="text-surface-container-highest">|</span>
+        <div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-[11px]">
+          <span class="flex items-center gap-1"><kbd class="px-1 py-0.2 rounded bg-surface-container-highest text-[10px]">↑</kbd><kbd class="px-1 py-0.2 rounded bg-surface-container-highest text-[10px]">↓</kbd> navigate</span>
+          <span>•</span>
+          <span class="flex items-center gap-1"><kbd class="px-1.5 py-0.2 rounded bg-surface-container-highest text-[10px]">↵</kbd> open</span>
+          <span>•</span>
+          <span class="flex items-center gap-1"><kbd class="px-1.5 py-0.2 rounded bg-surface-container-highest text-[10px]">ESC</kbd> dismiss</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   MANIFEST — 3-level pillar → group → route
+   ═══════════════════════════════════════════════════════════════════ */
+const MANIFEST = {
+  dashboard: {
+    label:"Dashboard", icon:"grid_view",
+    overview:{ route:"/admin", state:"MISSING", note:"redirect-only shell; DashboardView.tsx is dead" },
+    groups:[
+      { group:"Overview", routes:[
+        { route:"/admin", label:"Operations Vitals", type:"Overview", state:"shell", comp:"— redirect()", overview:true, missing:true },
+        { route:"/admin/dashboard", label:"Executive GMV & Margins", type:"Overview", state:"works", comp:"portal/DashboardView.tsx (dead)", overview:true, missing:true },
+      ]},
+      { group:"Analytics", routes:[
+        { route:"/admin/analytics", label:"Analytics", type:"Overview", state:"works", comp:"AnalyticsView + PlatformAnalyticsView" },
+        { route:"/admin/analytics/explorer", label:"Explorer", type:"List", state:"partial", comp:"AnalyticsExplorerView.tsx" },
+      ]},
+      { group:"Queues", routes:[
+        { route:"/admin/notifications", label:"Attention Queue", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/notifications/customers", label:"Customer notifs", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/notifications/seller", label:"Seller notifs", type:"List", state:"partial", comp:"inline" },
+      ]},
+    ]
+  },
+  contacts: {
+    label:"Contacts", icon:"group",
+    overview:{ route:"/admin/crm", state:"MISSING", note:"redirect-only; 10 CRM shells behind it" },
+    groups:[
+      { group:"CRM Overview", routes:[
+        { route:"/admin/crm", label:"Overview", type:"Overview", state:"shell", comp:"— redirect()", overview:true, missing:true },
+      ]},
+      { group:"Customer Directory", routes:[
+        { route:"/admin/customers", label:"Customer Directory", type:"List", state:"partial", comp:"CustomersView.tsx +6" },
+        { route:"/admin/crm/new-customer", label:"New customer", type:"Create-Wizard", state:"works", comp:"new-customer-wizard.tsx" },
+        { route:"/admin/crm/search", label:"Search", type:"Unclassified", state:"partial", comp:"GlobalSearch.tsx" },
+        { route:"/admin/crm/dedupe", label:"Dedupe", type:"List", state:"shell", comp:"— redirect()" },
+      ]},
+      { group:"Segments & Tools", routes:[
+        { route:"/admin/crm/leads", label:"Leads", type:"List", state:"shell", comp:"— redirect()" },
+        { route:"/admin/crm/segments", label:"Segments", type:"List", state:"shell", comp:"— redirect()" },
+        { route:"/admin/crm/templates", label:"Templates", type:"List", state:"shell", comp:"— redirect()" },
+      ]},
+      { group:"Seller Relationships", routes:[
+        { route:"/admin/sellers", label:"Sellers", type:"List", state:"partial", comp:"seller-status-badge.tsx" },
+      ]},
+    ]
+  },
+  catalog: {
+    label:"Catalog", icon:"inventory_2",
+    overview:{ route:"/admin/catalog", state:"MISSING", note:"Record/List root; no Overview" },
+    groups:[
+      { group:"Catalog Overview", routes:[
+        { route:"/admin/catalog", label:"Overview", type:"Overview", state:"partial", comp:"listing-editor + joined-catalog", overview:true, missing:true },
+      ]},
+      { group:"Design Studio", routes:[
+        { route:"/admin/studio", label:"Konva Studio Launcher", type:"Canvas", state:"works", comp:"studio-client.tsx" },
+        { route:"/admin/studio/new-design", label:"New design", type:"Create-Wizard", state:"works", comp:"new-design-wizard.tsx" },
+        { route:"/admin/studio/collection-builder", label:"Collection builder", type:"Canvas", state:"works", comp:"collection-builder-client.tsx" },
+        { route:"/admin/studio/publish", label:"Publish", type:"Canvas", state:"works", comp:"publish-client.tsx" },
+      ]},
+      { group:"Products & Variants", routes:[
+        { route:"/admin/products", label:"Published Items & SKUs", type:"List", state:"partial", comp:"listing-editor.tsx + joined-catalog.ts" },
+        { route:"/admin/catalog/bundles", label:"Bundles", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/catalog-review", label:"Review", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/categories", label:"Categories", type:"Record", state:"partial", comp:"PromotionDealForm.tsx" },
+        { route:"/admin/brands", label:"Brands", type:"List", state:"partial", comp:"inline" },
+      ]},
+      { group:"Channels", routes:[
+        { route:"/admin/ecommerce", label:"Ecommerce", type:"Settings", state:"shell", comp:"StaffDenied ⚠" },
+        { route:"/admin/website", label:"Website / CMS", type:"Settings", state:"partial", comp:"SettingsForm + SettingsImageUpload" },
+      ]},
+    ]
+  },
+  orders: {
+    label:"Orders", icon:"assignment",
+    overview:{ route:"/admin/orders", state:"MISSING", note:"List root; no Overview" },
+    groups:[
+      { group:"Orders Overview", routes:[
+        { route:"/admin/orders", label:"Overview", type:"Overview", state:"partial", comp:"ShippingLabelModal only", overview:true, missing:true },
+      ]},
+      { group:"Order Management", routes:[
+        { route:"/admin/orders/new", label:"New order", type:"Create-Wizard", state:"works", comp:"erp-actions.tsx" },
+        { route:"/admin/orders/[id]", label:"Order detail", type:"Record", state:"partial", comp:"erp-actions.tsx" },
+        { route:"/admin/orders/[id]/packing-slip", label:"Packing slip", type:"Record", state:"works", comp:"erp-actions.tsx" },
+        { route:"/admin/orders/order-problem", label:"Order problem", type:"Create-Wizard", state:"works", comp:"order-problem-wizard.tsx" },
+      ]},
+      { group:"Purchasing", routes:[
+        { route:"/admin/purchase-orders", label:"Purchase orders", type:"List", state:"partial", comp:"PurchaseOrdersView.tsx" },
+      ]},
+      { group:"Fulfillment", routes:[
+        { route:"/admin/inventory", label:"Inventory", type:"List", state:"partial", comp:"erp-actions.tsx + lib/orders/erp.ts" },
+        { route:"/admin/fulfillment", label:"Fulfillment Queue", type:"List", state:"partial", comp:"ShippingLabelModal + useActions" },
+        { route:"/admin/shipping", label:"Batch Slips & Labels", type:"List", state:"partial", comp:"ShippingStationView.tsx" },
+      ]},
+      { group:"Returns", routes:[
+        { route:"/admin/returns", label:"Returns & Claims", type:"List", state:"partial", comp:"ReturnsOversight + ReturnsView" },
+      ]},
+    ]
+  },
+  finance: {
+    label:"Finance", icon:"account_balance",
+    overview:{ route:"/admin/accounting", state:"OK", note:"PageHeader + KpiTiles" },
+    groups:[
+      { group:"Finance Overview", routes:[
+        { route:"/admin/accounting", label:"Overview", type:"Overview", state:"works", comp:"PageHeader + KpiTiles", overview:true },
+      ]},
+      { group:"General Ledger", routes:[
+        { route:"/admin/accounting/books/accounts", label:"Chart of Accounts", type:"List", state:"partial", comp:"_shared.tsx" },
+        { route:"/admin/accounting/books/journal", label:"Journal Entries", type:"List", state:"partial", comp:"_shared.tsx" },
+        { route:"/admin/accounting/banking/reconciliation", label:"Bank Reconciliation", type:"List", state:"partial", comp:"inline" },
+      ]},
+      { group:"Accounts Payable", routes:[
+        { route:"/admin/bills", label:"Vendor Bills", type:"List", state:"partial", comp:"BillsView.tsx" },
+      ]},
+      { group:"Accounts Receivable", routes:[
+        { route:"/admin/invoices", label:"Invoices", type:"List", state:"partial", comp:"InvoicesView + FilterSelect" },
+      ]},
+      { group:"Tax & Compliance", routes:[
+        { route:"/admin/taxes", label:"Taxes", type:"List", state:"partial", comp:"TaxesView.tsx" },
+        { route:"/admin/payroll", label:"Payroll", type:"List", state:"partial", comp:"PayrollView.tsx (5 dead)" },
+      ]},
+      { group:"Payments & Banking", routes:[
+        { route:"/admin/payments", label:"Payments", type:"List", state:"partial", comp:"PaymentsView + FailedPaymentsList" },
+        { route:"/admin/banking", label:"Banking", type:"List", state:"partial", comp:"BankingView.tsx" },
+        { route:"/admin/refunds", label:"Refunds", type:"List", state:"partial", comp:"RefundsView.tsx" },
+        { route:"/admin/deposits", label:"Deposits", type:"List", state:"partial", comp:"DepositsView.tsx" },
+      ]},
+      { group:"Books & Reports", routes:[
+        { route:"/admin/books", label:"Books", type:"List", state:"partial", comp:"BooksView.tsx" },
+        { route:"/admin/reports", label:"Reports", type:"List", state:"partial", comp:"ReportsView.tsx" },
+      ]},
+      { group:"Configuration", routes:[
+        { route:"/admin/financial-settings", label:"Financial settings", type:"Settings", state:"partial", comp:"FinancialSettingsView.tsx" },
+      ]},
+    ]
+  },
+  marketing: {
+    label:"Marketing", icon:"campaign",
+    overview:{ route:"/admin/social", state:"MISSING", note:"canvas exception; no Overview" },
+    groups:[
+      { group:"Marketing Overview", routes:[
+        { route:"/admin/social", label:"Overview", type:"Overview", state:"partial", comp:"PublishingStudio (canvas)", overview:true, missing:true },
+      ]},
+      { group:"Banners & Popups", routes:[
+        { route:"/admin/website/banners", label:"Banners", type:"List", state:"partial", comp:"WebsiteItemManager" },
+        { route:"/admin/website/popups", label:"Popups", type:"List", state:"partial", comp:"WebsiteItemManager" },
+      ]},
+      { group:"CMS Pages & Editorial", routes:[
+        { route:"/admin/website/cms", label:"CMS pages", type:"List", state:"partial", comp:"cms-dashboard.tsx" },
+        { route:"/admin/website/content", label:"Content blocks", type:"List", state:"partial", comp:"ContentForms.tsx" },
+      ]},
+      { group:"Social Studio", routes:[
+        { route:"/admin/social/calendar", label:"Calendar", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+        { route:"/admin/social/channels", label:"Channels", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+        { route:"/admin/social/create", label:"Create", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+        { route:"/admin/social/library", label:"Library", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+        { route:"/admin/social/performance", label:"Performance", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+        { route:"/admin/social/queue", label:"Queue", type:"Canvas", state:"works", comp:"PublishingStudio.tsx" },
+      ]},
+      { group:"Promotions", routes:[
+        { route:"/admin/promotions", label:"Discounts & Promo Rules", type:"Record", state:"partial", comp:"PromotionDealForm.tsx" },
+        { route:"/admin/newsletter", label:"Newsletter", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/automation", label:"Automation", type:"List", state:"shell", comp:"AutomationView.tsx (dead)" },
+      ]},
+    ]
+  },
+  support: {
+    label:"Support", icon:"support_agent",
+    overview:{ route:"/admin/support", state:"MISSING", note:"intake queue root; no Overview" },
+    groups:[
+      { group:"Support Overview", routes:[
+        { route:"/admin/support", label:"Overview", type:"Overview", state:"partial", comp:"SupportControls (intake)", overview:true, missing:true },
+      ]},
+      { group:"Inbox & Tickets", routes:[
+        { route:"/admin/support/[id]", label:"Ticket detail", type:"Record", state:"partial", comp:"ticket-widgets.tsx" },
+        { route:"/admin/messages", label:"Omnichannel Inbox", type:"List", state:"partial", comp:"notifications-panel.tsx" },
+      ]},
+      { group:"SLA & Routing", routes:[
+        { route:"/admin/support/queues", label:"Queues", type:"List", state:"partial", comp:"SupportControls.tsx" },
+        { route:"/admin/support/sla", label:"SLA rules", type:"List", state:"partial", comp:"SupportControls.tsx" },
+        { route:"/admin/support/automations", label:"Automations", type:"List", state:"partial", comp:"SupportControls.tsx" },
+      ]},
+      { group:"Knowledge", routes:[
+        { route:"/admin/support/knowledge", label:"Knowledge base", type:"List", state:"partial", comp:"SupportControls.tsx" },
+        { route:"/admin/help", label:"Help center", type:"List", state:"partial", comp:"help-home.tsx" },
+        { route:"/admin/docs", label:"Docs", type:"List", state:"partial", comp:"docs-admin.tsx" },
+      ]},
+      { group:"Trust & Safety", routes:[
+        { route:"/admin/trust-safety", label:"Trust & Safety Inspector", type:"List", state:"partial", comp:"TrustSafetyNav.tsx (13 pages)" },
+      ]},
+    ]
+  },
+  settings: {
+    label:"Settings", icon:"settings",
+    overview:{ route:"/admin/settings", state:"OK", note:"SettingsView" },
+    groups:[
+      { group:"Settings Overview", routes:[
+        { route:"/admin/settings", label:"Overview", type:"Settings", state:"partial", comp:"SettingsView.tsx", overview:true },
+      ]},
+      { group:"Staff & Roles", routes:[
+        { route:"/admin/users", label:"Users", type:"List", state:"partial", comp:"StaffWidgets.tsx" },
+        { route:"/admin/users/roles", label:"Roles", type:"List", state:"partial", comp:"StaffWidgets (PermissionsMatrix)" },
+        { route:"/admin/staff", label:"Staff", type:"List", state:"partial", comp:"StaffView.tsx" },
+      ]},
+      { group:"Integrations", routes:[
+        { route:"/admin/integrations", label:"Integrations catalog", type:"List", state:"partial", comp:"IntegrationsCatalog + subnav" },
+        { route:"/admin/ai-ops", label:"AI ops", type:"List", state:"partial", comp:"badge.tsx + ui/*" },
+      ]},
+      { group:"System", routes:[
+        { route:"/admin/system", label:"System", type:"Settings", state:"partial", comp:"SystemWidgets + SettingsForm" },
+        { route:"/admin/audit", label:"Audit", type:"List", state:"partial", comp:"inline" },
+        { route:"/admin/feature-flags", label:"Feature flags", type:"List", state:"partial", comp:"inline" },
+      ]},
+    ]
+  }
+};
+
+const RAIL_ORDER = ["dashboard","contacts","catalog","orders","finance","marketing","support","settings"];
+
+/* ─────────── state ─────────── */
+let activeDomain = "dashboard";
+let activeRoute = "/admin";
+const openTabs = [...RAIL_ORDER];
+const openGroups = {};
+
+/* ─────────── helpers ─────────── */
+function allRoutes(domain){
+  return MANIFEST[domain].groups.flatMap(g => g.routes.map(r => ({...r, group:g.group})));
+}
+function findRoute(domain, route){
+  return allRoutes(domain).find(r => r.route === route) || allRoutes(domain)[0];
+}
+function toast(msg){
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove("show"), 1800);
+}
+const STATE_STYLES = {
+  works:   { cls:"bg-secondary-container text-on-secondary-container", label:"works" },
+  partial: { cls:"bg-surface-container text-on-surface-variant",       label:"partial" },
+  shell:   { cls:"bg-error-container text-on-error-container",         label:"shell" },
+  MISSING: { cls:"bg-error-container text-on-error-container",         label:"overview missing" },
+  OK:      { cls:"bg-secondary-container text-on-secondary-container", label:"overview ok" }
+};
+
+/* ─────────── MAIN RAIL ─────────── */
+function renderMainRail(){
+  const nav = document.getElementById("mainrail");
+  nav.innerHTML = RAIL_ORDER.map(key=>{
+    const d = MANIFEST[key];
+    const active = key===activeDomain;
+    return `<button data-domain="${key}" class="w-10 h-10 flex items-center justify-center rounded transition-colors ${
+      active ? "bg-surface-container-highest text-primary" : "text-on-surface-variant hover:bg-surface-container hover:text-on-surface"
+    }" title="${d.label}" type="button">
+      <span class="material-symbols-outlined text-[20px]">${d.icon}</span>
+    </button>`;
+  }).join("");
+  nav.querySelectorAll("button").forEach(b=>{
+    b.onclick = ()=>{
+      activeDomain = b.dataset.domain;
+      activeRoute = allRoutes(activeDomain)[0].route;
+      openGroups[activeDomain] = new Set([MANIFEST[activeDomain].groups[0].group]);
+      renderAll();
+    };
+  });
+}
+
+/* ─────────── TAB STRIP ─────────── */
+function renderTabStrip(){
+  const nav = document.getElementById("tabstrip");
+  nav.innerHTML = openTabs.map(key=>{
+    const active = key===activeDomain;
+    return `<a class="h-[36px] px-space-md inline-flex items-center gap-space-sm rounded-t transition-colors whitespace-nowrap ${
+      active
+        ? "bg-surface-container-lowest text-on-surface border-b-2 border-primary font-label-md"
+        : "bg-surface-container-high text-on-surface-variant font-label-md hover:bg-surface-container-lowest hover:text-on-surface"
+    }" data-domain="${key}" href="#"><span>${MANIFEST[key].label}</span>
+      <button class="hover:text-error" type="button"><span class="material-symbols-outlined text-[14px]">close</span></button>
+    </a>`;
+  }).join("");
+  nav.querySelectorAll("a").forEach(a=>{
+    a.onclick = e=>{
+      e.preventDefault();
+      activeDomain = a.dataset.domain;
+      activeRoute = allRoutes(activeDomain)[0].route;
+      openGroups[activeDomain] = new Set([MANIFEST[activeDomain].groups[0].group]);
+      renderAll();
+    };
+  });
+}
+
+/* ─────────── SIDE RAIL ─────────── */
+function renderSideRail(){
+  const domain = MANIFEST[activeDomain];
+  document.getElementById("siderail-title").textContent = domain.label;
+  const nav = document.getElementById("siderail");
+  const filterVal = document.getElementById("route-filter").value.toLowerCase();
+
+  if (!openGroups[activeDomain]) openGroups[activeDomain] = new Set();
+  const activeGroupName = findRoute(activeDomain, activeRoute).group;
+  openGroups[activeDomain].add(activeGroupName);
+
+  nav.innerHTML = domain.groups.map(g=>{
+    const isOpen = openGroups[activeDomain].has(g.group) || (filterVal && g.routes.some(r=>r.label.toLowerCase().includes(filterVal) || r.route.toLowerCase().includes(filterVal)));
+    const visibleRoutes = g.routes.filter(r =>
+      !filterVal || r.label.toLowerCase().includes(filterVal) || r.route.toLowerCase().includes(filterVal)
+    );
+    if (filterVal && visibleRoutes.length === 0) return "";
+
+    return `<div class="flex flex-col">
+      <button data-group="${g.group}" class="flex items-center justify-between px-2 py-1.5 rounded hover:bg-surface-container-low text-on-surface w-full" type="button">
+        <div class="flex items-center gap-space-xs">
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform ${isOpen?'rotate-90':''}">chevron_right</span>
+          <span class="font-label-md text-label-md text-left">${g.group}</span>
+          <span class="px-1.5 py-0.2 rounded bg-surface-container text-on-surface-variant font-label-sm text-[11px]">${g.routes.length}</span>
+        </div>
+        ${g.routes.some(r=>r.missing) ? `<span class="material-symbols-outlined text-[14px] text-error" title="Overview missing">error</span>` : ""}
+      </button>
+      ${isOpen ? `<div class="pl-5 border-l border-surface-dim ml-3 mt-1 flex flex-col gap-0.5">
+        ${visibleRoutes.map(r=>{
+          const active = r.route===activeRoute;
+          return `<button data-route="${r.route}" class="text-left px-2 py-1 rounded font-body-sm flex items-center justify-between gap-2 ${
+            active ? "bg-surface-container text-primary font-label-md" : "text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low"
+          }">
+            <span class="truncate">${r.label}</span>
+            ${r.missing ? `<span class="material-symbols-outlined text-[14px] text-error">error</span>` : ""}
+          </button>`;
+        }).join("")}
+      </div>` : ""}
+    </div>`;
+  }).join("");
+
+  nav.querySelectorAll("button[data-group]").forEach(b=>{
+    b.onclick = ()=>{
+      const g = b.dataset.group;
+      if (openGroups[activeDomain].has(g)) openGroups[activeDomain].delete(g);
+      else openGroups[activeDomain].add(g);
+      renderSideRail();
+    };
+  });
+  nav.querySelectorAll("button[data-route]").forEach(b=>{
+    b.onclick = ()=>{ activeRoute = b.dataset.route; renderAll(); };
+  });
+}
+
+/* ─────────── CONTENT ─────────── */
+function renderContent(){
+  const domain = MANIFEST[activeDomain];
+  const child = findRoute(activeDomain, activeRoute);
+  const routes = allRoutes(activeDomain);
+
+  document.getElementById("breadcrumb").innerHTML = `
+    <span>ManageKube LLC — Unsaid</span><span class="text-outline">/</span>
+    <span>${domain.label}</span><span class="text-outline">/</span>
+    <span>${child.group}</span><span class="text-outline">/</span>
+    <span class="text-primary font-semibold">${child.label}</span>`;
+
+  document.getElementById("page-title").textContent = `${domain.label} · ${child.label}`;
+
+  const pill = document.getElementById("state-pill");
+  const st = STATE_STYLES[child.state] || STATE_STYLES.partial;
+  pill.className = `inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-label-sm ${st.cls}`;
+  pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-current"></span>${st.label}`;
+
+  const groupCount = domain.groups.length;
+  const missingCount = routes.filter(c=>c.missing).length;
+  const shellCount = routes.filter(c=>c.state==="shell").length;
+  document.getElementById("summary-cards").innerHTML = `
+    <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm">
+      <span class="font-label-sm uppercase tracking-wider text-outline">Domain root</span>
+      <div class="flex items-baseline gap-2 mt-1">
+        <span class="font-headline-xl text-on-surface font-semibold">${domain.overview.route}</span>
+      </div>
+      <div class="mt-3 pt-3 border-t border-surface-dim">
+        <span class="font-label-sm ${domain.overview.state==="OK"?"text-secondary":"text-error"}">${domain.overview.state} — ${domain.overview.note}</span>
+      </div>
+    </div>
+    <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm">
+      <span class="font-label-sm uppercase tracking-wider text-outline">Groups · Routes</span>
+      <div class="flex items-baseline gap-2 mt-1">
+        <span class="font-headline-xl text-on-surface font-semibold">${groupCount}</span>
+        <span class="font-label-sm text-on-surface-variant">groups ·</span>
+        <span class="font-headline-xl text-on-surface font-semibold">${routes.length}</span>
+        <span class="font-label-sm text-on-surface-variant">routes</span>
+      </div>
+      <div class="mt-3 pt-3 border-t border-surface-dim flex items-center gap-3 font-label-sm">
+        <span class="text-error">${missingCount} missing overview</span>
+        <span class="text-on-surface-variant">${shellCount} shells</span>
+      </div>
+    </div>
+    <div class="rounded-xl bg-surface-container-lowest p-5 shadow-sm">
+      <span class="font-label-sm uppercase tracking-wider text-outline">Rule check</span>
+      <div class="flex items-baseline gap-2 mt-1">
+        <span class="font-headline-xl ${domain.overview.state==="OK"?"text-secondary":"text-error"} font-semibold">${domain.overview.state==="OK"?"PASS":"FAIL"}</span>
+      </div>
+      <div class="mt-3 pt-3 border-t border-surface-dim font-label-sm text-on-surface-variant">
+        Domain with children ⇒ root must be Overview
+      </div>
+    </div>`;
+
+  document.getElementById("child-count").textContent = `${groupCount} groups · ${routes.length} routes`;
+  renderFlatTable();
+}
+
+function renderFlatTable(){
+  const tbody = document.getElementById("flat-table");
+  const filterVal = (document.getElementById("flat-filter").value || "").toLowerCase();
+
+  const rows = [];
+  RAIL_ORDER.forEach(key=>{
+    const domain = MANIFEST[key];
+    domain.groups.forEach(g=>{
+      g.routes.forEach(r=>rows.push({ pillar: domain.label, pillarKey: key, group: g.group, ...r }));
+    });
+  });
+
+  const filtered = rows.filter(r => {
+    if (!filterVal) return true;
+    return [r.pillar,r.group,r.label,r.route,r.type,r.state,r.comp]
+      .filter(Boolean).some(v => String(v).toLowerCase().includes(filterVal));
+  });
+
+  if (filtered.length === 0){
+    tbody.innerHTML = `<tr><td colspan="8" class="px-5 py-6 text-center text-on-surface-variant">No matches.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r=>{
+    const s = STATE_STYLES[r.state] || STATE_STYLES.partial;
+    const overviewCell = r.overview
+      ? (r.missing ? `<span class="text-error font-label-md">✗ missing</span>` : `<span class="text-secondary font-label-md">✓ present</span>`)
+      : `<span class="text-on-surface-variant">—</span>`;
+    const isActivePillar = r.pillarKey === activeDomain;
+    return `<tr class="hover:bg-surface-container-low transition-colors ${isActivePillar?"bg-surface-container-low/40":""}">
+      <td class="px-5 py-2.5">
+        <button data-jump="${r.pillarKey}" data-route="${r.route}" class="text-left hover:underline text-on-surface">${r.pillar}</button>
+      </td>
+      <td class="px-5 py-2.5 text-on-surface-variant">${r.group}</td>
+      <td class="px-5 py-2.5 text-on-surface">${r.label}</td>
+      <td class="px-5 py-2.5 font-mono text-[12px] text-on-surface">${r.route}</td>
+      <td class="px-5 py-2.5 text-on-surface-variant">${r.type}</td>
+      <td class="px-5 py-2.5"><span class="px-2 py-0.5 rounded-full font-label-sm ${s.cls}">${s.label}</span></td>
+      <td class="px-5 py-2.5">${overviewCell}</td>
+      <td class="px-5 py-2.5 text-on-surface-variant font-mono text-[11px]">${r.comp}</td>
+    </tr>`;
+  }).join("");
+
+  tbody.querySelectorAll("button[data-jump]").forEach(b=>{
+    b.onclick = ()=>{
+      activeDomain = b.dataset.jump;
+      activeRoute = b.dataset.route;
+      const grp = findRoute(activeDomain, activeRoute).group;
+      openGroups[activeDomain] = new Set([grp]);
+      renderAll();
+    };
+  });
+}
+
+/* ═══════════════ FLYOUT 1 — Enterprise Navigation Hub ═══════════════ */
+function buildHubGrid(){
+  const grid = document.getElementById("hub-grid");
+  const pillarMeta = [
+    { key:"dashboard", num:"1", label:"Dashboard", tag:"Core", tagCls:"bg-primary/10 text-primary",
+      blurb:"Operations control tower, vital KPI monitoring, and triage queue.",
+      iconBg:"bg-primary/10 text-primary", icon:"dashboard" },
+    { key:"marketing", num:"2", label:"Marketing", tag:"Growth", tagCls:"bg-secondary/15 text-secondary",
+      blurb:"Content pipelines, storefront banners, creative popups, and ad channels.",
+      iconBg:"bg-secondary/10 text-secondary", icon:"campaign" },
+    { key:"catalog", num:"3", label:"Catalog", tag:"Studio", tagCls:"bg-primary/10 text-primary",
+      blurb:"Design engines, canvas launchers, blank supplier inventory, variants.",
+      iconBg:"bg-primary-container/20 text-primary", icon:"inventory_2" },
+    { key:"orders", num:"4", label:"Orders", tag:"Routing", tagCls:"bg-tertiary/15 text-tertiary",
+      blurb:"Fulfillment pipelines, routing rules, batch slips, automated shipping labels.",
+      iconBg:"bg-tertiary/10 text-tertiary", icon:"local_shipping" },
+    { key:"finance", num:"5", label:"Finance", tag:"Fiscal", tagCls:"bg-primary/10 text-primary",
+      blurb:"General ledger, double-entry books, chart of accounts, automated tax feeds.",
+      iconBg:"bg-primary/10 text-primary", icon:"account_balance" },
+    { key:"contacts", num:"6", label:"Contacts", tag:"CRM", tagCls:"bg-secondary-container/40 text-on-secondary-fixed-variant",
+      blurb:"Customer registry, dynamic segmentation, lifetime value, wholesale clients.",
+      iconBg:"bg-secondary-container/30 text-secondary", icon:"groups" },
+    { key:"support", num:"7", label:"Support", tag:"Help Desk", tagCls:"bg-tertiary/15 text-tertiary",
+      blurb:"Unified inbox, ticket routing, macros, SLA compliance, trust & safety.",
+      iconBg:"bg-tertiary-container/20 text-tertiary", icon:"support_agent" },
+  ];
+
+  grid.innerHTML = pillarMeta.map(p=>{
+    const d = MANIFEST[p.key];
+    const links = d.groups.slice(0,4).map(g=>({ label:g.group, route:g.routes[0].route, count:g.routes.length }));
+    return `<div class="pillar-card group bg-surface-container-lowest hover:bg-surface-container-low/70 rounded-xl p-space-lg flex flex-col justify-between transition-all shadow-sm hover:shadow-md" data-pillar-text="${(p.label+' '+p.blurb+' '+links.map(l=>l.label).join(' ')).toLowerCase()}">
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-9 h-9 rounded-lg ${p.iconBg} flex items-center justify-center group-hover:bg-primary group-hover:text-on-primary transition-colors">
+              <span class="material-symbols-outlined text-[20px]">${p.icon}</span>
+            </div>
+            <span class="font-headline-sm text-on-surface font-bold">${p.num}. ${p.label}</span>
+          </div>
+          <span class="font-label-sm px-2 py-0.5 rounded ${p.tagCls} font-bold">${p.tag}</span>
+        </div>
+        <p class="font-body-sm text-on-surface-variant mb-space-md">${p.blurb}</p>
+        <div class="space-y-1">
+          ${links.map(l=>`<a data-hub-route="${p.key}:${l.route}" class="flex items-center justify-between p-1.5 rounded-lg text-on-surface hover:bg-surface-container-high transition-colors font-label-md cursor-pointer">
+            <span class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">chevron_right</span>${l.label}</span>
+            <span class="font-tabular-sm text-[12px] text-on-surface-variant">${l.count}</span>
+          </a>`).join("")}
+        </div>
+      </div>
+      <div class="mt-space-md pt-space-xs flex items-center justify-between text-on-surface-variant font-label-sm">
+        <span>${d.groups.length} groups · ${allRoutes(p.key).length} routes</span>
+        <span class="text-primary font-bold flex items-center gap-0.5">Explore <span class="material-symbols-outlined text-[14px]">chevron_right</span></span>
+      </div>
+    </div>`;
+  }).join("") + `
+    <div class="bg-gradient-to-br from-surface-container-low via-surface-container to-surface-container-high rounded-xl p-space-lg flex flex-col justify-between shadow-sm">
+      <div>
+        <div class="flex items-center justify-between mb-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <div class="w-9 h-9 rounded-lg bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+              <span class="material-symbols-outlined text-[20px]">hub</span>
+            </div>
+            <span class="font-headline-sm text-on-surface font-bold">Connected Nodes</span>
+          </div>
+          <span class="w-2.5 h-2.5 rounded-full bg-primary ring-4 ring-primary/20"></span>
+        </div>
+        <p class="font-body-sm text-on-surface-variant mb-space-md">Live webhook sync &amp; supplier fulfillment network status.</p>
+        <div class="space-y-2">
+          ${["Printful US API","Printify Global","Gelato POD Routing","Stripe Connect Gateway"].map(n=>`
+            <div class="flex items-center justify-between bg-surface-container-lowest px-2.5 py-1.5 rounded-lg">
+              <span class="font-label-sm text-on-surface flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-primary"></span>${n}</span>
+              <span class="font-tabular-sm text-[11px] text-on-surface-variant">Live</span>
+            </div>`).join("")}
+        </div>
+      </div>
+      <div class="pt-space-md">
+        <button data-jump-settings class="font-label-sm text-primary font-bold hover:underline flex items-center gap-1">
+          Manage all 14 integrations <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+        </button>
+      </div>
+    </div>`;
+
+  grid.querySelectorAll("[data-hub-route]").forEach(a=>{
+    a.onclick = ()=>{
+      const [key, route] = a.dataset.hubRoute.split(":");
+      activeDomain = key;
+      activeRoute = route;
+      openGroups[key] = new Set([findRoute(key, route).group]);
+      closeFlyout("flyout-hub");
+      renderAll();
+    };
+  });
+  grid.querySelectorAll("[data-jump-settings]").forEach(b=>{
+    b.onclick = ()=>{
+      activeDomain = "settings";
+      activeRoute = "/admin/integrations";
+      openGroups.settings = new Set(["Integrations"]);
+      closeFlyout("flyout-hub");
+      renderAll();
+    };
+  });
+}
+
+/* ═══════════════ FLYOUT 2 — Universal Create ═══════════════ */
+const CREATE_CATEGORIES = [
+  { title:"Customers", dot:"bg-primary", items:[
+    { label:"Invoice", desc:"Universal form • 4 tab styles", icon:"receipt_long" },
+    { label:"Receive Payment", desc:"Apply customer tender & credit", icon:"price_check" },
+    { label:"Estimate", desc:"B2B commercial bid pipeline", icon:"request_quote" },
+    { label:"Receipt", desc:"Instant OTC & kiosk settlement", icon:"point_of_sale" },
+    { label:"Credit", desc:"Customer balance reduction / RMA", icon:"assignment_return" },
+    { label:"Statement", desc:"Batch billing summary cycle", icon:"summarize" },
+    { label:"Customer", desc:"Master party profile & credit limit", icon:"person_add" },
+  ]},
+  { title:"Expenses", dot:"bg-secondary", items:[
+    { label:"Expense", desc:"Direct paid petty cash or credit card", icon:"credit_card" },
+    { label:"Bill", desc:"Enter vendor invoice payable", icon:"description" },
+    { label:"Payment", desc:"Batch ACH / wire check disbursement", icon:"outbox" },
+    { label:"Order", desc:"Blank supplier procurement (PO)", icon:"shopping_bag" },
+    { label:"Vendor", desc:"Payables party + W-9 auto-invite", icon:"domain_add" },
+    { label:"Refund", desc:"Supplier refund or merchant reward", icon:"savings" },
+  ]},
+  { title:"Banking", dot:"bg-tertiary", items:[
+    { label:"Deposit", desc:"Combine funds to primary clearing", icon:"account_balance" },
+    { label:"Transfer", desc:"Inter-account treasury movements", icon:"swap_horiz" },
+    { label:"Journal", desc:"Double-entry debit / credit adjustment", icon:"menu_book" },
+    { label:"Reconcile", desc:"Plaid feed & statement tie-out", icon:"fact_check" },
+    { label:"Recurring", desc:"Scheduled automated transaction", icon:"event_repeat" },
+    { label:"Settlement", desc:"Stripe / Shopify net payout split", icon:"assured_workload" },
+  ]},
+  { title:"Catalog", dot:"bg-primary", items:[
+    { label:"Product", desc:"Launch item in Konva visual studio", icon:"checkroom" },
+    { label:"Design", desc:"Vector canvas & print placement", icon:"palette" },
+    { label:"Banner", desc:"Storefront slot placement & CTA", icon:"view_carousel" },
+    { label:"Campaign", desc:"Meta, TikTok & Google Ads launch", icon:"campaign" },
+    { label:"Ticket", desc:"Care escalation & order replacement", icon:"headset_mic" },
+    { label:"Post", desc:"Multi-channel scheduled content", icon:"share" },
+  ]},
+];
+
+function buildCreateGrid(){
+  const grid = document.getElementById("create-grid");
+  grid.innerHTML = CREATE_CATEGORIES.map(cat=>`
+    <div class="flex flex-col gap-space-sm bg-surface-container-lowest p-space-md rounded-lg shadow-sm">
+      <div class="flex items-center justify-between pb-1 border-b border-surface-container">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full ${cat.dot}"></span>
+          <span class="font-label-sm text-[11px] text-on-surface font-bold uppercase tracking-wider">${cat.title}</span>
+        </div>
+        <span class="font-tabular-sm text-[10px] text-on-surface-variant font-medium">${cat.items.length} items</span>
+      </div>
+      <nav class="flex flex-col gap-0.5">
+        ${cat.items.map(it=>`
+          <button data-create-item="${it.label}" class="create-item group flex flex-col px-2.5 py-1.5 rounded hover:bg-primary hover:text-on-primary transition-all text-left w-full">
+            <div class="flex items-center justify-between">
+              <span class="font-body-md font-medium text-on-surface group-hover:text-on-primary flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px] text-primary group-hover:text-on-primary">${it.icon}</span>${it.label}
+              </span>
+            </div>
+            <span class="font-body-sm text-[11px] text-on-surface-variant group-hover:text-on-primary/80 mt-0.5">${it.desc}</span>
+          </button>`).join("")}
+      </nav>
+    </div>`).join("");
+}
+
+/* ─────────── flyout open/close ─────────── */
+function openFlyout(id){
+  document.querySelectorAll(".flyout-scrim").forEach(el=>el.classList.add("flyout-hidden"));
+  const el = document.getElementById(id);
+  el.classList.remove("flyout-hidden");
+  document.body.style.overflow = "hidden";
+  if (id === "flyout-hub"){ setTimeout(()=>document.getElementById("hub-search").focus(), 60); }
+  if (id === "flyout-create"){ setTimeout(()=>document.getElementById("create-search").focus(), 60); }
+}
+function closeFlyout(id){
+  const el = document.getElementById(id);
+  if (el) el.classList.add("flyout-hidden");
+  if (!document.querySelector(".flyout-scrim:not(.flyout-hidden)")){
+    document.body.style.overflow = "";
+  }
+}
+function closeAllFlyouts(){
+  document.querySelectorAll(".flyout-scrim").forEach(el=>el.classList.add("flyout-hidden"));
+  document.body.style.overflow = "";
+}
+
+/* ─────────── wiring ─────────── */
+// Flyout 1 Triggers
+document.getElementById("btn-hamburger").onclick = ()=>openFlyout("flyout-hub");
+document.querySelector("[data-utility='modules']").onclick = ()=>openFlyout("flyout-hub");
+
+// Flyout 2 Triggers
+document.getElementById("btn-create-header").onclick = ()=>openFlyout("flyout-create");
+document.getElementById("btn-create-rail").onclick = ()=>openFlyout("flyout-create");
+
+// Quick Launch Strips wiring
+document.querySelectorAll("[data-hub-quick]").forEach(btn=>{
+  btn.onclick = ()=>{
+    const act = btn.dataset.hubQuick;
+    closeAllFlyouts();
+    if (act === "konva") {
+      activeDomain = "catalog"; activeRoute = "/admin/studio"; openGroups.catalog = new Set(["Design Studio"]); renderAll();
+      toast("Jumped to Catalog → Konva Studio");
+    } else if (act === "ticket") {
+      activeDomain = "support"; activeRoute = "/admin/support"; openGroups.support = new Set(["Support Overview"]); renderAll();
+      toast("Jumped to Support → Overview");
+    } else {
+      openFlyout("flyout-create");
+      toast(`Targeting: ${act}`);
+    }
+  };
+});
+document.querySelectorAll("[data-create-item]").forEach(btn=>{
+  btn.onclick = ()=>{
+    closeAllFlyouts();
+    toast(`Create → ${btn.dataset.createItem}`);
+  };
+});
+
+// Global Dismissals
+document.querySelectorAll("[data-close-flyout]").forEach(b=>b.onclick = closeAllFlyouts);
+document.querySelectorAll(".flyout-scrim").forEach(s=>{
+  s.onclick = (e)=>{ if (e.target === s) closeAllFlyouts(); };
+});
+window.addEventListener("keydown", (e)=>{
+  if (e.key === "Escape") closeAllFlyouts();
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k"){
+    e.preventDefault();
+    openFlyout("flyout-hub");
+  }
+});
+
+// Search Filters
+document.getElementById("hub-search").addEventListener("input", (e)=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll("#hub-grid .pillar-card").forEach(card=>{
+    const text = card.dataset.pillarText || card.textContent.toLowerCase();
+    card.style.display = (!q || text.includes(q)) ? "" : "none";
+  });
+});
+document.getElementById("create-search").addEventListener("input", (e)=>{
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll("#create-grid .create-item").forEach(item=>{
+    const text = item.textContent.toLowerCase();
+    item.style.display = (!q || text.includes(q)) ? "" : "none";
+  });
+});
+
+// Global shell filters
+document.getElementById("route-filter").addEventListener("input", renderSideRail);
+document.getElementById("flat-filter").addEventListener("input", renderFlatTable);
+
+/* ─────────── boot ─────────── */
+function renderAll(){
+  renderMainRail();
+  renderTabStrip();
+  renderSideRail();
+  renderContent();
+}
+RAIL_ORDER.forEach(k=>{ openGroups[k] = new Set([MANIFEST[k].groups[0].group]); });
+buildHubGrid();
+buildCreateGrid();
+renderAll();
+</script>
+</body>
+</html>

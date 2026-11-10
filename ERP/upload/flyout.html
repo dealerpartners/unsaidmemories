@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unsaid Studio - Supplier Variant Inspector with Mega-Menu Queue</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf9fc; --card:#fff; --ink:#1a1c1e; --mut:#5f6b5a; --line:#dad9dd; --lo:#f4f3f7; 
+  --pri:#0a6400; --prit:#fff; --blue:#0077c5; --soft:#e8f5e9; --warn:#a85a00; --warnb:#fff3e0; 
+  --bad:#ba1a1a; --badb:#ffdad6; --ok:#2e7d32; --maroon:#6b1e28; --tee:#d9d7df;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121214; --card:#1a1b1e; --ink:#ecedee; --mut:#a3aaa0; --line:#2e3033; --lo:#222427; 
+    --pri:#2f9e1f; --soft:#1b2a19; --warn:#f0a649; --warnb:#33260f; --bad:#ff8a80; --badb:#3a1a18; 
+    --ok:#7fd48a; --tee:#3b3944; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121214; --card:#1a1b1e; --ink:#ecedee; --mut:#a3aaa0; --line:#2e3033; --lo:#222427; 
+  --pri:#2f9e1f; --soft:#1b2a19; --warn:#f0a649; --warnb:#33260f; --bad:#ff8a80; --badb:#3a1a18; 
+  --ok:#7fd48a; --tee:#3b3944; color-scheme:dark;
+}
+html,body{height:100%}*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 13px/1.45 var(--sans);display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ms{font-family:"Material Symbols Outlined";font-weight:400;font-style:normal;font-size:20px;line-height:1;display:inline-block;letter-spacing:normal;text-transform:none;white-space:nowrap;-webkit-font-smoothing:antialiased;font-feature-settings:"liga"}
+
+/* TOP NAVIGATION BAR (MEGA-MENU) */
+.top-nav{height:56px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:16px;z-index:50;position:relative}
+.nav-logo{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;min-width:200px}
+.nav-links{display:flex;gap:4px;height:100%}
+.nav-item{position:relative;height:100%;display:flex;align-items:center}
+.nav-btn{background:none;border:0;padding:8px 12px;font-weight:500;font-size:13px;color:var(--ink);border-radius:6px;display:flex;align-items:center;gap:4px;height:100%}
+.nav-btn:hover{background:var(--lo)}
+.nav-btn .ms{font-size:16px;color:var(--mut)}
+
+/* MEGA MENU DROPDOWN */
+.nav-dropdown{position:absolute;top:100%;left:0;background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.12);width:600px;padding:16px;display:none;z-index:60;grid-template-columns:200px 1fr;gap:16px}
+.nav-item.open .nav-dropdown{display:grid}
+
+/* Children List (Left side of Mega Menu) */
+.mega-menu-children { display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--line); padding-right: 16px; }
+.mega-child-item { text-align: left; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 500; color: var(--ink); background: none; border: 0; cursor: pointer; }
+.mega-child-item:hover { background: var(--lo); }
+.mega-child-item.active { background: var(--lo); font-weight: 600; color: var(--pri); }
+
+/* Product Selection (Right side of Mega Menu) */
+.mega-menu-products { display: flex; flex-direction: column; gap: 8px; }
+.mega-product-row { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 6px; cursor: pointer; }
+.mega-product-row:hover { background: var(--lo); }
+.mega-product-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--ink); }
+.mega-product-row img { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; background: var(--lo); }
+.mega-product-info { flex: 1; }
+.mega-product-info b { display: block; font-size: 12px; font-weight: 600; }
+.mega-product-info span { font-size: 11px; color: var(--mut); }
+.mega-footer { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 8px; display: flex; justify-content: flex-end; }
+.mega-footer button { background: var(--ink); color: var(--card); border: 0; padding: 6px 12px; border-radius: 4px; font-weight: 600; font-size: 12px; cursor: pointer; }
+
+/* QUEUE BUTTON */
+.queue-btn-container { position: relative; margin-left: auto; }
+.queue-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); font-weight: 600; font-size: 13px; cursor: pointer; }
+.queue-btn:hover { background: var(--lo); }
+.queue-badge { background: var(--bad); color: #fff; font-size: 10px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+
+/* QUEUE FLYOUT */
+.queue-flyout { position: absolute; top: 100%; right: 0; margin-top: 8px; width: 320px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; flex-direction: column; z-index: 200; }
+.queue-flyout.open { display: flex; }
+.flyout-header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 14px; }
+.flyout-body { max-height: 300px; overflow-y: auto; padding: 8px; }
+.flyout-item { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 6px; }
+.flyout-item img { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; background: var(--lo); }
+.flyout-item-info { flex: 1; }
+.flyout-item-info b { display: block; font-size: 12px; font-weight: 600; }
+.flyout-item-info span { font-size: 11px; color: var(--mut); }
+.flyout-footer { padding: 12px 16px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+.flyout-footer .btn { width: 100%; padding: 8px; background: var(--ink); color: var(--card); border: 0; border-radius: 6px; font-weight: 600; cursor: pointer; }
+
+/* MAIN APP BODY */
+.app-body{flex:1;display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:264px;flex:none;background:var(--card);border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:40}
+.sb-top{padding:12px 14px 8px;display:flex;flex-direction:column;gap:10px}
+.sb-icon-btn{width:28px;height:28px;border-radius:4px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--ink)}
+.sb-icon-btn:hover{background:var(--lo)}
+.sb-filter{display:flex;align-items:center;gap:8px;background:var(--lo);border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--mut)}
+.sb-filter input{border:0;background:transparent;width:100%;outline:none;font-size:13px}
+.sb-nav{flex:1;overflow-y:auto;padding:0 8px}
+.sb-group{margin-bottom:2px}
+.sb-header{display:flex;align-items:center;gap:10px;width:100%;padding:10px 8px;background:none;border:0;border-radius:6px;text-align:left;font-weight:600;font-size:13px;color:var(--ink)}
+.sb-header:hover{background:var(--lo)}
+.sb-header .gi{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+.sb-header .gi .ms{font-size:14px}
+.sb-header .title{flex:1}
+.sb-header .cnt{background:var(--lo);color:var(--mut);font-size:11px;font-weight:600;border-radius:99px;padding:1px 8px;min-width:20px;text-align:center}
+.sb-header .cnt.w{background:var(--warnb);color:var(--warn)}
+.sb-header .chev{color:var(--mut);transition:.2s;font-size:16px}
+.sb-group.open .chev{transform:rotate(180deg)}
+.sb-children{display:none;padding:2px 0 8px}
+.sb-group.open .sb-children{display:block}
+.sb-child{display:flex;align-items:center;width:100%;text-align:left;background:none;border:0;padding:8px 8px 8px 42px;color:var(--ink);font-weight:500;font-size:13px;border-radius:4px;margin-bottom:1px}
+.sb-child:hover{background:var(--lo)}
+.sb-child .dw{margin-left:auto;font-size:11px;color:var(--mut);opacity:.8}
+.sb-footer{border-top:1px solid var(--line);padding:12px 14px}
+.sb-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sb-btn{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-weight:600;font-size:12px;color:var(--ink)}
+.sb-btn:hover{background:var(--lo)}
+.sb-btn .ms{font-size:16px}
+.sb-sync{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mut)}
+.sb-sync .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pri);margin-right:5px}
+
+/* MAIN AREA (CANVAS) */
+.main-area{flex:1;display:flex;flex-direction:column;position:relative;background:var(--bg);overflow:hidden}
+.canvas-viewport{flex:1;position:relative;display:flex;align-items:center;justify-content:center;background-image:radial-gradient(var(--line) 1px, transparent 1px);background-size:20px 20px;transition:.3s}
+.canvas-viewport.dragover{background-color:var(--soft)}
+.canvas-empty{text-align:center;color:var(--mut);pointer-events:none}
+.canvas-empty .ms{font-size:48px;opacity:.4;margin-bottom:12px}
+.canvas-drop-zone{position:absolute;inset:20px;border:2px dashed transparent;border-radius:12px;pointer-events:none;transition:.2s}
+.canvas-viewport.dragover .canvas-drop-zone{border-color:var(--pri)}
+.canvas-item{position:absolute;max-height:70%;max-width:70%;cursor:grab;box-shadow:0 10px 30px rgba(0,0,0,0.1);z-index:5}
+.canvas-item:active{cursor:grabbing}
+
+/* TOOLBAR & BOTTOM */
+.toolbar{position:absolute;top:16px;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);border-radius:8px;display:flex;align-items:center;padding:6px 12px;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.05);z-index:10}
+.toolbar .seg{display:flex;background:var(--lo);border-radius:6px;padding:2px;border:1px solid var(--line)}
+.toolbar .seg button{border:0;background:none;padding:4px 16px;border-radius:4px;font-weight:600;font-size:12px;color:var(--mut)}
+.toolbar .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.toolbar .div{width:1px;height:20px;background:var(--line)}
+.btn-ico{width:32px;height:32px;border-radius:6px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;color:var(--ink)}
+.btn-ico:hover{background:var(--lo)}
+.bottom-bar{height:48px;border-top:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:16px;background:var(--card);z-index:10}
+.zoom{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:6px;padding:2px 8px;background:var(--bg)}
+.zoom button{border:0;background:none;font-weight:600;padding:0 4px}
+.zoom span{font-size:12px;font-weight:600;min-width:36px;text-align:center}
+.bottom-bar .sp{flex:1}
+.save-btn{background:var(--card);border:1px solid var(--line);color:var(--ink);padding:8px 24px;border-radius:6px;font-weight:600}
+.publish-btn{background:var(--pri);color:var(--prit);border:0;padding:8px 24px;border-radius:6px;font-weight:600}
+
+/* RIGHT RAIL (SUPPLIER DATA) */
+.right-rail{position:absolute;top:0;right:0;bottom:0;width:400px;background:var(--card);border-left:1px solid var(--line);box-shadow:-4px 0 24px rgba(0,0,0,0.05);z-index:30;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease}
+.right-rail.open{transform:translateX(0)}
+.rail-header{padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+.rail-header h2{margin:0;font-size:15px;font-weight:600;flex:1}
+.rail-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+
+/* RAIL COMPONENTS */
+.upload-zone{border:2px dashed var(--line);border-radius:8px;padding:32px 16px;text-align:center;color:var(--mut);cursor:pointer}
+.upload-zone:hover{border-color:var(--pri);background:var(--soft)}
+.lib-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lib-item{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:8px;cursor:grab;transition:.1s}
+.lib-item:hover{border-color:var(--pri);background:var(--soft);transform:translateY(-2px)}
+.lib-item .ms{font-size:28px;color:var(--mut)}
+.lib-item span{font-size:11px;font-weight:600;text-align:center}
+.product-hero{display:flex;gap:12px}
+.product-hero img{width:80px;height:80px;border-radius:6px;object-fit:cover;background:var(--lo)}
+.product-hero .info{flex:1;display:flex;flex-direction:column;gap:2px}
+.product-hero .info b{font-size:14px}
+.product-hero .info span{font-size:12px;color:var(--mut)}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.kv:last-child{border:0}
+.kv span:first-child{color:var(--mut)}
+.kv b{font-weight:600}
+.acc-item{border-bottom:1px solid var(--line)}
+.acc-head{width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 0;background:none;border:0;font-weight:600;font-size:13px}
+.acc-body{display:none;padding-bottom:12px;font-size:13px;color:var(--mut)}
+.acc-item.open .acc-body{display:block}
+.acc-item.open .acc-head .ms{transform:rotate(180deg)}
+.btn{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font-weight:600;font-size:13px;justify-content:center}
+.btn:hover{background:var(--lo)}
+.btn.p{background:var(--pri);border-color:var(--pri);color:var(--prit)}
+.btn.s{padding:4px 10px;font-size:12px}
+
+/* SUPPLIER INSPECTOR SPECIFIC */
+.supplier-tag { display: inline-flex; align-items: center; gap: 4px; background: var(--lo); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; color: var(--mut); margin-right: 4px; }
+.color-swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
+.color-swatch-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); cursor: pointer; }
+.color-swatch-btn.active { border-color: var(--pri); background: var(--soft); }
+.color-swatch-btn .swatch { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.1); }
+.color-swatch-btn span { font-size: 9px; font-weight: 600; text-align: center; }
+.model-thumbs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+.model-thumb { width: 60px; height: 60px; flex-shrink: 0; border: 2px solid transparent; border-radius: 6px; overflow: hidden; cursor: pointer; background: var(--lo); }
+.model-thumb.active { border-color: var(--pri); }
+.model-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* MODALS */
+.ov{position:fixed;inset:0;background:rgba(10,10,12,.45);display:none;z-index:100;justify-content:center;align-items:center;padding:16px}
+.ov.on{display:flex}
+.pk{background:var(--card);width:100%;max-width:500px;max-height:90vh;border-radius:12px;display:flex;flex-direction:column;overflow:hidden}
+.pk-header{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.pk-header h2{margin:0;font-size:16px;font-weight:600}
+.pk-body{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.pk-footer{padding:16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.var-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.var-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--pri)}
+.var-row .swatch{width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+.var-row .name{flex:1;font-weight:500}
+.scaling-diagram{display:flex;justify-content:space-between;align-items:flex-end;padding:20px 0;gap:4px}
+.scaling-item{text-align:center;font-size:12px;font-weight:600;flex:1}
+.scaling-item svg{height:80px;width:auto;margin-bottom:8px}
+.help-section h4{margin:16px 0 8px;font-size:13px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.shortcut-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.shortcut-row .key{background:var(--lo);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:11px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--card);padding:10px 20px;border-radius:8px;font-weight:500;opacity:0;transition:.2s;pointer-events:none;z-index:200}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION BAR (MEGA-MENU) -->
+<header class="top-nav">
+  <div class="nav-logo">
+    <span class="ms" style="color:var(--pri)">palette</span>
+    Unsaid Studio
+  </div>
+  
+  <nav class="nav-links" id="top-nav-links">
+    <!-- Dynamically populated by JS -->
+  </nav>
+
+  <div class="queue-btn-container" id="queue-flyout-container">
+    <button class="queue-btn" onclick="toggleQueueFlyout()">
+      <span class="ms" style="font-size:16px">playlist_add</span>
+      Design Queue
+      <span class="queue-badge" id="queue-count">0</span>
+    </button>
+    
+    <div class="queue-flyout" id="queue-flyout">
+      <div class="flyout-header">
+        Design Queue
+        <span class="ms" style="cursor:pointer" onclick="toggleQueueFlyout()">close</span>
+      </div>
+      <div class="flyout-body" id="queue-list">
+        <!-- Injected via JS -->
+      </div>
+      <div class="flyout-footer">
+        <button class="btn" onclick="closeQueueFlyout()">Close</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="app-body">
+  <!-- LEFT NAVIGATION SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <button class="sb-icon-btn"><span class="ms">menu</span></button>
+      <label class="sb-filter">
+        <span class="ms" style="font-size:18px">search</span>
+        <input type="text" placeholder="Filter…">
+      </label>
+    </div>
+    
+    <div class="sb-nav">
+      <div class="sb-group open">
+        <button class="sb-header" onclick="toggleGroup(this)">
+          <span class="gi" style="background:#8a4bd1"><span class="ms">palette</span></span>
+          <span class="title">Studio</span>
+          <span class="cnt">7</span>
+          <span class="ms chev">expand_less</span>
+        </button>
+        <div class="sb-children">
+          <button class="sb-child" onclick="openRail('upload')">Upload<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('ai')">AI<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('text')">Add text<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('library')">My library<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('graphics')">Graphics<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('templates')">My templates<span class="dw">rail</span></button>
+          <button class="sb-child" onclick="openRail('shutterstock')">Shutterstock<span class="dw">rail</span></button>
+        </div>
+      </div>
+
+      <div class="sb-group">
+        <button class="sb-header" onclick="toggleGroup(this)">
+          <span class="gi" style="background:#0e5e6f"><span class="ms">grid_view</span></span>
+          <span class="title">Catalog</span>
+          <span class="cnt">4</span>
+          <span class="ms chev">expand_less</span>
+        </button>
+        <div class="sb-children">
+          <button class="sb-child" onclick="openCatalog('Men')">Men</button>
+          <button class="sb-child" onclick="openCatalog('Women')">Women</button>
+          <button class="sb-child" onclick="openCatalog('Children')">Children</button>
+          <button class="sb-child" onclick="openCatalog('Home & Living')">Home & Living</button>
+        </div>
+      </div>
+
+      <div class="sb-group">
+        <button class="sb-header" onclick="toggleGroup(this)">
+          <span class="gi" style="background:#1e5a38"><span class="ms">checkroom</span></span>
+          <span class="title">My products</span>
+          <span class="cnt">2</span>
+          <span class="ms chev">expand_less</span>
+        </button>
+        <div class="sb-children">
+          <button class="sb-child" onclick="openMyProducts('order')">Create order</button>
+          <button class="sb-child" onclick="openMyProducts('stores')">My stores</button>
+        </div>
+      </div>
+
+      <div class="sb-group">
+        <button class="sb-header" onclick="toggleGroup(this)">
+          <span class="gi" style="background:#a85a00"><span class="ms">receipt_long</span></span>
+          <span class="title">My orders</span>
+          <span class="cnt w">1</span>
+          <span class="ms chev">expand_less</span>
+        </button>
+        <div class="sb-children">
+          <button class="sb-child" onclick="openOrders()">Orders list</button>
+        </div>
+      </div>
+
+      <div class="sb-group">
+        <button class="sb-header" onclick="toggleGroup(this)">
+          <span class="gi" style="background:#1f2937"><span class="ms">auto_fix_high</span></span>
+          <span class="title">Create wizard</span>
+          <span class="cnt">6</span>
+          <span class="ms chev">expand_less</span>
+        </button>
+        <div class="sb-children">
+          <button class="sb-child" onclick="openWizard('Best Selling')">Best Selling</button>
+          <button class="sb-child" onclick="openWizard('Fast Selling')">Fast Selling</button>
+          <button class="sb-child" onclick="openWizard('Men')">Men</button>
+          <button class="sb-child" onclick="openWizard('Women')">Women</button>
+          <button class="sb-child" onclick="openWizard('Children')">Children</button>
+          <button class="sb-child" onclick="openWizard('Home & Living')">Home & Living</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-actions">
+        <button class="sb-btn" onclick="toast('Workspace menu')"><span class="ms">add_box</span> Workspace</button>
+        <button class="sb-btn" onclick="toast('Export started')"><span class="ms">download</span> Export</button>
+      </div>
+      <div class="sb-sync">
+        <span><span class="dot"></span> Sync: 2s ago</span>
+        <span>v3.8.4</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CANVAS AREA -->
+  <main class="main-area">
+    <div class="canvas-viewport" id="canvas-viewport">
+      <div class="canvas-empty" id="canvas-empty">
+        <span class="ms">upload_file</span>
+        <h3>Canvas is empty</h3>
+        <p>Select a tool from the sidebar or drag a blank to begin.</p>
+      </div>
+      <div class="canvas-drop-zone"></div>
+      <img src="" class="canvas-item" id="canvas-item" style="display:none" alt="Design Mockup">
+    </div>
+
+    <div class="toolbar">
+      <button class="btn-ico" title="Undo"><span class="ms">undo</span></button>
+      <button class="btn-ico" title="Redo"><span class="ms">redo</span></button>
+      <div class="div"></div>
+      <div class="seg" id="mode-toggle">
+        <button class="on" onclick="setMode('edit')">Edit</button>
+        <button onclick="setMode('preview')">Preview</button>
+      </div>
+      <div class="div"></div>
+      <button class="btn-ico" title="Help" onclick="openModal('modal-help')"><span class="ms">help</span></button>
+    </div>
+
+    <div class="bottom-bar">
+      <div class="zoom">
+        <button>-</button><span>15%</span><button>+</button>
+      </div>
+      <span style="font-size:12px;color:var(--mut)" id="bottom-label">No product selected</span>
+      <div class="sp"></div>
+      <button class="save-btn" onclick="toast('Draft saved.')">Save product</button>
+      <button class="publish-btn" onclick="openModal('modal-publish')">Publish</button>
+    </div>
+
+    <!-- RIGHT RAIL (SUPPLIER INSPECTOR) -->
+    <div class="right-rail" id="right-rail">
+      <div class="rail-header">
+        <h2 id="rail-title">Product Info</h2>
+        <button class="btn-ico" onclick="closeRail()"><span class="ms">close</span></button>
+      </div>
+      <div class="rail-body" id="rail-body"></div>
+    </div>
+  </main>
+</div>
+
+<!-- MODALS -->
+<!-- Variants Modal -->
+<div class="ov" id="modal-variants">
+  <div class="pk">
+    <div class="pk-header">
+      <h2>Select variants</h2>
+      <button class="btn-ico" onclick="closeModal('modal-variants')"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body" id="variant-list"></div>
+    <div class="pk-footer">
+      <button class="btn" onclick="closeModal('modal-variants')">Cancel</button>
+      <button class="btn p" onclick="applyVariants()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- Design Scaling Modal -->
+<div class="ov" id="modal-scaling">
+  <div class="pk" style="max-width:600px">
+    <div class="pk-header">
+      <h2>Design scaling</h2>
+      <button class="btn-ico" onclick="closeModal('modal-scaling')"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body">
+      <p>Our Product Creator shows the L apparel size and allows you to place the design on that size only. While we scale down the design automatically for smaller apparel sizes, as shown in the image below, it will not be scaled up for sizes larger than L.</p>
+      <div class="scaling-diagram">
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="35" y="40" width="30" height="30" fill="var(--ink)"/></svg><br>S</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="30" y="35" width="40" height="40" fill="var(--ink)"/></svg><br>M</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>L</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>XL</div>
+        <div class="scaling-item"><svg viewBox="0 0 100 100"><path d="M20 10 L10 30 L10 90 L90 90 L90 30 L80 10 Z" fill="var(--bg)" stroke="var(--line)"/><rect x="25" y="30" width="50" height="50" fill="var(--ink)"/></svg><br>XXL</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Publish Modal -->
+<div class="ov" id="modal-publish">
+  <div class="pk">
+    <div class="pk-header">
+      <h2>Publish Product</h2>
+      <button class="btn-ico" onclick="closeModal('modal-publish')"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body">
+      <p class="sub">Select the sales channels where you want this product to appear.</p>
+      <label class="var-row" style="cursor:pointer">
+        <input type="checkbox" checked>
+        <div style="flex:1">
+          <b>Storefront (unsaidmemories.com)</b>
+          <div class="sub" style="font-size:11px">Your primary Shopify store.</div>
+        </div>
+      </label>
+      <label class="var-row" style="cursor:pointer">
+        <input type="checkbox">
+        <div style="flex:1">
+          <b>TikTok Shop</b>
+          <div class="sub" style="font-size:11px">Connect to sell directly in the app.</div>
+        </div>
+      </label>
+      <label class="var-row" style="cursor:pointer">
+        <input type="checkbox">
+        <div style="flex:1">
+          <b>Etsy</b>
+          <div class="sub" style="font-size:11px">List as a digital or physical product.</div>
+        </div>
+      </label>
+    </div>
+    <div class="pk-footer">
+      <button class="btn" onclick="closeModal('modal-publish')">Cancel</button>
+      <button class="btn p" onclick="publishProduct()">Publish Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Help Modal -->
+<div class="ov" id="modal-help">
+  <div class="pk" style="max-width:600px">
+    <div class="pk-header">
+      <h2>How can we help today?</h2>
+      <button class="btn-ico" onclick="closeModal('modal-help')"><span class="ms">close</span></button>
+    </div>
+    <div class="pk-body" style="gap:0">
+      <input type="text" placeholder="Search help topics…" style="width:100%;padding:8px 12px;border:1px solid var(--line);border-radius:6px;margin-bottom:16px">
+      <div class="help-section">
+        <h4>Shortcuts</h4>
+        <div class="shortcut-row"><span>Next view</span><span class="key">Ctrl + Shift + ></span></div>
+        <div class="shortcut-row"><span>Previous view</span><span class="key">Ctrl + Shift + <</span></div>
+        <div class="shortcut-row"><span>Align layer right</span><span class="key">Ctrl + Shift + →</span></div>
+        <div class="shortcut-row"><span>Align layer bottom</span><span class="key">Ctrl + Shift + ↓</span></div>
+        <div class="shortcut-row"><span>Align layer left</span><span class="key">Ctrl + Shift + ←</span></div>
+        <div class="shortcut-row"><span>Align layer top</span><span class="key">Ctrl + Shift + ↑</span></div>
+        <div class="shortcut-row"><span>Center layer horizontally</span><span class="key">Ctrl + Shift + C</span></div>
+        <div class="shortcut-row"><span>Center layer vertically</span><span class="key">Ctrl + Shift + M</span></div>
+      </div>
+      <div class="help-section">
+        <h4>Product setup</h4>
+        <div class="shortcut-row"><span>How can I create a product with Printify?</span></div>
+        <div class="shortcut-row"><span>What are all-over-print (AOP) products?</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const state = {
+  mode: 'edit',
+  product: null,
+  variants: { color: 'White', sizes: ['S','M','L'] },
+  supplierData: null,
+  queue: new Set(),
+  activeCategory: null,
+  activeChild: null
+};
+
+// Mock Supplier API Data
+const SUPPLIER_API = {
+  'men-sweatshirts': {
+    productName: 'Unisex Heavy Blend Crewneck',
+    supplier: 'Printify',
+    sku: 'GILDAN-18000',
+    basePrice: 17.87,
+    colors: [
+      { name: 'White', hex: '#ffffff', sku: '18000-WHT' },
+      { name: 'Ash', hex: '#e5e5e5', sku: '18000-ASH' },
+      { name: 'Sport Grey', hex: '#b0b0b0', sku: '18000-SPG' },
+      { name: 'Black', hex: '#000000', sku: '18000-BLK' },
+      { name: 'Navy', hex: '#1d2a44', sku: '18000-NVY' },
+      { name: 'Maroon', hex: '#6b1e28', sku: '18000-MRN' },
+      { name: 'Forest Green', hex: '#1d4422', sku: '18000-FGR' },
+      { name: 'Royal', hex: '#1d3e8a', sku: '18000-RYL' }
+    ],
+    sizes: ['S', 'M', 'L', 'XL', '2XL', '3XL'],
+    models: ['Front', 'Back', 'Folded', 'Lifestyle 1', 'Lifestyle 2']
+  }
+};
+
+const BLANKS = {
+  tee: { name: 'Unisex Heavy Blend Crewneck', brand: 'Gildan 18000', price: 17.87, img: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f4f3f7"/><path d="M60 40 L40 80 L40 160 L160 160 L160 80 L140 40 Z" fill="%23fff" stroke="%23ccc"/></svg>' },
+  hoodie: { name: 'Pullover Hoodie', brand: 'Gildan 18500', price: 28.50, img: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f4f3f7"/><path d="M50 40 L30 100 L40 160 L160 160 L170 100 L150 40 Z" fill="%23fff" stroke="%23ccc"/></svg>' },
+  mug: { name: 'Ceramic Mug 11oz', brand: 'Generic', price: 6.50, img: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f4f3f7"/><rect x="60" y="50" width="60" height="100" rx="10" fill="%23fff" stroke="%23ccc"/></svg>' }
+};
+
+const COLORS = [
+  { name: 'White', hex: '#ffffff' }, { name: 'Ash', hex: '#e5e5e5' }, { name: 'Sport Grey', hex: '#b0b0b0' },
+  { name: 'Black', hex: '#000000' }, { name: 'Antique Cherry Red', hex: '#a32b3d' }, { name: 'Navy', hex: '#1d2a44' }
+];
+
+const AI_STYLES = [
+  { name: 'None', icon: 'block' }, { name: 'Anime', icon: 'face' }, { name: 'Photographic', icon: 'photo_camera' },
+  { name: 'Digital Art', icon: 'palette' }, { name: 'Comic Book', icon: 'auto_stories' }, { name: 'Fantasy Art', icon: 'auto_awesome' },
+  { name: 'Line Art', icon: 'gesture' }, { name: 'Analog Film', icon: 'camera_roll' }, { name: 'Isometric', icon: 'view_in_ar' }
+];
+
+const GRAPHICS = {
+  Shapes: ['star', 'favorite', 'remove', 'change_history', 'circle', 'square'],
+  'Curved Text': ['art lover boutique', 'NEW DAY', 'WHOLENESS', 'SWEET DREAMS', 'SURFING THE WAVE', 'Progress'],
+  'Text elements': ['HAPPY', 'BRIDE', 'I\'M WITH', 'I love you', 'eyes', 'thank you'],
+  'Packaging Insert Templates': [
+    '<svg width="40" height="40" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff" stroke="%23ddd"/><text x="50" y="50" font-size="10" text-anchor="middle" fill="%23333" font-family="serif">Thank You</text></svg>',
+    '<svg width="40" height="40" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fff" stroke="%23ddd"/><text x="50" y="50" font-size="10" text-anchor="middle" fill="%23333" font-family="cursive">thank you</text></svg>'
+  ],
+  Americana: ['🇺🇸', '🔥', '🍔', '🍻', '⭐', '🗽'],
+  'Eco-friendly': ['🌍', '🌿', '🌻', '🍃', '♻️', '🌱'],
+  Love: ['❤️', '💖', '💘', '💝', '💕', '💌']
+};
+
+const TOP_NAV = {
+  'Women': ['Sweatshirts', 'T-shirts', 'Hoodies', 'Long Sleeves', 'Tank Tops', 'Bottoms', 'Outerwear', 'Sportswear', 'Skirts & Dresses', 'Swimwear', 'Shoes', 'Underwear', 'Workwear'],
+  'Men': ['Sweatshirts', 'Hoodies', 'T-shirts', 'Long Sleeves', 'Tank Tops', 'Sportswear', 'Bottoms', 'Swimwear', 'Shoes', 'Outerwear', 'Underwear', 'Workwear'],
+  'Kids': ['T-shirts', 'Long Sleeves', 'Sweatshirts', 'Baby Clothing', 'Sportswear', 'Bottoms', 'Other'],
+  'Accessories': ['Jewelry&Pins', 'Books', 'Phone Cases', 'Bags', 'Socks', 'Hats', 'Baby', 'Mouse Pads', 'Car Accessories', 'Tech Accessories', 'Travel Accessories', 'Stationery Accessories', 'Sports & Games', 'Pet Accessories', 'Patches', 'Keychains', 'Other', 'Trendy Picks'],
+  'Home & Living': ['Mugs', 'Candles', 'Ornaments', 'Seasonal Decorations', 'Glassware', 'Bottles & Tumblers', 'Canvas', 'Posters', 'Postcards', 'Journals & Notebooks', 'Magnets & Stickers', 'Home Decor', 'Blankets', 'Pillows & Covers', 'Towels', 'Bathroom', 'Rugs & Mats', 'Bedding', 'Baby & Kids Essentials', 'Kitchen Accessories', 'Wall Art'],
+  'Books': ['All Books'],
+  'PDFs': ['All PDFs']
+};
+
+const canvasViewport = document.getElementById('canvas-viewport');
+const canvasEmpty = document.getElementById('canvas-empty');
+const canvasItem = document.getElementById('canvas-item');
+const rightRail = document.getElementById('right-rail');
+const railTitle = document.getElementById('rail-title');
+const railBody = document.getElementById('rail-body');
+const bottomLabel = document.getElementById('bottom-label');
+const topNavLinks = document.getElementById('top-nav-links');
+const queueCountEl = document.getElementById('queue-count');
+const queueListEl = document.getElementById('queue-list');
+
+// --- TOP NAV BUILDER (MEGA-MENU) ---
+function buildTopNav() {
+  let html = '';
+  for (const [category, items] of Object.entries(TOP_NAV)) {
+    html += `
+      <div class="nav-item" id="nav-item-${category}">
+        <button class="nav-btn" onclick="toggleNav('${category}', this)">${category} <span class="ms">expand_more</span></button>
+        <div class="nav-dropdown" id="dropdown-${category}">
+          <div class="mega-menu-children" id="children-${category}">
+            ${items.map(item => `
+              <button class="mega-child-item" onclick="selectChild('${category}', '${item}', this)">${item}</button>
+            `).join('')}
+          </div>
+          <div class="mega-menu-products" id="products-${category}">
+            <div style="color:var(--mut);font-size:12px;padding:8px;">Select a category to view products.</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  topNavLinks.innerHTML = html;
+}
+
+function toggleNav(category, btn) {
+  document.querySelectorAll('.nav-item').forEach(el => {
+    if (el.id !== `nav-item-${category}`) el.classList.remove('open');
+  });
+  
+  const parent = btn.parentElement;
+  parent.classList.toggle('open');
+  
+  if (parent.classList.contains('open')) {
+    state.activeCategory = category;
+    // Auto-select the first child to populate the right side
+    const firstChild = TOP_NAV[category][0];
+    const childBtn = document.querySelector(`#children-${category} .mega-child-item`);
+    if (childBtn) selectChild(category, firstChild, childBtn);
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.nav-item')) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('open'));
+  }
+  if (!e.target.closest('#queue-flyout-container')) {
+    document.getElementById('queue-flyout').classList.remove('open');
+  }
+});
+
+// --- MEGA MENU LOGIC ---
+function selectChild(category, child, btn) {
+  // Highlight the active child
+  const parentDiv = btn.parentElement;
+  parentDiv.querySelectorAll('.mega-child-item').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  
+  // Populate the product list on the right
+  const productContainer = document.getElementById(`products-${category}`);
+  productContainer.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <span style="font-size:12px;font-weight:600;">Select ${child} for queue</span>
+    </div>
+    ${[1, 2, 3].map(i => {
+      const id = `${category}-${child}-${i}`;
+      const isChecked = state.queue.has(id) ? 'checked' : '';
+      return `
+        <div class="mega-product-row" onclick="toggleQueueSelection('${id}', event)">
+          <input type="checkbox" ${isChecked} onclick="event.stopPropagation(); toggleQueueSelection('${id}')">
+          <img src="${BLANKS.tee.img}" alt="Product">
+          <div class="mega-product-info">
+            <b>${child} Variant ${i}</b>
+            <span>${category} / ${child}</span>
+          </div>
+        </div>
+      `;
+    }).join('')}
+    <div class="mega-footer">
+      <button onclick="addCategoryToQueue('${category}', '${child}')">Add selected to queue</button>
+    </div>
+  `;
+}
+
+function addCategoryToQueue(category, child) {
+  let addedCount = 0;
+  
+  // Find all checked items for this child
+  for (let i = 1; i <= 3; i++) {
+    const id = `${category}-${child}-${i}`;
+    const checkbox = document.querySelector(`#dropdown-${category} input[id="cb-${id}"]`);
+    if (checkbox && checkbox.checked) {
+      if (!state.queue.has(id)) {
+        state.queue.add(id);
+        addedCount++;
+      }
+    }
+  }
+  
+  if (addedCount > 0) {
+    toast(`Added ${addedCount} items to Design Queue.`);
+    updateQueueCount();
+    renderQueueList();
+  } else {
+    toast('No new items selected.');
+  }
+  
+  // Close dropdown
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('open'));
+}
+
+// --- QUEUE LOGIC ---
+function toggleQueueSelection(id, event) {
+  if (event) event.stopPropagation();
+  const checkbox = document.getElementById(`cb-${id}`);
+  
+  if (state.queue.has(id)) {
+    state.queue.delete(id);
+    if (checkbox) checkbox.checked = false;
+  } else {
+    state.queue.add(id);
+    if (checkbox) checkbox.checked = true;
+  }
+  
+  updateQueueCount();
+  renderQueueList();
+}
+
+function toggleQueueFlyout() {
+  document.getElementById('queue-flyout').classList.toggle('open');
+}
+function closeQueueFlyout() {
+  document.getElementById('queue-flyout').classList.remove('open');
+}
+
+function updateQueueCount() {
+  queueCountEl.textContent = state.queue.size;
+}
+
+function renderQueueList() {
+  if (state.queue.size === 0) {
+    queueListEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--mut);font-size:12px">No items in queue.</div>`;
+    return;
+  }
+  
+  queueListEl.innerHTML = Array.from(state.queue).map(id => {
+    const parts = id.split('-');
+    const cat = parts[0];
+    const child = parts[1];
+    const variant = parts[2];
+    return `
+      <div class="flyout-item">
+        <img src="${BLANKS.tee.img}" alt="${child}">
+        <div class="flyout-item-info">
+          <b>${child} Variant ${variant}</b>
+          <span>${cat} / ${child}</span>
+        </div>
+        <button class="ms" style="border:0;background:none;cursor:pointer;color:var(--mut)" onclick="removeFromQueue('${id}')">close</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function removeFromQueue(id) {
+  state.queue.delete(id);
+  updateQueueCount();
+  renderQueueList();
+  
+  // Uncheck the box in the nav if it exists
+  const checkbox = document.getElementById(`cb-${id}`);
+  if (checkbox) checkbox.checked = false;
+}
+
+// --- EXISTING LOGIC (CANVAS, TOOLS, ETC) ---
+function toggleGroup(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+function openRail(type) {
+  rightRail.classList.add('open');
+  railTitle.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+  
+  if (type === 'upload') {
+    railBody.innerHTML = `
+      <div class="upload-zone" onclick="toast('File picker would open.')">
+        <span class="ms" style="font-size:32px;margin-bottom:8px">cloud_upload</span>
+        <b>Upload Design</b>
+        <p style="font-size:11px;margin:4px 0 0">PNG, JPG, SVG up to 100MB</p>
+      </div>
+      <p style="font-size:12px;color:var(--mut);margin:8px 0">Or drag a blank from the catalog below.</p>
+      <div class="lib-grid">
+        ${Object.keys(BLANKS).map(k => `
+          <div class="lib-item" draggable="true" ondragstart="handleDrag(event, '${k}')" onclick="loadBlank('${k}')">
+            <span class="ms">checkroom</span>
+            <span>${BLANKS[k].name}</span>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  } else if (type === 'ai') {
+    railBody.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;color:var(--mut)">15/15 daily attempts</span>
+        <button class="btn s" onclick="toast('Example prompt loaded.')">Try another</button>
+      </div>
+      <div style="height:120px;background:var(--lo);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px">
+        <span class="ms" style="font-size:48px;color:var(--mut);opacity:0.5">image</span>
+      </div>
+      <textarea placeholder="Christian Faith Graphics. Christian faith apparel graphics with typography-led layouts..." style="width:100%;height:120px;padding:10px;border:1px solid var(--line);border-radius:6px;resize:none;background:var(--bg)"></textarea>
+      <span style="font-size:10px;color:var(--mut);text-align:right;display:block">844/1000</span>
+      
+      <h4 style="margin:8px 0 4px;font-size:12px">Style</h4>
+      <div class="ai-style-grid">
+        ${AI_STYLES.map(s => `
+          <div class="ai-style-item" onclick="selectStyle(this)">
+            <div style="height:60px;display:flex;align-items:center;justify-content:center"><span class="ms">${s.icon}</span></div>
+            <span>${s.name}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn p" style="width:100%;margin-top:12px" onclick="toast('Generating image...')">Generate image</button>
+    `;
+  } else if (type === 'text') {
+    railBody.innerHTML = `
+      <input type="text" placeholder="Search fonts..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;margin-bottom:12px;background:var(--bg)">
+      <h4 style="margin:0 0 8px;font-size:12px">Curved Text</h4>
+      <div class="graphics-grid">
+        <div class="graphic-item curved-text">
+          <svg viewBox="0 0 100 50"><path id="curve" d="M10,40 Q50,10 90,40" fill="transparent"/><text><textPath href="#curve" startOffset="50%" text-anchor="middle" font-size="8" font-family="serif" fill="var(--ink)">art lover boutique</textPath></text></svg>
+        </div>
+        <div class="graphic-item curved-text">
+          <svg viewBox="0 0 100 50"><path id="curve2" d="M10,40 Q50,10 90,40" fill="transparent"/><text><textPath href="#curve2" startOffset="50%" text-anchor="middle" font-size="8" font-family="sans-serif" font-weight="900" fill="var(--ink)">NEW DAY</textPath></text></svg>
+        </div>
+        <div class="graphic-item curved-text">
+          <svg viewBox="0 0 100 50"><path id="curve3" d="M10,40 Q50,10 90,40" fill="transparent"/><text><textPath href="#curve3" startOffset="50%" text-anchor="middle" font-size="8" font-family="serif" fill="var(--ink)">WHOLENESS</textPath></text></svg>
+        </div>
+      </div>
+      <h4 style="margin:16px 0 8px;font-size:12px">My fonts</h4>
+      <button class="btn" style="width:100%;margin-bottom:12px"><span class="ms">upload</span> Upload font</button>
+      <h4 style="margin:16px 0 8px;font-size:12px">Discover fonts</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px">
+        <span class="tg" style="padding:4px 8px">Display</span>
+        <span class="tg" style="padding:4px 8px">Handwriting</span>
+        <span class="tg" style="padding:4px 8px">Monospace</span>
+      </div>
+      <div style="font-family:serif">
+        <div class="font-row">ABeeZee</div>
+        <div class="font-row">Abel</div>
+        <div class="font-row" style="font-family:monospace">Abhaya Libre</div>
+        <div class="font-row" style="font-weight:700">ABORETO</div>
+        <div class="font-row" style="font-family:cursive">Abril Fatface</div>
+        <div class="font-row" style="font-family:fantasy">Acme</div>
+      </div>
+    `;
+  } else if (type === 'graphics') {
+    railBody.innerHTML = Object.keys(GRAPHICS).map(cat => `
+      <h4 style="margin:0 0 8px;font-size:12px">${cat}</h4>
+      <div class="graphics-grid">
+        ${GRAPHICS[cat].map(g => `<div class="graphic-item ${cat==='Curved Text'?'t':''}">${cat==='Shapes'?`<span class="ms">${g}</span>`:g}</div>`).join('')}
+      </div>
+    `).join('');
+  } else if (type === 'library' || type === 'templates') {
+    railBody.innerHTML = `
+      <div class="canvas-empty" style="position:static;margin-top:40px">
+        <span class="ms">folder_open</span>
+        <h3>Nothing here yet</h3>
+        <p>Your ${type === 'library' ? 'design files' : 'templates'} will appear here once added.</p>
+      </div>
+    `;
+  } else if (type === 'shutterstock') {
+    railBody.innerHTML = `
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <button class="btn s" style="flex:1">Essentials</button>
+        <button class="btn s" style="flex:1">Full collection</button>
+      </div>
+      <input type="text" placeholder="Search Shutterstock..." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;margin-bottom:12px;background:var(--bg)">
+      <div class="graphics-grid">
+        ${['🐆','🦋','🌿','🐎','🏛️','🐱','🎴','🌙','🎨'].map(i => `<div class="graphic-item" style="font-size:32px">${i}</div>`).join('')}
+      </div>
+    `;
+  }
+}
+
+function openCatalog(cat) {
+  rightRail.classList.add('open');
+  railTitle.textContent = cat + ' Catalog';
+  railBody.innerHTML = `
+    <div style="background:var(--lo);padding:16px;border-radius:8px;margin-bottom:16px">
+      <h2 style="margin:0 0 4px">${cat}'s Clothing</h2>
+      <p style="margin:0;font-size:12px;color:var(--mut)">Browse blanks for ${cat.toLowerCase()}.</p>
+    </div>
+    <div style="border-top:1px solid var(--line);padding-top:16px">
+      <h4 style="margin:0 0 8px">Available Blanks</h4>
+      <div class="lib-grid">
+        ${Object.keys(BLANKS).map(k => `
+          <div class="lib-item" draggable="true" ondragstart="handleDrag(event, '${k}')" onclick="loadBlank('${k}')">
+            <span class="ms">checkroom</span>
+            <span>${BLANKS[k].name}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openMyProducts(view) {
+  rightRail.classList.add('open');
+  if (view === 'order') {
+    railTitle.textContent = 'Create Order';
+    railBody.innerHTML = `
+      <div style="background:var(--lo);padding:16px;border-radius:8px;margin-bottom:16px">
+        <h3 style="margin:0 0 8px">Order Samples</h3>
+        <p style="margin:0;font-size:12px;color:var(--mut)">Order a sample of your design to check quality.</p>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;font-weight:600">Select Product</label>
+        <select style="width:100%;padding:8px;margin-top:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">
+          <option>Unisex Heavy Blend Crewneck</option>
+          <option>Pullover Hoodie</option>
+        </select>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:12px;font-weight:600">Quantity</label>
+        <input type="number" value="1" min="1" style="width:100%;padding:8px;margin-top:4px;border:1px solid var(--line);border-radius:6px;background:var(--bg)">
+      </div>
+      <button class="btn p" style="width:100%" onclick="toast('Order placed for sample.')">Place Order</button>
+    `;
+  } else {
+    railTitle.textContent = 'My Stores';
+    railBody.innerHTML = `
+      <p style="font-size:13px;color:var(--mut)">Connect your stores to sync products.</p>
+      <div class="card-inner" style="border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:16px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="font-size:14px">Storefront</b>
+          <div style="font-size:12px;color:var(--ok)">Connected</div>
+        </div>
+        <button class="btn s" onclick="toast('Opening store settings.')">Manage</button>
+      </div>
+      <div class="card-inner" style="border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="font-size:14px">TikTok Shop</b>
+          <div style="font-size:12px;color:var(--mut)">Not connected</div>
+        </div>
+        <button class="btn s" onclick="toast('Opening connection flow.')">Connect</button>
+      </div>
+    `;
+  }
+}
+
+function openOrders() {
+  rightRail.classList.add('open');
+  railTitle.textContent = 'My Orders';
+  railBody.innerHTML = `
+    <div style="background:var(--lo);padding:16px;border-radius:8px;margin-bottom:16px">
+      <h3 style="margin:0 0 8px">Order History</h3>
+      <p style="margin:0;font-size:12px;color:var(--mut)">Track your samples and bulk orders.</p>
+    </div>
+    <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden">
+      <div style="padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px">
+        <span><b>#D-2041</b> - Sample</span>
+        <span class="tg w" style="font-size:10px">In production</span>
+      </div>
+      <div style="padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:12px">
+        <span><b>#D-2037</b> - Bulk</span>
+        <span class="tg a" style="font-size:10px">Shipped</span>
+      </div>
+      <div style="padding:12px;display:flex;justify-content:space-between;font-size:12px">
+        <span><b>#D-2030</b> - Sample</span>
+        <span class="tg o" style="font-size:10px">Delivered</span>
+      </div>
+    </div>
+  `;
+}
+
+function openWizard(cat) {
+  rightRail.classList.add('open');
+  railTitle.textContent = cat + ' Wizard';
+  railBody.innerHTML = `
+    <div style="background:var(--lo);padding:16px;border-radius:8px;margin-bottom:16px">
+      <h3 style="margin:0 0 8px">Start with ${cat}</h3>
+      <p style="margin:0;font-size:12px;color:var(--mut)">Pick a winning product to design.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="card-inner" style="border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="font-size:13px">Heavyweight Tee</b>
+          <div style="font-size:11px;color:var(--mut)">Sold: 412 units</div>
+        </div>
+        <button class="btn p s" onclick="loadBlank('tee');closeRail();toast('Product loaded from wizard.')">Design</button>
+      </div>
+      <div class="card-inner" style="border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <b style="font-size:13px">Pullover Hoodie</b>
+          <div style="font-size:11px;color:var(--mut)">Sold: 268 units</div>
+        </div>
+        <button class="btn p s" onclick="loadBlank('hoodie');closeRail();toast('Product loaded from wizard.')">Design</button>
+      </div>
+    </div>
+  `;
+}
+
+function selectStyle(el) {
+  document.querySelectorAll('.ai-style-item').forEach(i => i.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function closeRail() {
+  rightRail.classList.remove('open');
+}
+
+function handleDrag(e, type) {
+  e.dataTransfer.setData('blank-type', type);
+  e.dataTransfer.effectAllowed = 'copy';
+}
+
+canvasViewport.addEventListener('dragover', e => {
+  e.preventDefault();
+  canvasViewport.classList.add('dragover');
+});
+
+canvasViewport.addEventListener('dragleave', () => {
+  canvasViewport.classList.remove('dragover');
+});
+
+canvasViewport.addEventListener('drop', e => {
+  e.preventDefault();
+  canvasViewport.classList.remove('dragover');
+  const type = e.dataTransfer.getData('blank-type');
+  if (type && BLANKS[type]) {
+    loadBlank(type);
+  }
+});
+
+function loadBlank(type) {
+  state.product = BLANKS[type];
+  canvasEmpty.style.display = 'none';
+  canvasItem.src = state.product.img;
+  canvasItem.style.display = 'block';
+  bottomLabel.textContent = state.product.name;
+  
+  renderRightRail();
+  rightRail.classList.add('open');
+  toast(`${state.product.name} loaded.`);
+}
+
+function renderRightRail() {
+  if (!state.product) return;
+
+  if (state.mode === 'edit') {
+    railTitle.textContent = 'Product Info & Variants';
+    railBody.innerHTML = `
+      <div class="product-hero">
+        <img src="${state.product.img}" alt="mockup">
+        <div class="info">
+          <b>${state.product.name}</b>
+          <span>${state.product.brand}</span>
+          <span style="color:var(--ok);font-weight:600;font-size:11px;margin-top:2px">In Stock</span>
+          <button class="btn s" style="margin-top:6px">See details</button>
+        </div>
+      </div>
+      <button class="btn" style="width:100%"><span class="ms">download</span> Download template</button>
+      
+      <div class="acc-item open">
+        <button class="acc-head" onclick="toggleAcc(this)">Production cost <span class="ms">expand_more</span></button>
+        <div class="acc-body">
+          <div class="kv"><span>Blank product</span><span>USD 11.48–19.13</span></div>
+          <div class="kv"><span>Print front side</span><span>USD 6.38–6.19</span></div>
+          <div class="kv"><b>Subtotal</b><b>USD ${state.product.price.toFixed(2)}–25.32</b></div>
+        </div>
+      </div>
+
+      <div class="acc-item">
+        <button class="acc-head" onclick="toggleAcc(this)">Print area size <span class="ms">expand_more</span></button>
+        <div class="acc-body">
+          <div class="kv"><span>DPI</span><span>300</span></div>
+          <div class="kv"><span>Product size</span><span>L</span></div>
+          <div class="kv"><span>Print area</span><span>3852 × 4398 px</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <h3 style="font-size:12px;text-transform:uppercase;color:var(--mut)">Variants</h3>
+        <div class="card-inner" style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg)">
+          <div>
+            <div style="font-weight:600;font-size:13px">${state.variants.sizes.length} sizes</div>
+            <div style="font-size:12px;color:var(--mut)">Color: ${state.variants.color}</div>
+          </div>
+          <button class="btn" onclick="openVariants()">Select</button>
+        </div>
+      </div>
+
+      <div class="acc-item open">
+        <button class="acc-head" onclick="toggleAcc(this)"><span><span class="ms" style="font-size:16px;vertical-align:middle">info</span> Design guidelines</span><span class="ms">expand_more</span></button>
+        <div class="acc-body" style="background:var(--lo);padding:12px;border-radius:6px;margin-top:4px">
+          <p style="margin:0 0 8px"><b>Semi-transparencies and gradients may not print as shown</b></p>
+          <p style="margin:0 0 8px">Please note: DTF prints have a white underbase and cannot offer full transparency. When gradients and semi-transparencies are used in a design, the printed outcome will differ from what is seen in the mockups.</p>
+          <p style="margin:0 0 8px"><b>Design limitations (Single-color prints)</b></p>
+          <p style="margin:0 0 8px">The process used for creating single-color print products will impact the final look of colors and designs. Before creating this product, please review the guide here.</p>
+          <p style="margin:0 0 8px"><b>DTG decoration method</b></p>
+          <p style="margin:0 0 8px">Using this technique, pigmented water-based inks are applied to the garment’s surface and are absorbed by the product’s fibers and can accommodate precise and detailed designs.</p>
+          <p style="margin:0 0 8px"><b>Embroidery decoration method</b></p>
+          <p style="margin:0 0 8px">We recommend using designs with full shapes that are spaced from each other (instead of overlapping or being close together).</p>
+          <p style="margin:0 0 4px">Your design should NOT contain:</p>
+          <ul style="margin:0 0 8px;padding-left:20px">
+            <li>Photos</li>
+            <li>Gradients</li>
+            <li>Small details (< 0.05" (1.3 mm))</li>
+            <li>Small text (< 0.25" (6.4 mm))</li>
+            <li>Small negative spaces</li>
+            <li>Transparency around the edges</li>
+          </ul>
+          <p style="margin:0 0 8px">Also, please only use predefined embroidery thread colors (up to 6 from 15 available). For more precise designs, please use our downloadable templates.</p>
+          <p style="margin:0 0 8px"><i>Important: Products that don't meet the requirements above may be automatically changed or rejected. See the embroidery guide here.</i></p>
+          <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px">
+            <input type="checkbox"> Hide this info in the future
+          </label>
+        </div>
+      </div>
+    `;
+  } else {
+    railTitle.textContent = 'Mockup View';
+    railBody.innerHTML = `
+      <div class="model-thumbs">
+        ${SUPPLIER_API['men-sweatshirts'].models.map((m, i) => `
+          <div class="model-thumb ${i === 0 ? 'active' : ''}">
+            <img src="${state.product.img}" alt="${m}">
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn" style="width:100%;margin-top:8px">Show more</button>
+      
+      <div class="kv"><span>Preview product size</span><span>L</span></div>
+      <button class="btn" style="width:100%" onclick="openModal('modal-scaling')">Design scaling</button>
+      
+      <div style="font-size:12px;font-weight:600;margin-top:8px">Mockup color mode</div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="radio" name="cm"> Realistic (CMYK)</label>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px"><input type="radio" name="cm" checked> Bright (RGB)</label>
+      
+      <div style="font-size:12px;font-weight:600;margin-top:8px">Gildan Colors</div>
+      <div style="display:flex;gap:8px">
+        ${COLORS.map(c => `<div style="width:20px;height:20px;border-radius:50%;background:${c.hex};border:1px solid var(--line)"></div>`).join('')}
+      </div>
+      
+      <div style="font-size:12px;font-weight:600;margin-top:8px">Mockup background</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1"><span class="ms">add_photo_alternate</span> Add image</button>
+        <button class="btn" style="flex:1">White</button>
+      </div>
+    `;
+  }
+}
+
+function setMode(mode) {
+  state.mode = mode;
+  document.querySelectorAll('#mode-toggle button').forEach(b => b.classList.toggle('on', b.textContent.toLowerCase() === mode));
+  renderRightRail();
+}
+
+function toggleAcc(btn) {
+  btn.parentElement.classList.toggle('open');
+}
+
+function openVariants() {
+  const list = document.getElementById('variant-list');
+  list.innerHTML = COLORS.map(c => `
+    <div class="var-row">
+      <input type="checkbox" ${c.name === state.variants.color ? 'checked' : ''}>
+      <div class="swatch" style="background:${c.hex}"></div>
+      <div class="name">${c.name}</div>
+      <span class="ms" style="color:var(--mut)">expand_more</span>
+    </div>
+  `).join('');
+  openModal('modal-variants');
+}
+
+function applyVariants() {
+  closeModal('modal-variants');
+  toast('Variants applied to product.');
+  renderRightRail();
+}
+
+function publishProduct() {
+  closeModal('modal-publish');
+  toast('Product published to Storefront!');
+  setTimeout(() => {
+    toast('Redirecting to My Products...');
+  }, 1500);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('on'); }
+function closeModal(id) { document.getElementById(id).classList.remove('on'); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('on'), 2400);
+}
+
+// Initialize
+buildTopNav();
+openRail('upload');
+</script>
+</body>
+</html>

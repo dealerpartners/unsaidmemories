@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Receipts — Accounting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .cat-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#eeedf1;color:#1a1c1e;cursor:pointer;border:1px solid transparent}
+  .cat-chip:hover{border-color:#0077c5}
+  .cat-chip.suggested{background:#e8f0fb;color:#0055a5}
+  .cat-chip.uncat{background:#ffdad6;color:#93000a}
+  .cat-chip.done{background:#8af5be;color:#00714b}
+  /* ── Drop zone ── */
+  .drop-zone{border:2px dashed #becab6;border-radius:12px;padding:20px;text-align:center;transition:all .15s;cursor:pointer;background:#faf9fc}
+  .drop-zone:hover{background:#f4f3f7;border-color:#0077c5}
+  .drop-zone.dragover{background:#e8f0fb;border-color:#0077c5;border-style:solid}
+  /* ── Receipt thumb ── */
+  .receipt-thumb{width:36px;height:44px;border-radius:4px;background:linear-gradient(135deg,#f4f3f7 0%,#eeedf1 100%);border:1px solid #dad9dd;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;overflow:hidden}
+  .receipt-thumb::before{content:"";position:absolute;top:6px;left:6px;right:6px;height:2px;background:#becab6;box-shadow:0 6px 0 #becab6, 0 12px 0 #becab6, 0 18px 0 #dad9dd}
+  .spinner{width:16px;height:16px;border:2px solid #dad9dd;border-top-color:#0077c5;border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* ── Drawer (right) ── */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:820px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  /* ── Positioned dropdowns (picker, ⋯ menu) ── */
+  .cat-picker,.row-menu,.match-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:4px;z-index:200;display:none}
+  .cat-picker.open,.row-menu.open,.match-menu.open{display:block}
+  .cat-picker{min-width:280px}
+  .cat-picker input{width:100%;height:32px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:12px;margin-bottom:4px}
+  .cat-picker .cat-opt{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:13px;border-radius:4px;cursor:pointer}
+  .cat-picker .cat-opt:hover{background:#f4f3f7}
+  .cat-picker .cat-opt .dot{width:8px;height:8px;border-radius:50%}
+  .cat-picker .cat-sep{height:1px;background:#eeedf1;margin:4px 0}
+  .cat-picker .recent{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;padding:4px 10px 2px}
+  .row-menu{min-width:250px}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e;line-height:1.2}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Match menu */
+  .match-menu{min-width:340px;max-height:360px;overflow-y:auto}
+  .match-menu .mm-h{padding:8px 12px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;border-bottom:1px solid #eeedf1}
+  .match-menu .mm-item{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;border-bottom:1px solid #f4f3f7;cursor:pointer}
+  .match-menu .mm-item:hover{background:#f4f3f7}
+  .match-menu .mm-item:last-child{border-bottom:none}
+  .match-menu .mm-amt{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:600;font-size:12px}
+  .match-menu .mm-date{font-size:10px;color:#5a6355}
+  /* Receipt drawer split */
+  .drawer-split{display:flex;flex:1;min-height:0}
+  .drawer-image{width:45%;border-right:1px solid #dad9dd;background:#f4f3f7;display:flex;flex-direction:column}
+  .drawer-image-viewer{flex:1;display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+  .fake-receipt{width:280px;min-height:380px;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.08);padding:20px;border-radius:4px;font-family:'Courier New',monospace;font-size:11px;color:#1a1c1e}
+  .drawer-fields{width:55%;display:flex;flex-direction:column;overflow:hidden}
+  .drawer-fields-body{flex:1;overflow-y:auto;padding:16px 20px}
+  .field-row{display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #eeedf1;gap:8px}
+  .field-row:last-child{border-bottom:none}
+  .field-label{width:120px;flex-shrink:0;font-size:11px;font-weight:600;color:#5a6355;text-transform:uppercase;letter-spacing:.04em}
+  .field-value{flex:1;font-size:13px}
+  .field-value input,.field-value select{width:100%;height:30px;padding:0 8px;border:1px solid #dad9dd;border-radius:4px;font-size:13px;background:#fff}
+  .field-value input:focus,.field-value select:focus{outline:none;border-color:#0077c5}
+  /* Confetti-ish processing overlay for new drop */
+  .processing-row{background:linear-gradient(90deg,#e8f0fb 0%,#faf9fc 100%)}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Receipts</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Receipts</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Intake inbox — forward, drop, snap. Extracted fields auto-fill.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-trigger-upload>
+        <span class="material-symbols-outlined text-[16px]">upload</span>Upload</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-trigger-snap>
+        <span class="material-symbols-outlined text-[16px]">photo_camera</span>Snap photo</button>
+    </div>
+  </div>
+
+  <!-- Forwarding address + drop zone -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+    <div class="xl:col-span-2">
+      <div class="drop-zone" id="drop-zone" data-drop-zone>
+        <span class="material-symbols-outlined text-[40px] text-primary">cloud_upload</span>
+        <div class="text-body-md font-semibold mt-2">Drop receipts here</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">PDF, JPG, PNG · up to 20 MB each · multiple files supported</div>
+        <div class="flex items-center justify-center gap-2 mt-3">
+          <button class="h-8 px-3 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container flex items-center gap-1" data-trigger-upload>
+            <span class="material-symbols-outlined text-[14px]">upload_file</span>Choose files</button>
+          <button class="h-8 px-3 border border-surface-dim rounded text-label-sm hover:bg-white flex items-center gap-1" data-trigger-snap>
+            <span class="material-symbols-outlined text-[14px]">photo_camera</span>Snap</button>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4 flex flex-col">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-[18px] text-qb-blue">mail</span>
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Forward by email</span>
+      </div>
+      <p class="text-[11px] text-on-surface-variant mb-3">Send receipts to this address — they'll appear here for review.</p>
+      <div class="flex items-center gap-1">
+        <input id="fwd-address" readonly class="flex-1 h-8 px-2.5 border border-surface-dim rounded text-body-sm font-mono bg-surface-container-low" value="receipts@managekube.unsaid.app"/>
+        <button id="copy-fwd" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm font-semibold hover:bg-surface-container-low flex items-center gap-1" data-copy-fwd>
+          <span class="material-symbols-outlined text-[14px]">content_copy</span>Copy</button>
+      </div>
+      <div class="mt-2 text-[11px] text-secondary flex items-center gap-1 hidden-imp" data-copy-confirm>
+        <span class="material-symbols-outlined text-[14px]">check_circle</span>Copied to clipboard
+      </div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- Tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="review">For review <span class="ml-1 px-1.5 py-0.5 rounded-full bg-qb-blue text-white text-[10px] font-bold" data-tab-review>3</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="reviewed">Reviewed</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="all">All</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by vendor, amount…"/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-rc-count>1–5 of 5</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="categorize"><span class="material-symbols-outlined text-[14px] align-middle mr-1">category</span>Categorize</button>
+      <button data-bulk="attach"><span class="material-symbols-outlined text-[14px] align-middle mr-1">attach_file</span>Attach to bill</button>
+      <button data-bulk="create"><span class="material-symbols-outlined text-[14px] align-middle mr-1">receipt_long</span>Create expenses</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2 w-12">Receipt</th>
+          <th class="px-3 py-2">Date</th>
+          <th class="px-3 py-2">Vendor</th>
+          <th class="px-3 py-2">Payment account</th>
+          <th class="px-3 py-2 text-right">Amount / Tax</th>
+          <th class="px-3 py-2">Category</th>
+          <th class="px-3 py-2">Action</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-rc-tbody>
+        <!-- rows injected + hydrated by JS -->
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rc-row" data-status="review" data-vendor="Staples" data-amount="$142.50" data-tax="$8.55" data-date="10/30/2026" data-account="Visa •4421" data-category="Office supplies" data-receipt-id="R-1042">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check"/></td>
+          <td class="px-3 py-2"><div class="receipt-thumb"></div></td>
+          <td class="px-3 py-2">10/30/2026</td>
+          <td class="px-3 py-2 font-medium">Staples</td>
+          <td class="px-3 py-2 text-on-surface-variant">Visa •4421</td>
+          <td class="px-3 py-2 text-right tabular-nums"><div>$142.50</div><div class="text-[10px] text-on-surface-variant">Tax $8.55</div></td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Office supplies</button></td>
+          <td class="px-3 py-2"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-action="review">Review</button></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rc-row" data-status="review" data-vendor="FedEx" data-amount="$84.20" data-tax="$5.05" data-date="10/29/2026" data-account="Bank •9910" data-category="" data-receipt-id="R-1041">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check"/></td>
+          <td class="px-3 py-2"><div class="receipt-thumb"></div></td>
+          <td class="px-3 py-2">10/29/2026</td>
+          <td class="px-3 py-2 font-medium">FedEx</td>
+          <td class="px-3 py-2 text-on-surface-variant">Bank •9910</td>
+          <td class="px-3 py-2 text-right tabular-nums"><div>$84.20</div><div class="text-[10px] text-on-surface-variant">Tax $5.05</div></td>
+          <td class="px-3 py-2"><button class="cat-chip uncat" data-cat-picker><span class="material-symbols-outlined text-[12px]">error</span>Needs category</button></td>
+          <td class="px-3 py-2"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-action="review">Review</button></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rc-row" data-status="review" data-vendor="Adobe" data-amount="$59.99" data-tax="$3.60" data-date="10/30/2026" data-account="Visa •4421" data-category="Software" data-receipt-id="R-1040">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check"/></td>
+          <td class="px-3 py-2"><div class="receipt-thumb"></div></td>
+          <td class="px-3 py-2">10/30/2026</td>
+          <td class="px-3 py-2 font-medium">Adobe</td>
+          <td class="px-3 py-2 text-on-surface-variant">Visa •4421</td>
+          <td class="px-3 py-2 text-right tabular-nums"><div>$59.99</div><div class="text-[10px] text-on-surface-variant">Tax $3.60</div></td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Software</button></td>
+          <td class="px-3 py-2"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-action="review">Review</button></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rc-row" data-status="reviewed" data-vendor="UPS" data-amount="$62.10" data-tax="$3.73" data-date="10/26/2026" data-account="Amex •2103" data-category="Shipping" data-receipt-id="R-1039">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check"/></td>
+          <td class="px-3 py-2"><div class="receipt-thumb"></div></td>
+          <td class="px-3 py-2">10/26/2026</td>
+          <td class="px-3 py-2 font-medium">UPS</td>
+          <td class="px-3 py-2 text-on-surface-variant">Amex •2103</td>
+          <td class="px-3 py-2 text-right tabular-nums"><div>$62.10</div><div class="text-[10px] text-on-surface-variant">Tax $3.73</div></td>
+          <td class="px-3 py-2"><button class="cat-chip done" data-cat-picker><span class="material-symbols-outlined text-[12px]">check_circle</span>Shipping</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Reviewed</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rc-row" data-status="reviewed" data-vendor="Google Workspace" data-amount="$144.00" data-tax="$0.00" data-date="10/25/2026" data-account="Visa •4421" data-category="Software" data-receipt-id="R-1038">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check"/></td>
+          <td class="px-3 py-2"><div class="receipt-thumb"></div></td>
+          <td class="px-3 py-2">10/25/2026</td>
+          <td class="px-3 py-2 font-medium">Google Workspace</td>
+          <td class="px-3 py-2 text-on-surface-variant">Visa •4421</td>
+          <td class="px-3 py-2 text-right tabular-nums"><div>$144.00</div><div class="text-[10px] text-on-surface-variant">Tax $0.00</div></td>
+          <td class="px-3 py-2"><button class="cat-chip done" data-cat-picker><span class="material-symbols-outlined text-[12px]">check_circle</span>Software</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Reviewed</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- Hidden inputs (real file pickers) -->
+<input type="file" id="file-input-upload" accept="image/*,application/pdf" multiple class="hidden-imp"/>
+<input type="file" id="file-input-snap" accept="image/*" capture="environment" class="hidden-imp"/>
+
+<!-- ═══════════ RECEIPT PREVIEW DRAWER ═══════════ -->
+<div class="drawer-scrim" id="receipt-scrim"></div>
+<div class="drawer" id="receipt-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-receipt-title>Receipt — Vendor</div>
+        <div class="text-[11px] text-on-surface-variant" data-receipt-sub>R-0000 · For review</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" title="Download original" data-dl-orig>
+        <span class="material-symbols-outlined text-[18px]">download</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-receipt>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+
+  <div class="drawer-split">
+    <!-- Left: image viewer -->
+    <div class="drawer-image">
+      <div class="drawer-image-viewer" data-receipt-image>
+        <!-- fake receipt rendered here -->
+      </div>
+      <div class="border-t border-surface-dim p-2 flex items-center justify-center gap-2 bg-white">
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">zoom_in</span></button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">zoom_out</span></button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">rotate_right</span></button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">open_in_new</span>Open</button>
+      </div>
+    </div>
+    <!-- Right: extracted fields -->
+    <div class="drawer-fields">
+      <div class="drawer-fields-body">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-3">Extracted fields</div>
+        <div class="field-row">
+          <div class="field-label">Vendor</div>
+          <div class="field-value"><input data-field="vendor"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Date</div>
+          <div class="field-value"><input data-field="date" type="date"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Amount</div>
+          <div class="field-value"><input data-field="amount"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Tax</div>
+          <div class="field-value"><input data-field="tax"/></div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Payment account</div>
+          <div class="field-value">
+            <select data-field="account">
+              <option>Visa •4421</option><option>Bank •9910</option><option>Amex •2103</option>
+              <option>Cash</option><option>Personal funds — reimburse</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Category</div>
+          <div class="field-value">
+            <select data-field="category">
+              <option value="">— Select category —</option>
+              <option>Office supplies</option><option>Shipping</option><option>Software</option>
+              <option>Advertising</option><option>Meals &amp; entertainment</option>
+              <option>Travel</option><option>Ask My Accountant</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field-label">Notes</div>
+          <div class="field-value"><input data-field="notes" placeholder="Add a note…"/></div>
+        </div>
+      </div>
+      <div class="border-t border-surface-dim p-3 flex items-center justify-between shrink-0">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-receipt>Cancel</button>
+        <div class="flex items-center gap-2">
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low flex items-center gap-1" data-match-receipt>
+            <span class="material-symbols-outlined text-[16px]">link</span>Match to transaction</button>
+          <div class="flex split-btn">
+            <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-create-expense>
+              Create expense</button>
+            <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+              <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CATEGORY PICKER ═══════════ -->
+<div class="cat-picker" id="cat-picker">
+  <input placeholder="Search categories…"/>
+  <div class="recent">Suggested</div>
+  <div class="cat-opt" data-pick="Office supplies"><span class="dot" style="background:#0077c5"></span>Office supplies</div>
+  <div class="cat-opt" data-pick="Shipping"><span class="dot" style="background:#1e5a38"></span>Shipping</div>
+  <div class="cat-opt" data-pick="Software"><span class="dot" style="background:#6b1e28"></span>Software</div>
+  <div class="cat-opt" data-pick="Advertising"><span class="dot" style="background:#0e5e6f"></span>Advertising</div>
+  <div class="cat-sep"></div>
+  <div class="recent">All categories</div>
+  <div class="cat-opt" data-pick="Meals &amp; entertainment"><span class="dot" style="background:#dad9dd"></span>Meals &amp; entertainment</div>
+  <div class="cat-opt" data-pick="Travel"><span class="dot" style="background:#dad9dd"></span>Travel</div>
+  <div class="cat-opt" data-pick="Ask My Accountant"><span class="dot" style="background:#ba1a1a"></span>Ask My Accountant</div>
+</div>
+
+<!-- ═══════════ ROW ⋯ MENU — fully defined ═══════════ -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This receipt</div>
+  <button data-action="view"><span class="material-symbols-outlined">open_in_new</span>View receipt</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit extracted fields</button>
+  <button data-action="download"><span class="material-symbols-outlined">download</span>Download original</button>
+  <div class="sep"></div>
+  <div class="menu-header">Create from receipt</div>
+  <button data-action="create-expense"><span class="material-symbols-outlined">credit_card</span>Create expense</button>
+  <button data-action="create-bill"><span class="material-symbols-outlined">description</span>Create bill</button>
+  <button data-action="attach"><span class="material-symbols-outlined">attach_file</span>Attach to existing…</button>
+  <div class="sep"></div>
+  <div class="menu-header">Match</div>
+  <button data-action="match"><span class="material-symbols-outlined">link</span>Match to transaction…</button>
+  <div class="sep"></div>
+  <div class="menu-header">State</div>
+  <button data-action="mark-reviewed"><span class="material-symbols-outlined">check_circle</span>Mark as reviewed</button>
+  <button data-action="unmark-reviewed" data-hide="true"><span class="material-symbols-outlined">restart_alt</span>Move back to review</button>
+  <button class="danger" data-action="delete"><span class="material-symbols-outlined">delete</span>Delete receipt</button>
+</div>
+
+<!-- ═══════════ MATCH MENU — real, positioned ═══════════ -->
+<div class="match-menu" id="match-menu">
+  <div class="mm-h">Unmatched bank transactions</div>
+  <div class="mm-item" data-match-kind="bank" data-match-name="FEDEX 001239847">
+    <span class="material-symbols-outlined text-[16px] text-error mt-0.5">account_balance</span>
+    <div class="min-w-0 flex-1">
+      <div class="text-body-sm font-medium truncate">FEDEX 001239847</div>
+      <div class="mm-date">10/29/2026 · Bank •9910</div>
+    </div>
+    <span class="mm-amt text-error">−$84.20</span>
+  </div>
+  <div class="mm-item" data-match-kind="bank" data-match-name="STAPLES #0412">
+    <span class="material-symbols-outlined text-[16px] text-error mt-0.5">account_balance</span>
+    <div class="min-w-0 flex-1">
+      <div class="text-body-sm font-medium truncate">STAPLES #0412</div>
+      <div class="mm-date">10/30/2026 · Bank •9910</div>
+    </div>
+    <span class="mm-amt text-error">−$142.50</span>
+  </div>
+  <div class="mm-item" data-match-kind="bank" data-match-name="AWS EMEA CHARGES">
+    <span class="material-symbols-outlined text-[16px] text-error mt-0.5">account_balance</span>
+    <div class="min-w-0 flex-1">
+      <div class="text-body-sm font-medium truncate">AWS EMEA CHARGES</div>
+      <div class="mm-date">10/27/2026 · Visa •4421</div>
+    </div>
+    <span class="mm-amt text-error">−$124.88</span>
+  </div>
+  <div class="mm-h">Open bills</div>
+  <div class="mm-item" data-match-kind="bill" data-match-name="Bill PF-9211 — Printful">
+    <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">description</span>
+    <div class="min-w-0 flex-1">
+      <div class="text-body-sm font-medium truncate">Bill PF-9211 · Printful</div>
+      <div class="mm-date">Due 11/10/2026</div>
+    </div>
+    <span class="mm-amt text-on-surface-variant">$2,880.00</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ────────── utils ────────── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+function closeAll(){
+  document.getElementById("cat-picker").classList.remove("open");
+  document.getElementById("row-menu").classList.remove("open");
+  document.getElementById("match-menu").classList.remove("open");
+}
+function updateCounts(){
+  const all = document.querySelectorAll(".rc-row");
+  const review = [...all].filter(r=>r.dataset.status==="review").length;
+  const tab = document.querySelector("[data-tab-review]");
+  if (tab) tab.textContent = review;
+  const visible = [...all].filter(r=>r.style.display!=="none").length;
+  document.querySelector("[data-rc-count]").textContent = `1–${visible} of ${all.length}`;
+}
+
+/* ────────── Forwarding copy ────────── */
+document.getElementById("copy-fwd").addEventListener("click", async ()=>{
+  const val = document.getElementById("fwd-address").value;
+  try { await navigator.clipboard.writeText(val); }
+  catch(e){ const ta=document.createElement("textarea"); ta.value=val; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+  const c = document.querySelector("[data-copy-confirm]");
+  c.classList.remove("hidden-imp");
+  setTimeout(()=>c.classList.add("hidden-imp"), 1800);
+});
+
+/* ────────── File pickers (real) ────────── */
+const inputUpload = document.getElementById("file-input-upload");
+const inputSnap = document.getElementById("file-input-snap");
+document.querySelectorAll("[data-trigger-upload]").forEach(b=>b.addEventListener("click", e=>{ e.stopPropagation(); inputUpload.click(); }));
+document.querySelectorAll("[data-trigger-snap]").forEach(b=>b.addEventListener("click", e=>{ e.stopPropagation(); inputSnap.click(); }));
+inputUpload.addEventListener("change", e=>handleFiles(e.target.files));
+inputSnap.addEventListener("change", e=>handleFiles(e.target.files));
+
+/* ────────── Drop zone (real) ────────── */
+const dropZone = document.getElementById("drop-zone");
+["dragenter","dragover"].forEach(evt=>dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.add("dragover"); }));
+["dragleave","drop"].forEach(evt=>dropZone.addEventListener(evt, e=>{ e.preventDefault(); dropZone.classList.remove("dragover"); }));
+dropZone.addEventListener("drop", e=>handleFiles(e.dataTransfer.files));
+dropZone.addEventListener("click", ()=>inputUpload.click());
+
+/* ────────── Handle dropped/picked files → fake OCR pipeline ────────── */
+const FAKE_VENDORS = ["Staples","FedEx","Adobe","Amazon Web Services","Google Workspace","UPS"];
+let fakeIdCounter = 1050;
+function handleFiles(fileList){
+  const files = Array.from(fileList || []);
+  if (files.length === 0) return;
+  files.forEach((file, idx)=>{
+    setTimeout(()=>addProcessingRow(file), idx*350);
+  });
+}
+function addProcessingRow(file){
+  const id = "R-"+(++fakeIdCounter);
+  const vendorGuess = FAKE_VENDORS[Math.floor(Math.random()*FAKE_VENDORS.length)];
+  const amountGuess = "$"+(20 + Math.random()*180).toFixed(2);
+  const dateGuess = new Date().toLocaleDateString("en-US");
+  const tbody = document.querySelector("[data-rc-tbody]");
+  const tr = document.createElement("tr");
+  tr.className = "rc-row processing-row cursor-pointer";
+  tr.dataset.status = "review";
+  tr.dataset.receiptId = id;
+  tr.dataset.vendor = ""; tr.dataset.amount = ""; tr.dataset.tax = ""; tr.dataset.date = dateGuess; tr.dataset.account = "Visa •4421"; tr.dataset.category = "";
+  tr.innerHTML = `
+    <td class="px-3 py-2"><input type="checkbox" class="row-check rc-check" disabled/></td>
+    <td class="px-3 py-2"><div class="receipt-thumb"><div class="spinner"></div></div></td>
+    <td class="px-3 py-2">${dateGuess}</td>
+    <td class="px-3 py-2 font-medium italic text-on-surface-variant">Extracting…</td>
+    <td class="px-3 py-2 text-on-surface-variant">${file.name}</td>
+    <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">…</td>
+    <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant flex items-center gap-1"><div class="spinner" style="width:12px;height:12px"></div>Processing</span></td>
+    <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+    <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" disabled><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+  `;
+  tbody.insertBefore(tr, tbody.firstChild);
+
+  // Resolve after 1100ms
+  setTimeout(()=>{
+    tr.classList.remove("processing-row");
+    tr.dataset.vendor = vendorGuess;
+    tr.dataset.amount = amountGuess;
+    tr.dataset.tax = "$"+(parseFloat(amountGuess.slice(1))*0.06).toFixed(2);
+    tr.querySelector("td:nth-child(2)").innerHTML = `<div class="receipt-thumb"></div>`;
+    tr.querySelector("td:nth-child(4)").innerHTML = `<span class="font-medium">${vendorGuess}</span>`;
+    tr.querySelector("td:nth-child(5)").textContent = "Visa •4421";
+    tr.querySelector("td:nth-child(6)").innerHTML = `<div>${amountGuess}</div><div class="text-[10px] text-on-surface-variant">Tax ${tr.dataset.tax}</div>`;
+    tr.querySelector("td:nth-child(7)").innerHTML = `<button class="cat-chip uncat" data-cat-picker><span class="material-symbols-outlined text-[12px]">error</span>Needs category</button>`;
+    tr.querySelector("td:nth-child(8)").innerHTML = `<button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-action="review">Review</button>`;
+    tr.querySelector("td:nth-child(9)").innerHTML = `<button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>`;
+    tr.querySelector(".rc-check").disabled = false;
+    wireRow(tr);
+    toast(`${vendorGuess} receipt extracted from ${file.name}`);
+    openReceipt(tr);  // auto-open preview per (a)+(b)
+  }, 1100);
+}
+
+/* ────────── Receipt drawer ────────── */
+let currentReceiptRow = null;
+function openReceipt(tr){
+  currentReceiptRow = tr;
+  const vendor = tr.dataset.vendor || "Unknown";
+  const id = tr.dataset.receiptId || "R-0000";
+  const status = tr.dataset.status === "review" ? "For review" : "Reviewed";
+  document.querySelector("[data-receipt-title]").textContent = `Receipt — ${vendor}`;
+  document.querySelector("[data-receipt-sub]").textContent = `${id} · ${status}`;
+
+  // image viewer — fake receipt
+  const viewer = document.querySelector("[data-receipt-image]");
+  const date = tr.dataset.date || "";
+  const amt = (tr.dataset.amount||"").replace("$","");
+  const tax = (tr.dataset.tax||"").replace("$","");
+  viewer.innerHTML = `
+    <div class="fake-receipt">
+      <div style="text-align:center;font-weight:700;font-size:13px;margin-bottom:6px">${vendor.toUpperCase()}</div>
+      <div style="text-align:center;font-size:10px;color:#5a6355">Store #0412</div>
+      <div style="height:1px;background:#1a1c1e;margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between"><span>Date</span><span>${date}</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Time</span><span>2:42 PM</span></div>
+      <div style="height:1px;background:#dad9dd;margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between"><span>Item 1</span><span>$18.44</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Item 2</span><span>$32.10</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Item 3</span><span>$44.90</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Item 4</span><span>$38.51</span></div>
+      <div style="height:1px;background:#dad9dd;margin:8px 0"></div>
+      <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span>$${(amt-tax).toFixed(2)}</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Tax</span><span>$${tax||"0.00"}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #1a1c1e;padding-top:4px;margin-top:4px"><span>TOTAL</span><span>$${amt}</span></div>
+      <div style="height:1px;background:#dad9dd;margin:8px 0"></div>
+      <div style="font-size:9px;text-align:center;color:#5a6355">VISA ****4421<br/>Auth: 002847<br/>Thank you!</div>
+    </div>
+  `;
+
+  // fields
+  viewer.closest(".drawer").querySelector('[data-field="vendor"]').value = tr.dataset.vendor || "";
+  viewer.closest(".drawer").querySelector('[data-field="date"]').value = toISO(tr.dataset.date);
+  viewer.closest(".drawer").querySelector('[data-field="amount"]').value = tr.dataset.amount || "";
+  viewer.closest(".drawer").querySelector('[data-field="tax"]').value = tr.dataset.tax || "";
+  viewer.closest(".drawer").querySelector('[data-field="account"]').value = tr.dataset.account || "Visa •4421";
+  viewer.closest(".drawer").querySelector('[data-field="category"]').value = tr.dataset.category || "";
+
+  document.getElementById("receipt-scrim").classList.add("open");
+  document.getElementById("receipt-drawer").classList.add("open");
+}
+function closeReceipt(){
+  document.getElementById("receipt-scrim").classList.remove("open");
+  document.getElementById("receipt-drawer").classList.remove("open");
+}
+function toISO(usDate){
+  const m = (usDate||"").match(/(\d+)\/(\d+)\/(\d+)/);
+  return m ? `${m[3]}-${m[1].padStart(2,"0")}-${m[2].padStart(2,"0")}` : "";
+}
+document.querySelectorAll("[data-close-receipt]").forEach(b=>b.addEventListener("click", closeReceipt));
+document.getElementById("receipt-scrim").addEventListener("click", closeReceipt);
+
+/* ────────── Receipt drawer actions ────────── */
+document.querySelector("[data-create-expense]").addEventListener("click", ()=>{
+  if (currentReceiptRow){
+    currentReceiptRow.dataset.status = "reviewed";
+    currentReceiptRow.querySelector("td:nth-child(8)").innerHTML = `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Expense created</span>`;
+    updateCounts();
+  }
+  toast("Expense created from receipt");
+  closeReceipt();
+});
+document.querySelector("[data-dl-orig]").addEventListener("click", ()=>toast("Download original receipt"));
+document.querySelector("[data-match-receipt]").addEventListener("click", (e)=>{
+  const r = e.currentTarget.getBoundingClientRect();
+  const mm = document.getElementById("match-menu");
+  mm.style.top = (r.bottom + 4) + "px";
+  mm.style.left = Math.min(r.left, window.innerWidth - 360) + "px";
+  mm.classList.add("open");
+});
+
+/* ────────── Category picker ────────── */
+const catPicker = document.getElementById("cat-picker");
+let currentChip = null;
+function wireCategoryChip(chip){
+  chip.addEventListener("click", e=>{
+    e.stopPropagation();
+    closeAll();
+    currentChip = chip;
+    const r = chip.getBoundingClientRect();
+    catPicker.style.top = (r.bottom + 4) + "px";
+    catPicker.style.left = Math.min(r.left, window.innerWidth - 300) + "px";
+    catPicker.classList.add("open");
+  });
+}
+document.querySelectorAll("[data-cat-picker]").forEach(wireCategoryChip);
+catPicker.querySelectorAll("[data-pick]").forEach(o=>o.addEventListener("click", ()=>{
+  const val = o.dataset.pick;
+  if (currentChip){
+    currentChip.className = "cat-chip";
+    currentChip.textContent = val;
+    const tr = currentChip.closest(".rc-row");
+    if (tr) tr.dataset.category = val;
+  }
+  catPicker.classList.remove("open");
+}));
+
+/* ────────── Row ⋯ menu ────────── */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+function openRowMenu(btn, tr){
+  currentMenuRow = tr;
+  const reviewed = tr.dataset.status === "reviewed";
+  rowMenu.querySelector('[data-action="mark-reviewed"]').style.display = reviewed ? "none" : "";
+  rowMenu.querySelector('[data-action="unmark-reviewed"]').style.display = reviewed ? "" : "none";
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+}
+function wireRowMenu(btn, tr){
+  btn.addEventListener("click", e=>{ e.stopPropagation(); closeAll(); openRowMenu(btn, tr); });
+}
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const action = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  switch(action){
+    case "view":
+    case "edit":
+      openReceipt(tr); break;
+    case "download":
+      toast("Download original receipt"); break;
+    case "create-expense":
+      tr.dataset.status = "reviewed";
+      tr.querySelector("td:nth-child(8)").innerHTML = `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Expense created</span>`;
+      updateCounts(); toast("Expense created from receipt"); break;
+    case "create-bill":
+      toast("Bill created from receipt"); break;
+    case "attach":
+      toast("Attach to existing — opens bill picker"); break;
+    case "match": {
+      const r = b.getBoundingClientRect();
+      const mm = document.getElementById("match-menu");
+      mm.style.top = (r.bottom + 4) + "px";
+      mm.style.left = Math.min(r.left - 100, window.innerWidth - 360) + "px";
+      mm.classList.add("open");
+      break;
+    }
+    case "mark-reviewed":
+      tr.dataset.status = "reviewed";
+      tr.querySelector("td:nth-child(8)").innerHTML = `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Reviewed</span>`;
+      updateCounts(); toast("Marked as reviewed"); break;
+    case "unmark-reviewed":
+      tr.dataset.status = "review";
+      tr.querySelector("td:nth-child(8)").innerHTML = `<button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-action="review">Review</button>`;
+      wireRow(tr); updateCounts(); toast("Moved back to review"); break;
+    case "delete":
+      tr.remove(); updateCounts(); toast("Receipt deleted"); break;
+  }
+}));
+
+/* Match menu selection */
+document.querySelectorAll("#match-menu .mm-item").forEach(it=>it.addEventListener("click", ()=>{
+  const name = it.dataset.matchName;
+  document.getElementById("match-menu").classList.remove("open");
+  if (currentMenuRow){
+    currentMenuRow.dataset.status = "reviewed";
+    currentMenuRow.querySelector("td:nth-child(8)").innerHTML = `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Matched</span>`;
+    updateCounts();
+  }
+  closeReceipt();
+  toast(`Receipt matched to "${name}"`);
+}));
+
+/* ────────── Row click → open drawer ────────── */
+function wireRow(tr){
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-cat-picker],[data-row-menu]")) return;
+    openReceipt(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    closeAll();
+    openRowMenu(e.currentTarget, tr);
+  });
+  tr.querySelector("[data-action='review']")?.addEventListener("click", e=>{
+    e.stopPropagation(); openReceipt(tr);
+  });
+  tr.querySelector("[data-cat-picker]") && wireCategoryChip(tr.querySelector("[data-cat-picker]"));
+}
+document.querySelectorAll(".rc-row").forEach(wireRow);
+
+/* ────────── View tabs ────────── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  const st = b.dataset.viewtab;
+  document.querySelectorAll(".rc-row").forEach(tr=>{
+    const vis = st==="all" || tr.dataset.status === st;
+    tr.style.display = vis ? "" : "none";
+  });
+  updateCounts();
+}));
+
+/* ────────── Bulk bar ────────── */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".rc-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{
+  if (e.target.matches(".rc-check")) updateBulk();
+});
+document.querySelector("[data-check-all]")?.addEventListener("change", e=>{
+  document.querySelectorAll(".rc-check").forEach(c=>{ if(!c.disabled) c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".rc-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked=false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".rc-check:checked").length;
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} receipt${n!==1?"s":""}`);
+  if (act === "delete"){
+    document.querySelectorAll(".rc-check:checked").forEach(c=>{ const tr = c.closest("tr"); if(tr) tr.remove(); });
+    updateBulk(); updateCounts();
+  }
+}));
+
+/* ────────── Global close on outside click ────────── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#cat-picker")) catPicker.classList.remove("open");
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#match-menu")) document.getElementById("match-menu").classList.remove("open");
+});
+
+/* ────────── Init ────────── */
+updateCounts();
+</script>
+</body>
+</html>

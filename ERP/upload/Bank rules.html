@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rules — Accounting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .switch{width:34px;height:18px;background:#dad9dd;border-radius:9px;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
+  .switch.on{background:#0a6400}
+  .switch::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:left .15s}
+  .switch.on::after{left:18px}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:600px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  /* Row ⋯ menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:260px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Rule builder */
+  .cond-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #f4f3f7}
+  .cond-row:last-child{border-bottom:none}
+  .cond-prefix{font:600 11px Inter;color:#5a6355;text-transform:uppercase;letter-spacing:.04em;min-width:44px}
+  .cond-select,.cond-input{height:32px;padding:0 8px;border:1px solid #dad9dd;border-radius:6px;font-size:12px;background:#fff}
+  .cond-select:focus,.cond-input:focus{outline:none;border-color:#0077c5}
+  .cond-input{flex:1}
+  .cond-sep{font-size:11px;color:#5a6355;padding:0 4px}
+  .cond-remove{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#5a6355;flex-shrink:0}
+  .cond-remove:hover{background:#ffdad6;color:#ba1a1a}
+  .preview-txn{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f4f3f7;font-size:12px}
+  .preview-txn:last-child{border-bottom:none}
+  .preview-txn .amt{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums}
+  /* Field labels */
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Rules</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Bank rules</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Auto-categorize repeating transactions — when the bank description matches, apply the category.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new-rule>
+        <span class="material-symbols-outlined text-[16px]">add</span>New rule</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Active rules</span>
+      <div class="text-headline-sm mt-1 tabular-nums" data-kpi-active>4</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Auto-categorized (30d)</span>
+      <div class="text-headline-sm mt-1 tabular-nums">28</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Paused</span>
+      <div class="text-headline-sm mt-1 tabular-nums" data-kpi-paused>1</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Match rate</span>
+      <div class="text-headline-sm mt-1 tabular-nums">94%</div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="all">All rules</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="active">Active</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="paused">Paused</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter rules…"/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-rl-count>1–5 of 5</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="activate"><span class="material-symbols-outlined text-[14px] align-middle mr-1">play_arrow</span>Activate</button>
+      <button data-bulk="pause"><span class="material-symbols-outlined text-[14px] align-middle mr-1">pause</span>Pause</button>
+      <button data-bulk="run"><span class="material-symbols-outlined text-[14px] align-middle mr-1">play_circle</span>Apply to existing</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Rule name</th>
+          <th class="px-3 py-2">When (description)</th>
+          <th class="px-3 py-2">Then (category)</th>
+          <th class="px-3 py-2 text-right">Matched (30d)</th>
+          <th class="px-3 py-2">Active</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-rl-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rl-row" data-status="active" data-name="Staples → Office supplies" data-category="Office supplies">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+          <td class="px-3 py-2 font-medium">Staples → Office supplies</td>
+          <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "STAPLES"</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-blue/10 text-qb-blue font-medium">Office supplies</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">11</td>
+          <td class="px-3 py-2"><div class="switch on" data-toggle></div></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rl-row" data-status="active" data-name="Adobe → Software" data-category="Software">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+          <td class="px-3 py-2 font-medium">Adobe → Software</td>
+          <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "ADOBE"</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-maroon/10 text-qb-maroon font-medium">Software</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">6</td>
+          <td class="px-3 py-2"><div class="switch on" data-toggle></div></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rl-row" data-status="active" data-name="Stripe payouts → Stripe clearing" data-category="Stripe clearing">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+          <td class="px-3 py-2 font-medium">Stripe payouts → Stripe clearing</td>
+          <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "STRIPE"</span> <span class="text-[11px]">and amount > $0</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-green/10 text-qb-green font-medium">Stripe clearing</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">8</td>
+          <td class="px-3 py-2"><div class="switch on" data-toggle></div></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rl-row" data-status="active" data-name="AWS → Software" data-category="Software">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+          <td class="px-3 py-2 font-medium">AWS → Software</td>
+          <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "AWS"</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-maroon/10 text-qb-maroon font-medium">Software</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">3</td>
+          <td class="px-3 py-2"><div class="switch on" data-toggle></div></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer rl-row opacity-70" data-status="paused" data-name="Uber → Travel (paused)" data-category="Travel">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+          <td class="px-3 py-2 font-medium">Uber → Travel</td>
+          <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "UBER"</span></td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-teal/10 text-qb-teal font-medium">Travel</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">0</td>
+          <td class="px-3 py-2"><div class="switch" data-toggle></div></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ═══════════ RULE EDITOR DRAWER ═══════════ -->
+<div class="drawer-scrim" id="rule-scrim"></div>
+<div class="drawer" id="rule-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-rule-title>New bank rule</div>
+        <div class="text-[11px] text-on-surface-variant">When the bank description matches, categorize</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-rule>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+    <!-- Rule name -->
+    <div>
+      <label class="field-label">Rule name</label>
+      <input class="field-input" value="" placeholder="e.g. Staples → Office supplies" data-rule-name/>
+    </div>
+
+    <!-- WHEN -->
+    <div class="border-t border-surface-dim pt-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">When (conditions)</div>
+        <select class="text-[11px] bg-transparent border border-surface-dim rounded px-1.5 py-0.5">
+          <option>Match ALL conditions</option>
+          <option>Match ANY condition</option>
+        </select>
+      </div>
+      <div data-conditions>
+        <div class="cond-row">
+          <span class="cond-prefix">When</span>
+          <select class="cond-select">
+            <option>Bank description</option>
+            <option>Payee</option>
+            <option>Amount</option>
+            <option>Type (deposit / payment)</option>
+          </select>
+          <select class="cond-select">
+            <option>Contains</option>
+            <option>Does not contain</option>
+            <option>Equals</option>
+            <option>Starts with</option>
+            <option>Ends with</option>
+          </select>
+          <input class="cond-input" placeholder="e.g. STAPLES" data-cond-val/>
+          <button class="cond-remove" data-remove-cond>
+            <span class="material-symbols-outlined text-[16px]">close</span></button>
+        </div>
+      </div>
+      <button class="h-7 px-2 mt-2 border border-dashed border-surface-dim rounded text-[11px] font-semibold text-primary hover:bg-surface-container-low flex items-center gap-1" data-add-cond>
+        <span class="material-symbols-outlined text-[14px]">add</span>Add condition</button>
+    </div>
+
+    <!-- THEN -->
+    <div class="border-t border-surface-dim pt-4">
+      <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Then (apply)</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Category</label>
+          <select class="field-input" data-then-category>
+            <option value="">— Select category —</option>
+            <option>Office supplies</option>
+            <option>Shipping</option>
+            <option>Software</option>
+            <option>Advertising</option>
+            <option>Meals &amp; entertainment</option>
+            <option>Travel</option>
+            <option>Stripe clearing</option>
+            <option>Ask My Accountant</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Apply to bank account</label>
+          <select class="field-input">
+            <option>All accounts</option>
+            <option>Chase •9910</option>
+            <option>Visa •4421</option>
+            <option>Amex •2103</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" class="row-check" checked/>
+          <span class="text-body-sm">Turn on rule</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW — which past transactions this rule would have matched -->
+    <div class="border-t border-surface-dim pt-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Would have matched</div>
+        <span class="text-[11px] text-on-surface-variant"><span data-preview-count>0</span> recent transactions</span>
+      </div>
+      <div class="border border-surface-dim rounded-lg overflow-hidden" data-preview-list>
+        <div class="text-[11px] text-on-surface-variant text-center py-4">Enter a description keyword to preview matched transactions.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-rule>Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-save-new>Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-save-rule>Save rule</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ ROW ⋯ MENU ═══════════ -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This rule</div>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit rule</button>
+  <button data-action="duplicate"><span class="material-symbols-outlined">content_copy</span>Duplicate</button>
+  <div class="sep"></div>
+  <div class="menu-header">Run</div>
+  <button data-action="apply-existing"><span class="material-symbols-outlined">play_circle</span>Apply to existing</button>
+  <button data-action="view-matched"><span class="material-symbols-outlined">list</span>View matched transactions</button>
+  <div class="sep"></div>
+  <div class="menu-header">State</div>
+  <button data-action="pause"><span class="material-symbols-outlined">pause</span>Pause rule</button>
+  <button data-action="activate" data-hide="true"><span class="material-symbols-outlined">play_arrow</span>Activate rule</button>
+  <button class="danger" data-action="delete"><span class="material-symbols-outlined">delete</span>Delete rule</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Sample transactions used in the preview -->
+<script>
+  const SAMPLE_TXNS = [
+    { desc:"STAPLES #0412", date:"10/30/2026", amt:-142.50 },
+    { desc:"STAPLES #0418", date:"10/22/2026", amt:-88.15 },
+    { desc:"STAPLES #0412", date:"10/12/2026", amt:-210.00 },
+    { desc:"STAPLES.COM", date:"09/28/2026", amt:-45.99 },
+    { desc:"ADOBE CREATIVE", date:"10/26/2026", amt:-59.99 },
+    { desc:"ADOBE SYSTEMS", date:"09/26/2026", amt:-59.99 },
+    { desc:"STRIPE PAYOUT", date:"10/28/2026", amt:1842.60 },
+    { desc:"STRIPE FEE", date:"10/28/2026", amt:-52.11 },
+    { desc:"AWS EMEA CHARGES", date:"10/27/2026", amt:-124.88 },
+    { desc:"AWS EMEA CHARGES", date:"09/27/2026", amt:-118.44 },
+    { desc:"UBER TRIP", date:"10/15/2026", amt:-22.40 },
+    { desc:"UBER EATS", date:"10/18/2026", amt:-34.55 },
+  ];
+</script>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+const money = n => (n<0?"−":"+")+"$"+Math.abs(n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",");
+
+/* ── Drawer open/close ── */
+function openDrawer(rule){
+  const title = document.querySelector("[data-rule-title]");
+  const nameInput = document.querySelector("[data-rule-name]");
+  const condVal = document.querySelector("[data-cond-val]");
+  const thenCat = document.querySelector("[data-then-category]");
+  if (rule){
+    title.textContent = "Edit rule";
+    nameInput.value = rule.dataset.name || "";
+    // crude parse: extract the keyword from the row's "contains X"
+    const kw = (rule.querySelector(".font-mono")?.textContent||"").match(/"([^"]+)"/);
+    condVal.value = kw ? kw[1] : "";
+    thenCat.value = rule.dataset.category || "";
+  } else {
+    title.textContent = "New bank rule";
+    nameInput.value = "";
+    condVal.value = "";
+    thenCat.value = "";
+  }
+  document.getElementById("rule-scrim").classList.add("open");
+  document.getElementById("rule-drawer").classList.add("open");
+  updatePreview();
+}
+document.querySelectorAll("[data-close-rule]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("rule-scrim").classList.remove("open");
+  document.getElementById("rule-drawer").classList.remove("open");
+}));
+document.getElementById("rule-scrim").addEventListener("click", ()=>{
+  document.getElementById("rule-scrim").classList.remove("open");
+  document.getElementById("rule-drawer").classList.remove("open");
+});
+document.querySelector("[data-new-rule]").addEventListener("click", ()=>openDrawer(null));
+
+/* ── Condition builder ── */
+document.querySelector("[data-add-cond]").addEventListener("click", ()=>{
+  const wrap = document.querySelector("[data-conditions]");
+  const row = document.createElement("div");
+  row.className = "cond-row";
+  row.innerHTML = `
+    <span class="cond-prefix">And</span>
+    <select class="cond-select"><option>Bank description</option><option>Payee</option><option>Amount</option><option>Type</option></select>
+    <select class="cond-select"><option>Contains</option><option>Does not contain</option><option>Equals</option><option>Greater than</option></select>
+    <input class="cond-input" placeholder="e.g. $0"/>
+    <button class="cond-remove" data-remove-cond><span class="material-symbols-outlined text-[16px]">close</span></button>
+  `;
+  wrap.appendChild(row);
+  row.querySelector("[data-remove-cond]").addEventListener("click", ()=>row.remove());
+});
+document.querySelectorAll("[data-remove-cond]").forEach(b=>b.addEventListener("click", e=>{
+  const row = e.currentTarget.closest(".cond-row");
+  // don't remove the last condition
+  if (document.querySelectorAll(".cond-row").length > 1) row.remove();
+}));
+
+/* ── Live preview as the user types a keyword ── */
+function updatePreview(){
+  const kw = (document.querySelector("[data-cond-val]")?.value || "").toUpperCase().trim();
+  const list = document.querySelector("[data-preview-list]");
+  if (!kw){ list.innerHTML = `<div class="text-[11px] text-on-surface-variant text-center py-4">Enter a description keyword to preview matched transactions.</div>`; document.querySelector("[data-preview-count]").textContent = "0"; return; }
+  const matches = SAMPLE_TXNS.filter(t => t.desc.toUpperCase().includes(kw));
+  document.querySelector("[data-preview-count]").textContent = matches.length;
+  if (matches.length === 0){
+    list.innerHTML = `<div class="text-[11px] text-on-surface-variant text-center py-4">No recent transactions match "<strong>${kw}</strong>".</div>`;
+    return;
+  }
+  list.innerHTML = matches.slice(0, 6).map(t=>`
+    <div class="preview-txn">
+      <span class="text-[11px] text-on-surface-variant w-20">${t.date}</span>
+      <span class="flex-1 font-medium truncate">${t.desc}</span>
+      <span class="amt ${t.amt<0?'text-error':'text-secondary'}">${money(t.amt)}</span>
+    </div>
+  `).join("");
+}
+document.addEventListener("input", e=>{
+  if (e.target.matches("[data-cond-val]")) updatePreview();
+});
+
+/* ── Save ── */
+function saveRule(andClose){
+  const name = document.querySelector("[data-rule-name]").value.trim();
+  if (!name){ toast("Rule name required"); return; }
+  const kw = (document.querySelector("[data-cond-val]")?.value||"").trim();
+  if (!kw){ toast("Add a description keyword"); return; }
+  const cat = document.querySelector("[data-then-category]").value;
+  if (!cat){ toast("Pick a category"); return; }
+
+  const tbody = document.querySelector("[data-rl-tbody]");
+  const tr = document.createElement("tr");
+  tr.className = "hover:bg-surface-container-low cursor-pointer rl-row";
+  tr.dataset.status = "active"; tr.dataset.name = name; tr.dataset.category = cat;
+  tr.innerHTML = `
+    <td class="px-3 py-2"><input type="checkbox" class="row-check rl-check"/></td>
+    <td class="px-3 py-2 font-medium">${name}</td>
+    <td class="px-3 py-2 text-on-surface-variant"><span class="px-1.5 py-0.5 rounded bg-surface-container text-[11px] font-mono">contains "${kw.toUpperCase()}"</span></td>
+    <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] bg-qb-blue/10 text-qb-blue font-medium">${cat}</span></td>
+    <td class="px-3 py-2 text-right tabular-nums">0</td>
+    <td class="px-3 py-2"><div class="switch on" data-toggle></div></td>
+    <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+  `;
+  tbody.insertBefore(tr, tbody.firstChild);
+  wireRuleRow(tr);
+  updateKpis();
+  toast(`Rule "${name}" saved`);
+  if (andClose){
+    document.getElementById("rule-scrim").classList.remove("open");
+    document.getElementById("rule-drawer").classList.remove("open");
+  } else {
+    document.querySelector("[data-rule-name]").value = "";
+    document.querySelector("[data-cond-val]").value = "";
+    document.querySelector("[data-then-category]").value = "";
+    updatePreview();
+  }
+}
+document.querySelector("[data-save-rule]").addEventListener("click", ()=>saveRule(true));
+document.querySelector("[data-save-new]").addEventListener("click", ()=>saveRule(false));
+
+/* ── KPIs ── */
+function updateKpis(){
+  const total = document.querySelectorAll(".rl-row").length;
+  const active = document.querySelectorAll('.rl-row[data-status="active"]').length;
+  const paused = document.querySelectorAll('.rl-row[data-status="paused"]').length;
+  document.querySelector("[data-kpi-active]").textContent = active;
+  document.querySelector("[data-kpi-paused]").textContent = paused;
+  document.querySelector("[data-rl-count]").textContent = `1–${total} of ${total}`;
+}
+
+/* ── Row click + row menu + toggle ── */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+function openRowMenu(btn, tr){
+  currentMenuRow = tr;
+  const paused = tr.dataset.status === "paused";
+  rowMenu.querySelector('[data-action="pause"]').style.display = paused ? "none" : "";
+  rowMenu.querySelector('[data-action="activate"]').style.display = paused ? "" : "none";
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  rowMenu.classList.add("open");
+}
+function wireRuleRow(tr){
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,.switch")) return;
+    openDrawer(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    openRowMenu(e.currentTarget, tr);
+  });
+  tr.querySelector("[data-toggle]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    const sw = e.currentTarget;
+    sw.classList.toggle("on");
+    const isOn = sw.classList.contains("on");
+    tr.dataset.status = isOn ? "active" : "paused";
+    tr.classList.toggle("opacity-70", !isOn);
+    updateKpis();
+    toast(isOn ? "Rule activated" : "Rule paused");
+  });
+}
+document.querySelectorAll(".rl-row").forEach(wireRuleRow);
+
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const action = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  switch(action){
+    case "edit":
+    case "duplicate":
+      openDrawer(tr); break;
+    case "apply-existing": {
+      const matched = Math.floor(Math.random()*8)+3;
+      toast(`Applied to ${matched} past transactions`);
+      const cell = tr.querySelectorAll("td")[4];
+      if (cell) cell.textContent = String(parseInt(cell.textContent) + matched);
+      break;
+    }
+    case "view-matched":
+      toast(`Showing transactions matched by "${tr.dataset.name}"`); break;
+    case "pause": {
+      tr.dataset.status = "paused";
+      tr.classList.add("opacity-70");
+      const sw = tr.querySelector("[data-toggle]"); sw.classList.remove("on");
+      updateKpis(); toast("Rule paused"); break;
+    }
+    case "activate": {
+      tr.dataset.status = "active";
+      tr.classList.remove("opacity-70");
+      const sw = tr.querySelector("[data-toggle]"); sw.classList.add("on");
+      updateKpis(); toast("Rule activated"); break;
+    }
+    case "delete":
+      tr.remove(); updateKpis(); toast("Rule deleted"); break;
+  }
+}));
+
+/* ── View tabs ── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  const st = b.dataset.viewtab;
+  let shown = 0, total = 0;
+  document.querySelectorAll(".rl-row").forEach(tr=>{
+    total++;
+    const vis = st==="all" || tr.dataset.status===st;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-rl-count]").textContent = `1–${shown} of ${total}`;
+}));
+
+/* ── Bulk bar ── */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".rl-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{
+  if (e.target.matches(".rl-check")) updateBulk();
+});
+document.querySelector("[data-check-all]")?.addEventListener("change", e=>{
+  document.querySelectorAll(".rl-check").forEach(c=>{c.checked = e.target.checked;});
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".rl-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked=false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".rl-check:checked").length;
+  if (act === "delete"){
+    document.querySelectorAll(".rl-check:checked").forEach(c=>{const tr=c.closest("tr");if(tr) tr.remove();});
+    updateKpis();
+  }
+  if (act === "activate"){
+    document.querySelectorAll(".rl-check:checked").forEach(c=>{
+      const tr = c.closest("tr"); tr.dataset.status = "active"; tr.classList.remove("opacity-70");
+      tr.querySelector("[data-toggle]")?.classList.add("on");
+    });
+    updateKpis();
+  }
+  if (act === "pause"){
+    document.querySelectorAll(".rl-check:checked").forEach(c=>{
+      const tr = c.closest("tr"); tr.dataset.status = "paused"; tr.classList.add("opacity-70");
+      tr.querySelector("[data-toggle]")?.classList.remove("on");
+    });
+    updateKpis();
+  }
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} rule${n!==1?"s":""}`);
+  document.querySelectorAll(".rl-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked=false;
+  updateBulk();
+}));
+
+/* ── Global click outside closes menus ── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+});
+
+updateKpis();
+</script>
+</body>
+</html>

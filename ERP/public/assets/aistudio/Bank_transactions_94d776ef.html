@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bank transactions — Accounting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .bulk-bar select{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:4px;padding:4px 8px;font-size:12px;font-weight:600}
+  .bulk-bar select option{color:#1a1c1e;background:#fff}
+  .cat-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500;background:#eeedf1;color:#1a1c1e;cursor:pointer;border:1px solid transparent;transition:all .1s}
+  .cat-chip:hover{border-color:#0077c5}
+  .cat-chip.suggested{background:#e8f0fb;color:#0055a5}
+  .cat-chip.uncat{background:#ffdad6;color:#93000a}
+  .cat-chip.excluded{background:#f4f3f7;color:#5a6355;text-decoration:line-through}
+  .row-excluded{opacity:.45}
+  .match-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;background:#8af5be;color:#00714b}
+  .rule-banner{background:linear-gradient(90deg,#e8f0fb 0%,#f4f3f7 100%);border:1px solid #becab6;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  /* category picker dropdown */
+  .cat-picker{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:280px;padding:4px;z-index:150;display:none}
+  .cat-picker.open{display:block}
+  .cat-picker input{width:100%;height:32px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:12px;margin-bottom:4px}
+  .cat-picker .cat-opt{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:13px;border-radius:4px;cursor:pointer}
+  .cat-picker .cat-opt:hover{background:#f4f3f7}
+  .cat-picker .cat-opt .dot{width:8px;height:8px;border-radius:50%}
+  .cat-picker .cat-sep{height:1px;background:#eeedf1;margin:4px 0}
+  .cat-picker .recent{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;padding:4px 10px 2px}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Bank transactions</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Bank transactions</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">For review feed + bank rules · Chase •9910 · synced 2m ago</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">sync</span>Sync bank</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-goto="rules">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Rules</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- Account tabs -->
+  <div class="flex items-center gap-1 mb-3">
+    <button class="h-8 px-3 rounded-lg bg-white border border-primary text-primary text-label-sm font-semibold flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[14px]">account_balance</span>Chase •9910</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-surface-container-low text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[14px]">credit_card</span>Visa •4421</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-surface-container-low text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[14px]">account_balance_wallet</span>Amex •2103</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-surface-container-low text-on-surface-variant text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[14px]">add</span>Connect account</button>
+  </div>
+
+  <!-- Rule suggestion banner -->
+  <div class="rule-banner">
+    <span class="material-symbols-outlined text-[20px] text-qb-blue">auto_awesome</span>
+    <div class="flex-1">
+      <div class="text-body-sm font-semibold">Rule suggestion</div>
+      <div class="text-[11px] text-on-surface-variant">You've categorized 3 STAPLES transactions as <strong>Office supplies</strong>. Create a rule to auto-categorize future ones?</div>
+    </div>
+    <button class="h-7 px-2.5 border border-surface-dim rounded text-label-sm font-semibold hover:bg-white" data-create-rule>Create rule</button>
+    <button class="h-7 w-7 rounded hover:bg-white flex items-center justify-center" data-dismiss-rule>
+      <span class="material-symbols-outlined text-[16px]">close</span></button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- Tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="review">For review <span class="ml-1 px-1.5 py-0.5 rounded-full bg-qb-blue text-white text-[10px] font-bold" data-tab-count>5</span></button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="categorized">Categorized</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="excluded">Excluded</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="all">All</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by description, amount…"/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-tx-count>1–5 of 5</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <select data-bulk-cat>
+        <option value="">Categorize as…</option>
+        <option>Office supplies</option>
+        <option>Shipping</option>
+        <option>Software</option>
+        <option>Advertising</option>
+        <option>Meals &amp; entertainment</option>
+        <option>Travel</option>
+        <option>Stripe clearing</option>
+        <option>Ask My Accountant</option>
+      </select>
+      <button data-bulk="match"><span class="material-symbols-outlined text-[14px] align-middle mr-1">link</span>Match</button>
+      <button data-bulk="exclude"><span class="material-symbols-outlined text-[14px] align-middle mr-1">block</span>Exclude</button>
+      <button data-bulk="receipt"><span class="material-symbols-outlined text-[14px] align-middle mr-1">receipt</span>Attach receipt</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Date</th>
+          <th class="px-3 py-2">Description</th>
+          <th class="px-3 py-2">Payee</th>
+          <th class="px-3 py-2 text-right">Amount</th>
+          <th class="px-3 py-2">Category</th>
+          <th class="px-3 py-2">Match</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-tx-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="review" data-type="expense">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/30/2026</td>
+          <td class="px-3 py-2 font-medium">STAPLES #0412</td>
+          <td class="px-3 py-2 text-on-surface-variant">Staples</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">−$142.50</td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Office supplies</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="review" data-type="expense">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/29/2026</td>
+          <td class="px-3 py-2 font-medium">FEDEX 001239847</td>
+          <td class="px-3 py-2 text-on-surface-variant">FedEx</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">−$84.20</td>
+          <td class="px-3 py-2"><button class="cat-chip" data-cat-picker><span class="material-symbols-outlined text-[12px]">expand_more</span>Select category</button></td>
+          <td class="px-3 py-2"><span class="match-badge"><span class="material-symbols-outlined text-[11px]">link</span>Bill #PF-9211</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="review" data-type="income">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/28/2026</td>
+          <td class="px-3 py-2 font-medium">STRIPE PAYOUT</td>
+          <td class="px-3 py-2 text-on-surface-variant">Stripe</td>
+          <td class="px-3 py-2 text-right tabular-nums text-secondary">+$1,842.60</td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Stripe clearing</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="review" data-type="expense">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/27/2026</td>
+          <td class="px-3 py-2 font-medium">AWS EMEA CHARGES</td>
+          <td class="px-3 py-2 text-on-surface-variant">Amazon Web Services</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">−$124.88</td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Software</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="review" data-type="income">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/27/2026</td>
+          <td class="px-3 py-2 font-medium">ACME CORP — ACH</td>
+          <td class="px-3 py-2 text-on-surface-variant">Acme Corp</td>
+          <td class="px-3 py-2 text-right tabular-nums text-secondary">+$1,240.00</td>
+          <td class="px-3 py-2"><button class="cat-chip suggested" data-cat-picker><span class="material-symbols-outlined text-[12px]">auto_awesome</span>Invoice 1002</button></td>
+          <td class="px-3 py-2"><span class="match-badge"><span class="material-symbols-outlined text-[11px]">link</span>Invoice 1002</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row" data-status="categorized" data-type="expense">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/26/2026</td>
+          <td class="px-3 py-2 font-medium">ADOBE CREATIVE</td>
+          <td class="px-3 py-2 text-on-surface-variant">Adobe</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">−$59.99</td>
+          <td class="px-3 py-2"><button class="cat-chip" data-cat-picker>Software</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer tx-row row-excluded" data-status="excluded" data-type="expense">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check tx-check"/></td>
+          <td class="px-3 py-2">10/25/2026</td>
+          <td class="px-3 py-2 font-medium">ATM WITHDRAWAL</td>
+          <td class="px-3 py-2 text-on-surface-variant">—</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">−$200.00</td>
+          <td class="px-3 py-2"><button class="cat-chip excluded">Excluded</button></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant">—</span></td>
+          <td class="px-3 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- Category picker (positioned dropdown) -->
+<div class="cat-picker" id="cat-picker">
+  <input placeholder="Search categories…" data-cat-search/>
+  <div class="recent">Suggested</div>
+  <div class="cat-opt" data-pick="Office supplies"><span class="dot" style="background:#0077c5"></span>Office supplies</div>
+  <div class="cat-opt" data-pick="Shipping"><span class="dot" style="background:#1e5a38"></span>Shipping</div>
+  <div class="cat-opt" data-pick="Software"><span class="dot" style="background:#6b1e28"></span>Software</div>
+  <div class="cat-opt" data-pick="Advertising"><span class="dot" style="background:#0e5e6f"></span>Advertising</div>
+  <div class="cat-sep"></div>
+  <div class="recent">All categories</div>
+  <div class="cat-opt" data-pick="Meals &amp; entertainment"><span class="dot" style="background:#dad9dd"></span>Meals &amp; entertainment</div>
+  <div class="cat-opt" data-pick="Travel"><span class="dot" style="background:#dad9dd"></span>Travel</div>
+  <div class="cat-opt" data-pick="Stripe clearing"><span class="dot" style="background:#0a6400"></span>Stripe clearing</div>
+  <div class="cat-opt" data-pick="Ask My Accountant"><span class="dot" style="background:#ba1a1a"></span>Ask My Accountant</div>
+  <div class="cat-sep"></div>
+  <div class="cat-opt" data-pick="__match__"><span class="material-symbols-outlined text-[16px] text-qb-blue">link</span>Match to existing…</div>
+  <div class="cat-opt" data-pick="__exclude__"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">block</span>Exclude this transaction</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* Category picker */
+const picker = document.getElementById("cat-picker");
+let currentChip = null;
+document.querySelectorAll("[data-cat-picker]").forEach(b=>b.addEventListener("click",e=>{
+  e.stopPropagation();
+  currentChip = b;
+  const r = b.getBoundingClientRect();
+  picker.style.top = (r.bottom + 4) + "px";
+  picker.style.left = Math.min(r.left, window.innerWidth - 300) + "px";
+  picker.classList.add("open");
+  picker.querySelector("[data-cat-search]").value = "";
+}));
+document.addEventListener("click",e=>{
+  if (!picker.contains(e.target)) picker.classList.remove("open");
+});
+picker.querySelectorAll("[data-pick]").forEach(o=>o.addEventListener("click",()=>{
+  const val = o.dataset.pick;
+  if (val === "__match__") { toast("Open match drawer"); picker.classList.remove("open"); return; }
+  if (val === "__exclude__") {
+    if (currentChip) { currentChip.className = "cat-chip excluded"; currentChip.textContent = "Excluded"; }
+    toast("Transaction excluded"); picker.classList.remove("open"); return;
+  }
+  if (currentChip) { currentChip.className = "cat-chip"; currentChip.textContent = val; }
+  toast(`Categorized as ${val}`);
+  picker.classList.remove("open");
+}));
+
+/* Bulk bar */
+function updateBulk(){
+  const checks = [...document.querySelectorAll(".tx-check")];
+  const checked = checks.filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0) { bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.querySelectorAll(".tx-check").forEach(c=>c.addEventListener("change",updateBulk));
+document.querySelector("[data-check-all]")?.addEventListener("change",e=>{
+  document.querySelectorAll(".tx-check").forEach(c=>{c.checked=e.target.checked;});
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click",()=>{
+  const act = b.dataset.bulk;
+  if (act === "close") {
+    document.querySelectorAll(".tx-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked=false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".tx-check:checked").length;
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} transaction${n!==1?"s":""}`);
+}));
+
+/* View tabs */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active",x===b));
+  const st=b.dataset.viewtab; let shown=0,total=0;
+  document.querySelectorAll(".tx-row").forEach(tr=>{
+    total++;
+    const vis = st==="all" || tr.dataset.status===st;
+    tr.style.display=vis?"":"none"; if(vis)shown++;
+  });
+  document.querySelector("[data-tx-count]").textContent=`1–${shown} of ${total}`;
+}));
+
+/* Row interactions */
+document.querySelectorAll(".tx-row").forEach(tr=>tr.addEventListener("click",e=>{
+  if(e.target.closest("input,button,.cat-chip")) return;
+  toast("Row click → transaction detail drawer");
+}));
+
+/* Rule banner */
+document.querySelector("[data-dismiss-rule]")?.addEventListener("click",e=>{
+  e.target.closest(".rule-banner").style.display = "none";
+});
+document.querySelector("[data-create-rule]")?.addEventListener("click",()=>toast("Rule created: STAPLES → Office supplies"));
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>toast(`Navigate → ${b.dataset.goto}`)));
+</script>
+</body>
+</html>

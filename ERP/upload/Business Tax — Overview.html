@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Business Tax — Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* Deadline card */
+  .deadline-card{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s}
+  .deadline-card:hover{border-color:#0077c5}
+  .deadline-card.urgent{border-left:4px solid #ba1a1a}
+  .deadline-card.soon{border-left:4px solid #1e6dc9}
+  .deadline-card.far{border-left:4px solid #1e5a38}
+  .deadline-card.past{border-left:4px solid #5a6355;opacity:.75}
+  .deadline-date{width:56px;flex-shrink:0;text-align:center}
+  .deadline-date .m{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .deadline-date .d{font-size:22px;font-weight:700;line-height:1.1}
+  .deadline-status{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+  .deadline-status.urgent{background:#ffdad6;color:#93000a}
+  .deadline-status.soon{background:#e8f0fb;color:#0055a5}
+  .deadline-status.far{background:#e8f5e8;color:#1e5a38}
+  .deadline-status.past{background:#f4f3f7;color:#5a6355}
+  /* Progress bar */
+  .progress{height:8px;background:#eeedf1;border-radius:4px;overflow:hidden}
+  .progress > div{height:100%;background:#0a6400;transition:width .3s ease}
+  /* Map accounts task */
+  .map-task{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:16px}
+  .map-task .unmapped-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f4f3f7}
+  .map-task .unmapped-row:last-child{border-bottom:none}
+  .map-task .unmapped-row .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .map-task .unmapped-row select{margin-left:auto;height:28px;font-size:12px;padding:0 6px;border:1px solid #dad9dd;border-radius:4px;background:#fff}
+  /* Chart bars */
+  .bar-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+  .bar-label{width:140px;font-size:12px;color:#5a6355;text-align:right}
+  .bar-track{flex:1;height:20px;background:#f4f3f7;border-radius:3px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:3px}
+  .bar-value{width:90px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Business Tax</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Overview</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Business Tax — Overview</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Tax year 2026 · ManageKube LLC · C-Corp · Accrual basis</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-switch-year>
+        <span class="material-symbols-outlined text-[16px]">calendar_month</span>Tax year 2026 ▾</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-goto="tax-summary">
+        <span class="material-symbols-outlined text-[16px]">description</span>Tax summary</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Est. taxable profit</span>
+      <div class="text-headline-lg mt-1 tabular-nums">$51,032.12</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">YTD · accrual</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Est. tax due</span>
+      <div class="text-headline-lg mt-1 tabular-nums">$10,716.75</div>
+      <div class="text-[11px] text-tertiary mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px]">info</span>21% federal · state TBD</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Next deadline</span>
+      <div class="text-headline-lg mt-1">Jan 15, 2027</div>
+      <div class="text-[11px] text-tertiary mt-1">Q4 estimated payment</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Mapped accounts</span>
+      <div class="text-headline-lg mt-1 tabular-nums"><span data-mapped-count>31</span> / 34</div>
+      <div class="text-[11px] text-error mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px]">warning</span>3 accounts need mapping</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Tax summary">
+      <span class="material-symbols-outlined text-[16px]">description</span>Tax summary</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Estimated payment">
+      <span class="material-symbols-outlined text-[16px]">payments</span>Estimated payment</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Tax payment">
+      <span class="material-symbols-outlined text-[16px]">account_balance</span>Tax payment</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="File extension">
+      <span class="material-symbols-outlined text-[16px]">schedule</span>File extension</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Two-column: Deadlines + Taxable profit breakdown -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+
+    <!-- Deadlines -->
+    <div class="xl:col-span-2">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Filing deadlines</h2>
+        <span class="text-[11px] text-on-surface-variant">Tax year 2026 · C-Corp</span>
+      </div>
+      <div class="space-y-2">
+
+        <div class="deadline-card past">
+          <div class="deadline-date"><div class="m">Apr</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2026</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Q1 estimated payment</span>
+              <span class="deadline-status past"><span class="material-symbols-outlined text-[11px]">check_circle</span>Paid</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Form 1120-W · $2,560.00 paid 04/12/2026</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-view-payment>View</button>
+        </div>
+
+        <div class="deadline-card past">
+          <div class="deadline-date"><div class="m">Jun</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2026</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Q2 estimated payment</span>
+              <span class="deadline-status past"><span class="material-symbols-outlined text-[11px]">check_circle</span>Paid</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Form 1120-W · $2,560.00 paid 06/13/2026</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-view-payment>View</button>
+        </div>
+
+        <div class="deadline-card past">
+          <div class="deadline-date"><div class="m">Sep</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2026</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Q3 estimated payment</span>
+              <span class="deadline-status past"><span class="material-symbols-outlined text-[11px]">check_circle</span>Paid</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Form 1120-W · $2,560.00 paid 09/12/2026</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-view-payment>View</button>
+        </div>
+
+        <div class="deadline-card soon" data-deadline="2027-01-15">
+          <div class="deadline-date"><div class="m">Jan</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2027</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Q4 estimated payment</span>
+              <span class="deadline-status soon" data-countdown><span class="material-symbols-outlined text-[11px]">schedule</span>—</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Form 1120-W · est. $2,560.00</div>
+          </div>
+          <button class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container" data-pay-estimate>Pay</button>
+        </div>
+
+        <div class="deadline-card far" data-deadline="2027-03-15">
+          <div class="deadline-date"><div class="m">Mar</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2027</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Annual return (Form 1120)</span>
+              <span class="deadline-status far" data-countdown><span class="material-symbols-outlined text-[11px]">event</span>—</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Fiscal year 2026 · e-file</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-file-return>Start</button>
+        </div>
+
+        <div class="deadline-card far" data-deadline="2027-04-15">
+          <div class="deadline-date"><div class="m">Apr</div><div class="d">15</div><div class="text-[10px] text-on-surface-variant">2027</div></div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-body-md font-semibold">Final payment / extension deadline</span>
+              <span class="deadline-status far" data-countdown><span class="material-symbols-outlined text-[11px]">event</span>—</span>
+            </div>
+            <div class="text-[11px] text-on-surface-variant mt-0.5">Pay balance owed after annual return</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-file-return>Start</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Taxable profit breakdown (bar chart) -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Taxable profit breakdown</h2>
+      <div class="bar-row"><div class="bar-label">Gross income</div><div class="bar-track"><div class="bar-fill bg-qb-green" style="width:100%"></div></div><div class="bar-value">$89,324</div></div>
+      <div class="bar-row"><div class="bar-label">COGS</div><div class="bar-track"><div class="bar-fill bg-qb-maroon" style="width:28%"></div></div><div class="bar-value">−$25,380</div></div>
+      <div class="bar-row"><div class="bar-label">Deductible expenses</div><div class="bar-track"><div class="bar-fill bg-qb-maroon" style="width:14%"></div></div><div class="bar-value">−$12,912</div></div>
+      <div class="bar-row mt-2 pt-2 border-t border-surface-dim"><div class="bar-label font-semibold text-on-surface">Taxable profit</div><div class="bar-track"><div class="bar-fill bg-qb-blue" style="width:57%"></div></div><div class="bar-value text-qb-blue">$51,032</div></div>
+      <div class="mt-3 pt-3 border-t border-surface-dim space-y-1 text-[11px] text-on-surface-variant">
+        <div class="flex justify-between"><span>Federal rate (C-Corp)</span><span class="font-semibold">21%</span></div>
+        <div class="flex justify-between"><span>Est. federal tax</span><span class="font-semibold tabular-nums">$10,716.75</span></div>
+        <div class="flex justify-between"><span>State (TN)</span><span class="font-semibold tabular-nums">$0.00</span></div>
+        <div class="flex justify-between pt-1 border-t border-surface-dim"><span class="font-semibold text-on-surface">Total est. tax</span><span class="font-semibold text-on-surface tabular-nums">$10,716.75</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map accounts task -->
+  <div class="map-task mb-5" data-map-task>
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h2 class="text-headline-sm">Map accounts to tax categories</h2>
+        <p class="text-[11px] text-on-surface-variant mt-0.5">Every income &amp; expense account needs a tax line before filing. 31 of 34 mapped.</p>
+      </div>
+      <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-error-container text-on-error-container" data-map-badge>3 need mapping</span>
+    </div>
+    <div class="progress mb-3"><div style="width:91.2%" data-map-progress></div></div>
+    <div data-map-list>
+      <div class="unmapped-row" data-account="Marketing — Contractors" data-account-type="Expense">
+        <span class="dot bg-qb-maroon"></span>
+        <span class="text-body-sm font-medium flex-1">Marketing — Contractors</span>
+        <span class="text-[11px] text-on-surface-variant">Expense</span>
+        <select data-map-cat>
+          <option value="">— Map to tax category —</option>
+          <option>Contract labor</option>
+          <option>Advertising</option>
+          <option>Other deductions</option>
+        </select>
+      </div>
+      <div class="unmapped-row" data-account="Warehouse utilities" data-account-type="Expense">
+        <span class="dot bg-qb-maroon"></span>
+        <span class="text-body-sm font-medium flex-1">Warehouse utilities</span>
+        <span class="text-[11px] text-on-surface-variant">Expense</span>
+        <select data-map-cat>
+          <option value="">— Map to tax category —</option>
+          <option>Utilities</option>
+          <option>Rent or lease</option>
+          <option>Other deductions</option>
+        </select>
+      </div>
+      <div class="unmapped-row" data-account="Freight income" data-account-type="Income">
+        <span class="dot bg-qb-green"></span>
+        <span class="text-body-sm font-medium flex-1">Freight income</span>
+        <span class="text-[11px] text-on-surface-variant">Income</span>
+        <select data-map-cat>
+          <option value="">— Map to tax category —</option>
+          <option>Gross receipts</option>
+          <option>Returns and allowances</option>
+          <option>Other income</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex items-center justify-between mt-4 pt-3 border-t border-surface-dim">
+      <button class="h-8 px-3 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-open-coa>
+        <span class="material-symbols-outlined text-[14px]">account_tree</span>Open chart of accounts</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container disabled:opacity-40 disabled:cursor-not-allowed" data-save-mapping disabled>
+        <span class="material-symbols-outlined text-[14px] align-middle mr-1">save</span>Save mapping</button>
+    </div>
+  </div>
+
+  <!-- Bottom row: Mini reports + recent activity -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+    <!-- Quick reports -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Tax reports</h2>
+        <button class="text-[11px] text-primary font-semibold hover:underline" data-goto="reports">View all reports</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button class="text-left p-3 border border-surface-dim rounded-lg hover:border-primary hover:bg-surface-container-low flex items-center gap-2" data-run-report="Tax summary">
+          <span class="material-symbols-outlined text-[20px] text-qb-blue">description</span>
+          <div class="min-w-0">
+            <div class="text-body-sm font-semibold truncate">Tax summary</div>
+            <div class="text-[11px] text-on-surface-variant truncate">Income / deductions / assets</div>
+          </div>
+        </button>
+        <button class="text-left p-3 border border-surface-dim rounded-lg hover:border-primary hover:bg-surface-container-low flex items-center gap-2" data-run-report="Sales tax">
+          <span class="material-symbols-outlined text-[20px] text-qb-maroon">gavel</span>
+          <div class="min-w-0">
+            <div class="text-body-sm font-semibold truncate">Sales tax liability</div>
+            <div class="text-[11px] text-on-surface-variant truncate">Collected minus paid</div>
+          </div>
+        </button>
+        <button class="text-left p-3 border border-surface-dim rounded-lg hover:border-primary hover:bg-surface-container-low flex items-center gap-2" data-run-report="Payroll tax">
+          <span class="material-symbols-outlined text-[20px] text-qb-green">receipt_long</span>
+          <div class="min-w-0">
+            <div class="text-body-sm font-semibold truncate">Payroll tax (941)</div>
+            <div class="text-[11px] text-on-surface-variant truncate">Quarterly federal</div>
+          </div>
+        </button>
+        <button class="text-left p-3 border border-surface-dim rounded-lg hover:border-primary hover:bg-surface-container-low flex items-center gap-2" data-run-report="Form 1120 prep">
+          <span class="material-symbols-outlined text-[20px] text-qb-teal">assignment</span>
+          <div class="min-w-0">
+            <div class="text-body-sm font-semibold truncate">Form 1120 prep</div>
+            <div class="text-[11px] text-on-surface-variant truncate">Annual return worksheet</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Recent tax activity</h2>
+      <div class="space-y-3 text-body-sm">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">check_circle</span>
+          <div class="min-w-0">
+            <div class="font-medium">Q3 estimated payment filed</div>
+            <div class="text-[11px] text-on-surface-variant">$2,560.00 · 09/12/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-blue mt-0.5">tune</span>
+          <div class="min-w-0">
+            <div class="font-medium">5 accounts remapped</div>
+            <div class="text-[11px] text-on-surface-variant">Priya N. · 10/28/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">description</span>
+          <div class="min-w-0">
+            <div class="font-medium">2025 annual return accepted</div>
+            <div class="text-[11px] text-on-surface-variant">IRS · 06/22/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">download</span>
+          <div class="min-w-0">
+            <div class="font-medium">Tax summary exported</div>
+            <div class="text-[11px] text-on-surface-variant">Marcus L. · 10/15/2026</div>
+          </div>
+        </div>
+      </div>
+      <button class="w-full mt-3 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low flex items-center justify-center gap-1" data-view-history>
+        <span class="material-symbols-outlined text-[14px]">history</span>Full history</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Deadlines countdown — real, based on today                 */
+/* ═══════════════════════════════════════════════════════════ */
+const today = new Date();
+today.setHours(0,0,0,0);
+document.querySelectorAll("[data-deadline]").forEach(card=>{
+  const target = new Date(card.dataset.deadline);
+  const days = Math.round((target - today) / 86400000);
+  const badge = card.querySelector("[data-countdown]");
+  if (!badge) return;
+  if (days < 0){
+    badge.innerHTML = `<span class="material-symbols-outlined text-[11px]">check_circle</span>${Math.abs(days)}d ago`;
+    badge.className = "deadline-status past";
+    card.classList.remove("urgent","soon","far");
+    card.classList.add("past");
+  } else if (days <= 14){
+    badge.innerHTML = `<span class="material-symbols-outlined text-[11px]">warning</span>${days} days left`;
+    badge.className = "deadline-status urgent";
+    card.classList.remove("soon","far","past");
+    card.classList.add("urgent");
+  } else if (days <= 60){
+    badge.innerHTML = `<span class="material-symbols-outlined text-[11px]">schedule</span>${days} days left`;
+    badge.className = "deadline-status soon";
+    card.classList.remove("urgent","far","past");
+    card.classList.add("soon");
+  } else {
+    badge.innerHTML = `<span class="material-symbols-outlined text-[11px]">event</span>${days} days left`;
+    badge.className = "deadline-status far";
+    card.classList.remove("urgent","soon","past");
+    card.classList.add("far");
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Map accounts — real mapping, live progress, save gate      */
+/* ═══════════════════════════════════════════════════════════ */
+const MAPPABLE_TOTAL = 34;
+let mappedCount = 31;
+
+function updateMapping(){
+  const selects = [...document.querySelectorAll("[data-map-cat]")];
+  const mapped = selects.filter(s => s.value !== "").length;
+  const unmapped = selects.length - mapped;
+  const total = 31 + mapped; // base 31 + newly mapped
+  document.querySelector("[data-mapped-count]").textContent = total;
+  document.querySelector("[data-map-progress]").style.width = `${(total / MAPPABLE_TOTAL) * 100}%`;
+  const badge = document.querySelector("[data-map-badge]");
+  const save = document.querySelector("[data-save-mapping]");
+  if (unmapped === 0){
+    badge.textContent = "All mapped";
+    badge.className = "px-2 py-0.5 rounded-full text-[11px] font-semibold bg-secondary-container text-on-secondary-container";
+    save.disabled = false;
+  } else {
+    badge.textContent = `${unmapped} need mapping`;
+    badge.className = "px-2 py-0.5 rounded-full text-[11px] font-semibold bg-error-container text-on-error-container";
+    save.disabled = true;
+  }
+}
+document.querySelectorAll("[data-map-cat]").forEach(sel=>{
+  sel.addEventListener("change", updateMapping);
+});
+document.querySelector("[data-save-mapping]").addEventListener("click", ()=>{
+  // remove mapped rows
+  document.querySelectorAll("[data-map-list] .unmapped-row").forEach(row=>{
+    if (row.querySelector("[data-map-cat]").value !== "") row.remove();
+  });
+  const remaining = document.querySelectorAll("[data-map-cat]").length;
+  if (remaining === 0){
+    document.querySelector("[data-map-task]").innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[24px] text-secondary">check_circle</span>
+        <div>
+          <h2 class="text-headline-sm">All accounts mapped</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">34 of 34 accounts are mapped to tax categories. Ready for filing.</p>
+        </div>
+      </div>`;
+  }
+  toast("Tax mapping saved");
+});
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Action buttons                                            */
+/* ═══════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-view-payment]").forEach(b=>b.addEventListener("click", ()=>{
+  toast("Opening payment detail drawer — 1120-W line, confirmation, amount paid");
+}));
+document.querySelector("[data-pay-estimate]").addEventListener("click", ()=>{
+  toast("Q4 estimated payment — opens pay modal (amount, bank account, submit)");
+});
+document.querySelectorAll("[data-file-return]").forEach(b=>b.addEventListener("click", ()=>{
+  toast("Filing workflow — opens wizard step 1 of 4");
+}));
+document.querySelector("[data-switch-year]").addEventListener("click", ()=>{
+  toast("Tax year switcher — 2024 / 2025 / 2026");
+});
+document.querySelectorAll("[data-create]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`Create → ${b.dataset.create}`);
+}));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>{
+  toast("Global Create flyout — filtered to Business Tax");
+});
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`Navigate → ${b.dataset.goto}`);
+}));
+document.querySelector("[data-open-coa]").addEventListener("click", ()=>{
+  toast("Navigate → Chart of accounts (filter: unmapped)");
+});
+document.querySelectorAll("[data-run-report]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`Run report → ${b.dataset.runReport}`);
+}));
+document.querySelector("[data-view-history]").addEventListener("click", ()=>{
+  toast("Tax activity history — 12 entries");
+});
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Init                                                      */
+/* ═══════════════════════════════════════════════════════════ */
+updateMapping();
+</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+     1→     1→# Unified Platform: Master Spec
+     2→     2→
+     3→     3→Contents: **Part A** Component Map (what and why) · **Part B** Build Spec (components, interactions, API, 14-day plan) · **Part C** Settings Spec (schema-grounded). Types live in `contracts.ts`.
+     4→     4→
+     5→     5→---
+     6→     6→
+     7→     7→# PART A
+     8→     8→
+     9→     9→# Unified Platform — Component Map & System Logic
+    10→    10→
+    11→    11→Commerce + Design + Accounting, one connected system. This doc defines, for every module: the primary entity, which surface opens for each action (drawer / modal / page / workspace / studio), table columns and sorts, right-click menus, pills, and what rides along from other modules.
+    12→    12→
+    13→    13→---
+    14→    14→
+    15→    15→## PART 1 — System Logic (the rules every module obeys)
+    16→    16→
+    17→    17→### 1.1 The five shared entities
+    18→    18→
+    19→    19→Everything in the Create Actions list collapses into five entity families. This is what makes the platform feel integrated: modules are *views* over shared entities, not separate databases.
+    20→    20→
+    21→    21→| Entity | What it is | Roles / Types | Used by |
+    22→    22→|---|---|---|---|
+    23→    23→| **Party** | One person/company record | Customer, Vendor, Supplier, Contractor, Seller, Lead (a party can hold many roles) | Sales, Expenses, CRM, Orders, Support, Tax (1099), Marketplace |
+    24→    24→| **Item** | Anything sellable/buyable | Product, Service, Blank, Bundle, Design-linked product, Gift card, Subscription | Catalog, Studio, Invoices, Bills, PO, Orders, Inventory, Channels |
+    25→    25→| **Document** | Any multi-line transaction | Invoice, Estimate, Sales order, Sales receipt, Credit memo, Bill, Expense, Check, PO, Vendor credit, RMA, Journal entry | Sales, Expenses, Orders, Purchasing, Returns, Accounting |
+    26→    26→| **Money movement** | Cash actually moving | Payment, Payment link, Deposit, Transfer, Settlement/Payout, Refund | Sales, Bills, Banking, Reconcile, Stripe/Shopify |
+    27→    27→| **Account** | Ledger node | Chart of Accounts, Bank, Credit card, Loan, Line of credit | Accounting, every Document line, Reconcile, Tax, Reports |
+    28→    28→
+    29→    29→**Rule:** "Add vendor" and "Add supplier" and "Add customer" are the **same drawer** (Party drawer) with a different default role pill. Same for "Add contractor" (role = Contractor, plus W-9 invite section). Never build four forms.
+    30→    30→
+    31→    31→**Rule:** Every Document is rendered by **one Document Engine** (header → lines → totals → attachments/memo → status → activity). Invoice, Bill, PO, Sales order, Estimate, Credit memo, Vendor credit differ only by *config* (party role, line columns, status machine, posting rules). Build once.
+    32→    32→
+    33→    33→### 1.2 Surface rules — which container for which job
+    34→    34→
+    35→    35→| Surface | Use when | Examples | Escape hatch |
+    36→    36→|---|---|---|---|
+    37→    37→| **Pill / popover (peek)** | Read-only glance, zero commitment | Hover a customer pill → balance, last order, open tickets | Click → open drawer; ⌘-click → new tab |
+    38→    38→| **Modal** | Single decision, ≤5 fields, result is immediate | Record payment, Void, Refund, Mark shipped, Adjust stock, Transfer, Send, Remind, Approve/Decline return, Archive | None (small by design) |
+    39→    39→| **Drawer (right, 480px; 720px wide mode)** | Create/edit a *record* while staying on the list | Party, Product, Account, Category, Task, Note, Ticket, Banner, Popup, Discount code, Collection | **Make full page** (already in your Bills create menu) |
+    40→    40→| **Document page (full)** | Multi-line transactions | Invoice, Bill, PO, Sales order, Estimate, Credit memo, Journal entry | Print/PDF/Email views as tabs inside the page |
+    41→    41→| **Workspace** | Many records, one batch outcome | Pay bills, Receive payment, Reconcile, Batch slips & labels, Cycle count, Upload multiple bills | Saves as draft batch |
+    42→    42→| **Studio** | Visual canvas | Design, Collection canvas, Product mockup | "Back to record" returns to originating drawer |
+    43→    43→| **Command palette (⌘K)** | Jump or create anywhere | "New invoice for Acme", "Bill from Printful" | Same Create menu, searchable |
+    44→    44→
+    45→    45→**Escalation ladder:** Peek → Modal → Drawer → Full page. A user can always promote upward without losing input (drawer → full page keeps state).
+    46→    46→
+    47→    47→### 1.3 The Context Envelope (this is the integration engine)
+    48→    48→
+    49→    49→Every surface carries an invisible envelope. Creating something from inside a record **prefills from that record**; creating from the global Create menu inherits only the **active tab's** envelope.
+    50→    50→
+    51→    51→```
+    52→    52→envelope = {
+    53→    53→  origin_module, origin_record_id, origin_tab_id,
+    54→    54→  party_id, order_id, item_id, design_id, account_id,
+    55→    55→  channel_id, currency, date_range, return_to
+    56→    56→}
+    57→    57→```
+    58→    58→
+    59→    59→Examples:
+    60→    60→- On **Order #1042** → Create → Invoice: party, lines, channel, and `order_id` are prefilled and linked.
+    61→    61→- On **Vendor: Printful** → Create → Bill: vendor, terms, default expense category prefilled; open POs from that vendor show as a "Match PO" suggestion.
+    62→    62→- On a **Design** in Studio → Create → Product: design attached, blank picker opens, margins pre-calculated from supplier cost.
+    63→    63→- On **Bank transaction** (Reconcile) → Create → Expense: amount, date, paid-from prefilled; "Match" and "Create" are siblings.
+    64→    64→
+    65→    65→`return_to` means closing any drawer/modal/page returns to the exact scroll position and tab it came from.
+    66→    66→
+    67→    67→### 1.4 Universal components (build once, use everywhere)
+    68→    68→
+    69→    69→| Component | Behavior | Appears in |
+    70→    70→|---|---|---|
+    71→    71→| **Party picker** | Typeahead, role-filtered, `+ Add new` opens Party drawer inline, shows balance pill | Every Document, Task, Ticket, Campaign target |
+    72→    72→| **Item picker** | Search by name/SKU/barcode, shows price, cost, stock pill; `+ Add product/service` opens Item drawer | Invoice/Bill/PO/Order lines, Bundles, Discounts |
+    73→    73→| **Account picker** | Typeahead with account type grouping; `+ Add account` opens CoA drawer | Expense, Bill lines, Journal, Transfer, Rules |
+    74→    74→| **Capture panel** | Upload / take photo / paste email → OCR → autofill | Bill, Expense, Receipts, Contractor docs |
+    75→    75→| **Tag toggle** | Tags on header and per line (Tag Lines) | Bills, Invoices, Orders, Expenses, Reports filter |
+    76→    76→| **Attachment strip** | Drag/drop, preview, "Download attachment" | All Documents, Parties, Tickets, Returns |
+    77→    77→| **Activity timeline** | Every status change, email, payment, comment, with actor | Right rail on every record |
+    78→    78→| **Related rail** | Linked records as pills (see 1.6) | Right rail on every record |
+    79→    79→| **Status pill** | State machine badge, clickable to next legal state | Every list row and header |
+    80→    80→| **Money field** | Currency-aware, tax-aware | Everywhere |
+    81→    81→| **Date range picker** | Presets + compare previous period | Every list and report |
+    82→    82→
+    83→    83→### 1.5 Table standard (every list view)
+    84→    84→
+    85→    85→**Anatomy:** `[select] [primary identifier] [party pill] [status pill] … [amount] [date] [⋯ row actions]`
+    86→    86→
+    87→    87→| Rule | Standard |
+    88→    88→|---|---|
+    89→    89→| Toolbar | Search · Filters (saved views) · Date range · Columns · **Import** (where the entity supports it) · **Export** · **primary Create button** |
+    90→    90→| Tabs-as-filters | Status tabs with counts: e.g., Bills → *For review · Unpaid · Paid* |
+    91→    91→| Default sort | Newest by primary date; overdue/attention items pinned top when applicable |
+    92→    92→| Sortable | Every column except Actions |
+    93→    93→| Column picker | Per-user, saved per view |
+    94→    94→| Row click | Opens **drawer** for records, **page** for documents |
+    95→    95→| Right-click | Same menu as `⋯` (see 1.7) |
+    96→    96→| Bulk bar | Appears on select: Send, Print, Tag, Archive, Export, + module-specific |
+    97→    97→| Totals footer | Sum of visible amounts / open balance |
+    98→    98→| Empty state | One sentence + primary action + import option |
+    99→    99→
+   100→   100→### 1.6 Pill vocabulary
+   101→   101→
+   102→   102→| Pill type | Meaning | Click | Right-click |
+   103→   103→|---|---|---|---|
+   104→   104→| **Status** | Draft, Sent, Unpaid, Overdue, Paid, Deposited, For review, Approved, Shipped, Delivered, Returned | Peek next actions | Change status |
+   105→   105→| **Relation** | Linked record: `Order #1042`, `Inv #88`, `PO #12`, `Design: Tee v3`, `Ticket #301` | Peek popover | Open / Open in new tab / Unlink |
+   106→   106→| **Party** | Customer/vendor with role color + balance | Peek popover → Open profile | Email / Create → … |
+   107→   107→| **Channel** | Etsy, TikTok, Amazon, Shopify, Website | Filter by channel | Open channel settings |
+   108→   108→| **Alert** | Needs attention, Manual push, Stock low, SLA at risk, Unreconciled, Missing W-9 | Opens the fix surface (modal/drawer) | Dismiss / Snooze |
+   109→   109→| **Tag** | User-defined | Filter by tag | Edit tags |
+   110→   110→
+   111→   111→**Cross-module rule:** a pill on one module's screen should always be the *door* to the related module. Overdue invoice shows a **Customer pill** and a **Ticket pill** if a ticket is open; the order row shows an **Invoice pill** and a **Shipment pill**.
+   112→   112→
+   113→   113→### 1.7 Right-click grammar (same order everywhere)
+   114→   114→
+   115→   115→```
+   116→   116→1. Open / View / Open in new tab
+   117→   117→2. Edit · Duplicate
+   118→   118→3. CREATE FROM THIS ▸ (cross-module — the integration menu)
+   119→   119→4. COMMUNICATE ▸ Email · Send · Remind · Add note · Open ticket
+   120→   120→5. MONEY ▸ Record payment · Refund · Mark paid · Pay
+   121→   121→6. PRINT / EXPORT ▸ Print · PDF · Download attachment
+   122→   122→7. ORGANIZE ▸ Tag · Add to… · Favorite · Pin
+   123→   123→——————————
+   124→   124→8. Archive · Void · Delete   (danger, always last, always confirm)
+   125→   125→```
+   126→   126→
+   127→   127→Only sections relevant to the record type show. The "Create from this" section is what makes your platform different from QuickBooks.
+   128→   128→
+   129→   129→### 1.8 Visibility & permissions
+   130→   130→
+   131→   131→| Layer | Controls |
+   132→   132→|---|---|
+   133→   133→| **Role** (Settings → Roles & permissions) | Module visible / hidden, view vs edit vs approve |
+   134→   134→| **Approvals & limits** | Bill approval, payment approval thresholds → surfaces "Approve to Unpaid" and "Setup Payment approval" |
+   135→   135→| **Field-level** | Cost, margin, bank account numbers (Bill Pay ACH routing/account) masked unless permitted |
+   136→   136→| **Pill visibility** | Relation pills hidden if user lacks access to the target module (shows count only) |
+   137→   137→| **Create menu** | Actions are filtered by permission; the menu never shows what the user can't finish |
+   138→   138→
+   139→   139→---
+   140→   140→
+   141→   141→### 1.9 Scoped Workspaces → Global Hubs (the Push pattern)
+   142→   142→
+   143→   143→Catalog, Contacts/CRM, Support and Marketing each exist **twice on purpose**: once as a **scoped view** inside the area where the work happens, and once as the **global hub** that is the system of record. This is how a user never has to leave what they're doing to get or create what they need.
+   144→   144→
+   145→   145→| Scoped view (where you work) | Lives in | Global hub (system of record) | Push action | Pull action |
+   146→   146→|---|---|---|---|---|
+   147→   147→| **My Catalog** | Design Studio / My products | **Global Catalog** | **Publish** | Add a blank/product from global into My Catalog |
+   148→   148→| **Contacts** | Finance (Sales, Expenses, Accounting) | **Global Contacts / CRM** | **Create and push** | **Search global → Use here** |
+   149→   149→| **Support** | Record context (Orders, Sales, Customers) | **Global Support** (Inbox & Tickets) | Create ticket here → lands in global queue | Link an existing global ticket |
+   150→   150→| **Marketing** | Studio / Catalog / Product context | **Global Marketing** | Promote here → lands in global calendar/queue | Pull from global library/campaigns |
+   151→   151→
+   152→   152→**Why two:** The designer cannot bounce to the global catalog mid-design. The user in Finance should not have to open CRM to bill someone. Scoped = fast, in context, only what you need. Global = governed, searchable, shared across the whole platform.
+   153→   153→
+   154→   154→**Rules**
+   155→   155→
+   156→   156→1. **One record identity.** A scoped view is a lens (or staging copy) linked to a single global ID. Pushing never makes a second record.
+   157→   157→2. **Two entry flows, same destination.**
+   158→   158→   - *Create → push:* new contact/product made in scope, then promoted to global.
+   159→   159→   - *Search → link:* user searches the global hub from the scoped view and attaches the existing record. Search always runs **before** create ("Does this already exist?").
+   160→   160→3. **Dedupe on push.** Match keys: Contact = email / tax ID / name + address; Product = SKU / design ID; Ticket = requester + related record. On a match the push modal offers **Link to existing · Merge · Create anyway**.
+   161→   161→4. **State pill on every scoped row:** `Local only` → `Pushed` → `Live/Global`. Catalog adds `Draft → Published → Syncing to channels`.
+   162→   162→5. **Provenance:** global records carry a source pill (`Created in Studio`, `Created in Finance`) so context is never lost after the push.
+   163→   163→6. **Visibility:** a scoped item is visible to the creator/team until pushed; global visibility follows Roles & permissions. Pushing is its own permission (e.g. Publish to catalog).
+   164→   164→7. **Edit from either view, with an "existing record" warning.** The user is never sent to the other view to make a change. Because there is only one record underneath (rule 1), an edit made in the scoped view or the global hub writes to the same record and shows up in both immediately. The safeguard is a warning on entering edit, not a redirect.
+   165→   165→
+   166→   166→   **Warning tiers (shown when edit opens, in the drawer/page header):**
+   167→   167→
+   168→   168→   | Tier | Applies to | What the user sees |
+   169→   169→   |---|---|---|
+   170→   170→   | **1 — Notice** | Local only / not yet pushed | No warning needed |
+   171→   171→   | **2 — Existing record banner** | Pushed/Global record, edited from anywhere | Banner: *"You're editing an existing record shared with Global Catalog."* + impact line (e.g. *Used in 14 products · 3 open invoices · 2 channels*) + **View where used**. Non-blocking. |
+   172→   172→   | **3 — Confirm on save** | Edit changes a field with downstream effect (price, SKU, email, tax ID, terms, default account) | Save opens a small modal with a before → after summary of what propagates; options **Save** · **Save and apply to open drafts** · Cancel |
+   173→   173→   | **4 — Locked** | Posted financial documents, reconciled transactions | Fields locked; offer **Void**, **Adjust**, or **Create credit memo** instead of edit |
+   174→   174→
+   175→   175→   **Safeguards that make edit-anywhere safe:**
+   176→   176→   - **Source pill in the activity log:** every edit records *edited from My Catalog / Studio / Finance / Global*, who, and the before → after values.
+   177→   177→   - **Concurrency:** soft lock banner (*"Maria is editing this"*) and a version check on save; on conflict show a field-level diff to keep mine, keep theirs, or merge.
+   178→   178→   - **Permissions still apply:** edit rights follow Roles and permissions; fields like cost, margin and bank details stay masked and read-only without the right role.
+   179→   179→   - **Undo:** a toast with **Undo** after save for Tier 2 edits, plus Activity → Restore previous value.
+   180→   180→   - **Same warning component everywhere:** one Existing Record Banner component, parameterized by record type and impact counts, used by Party, Item, Ticket, Campaign and Account drawers.
+   181→   181→8. **Create menu:** actions in a scoped context default to creating locally with **Push to global** pre-checked in the drawer footer (`Save` · `Save and push`).
+   182→   182→
+   183→   183→---
+   184→   184→
+   185→   185→## PART 2 — Module by Module
+   186→   186→
+   187→   187→Format per module: **Entity → Lists → Create surfaces → Detail → Right-click → Bulk → Rides along (cross-module) → Context in/out**.
+   188→   188→
+   189→   189→---
+   190→   190→
+   191→   191→### MODULE: Sales (Customers)
+   192→   192→
+   193→   193→**Primary entities:** Invoice, Estimate, Sales receipt, Credit memo, Payment link, Payment, Statement, Subscription, Gift card
+   194→   194→
+   195→   195→**Overview page**
+   196→   196→- Create actions bar: Get paid online · Create invoice · Payment link · Recurring · Record payment · Sales receipt
+   197→   197→- Sales funnel (Estimate → Invoice → Not paid → Paid → Deposited)
+   198→   198→- Income over time with Compare previous year, group by Month/Year
+   199→   199→- Revenue transactions feed (Stripe webhook)
+   200→   200→
+   201→   201→**Create surfaces**
+   202→   202→
+   203→   203→| Action | Surface | Fields / notes |
+   204→   204→|---|---|---|
+   205→   205→| Invoice | **Document page** | Party picker, Terms, Invoice date, Due date, Invoice no, Lines (Item/Desc/Qty/Rate/Amount), Charge a deposit, Note to customer, Memo on statement, Attachments, Tags. Header tabs: **Edit · Email view · Payor view · PDF view**. Right-hand: Payment options, Design, Scheduling, More options. Footer: Save · Review and send · Print/Download |
+   206→   206→| Estimate | Document page | Same engine; Expiry date; button **Convert to invoice** |
+   207→   207→| Sales receipt | Document page (compact) | Instant settlement; deposit-to account |
+   208→   208→| Credit memo | Document page | Source invoice pill; reason; RMA link; **Apply to invoice** or **Refund** |
+   209→   209→| Payment link | **Modal** | Amount, Description → result screen with Share link + QR + Copy |
+   210→   210→| Receive payment | **Workspace** | Party → shows open invoices → checkboxes apply amount → deposit-to account → unapplied credit handling |
+   211→   211→| Record payment | **Modal** (from invoice row) | Amount, date, method, deposit-to, reference |
+   212→   212→| Statement | **Workspace** (batch) | Select customers + period → preview → send/print |
+   213→   213→| Recurring | **Drawer** | Template from existing invoice; schedule; auto-send vs. draft |
+   214→   214→| Add customer | **Party drawer** (role=Customer) | See CRM |
+   215→   215→
+   216→   216→**Invoice list columns:** ☐ · Invoice # · Customer (pill) · Invoice date · Due date · Status (pill) · Amount · Balance due · Source (Order/Link/Manual pill) · ⋯
+   217→   217→**Default sort:** Due date asc for Unpaid; Date desc for All. **Status tabs:** All · Draft · Unpaid · Overdue · Paid · Deposited.
+   218→   218→
+   219→   219→**Right-click on an invoice**
+   220→   220→- Open · Edit · Duplicate
+   221→   221→- **Create from this ▸** Credit memo · Return/RMA · Ticket · Task (follow up) · Payment link
+   222→   222→- **Communicate ▸** Send · Remind · Email customer · Add note
+   223→   223→- **Money ▸** Record payment · Refund · Mark paid
+   224→   224→- Print · PDF · Download attachment
+   225→   225→- Void · Delete
+   226→   226→
+   227→   227→**Bulk:** Send · Remind · Print · Tag · Export · Record payment (batch)
+   228→   228→
+   229→   229→**Rides along**
+   230→   230→- **Orders:** Order pill; "Create invoice" from order; shipment status shown inline
+   231→   231→- **Catalog:** Item picker shows stock pill; low stock warns on line
+   232→   232→- **Accounting:** "View journal entry"; deposit pill → Bank deposit → Reconcile
+   233→   233→- **Support:** Ticket pill if open; "Open ticket" from row
+   234→   234→- **CRM:** Customer peek shows lifetime value, last order, segment
+   235→   235→- **Tax:** Sales tax calculated per line (needs definition — see Part 4)
+   236→   236→- **Marketing:** Discount code pill if applied
+   237→   237→
+   238→   238→**Context out:** `party_id`, `invoice_id`, `order_id` → into Credit memo, RMA, Ticket, Payment.
+   239→   239→
+   240→   240→---
+   241→   241→
+   242→   242→### MODULE: Expenses & Bills (Vendors & Suppliers)
+   243→   243→
+   244→   244→**Primary entities:** Bill, Expense, Check, Vendor credit, Credit card credit, Bill payment, Purchase notification
+   245→   245→
+   246→   246→**Overview page**
+   247→   247→- Create actions: Upload multiple bills · Create bills · Schedule online payment · Pay bills · Record an expense
+   248→   248→- Automate bills funnel: **Upload & auto-create → For review → Approval → Paid**
+   249→   249→- Spend over time · Spend insights
+   250→   250→
+   251→   251→**Create surfaces**
+   252→   252→
+   253→   253→| Action | Surface | Notes |
+   254→   254→|---|---|---|
+   255→   255→| **Add bill** | **Document page** (opens as drawer first, "Make full page") | Capture panel at top (Autofill · Upload · Take a photo). Vendor, Mailing address, Terms, Bill date, Due date, Bill no. **Category lines** and **Item lines** in two tabs. Line actions: Add / Clear / Copy / Tag / Delete. Memo, Attachment, **Make recurring**. Footer: Save bill · Save and schedule · Print |
+   256→   256→| Upload multiple bills | **Workspace** | Drop zone → OCR queue → each lands in **For review** |
+   257→   257→| Expense | **Drawer** (fast) | Payee, Date, Paid-from account, Category, Amount, Receipt, Tag |
+   258→   258→| Check | Drawer / Document | Payee, bank account, **Print later** toggle, memo; goes to Print checks queue |
+   259→   259→| Pay bills | **Workspace** | Payment table: Payment account · Payment date · Starting check # · Rows: Payee · Ref no · Due date · Status · Bill approval · Open balance · Credits · Payment · Total · Action |
+   260→   260→| Schedule online payment | Modal | Date, method (ACH uses vendor's Bill Pay ACH details) |
+   261→   261→| Vendor credit | Document page | Source bill pill; supplier refund tracking |
+   262→   262→| Credit card credit | Drawer | Card account, vendor, amount |
+   263→   263→| Purchase order | Document page | Blank/SKU lines; see Purchasing |
+   264→   264→
+   265→   265→**Bills list columns:** ☐ · Vendor (pill) · Bill no · Bill date · Due date · Bill amount · Open balance · Status (pill) · Approval (pill) · Source (Upload/Email/Manual) · Action
+   266→   266→**Tabs:** For review · Unpaid · Paid. **Search:** by vendor, by bill date. **Default sort:** Due date asc (Unpaid), Bill date desc (Paid).
+   267→   267→**Row primary action (the "Action" column):** Pay · Approve · Review (changes by status).
+   268→   268→
+   269→   269→**Expense Transactions list** (all types): Date · Type pill (Bill/Expense/Check/Vendor credit/Card credit) · Payee · Category · Account · Amount · Status · Attachment icon. Filters/dates/saved views. **New transaction** button → type picker.
+   270→   270→
+   271→   271→**Right-click on a bill**
+   272→   272→- View bill details · Edit · Duplicate
+   273→   273→- **Create from this ▸** Vendor credit · Task · PO match · Expense (split)
+   274→   274→- **Communicate ▸** Email vendor · Add note
+   275→   275→- **Money ▸** Pay · Mark paid · Schedule payment
+   276→   276→- Categorize · Match (to PO/bank transaction) · Approve to Unpaid
+   277→   277→- Download attachment · Print
+   278→   278→- Delete bill
+   279→   279→
+   280→   280→**Bulk:** Approve · Pay selected (sends into Pay bills workspace) · Categorize · Tag · Print checks
+   281→   281→
+   282→   282→**Vendors tab (inside Expenses):** Import vendors · Add vendor (Party drawer). Columns: Vendor · Open balance · Last bill · YTD spend · 1099 flag · Payment method (ACH ready pill) · ⋯
+   283→   283→
+   284→   284→**Contractors tab:** Name · Email invite · W-9 status pill · Tax profile · YTD paid · **Pay and file 1099s**. Add contractor = Party drawer role=Contractor with W-9 invite section.
+   285→   285→
+   286→   286→**Rides along**
+   287→   287→- **Purchasing:** Open PO pills on vendor; matching suggestion on bill
+   288→   288→- **Catalog:** Item lines update cost; "Reprice" prompt if cost changed beyond threshold
+   289→   289→- **Inventory:** Item lines on bill can receive stock ("Receive items…")
+   290→   290→- **Accounting:** Category = Account picker; bank match in Reconcile; Rules (Settings → Bank rules) auto-categorize
+   291→   291→- **Tax:** Contractor spend → 1099; deductible expense totals → Tax summary
+   292→   292→- **Orders:** Supplier cost on order lines links to bill (COGS)
+   293→   293→
+   294→   294→---
+   295→   295→
+   296→   296→### MODULE: Contacts / CRM (Parties)
+   297→   297→
+   298→   298→**Primary entity:** Party (+ roles). Sub-areas: Parties, Seller relationships, CRM tools.
+   299→   299→
+   300→   300→**List: Parties**
+   301→   301→Columns: ☐ · Name · Role pills (multi) · Email · Phone · Open balance (AR/AP) · Lifetime value / YTD spend · Last activity · Segment pills · Owner · ⋯
+   302→   302→Tabs: All · Customers · Vendors · Suppliers · Contractors · Sellers · Leads · Archived
+   303→   303→Default sort: Last activity desc.
+   304→   304→
+   305→   305→**Party drawer (the single most reused component)**
+   306→   306→
+   307→   307→| Section | Fields |
+   308→   308→|---|---|
+   309→   309→| Identity | Name, Company, Display name, Email, Phone, Roles (pills, **Add role…**) |
+   310→   310→| Address | Street, City, State, Zip, Country, shipping vs. billing |
+   311→   311→| Finance | Terms, Currency, Default category/account, Tax exempt, **Bill Pay ACH** (Account no., Routing no. — masked), 1099 flag |
+   312→   312→| Notes & Attachments | Notes, attachments |
+   313→   313→| Role-specific | Customer: price list, credit limit, statement preference · Vendor/Supplier: lead time, MOQ, catalog feed, integration · Contractor: W-9 invite · Seller: payout, onboarding status |
+   314→   314→| Footer | Save and new · Save and close |
+   315→   315→
+   316→   316→**Party detail (opened from row — drawer, expandable to page)**
+   317→   317→Tabs: **Overview · Transactions · Orders · Tickets · Files · Activity**
+   318→   318→Header actions: Email · Create ▸ (role-aware: Invoice/Estimate/Order/Bill/PO/Ticket/Task/Note)
+   319→   319→
+   320→   320→**Right-click on a party** (matches your spec)
+   321→   321→- THIS PARTY ▸ Open profile · Email · Edit party
+   322→   322→- **Create ▸** (role-aware) Invoice · Estimate · Sales order · Bill · PO · Expense · Ticket · Task · Note
+   323→   323→- ROLES ▸ Add role… · Remove role
+   324→   324→- Archive
+   325→   325→
+   326→   326→**Rides along:** this is the *hub*. Every other module's Party pill resolves here. Peek popover shows: balance, last transaction, open tickets, next task, segment.
+   327→   327→
+   328→   328→**CRM tools:** Leads (pipeline board + list; convert to Customer = adds role, no duplicate) · Appointments (calendar) · Segments (rule builder → feeds Newsletter/Promotions) · Templates (email/SMS).
+   329→   329→
+   330→   330→**Marketplace sellers:** Sellers list → Seller detail (Overview · Catalog · Orders · Payouts · Compliance & 1099 · Support) → Seller feed → **Onboarding queue** (Approve/Decline modal). Attention pill: Missing docs.
+   331→   331→
+   332→   332→---
+   333→   333→
+   334→   334→### MODULE: Catalog (Products, Variants, Channels)
+   335→   335→
+   336→   336→**Primary entity:** Item. **Prereq (from your notes):** Department / Sub-department / Service type / SKU line must exist before product entry → build these as **inline "Add new" inside the Category field**, so the prereq never blocks the user.
+   337→   337→
+   338→   338→**List: Products & Variants**
+   339→   339→Columns: ☐ · Image · Name · SKU · Type pill (Product/Blank/Bundle/Service) · Category · Status pill (Draft/Published/Archived) · Channels (channel pills) · Price · Cost · Margin % · Stock (pill) · Supplier pill · Design pill · Updated · ⋯
+   340→   340→Tabs: Products · Listings · Blanks · Bundles · Published items & SKUs · Review
+   341→   341→Sorts: Name, Price, Margin, Stock, Updated, Best selling (sales velocity).
+   342→   342→Filters: Category, Channel, Supplier, Status, Has design, Low stock.
+   343→   343→
+   344→   344→**Create: Product/Service drawer (wide)**
+   345→   345→
+   346→   346→| Tab | Fields |
+   347→   347→|---|---|
+   348→   348→| **Basic info** | Name, Item type, SKU, Category (+ add new), Image(s), Chart of account selection (+ Add new) |
+   349→   349→| **Sales** | Description, Price/Rate, Income account, Tax |
+   350→   350→| **Purchasing** | "Purchase this service from a supplier" toggle → Supplier, Cost, Expense/COGS account, Lead time |
+   351→   351→| **Accounting** | Income, COGS, Inventory asset accounts |
+   352→   352→| **Variants** | Option grid (size/color) → SKU per variant, price override, stock |
+   353→   353→| **Channels** | Per-channel publish toggles with sync status pills |
+   354→   354→| **Design** | Attached design(s) → **Open in Studio** |
+   355→   355→| Footer | Save and new · Save and close |
+   356→   356→
+   357→   357→**Right-click on a product** (matches your spec)
+   358→   358→- View · Edit · Duplicate
+   359→   359→- Publish / Unpublish · Reprice
+   360→   360→- **Open in Studio** · Add to designer
+   361→   361→- View sales · View supplier
+   362→   362→- **Create from this ▸** PO · Discount code · Banner · Social post · Newsletter feature · Campaign
+   363→   363→- Archive
+   364→   364→
+   365→   365→**Bulk:** Publish · Reprice (modal: % or fixed) · Add to collection · Assign category · Push to channels · Archive
+   366→   366→
+   367→   367→**Rides along**
+   368→   368→- **Studio:** design thumbnail on every product; "Open in Studio" preserves envelope
+   369→   369→- **Inventory:** stock pill → Adjust stock / Transfer / Stock history modals
+   370→   370→- **Purchasing:** "Create PO" with SKU line prefilled at reorder qty
+   371→   371→- **Sales/Orders:** "View sales" → Sales report prefiltered to item
+   372→   372→- **Marketing:** product → Banner/Popup/Post/Discount with item prefilled
+   373→   373→- **Channels:** sync status pill (Synced / Error / Needs attention) → opens channel fix drawer
+   374→   374→
+   375→   375→**Categories:** list + **drawer** (name, parent, slug, image, rules). **Bundles:** drawer with component item picker and bundle price calc. **Collections:** canvas builder (Studio-style).
+   376→   376→
+   377→   377→**Channels page:** card per channel (TikTok, Amazon, Facebook Marketplace, WhatNot, Etsy, eBay, Website/CMS): Status · Last sync · Listings count · Errors pill. Click → drawer with connect, mapping, rules.
+   378→   378→
+   379→   379→---
+   380→   380→
+   381→   381→### MODULE: Design Studio (T-shirt / product design)
+   382→   382→
+   383→   383→**Primary entity:** Design (→ Collection → Product)
+   384→   384→
+   385→   385→**Entry points (all must lead to the same studio):**
+   386→   386→Create → Design · Product drawer → Open in Studio · Product row right-click → Open in Studio · Catalog (Men/Women/Children/Home Living) → pick blank → Start design · Order issue → "Edit artwork"
+   387→   387→
+   388→   388→**Studio layout (Konva)**
+   389→   389→
+   390→   390→| Region | Components |
+   391→   391→|---|---|
+   392→   392→| Left rail | Upload · AI · Add text · Graphics · Images · My library · My templates |
+   393→   393→| Canvas | Product mockup (front/back/sleeve views), print area guides, safe margin warning |
+   394→   394→| Right panel | Layer list, properties (font, color, size, position), color swatches of blank |
+   395→   395→| Top bar | New design · Preview · View product page · Undo/Redo · Save · **Publish** |
+   396→   396→| Bottom/side | Blank selector, size chart, variant colors, **live cost/price/margin** |
+   397→   397→
+   398→   398→**Design list (Studio home):** tabs **New design · Collection · Published · My templates**. Card grid with thumbnail, name, status pill, linked products pills, updated.
+   399→   399→List view columns: Thumbnail · Name · Collection · Status · Linked products · Blank(s) · Updated · ⋯
+   400→   400→
+   401→
+   402→[showing lines 1-400 of 2122; use offset=401 with limit to continue reading]

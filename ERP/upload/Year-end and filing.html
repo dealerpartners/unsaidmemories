@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Year-end and filing — Business Tax</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* Progress step bar */
+  .step-bar{display:flex;align-items:center;gap:0}
+  .step{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .step-circle{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .step-circle.done{background:#108000;color:#fff}
+  .step-circle.active{background:#0077c5;color:#fff}
+  .step-circle.todo{background:#eeedf1;color:#5a6355;border:1px solid #dad9dd}
+  .step-label{font-size:12px;font-weight:600;white-space:nowrap}
+  .step-label.active{color:#0077c5}
+  .step-label.done{color:#0a6400}
+  .step-label.todo{color:#5a6355}
+  .step-line{flex:1;height:2px;background:#dad9dd;margin:0 8px;min-width:16px}
+  .step-line.done{background:#108000}
+  /* Gate */
+  .gate{max-width:520px;text-align:center;padding:48px 24px}
+  .gate-icon{width:72px;height:72px;background:#f4f3f7;border:1px solid #dad9dd;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+  /* Toggle */
+  .toggle{width:44px;height:24px;background:#dad9dd;border-radius:12px;position:relative;cursor:pointer;transition:background .15s;flex-shrink:0}
+  .toggle.on{background:#0a6400}
+  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .15s}
+  .toggle.on::after{left:23px}
+  /* Feature flag chip */
+  .flag-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:12px;font-size:11px;font-weight:600;background:#e8f0fb;color:#0055a5;border:1px solid #0077c5}
+  .flag-chip.off{background:#f4f3f7;color:#5a6355;border-color:#dad9dd}
+  /* Form line row */
+  .form-line{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #eeedf1}
+  .form-line:last-child{border-bottom:none}
+  .form-line .ln{width:36px;font-family:monospace;font-size:11px;color:#5a6355;flex-shrink:0}
+  .form-line .desc{flex:1;font-size:13px}
+  .form-line .amt{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px;text-align:right;min-width:100px}
+  .form-line.flagged .amt{color:#ba1a1a}
+  /* Checklist */
+  .check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f4f3f7}
+  .check-item:last-child{border-bottom:none}
+  .check-status{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .check-status.done{background:#108000;color:#fff}
+  .check-status.warn{background:#fff4dc;color:#8a5a00;border:1px solid #f0c880}
+  .check-status.todo{background:#eeedf1;color:#5a6355;border:1px solid #dad9dd}
+  /* KPI */
+  .kpi-card{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px}
+  .kpi-label{font:600 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .kpi-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.1}
+  /* Dropdown */
+  .menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:220px;padding:4px;z-index:200;display:none}
+  .menu.open{display:block}
+  .menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .menu button:hover{background:#f4f3f7}
+  .menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:600px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  /* Flag toggle bar (demonstration control) */
+  .flag-toggle-bar{background:#faf9fc;border-bottom:1px solid #dad9dd;padding:8px 24px;display:flex;align-items:center;gap:10px;font-size:11px;color:#5a6355}
+  .flag-toggle-bar .spacer{flex:1}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Business Tax</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Year-end and filing</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<!-- Demo feature-flag control strip -->
+<div class="flag-toggle-bar">
+  <span class="material-symbols-outlined text-[14px]">toggle_on</span>
+  <span>Demo control — feature flag: <strong>year_end_filing</strong></span>
+  <span class="spacer"></span>
+  <span class="text-on-surface-variant">OFF shows the gated route (§A "This product isn't available for your account"). ON shows the working page.</span>
+  <label class="flex items-center gap-2 cursor-pointer">
+    <span>Ungated</span>
+    <div class="toggle on" id="flag-toggle"></div>
+  </label>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- GATED STATE (§A "Gated route → This product isn't available") -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main id="gated-view" class="hidden-imp flex items-center justify-center min-h-[calc(100vh-120px)] px-6">
+  <div class="gate">
+    <div class="gate-icon">
+      <span class="material-symbols-outlined text-[36px] text-on-surface-variant">lock</span>
+    </div>
+    <h1 class="text-headline-lg mb-2">Year-end and filing isn't available for your account</h1>
+    <p class="text-body-md text-on-surface-variant mb-6">This feature requires a Business Tax subscription or an active year-end engagement. Reach out to your account manager to enable it, or explore what else you can do with Business Tax today.</p>
+    <div class="flex items-center justify-center gap-2 flex-wrap">
+      <button class="h-9 px-4 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" data-gated-back>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">arrow_back</span>Back to Business Tax</button>
+      <button class="h-9 px-4 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-gated-learn>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">help</span>Learn about Business Tax</button>
+    </div>
+    <p class="mt-6 text-[11px] text-on-surface-variant">Need help? <a href="#" class="text-primary font-semibold hover:underline" data-gated-contact>Contact support</a></p>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- UNGATED STATE                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<main id="ungated-view" class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <div class="flex items-center gap-2 mb-1">
+        <h1 class="text-headline-lg">Year-end and filing</h1>
+        <span class="flag-chip"><span class="material-symbols-outlined text-[12px]">verified</span>Feature enabled</span>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Prepare, review, and e-file your annual return for tax year 2026.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-year>
+        <span class="material-symbols-outlined text-[16px]">calendar_month</span>Tax year 2026 ▾</button>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-start-filing>
+          <span class="material-symbols-outlined text-[16px]">play_arrow</span>Continue filing
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-filing-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filing wizard step bar -->
+  <div class="bg-white rounded-xl border border-surface-dim p-4 mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Filing progress</div>
+      <div class="text-[11px] text-on-surface-variant">Step 3 of 5 · 60% complete</div>
+    </div>
+    <div class="step-bar mb-2">
+      <div class="step"><span class="step-circle done">✓</span><span class="step-label done">Gather data</span></div>
+      <div class="step-line done"></div>
+      <div class="step"><span class="step-circle done">✓</span><span class="step-label done">Reconcile</span></div>
+      <div class="step-line done"></div>
+      <div class="step"><span class="step-circle active">3</span><span class="step-label active">Review 1120 lines</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-circle todo">4</span><span class="step-label todo">E-file</span></div>
+      <div class="step-line"></div>
+      <div class="step"><span class="step-circle todo">5</span><span class="step-label todo">Confirmed</span></div>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="kpi-card">
+      <div class="kpi-label">Est. tax due</div>
+      <div class="kpi-val">$10,716.75</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">21% federal · state TBD</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Amount paid to date</div>
+      <div class="kpi-val text-secondary">$7,680.00</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">Q1 / Q2 / Q3 estimates</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Remaining balance</div>
+      <div class="kpi-val text-error">$3,036.75</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">Due at filing</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Days to deadline</div>
+      <div class="kpi-val" data-deadline-days>—</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">Mar 15, 2027 (Form 1120)</div>
+    </div>
+  </div>
+
+  <!-- Two-column: 1120 lines + Checklist -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+
+    <!-- 1120 form lines preview -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Form 1120 — review lines</h2>
+        <span class="text-[11px] text-on-surface-variant">Draft · 4 lines flagged</span>
+      </div>
+      <div>
+        <div class="form-line">
+          <div class="ln">1a</div>
+          <div class="desc"><strong>Gross receipts or sales</strong><div class="text-[11px] text-on-surface-variant">36 invoices + 5 sales receipts</div></div>
+          <div class="amt">$89,324.00</div>
+        </div>
+        <div class="form-line">
+          <div class="ln">2</div>
+          <div class="desc"><strong>Cost of goods sold</strong><div class="text-[11px] text-on-surface-variant">COGS — Apparel + COGS — Wall Art</div></div>
+          <div class="amt">$25,380.00</div>
+        </div>
+        <div class="form-line">
+          <div class="ln">3</div>
+          <div class="desc"><strong>Gross profit</strong></div>
+          <div class="amt">$63,944.00</div>
+        </div>
+        <div class="form-line">
+          <div class="ln">18</div>
+          <div class="desc"><strong>Other deductions</strong><div class="text-[11px] text-on-surface-variant">Operating expenses (office, software, shipping, advertising, bank fees)</div></div>
+          <div class="amt">$12,911.88</div>
+        </div>
+        <div class="form-line flagged">
+          <div class="ln">20</div>
+          <div class="desc"><strong>Other deductions — unmapped accounts</strong><div class="text-[11px] text-on-surface-variant">3 accounts not yet mapped to tax lines (Marketing — Contractors, Warehouse utilities, Freight income)</div></div>
+          <div class="amt">$0.00</div>
+        </div>
+        <div class="form-line">
+          <div class="ln">28</div>
+          <div class="desc"><strong>Taxable income before NOL and special deductions</strong></div>
+          <div class="amt">$51,032.12</div>
+        </div>
+        <div class="form-line">
+          <div class="ln">31</div>
+          <div class="desc"><strong>Total tax</strong><div class="text-[11px] text-on-surface-variant">21% of Line 28</div></div>
+          <div class="amt">$10,716.75</div>
+        </div>
+      </div>
+      <div class="flex items-center justify-between pt-4 mt-3 border-t border-surface-dim">
+        <button class="h-8 px-3 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-open-tax-summary>
+          <span class="material-symbols-outlined text-[14px]">description</span>Full tax summary</button>
+        <button class="h-8 px-3 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-export-1120>
+          <span class="material-symbols-outlined text-[14px]">download</span>Export draft 1120</button>
+      </div>
+    </div>
+
+    <!-- Pre-filing checklist -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Pre-filing checklist</h2>
+      <div class="check-item">
+        <div class="check-status done"><span class="material-symbols-outlined text-[13px]">check</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Reconcile all bank accounts</div>
+          <div class="text-[11px] text-on-surface-variant">Chase •9910 · Nov closed</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-status done"><span class="material-symbols-outlined text-[13px]">check</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Confirm year-end date</div>
+          <div class="text-[11px] text-on-surface-variant">12/31/2026</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-status warn"><span class="material-symbols-outlined text-[13px]">warning</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Map all accounts to tax lines</div>
+          <div class="text-[11px] text-on-surface-variant">3 of 34 unmapped</div>
+        </div>
+        <button class="h-6 px-2 border border-surface-dim rounded text-[11px] font-semibold text-primary hover:bg-surface-container-low" data-jump="tax-summary">Fix</button>
+      </div>
+      <div class="check-item">
+        <div class="check-status done"><span class="material-symbols-outlined text-[13px]">check</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Review 1099 contractors</div>
+          <div class="text-[11px] text-on-surface-variant">4 filed · due Jan 31, 2027</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-status warn"><span class="material-symbols-outlined text-[13px]">warning</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Verify officer compensation</div>
+          <div class="text-[11px] text-on-surface-variant">Sarah Ahmed · $0 · C-Corp must report</div>
+        </div>
+        <button class="h-6 px-2 border border-surface-dim rounded text-[11px] font-semibold text-primary hover:bg-surface-container-low" data-jump="payroll">Review</button>
+      </div>
+      <div class="check-item">
+        <div class="check-status todo"><span class="material-symbols-outlined text-[13px]">schedule</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Upload signed Form 8879</div>
+          <div class="text-[11px] text-on-surface-variant">E-file authorization</div>
+        </div>
+      </div>
+      <div class="check-item">
+        <div class="check-status todo"><span class="material-symbols-outlined text-[13px]">schedule</span></div>
+        <div class="flex-1 min-w-0">
+          <div class="text-body-sm font-medium">Review state filing requirements</div>
+          <div class="text-[11px] text-on-surface-variant">TN — no state income tax for C-Corp</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column: Deadline + Recent activity -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+    <!-- Deadline card -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Key filing dates</h2>
+      <div class="space-y-2">
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low">
+          <span class="material-symbols-outlined text-[20px] text-qb-blue">event</span>
+          <div class="flex-1">
+            <div class="text-body-sm font-semibold">E-file window opens</div>
+            <div class="text-[11px] text-on-surface-variant">Jan 15, 2027 — IRS MeF system opens</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">74 days</span>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low">
+          <span class="material-symbols-outlined text-[20px] text-qb-maroon">schedule</span>
+          <div class="flex-1">
+            <div class="text-body-sm font-semibold">Form 1120 due</div>
+            <div class="text-[11px] text-on-surface-variant">Mar 15, 2027 — or file extension (Sep 15, 2027)</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">133 days</span>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low">
+          <span class="material-symbols-outlined text-[20px] text-qb-green">payments</span>
+          <div class="flex-1">
+            <div class="text-body-sm font-semibold">Payment due (no extension)</div>
+            <div class="text-[11px] text-on-surface-variant">Mar 15, 2027 — $3,036.75 balance</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">133 days</span>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-low">
+          <span class="material-symbols-outlined text-[20px] text-qb-teal">assignment</span>
+          <div class="flex-1">
+            <div class="text-body-sm font-semibold">1099-NEC to contractors</div>
+            <div class="text-[11px] text-on-surface-variant">Jan 31, 2027 — 4 contractors</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">90 days</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent filing activity -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Recent filing activity</h2>
+      <div class="space-y-3 text-body-sm">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">check_circle</span>
+          <div class="min-w-0">
+            <div class="font-medium">Q3 estimated payment confirmed</div>
+            <div class="text-[11px] text-on-surface-variant">IRS · $2,560.00 · 09/12/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-blue mt-0.5">description</span>
+          <div class="min-w-0">
+            <div class="font-medium">2025 Form 1120 accepted</div>
+            <div class="text-[11px] text-on-surface-variant">IRS MeF · 06/22/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">schedule</span>
+          <div class="min-w-0">
+            <div class="font-medium">Extension filed for 2025</div>
+            <div class="text-[11px] text-on-surface-variant">Form 7004 · 03/13/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">upload</span>
+          <div class="min-w-0">
+            <div class="font-medium">Year-end data imported</div>
+            <div class="text-[11px] text-on-surface-variant">QuickBooks desktop · 04/2026</div>
+          </div>
+        </div>
+      </div>
+      <button class="w-full mt-3 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low flex items-center justify-center gap-1" data-full-history>
+        <span class="material-symbols-outlined text-[14px]">history</span>Full filing history</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════ FILING SPLIT MENU ═══════════ -->
+<div class="menu" id="filing-menu">
+  <div class="menu-header">Continue filing</div>
+  <button data-filing="continue"><span class="material-symbols-outlined">play_arrow</span>Continue from step 3</button>
+  <button data-filing="restart"><span class="material-symbols-outlined">restart_alt</span>Restart review</button>
+  <div class="sep"></div>
+  <div class="menu-header">Alternative</div>
+  <button data-filing="extension"><span class="material-symbols-outlined">schedule</span>File extension (Form 7004)</button>
+  <button data-filing="accountant"><span class="material-symbols-outlined">person</span>Send to accountant</button>
+  <div class="sep"></div>
+  <button data-filing="abandon" class="text-error"><span class="material-symbols-outlined text-error">close</span>Discard draft</button>
+</div>
+
+<!-- ═══════════ E-FILE DRAWER (step 4 of 5) ═══════════ -->
+<div class="drawer-scrim" id="efile-scrim"></div>
+<div class="drawer" id="efile-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">upload_file</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate">E-file Form 1120</div>
+        <div class="text-[11px] text-on-surface-variant">Step 4 of 5 · Tax year 2026</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-efile>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div class="bg-surface-container-low rounded-lg p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase font-bold">Filing summary</div>
+      <div class="grid grid-cols-2 gap-2 text-[12px] mt-2">
+        <div class="flex justify-between"><span class="text-on-surface-variant">Form</span><span class="font-semibold">1120 (C-Corp)</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Tax year</span><span class="font-semibold">2026</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Balance due</span><span class="font-semibold tabular-nums">$3,036.75</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Payment method</span><span class="font-semibold">EFTPS</span></div>
+      </div>
+    </div>
+
+    <div>
+      <label class="field-label">Filing signer</label>
+      <select class="field-input">
+        <option>Sarah Ahmed — CEO</option>
+        <option>Marcus Lee — CTO</option>
+        <option>Priya Nair — COO</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="field-label">Contact email for IRS acknowledgment</label>
+      <input class="field-input" value="sarah@managekube.io"/>
+    </div>
+
+    <div>
+      <label class="field-label">Payment</label>
+      <div class="space-y-2">
+        <label class="flex items-center gap-2 text-body-sm"><input type="radio" name="pay" class="row-check" checked/> Pay $3,036.75 via EFTPS now</label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="radio" name="pay" class="row-check"/> Schedule for Mar 10, 2027 (before deadline)</label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="radio" name="pay" class="row-check"/> Pay by check (mail to IRS)</label>
+      </div>
+    </div>
+
+    <div class="border-t border-surface-dim pt-3">
+      <label class="flex items-start gap-2 text-body-sm cursor-pointer">
+        <input type="checkbox" class="row-check mt-0.5" data-authorize/>
+        <span>I authorize ManageKube LLC to e-file Form 1120 on my behalf and confirm that all information is accurate to the best of my knowledge.</span>
+      </label>
+    </div>
+
+    <div class="bg-error-container/40 border border-error/30 rounded-lg p-3 text-[11px] text-on-error-container flex items-start gap-2">
+      <span class="material-symbols-outlined text-[16px] mt-0.5">warning</span>
+      <div>Once transmitted, this return cannot be edited. You can file an amended return (Form 1120-X) if changes are needed.</div>
+    </div>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-efile>Cancel</button>
+    <button class="h-8 px-4 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container disabled:opacity-40 disabled:cursor-not-allowed" data-transmit disabled>
+      <span class="material-symbols-outlined text-[16px] align-middle mr-1">send</span>Transmit to IRS</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Feature flag — toggles gated vs ungated state              */
+/* ═══════════════════════════════════════════════════════════ */
+const flagToggle = document.getElementById("flag-toggle");
+function setFlag(on){
+  flagToggle.classList.toggle("on", on);
+  document.getElementById("gated-view").classList.toggle("hidden-imp", on);
+  document.getElementById("ungated-view").classList.toggle("hidden-imp", !on);
+}
+flagToggle.addEventListener("click", ()=>{
+  const next = !flagToggle.classList.contains("on");
+  setFlag(next);
+  toast(`year_end_filing → ${next ? "ON (ungated)" : "OFF (gated)"}`);
+});
+setFlag(true);
+
+/* Deadline countdown */
+const today = new Date(); today.setHours(0,0,0,0);
+const deadline = new Date("2027-03-15");
+const daysLeft = Math.round((deadline - today) / 86400000);
+document.querySelector("[data-deadline-days]").textContent = daysLeft + " days";
+
+/* Filing menu */
+const filingMenu = document.getElementById("filing-menu");
+document.querySelector("[data-filing-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  filingMenu.style.top = (r.bottom + 4) + "px";
+  filingMenu.style.left = Math.min(r.right - 220, window.innerWidth - 240) + "px";
+  filingMenu.classList.toggle("open");
+});
+document.querySelectorAll("#filing-menu [data-filing]").forEach(b=>b.addEventListener("click", ()=>{
+  filingMenu.classList.remove("open");
+  const act = b.dataset.filing;
+  if (act === "continue"){ openEfile(); return; }
+  if (act === "extension") toast("Form 7004 extension filed — deadline moved to Sep 15, 2027");
+  if (act === "accountant") toast("Draft sent to accountant — grant access via Settings › Manage users");
+  if (act === "restart") toast("Restarting review from step 1…");
+  if (act === "abandon") toast("Draft discarded — can resume anytime from Year-end and filing");
+}));
+document.querySelector("[data-start-filing]").addEventListener("click", openEfile);
+
+/* E-file drawer */
+function openEfile(){
+  document.getElementById("efile-scrim").classList.add("open");
+  document.getElementById("efile-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-efile]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("efile-scrim").classList.remove("open");
+  document.getElementById("efile-drawer").classList.remove("open");
+}));
+document.getElementById("efile-scrim").addEventListener("click", ()=>{
+  document.getElementById("efile-scrim").classList.remove("open");
+  document.getElementById("efile-drawer").classList.remove("open");
+});
+
+/* Authorize gate */
+document.querySelector("[data-authorize]").addEventListener("change", e=>{
+  document.querySelector("[data-transmit]").disabled = !e.target.checked;
+});
+document.querySelector("[data-transmit]").addEventListener("click", ()=>{
+  document.getElementById("efile-scrim").classList.remove("open");
+  document.getElementById("efile-drawer").classList.remove("open");
+  toast("Return transmitted to IRS — confirmation to follow within 24h");
+});
+
+/* Misc */
+document.querySelector("[data-year]").addEventListener("click", ()=>toast("Tax year switcher — 2024 / 2025 / 2026"));
+document.querySelectorAll("[data-jump]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`Navigate → ${b.dataset.jump}`);
+}));
+document.querySelector("[data-open-tax-summary]").addEventListener("click", ()=>toast("Navigate → Tax summary"));
+document.querySelector("[data-export-1120]").addEventListener("click", ()=>toast("Export draft 1120 as PDF"));
+document.querySelector("[data-full-history]").addEventListener("click", ()=>toast("Full filing history — 4 years"));
+document.querySelectorAll("[data-gated-back]").forEach(b=>b.addEventListener("click", ()=>toast("Back to Business Tax Overview")));
+document.querySelectorAll("[data-gated-learn]").forEach(b=>b.addEventListener("click", ()=>toast("Opening Business Tax overview — feature comparison")));
+document.querySelectorAll("[data-gated-contact]").forEach(b=>b.addEventListener("click", e=>{ e.preventDefault(); toast("Opening Contact support — year-end engagement"); }));
+
+/* Global close */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#filing-menu") && !e.target.closest("[data-filing-split]")) filingMenu.classList.remove("open");
+});
+</script>
+</body>
+</html>

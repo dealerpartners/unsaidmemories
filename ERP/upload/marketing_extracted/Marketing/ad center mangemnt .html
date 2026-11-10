@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Advertising — Advertisers</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.active{background:#8af5be;color:#00714b}
+  .stat.pending{background:#eaf3fb;color:#4e7b9d}
+  .stat.suspended{background:#ffdad6;color:#93000a}
+  .stat.invited{background:#f2f1f8;color:#6e6596}
+  .stat.closed{background:#f4f3f7;color:#5a6355}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:600px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff;min-height:70px;resize:vertical}
+  .field-textarea:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:12px}
+  .adv-avatar{width:36px;height:36px;border-radius:8px;background:#e6efed;color:#0a6400;display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0}
+  .adv-avatar.suspended{background:#ffdad6;color:#93000a}
+  .adv-avatar.pending{background:#eaf3fb;color:#4e7b9d}
+  .adv-avatar.invited{background:#f2f1f8;color:#6e6596}
+  .adv-avatar.closed{background:#f4f3f7;color:#5a6355}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .role-chip{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+  .role-chip .material-symbols-outlined{font-size:11px}
+  .net-chip{display:inline-flex;align-items:center;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600}
+  .net-Meta{background:#edf3fc;color:#4b77b8}
+  .net-TikTok{background:#eef1f2;color:#27353a}
+  .net-Google{background:#f8f0ee;color:#c45c5b}
+  .net-Pinterest{background:#f9eeee;color:#bd5558}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Advertising</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">Advertisers</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Advertisers</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Every advertiser account — identity, networks, billing, verification, and access.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="export">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="customize">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-advertiser>
+          <span class="material-symbols-outlined text-[16px]">add</span>New advertiser
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total advertisers</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statTotal">8</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across 4 networks</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Active</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="statActive">5</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Approved &amp; able to spend</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Verification pending</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-tertiary" id="statPending">2</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Blocking new campaigns</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Suspended</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error" id="statSuspended">1</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Spend paused by policy</div>
+    </div>
+  </div>
+
+  <!-- ─── LIST CARD ─── -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- View tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Active">Active</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Pending">Pending</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Suspended">Suspended</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Invited">Invited</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Closed">Closed</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter advertisers…" data-filter/>
+      </div>
+      <div class="relative">
+        <button id="btnNetwork" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">hub</span>Network
+        </button>
+        <div id="popNetwork" class="row-menu" style="min-width:220px">
+          <div class="menu-header">Filter by network</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Meta" checked/>Meta Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="TikTok" checked/>TikTok Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Google" checked/>Google Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Pinterest" checked/>Pinterest Ads</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="networkClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="networkApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnRole" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">badge</span>Role
+        </button>
+        <div id="popRole" class="row-menu" style="min-width:200px">
+          <div class="menu-header">Filter by role</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Owner" checked/>Owner</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Manager" checked/>Manager</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Billing" checked/>Billing</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Analyst" checked/>Analyst</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="roleClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="roleApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <button id="btnSaved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+      </button>
+      <button id="btnClearAll" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 hidden-imp">
+        <span class="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-b-count>—</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="suspend"><span class="material-symbols-outlined text-[14px] align-middle mr-1">block</span>Suspend</button>
+      <button data-bulk="restore"><span class="material-symbols-outlined text-[14px] align-middle mr-1">refresh</span>Restore</button>
+      <button data-bulk="verify"><span class="material-symbols-outlined text-[14px] align-middle mr-1">verified</span>Mark verified</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Advertiser</th>
+          <th class="px-3 py-2">Advertiser ID</th>
+          <th class="px-3 py-2">Networks</th>
+          <th class="px-3 py-2">Billing</th>
+          <th class="px-3 py-2">Verification</th>
+          <th class="px-3 py-2 text-right">Campaigns</th>
+          <th class="px-3 py-2 text-right">Spend (30d)</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-adv-tbody></tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="hidden-imp py-12 px-6 text-center" data-adv-empty>
+      <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+        <span class="material-symbols-outlined text-[28px] text-outline">person_search</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No advertisers match</h3>
+      <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or add a new advertiser.</p>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="emptyClear">Clear filters</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white" id="rowsPerPage">
+          <option>25</option><option>50</option><option>75</option><option>100</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pagePrev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span id="pageLabel">Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pageNext"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     OVERLAYS (single-page)
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New</div>
+  <button data-create-kind="advertiser"><span class="material-symbols-outlined">person_add</span>Advertiser</button>
+  <button data-create-kind="invite"><span class="material-symbols-outlined">group_add</span>Invite user</button>
+  <button data-create-kind="billing"><span class="material-symbols-outlined">account_balance</span>Billing profile</button>
+  <button data-create-kind="network"><span class="material-symbols-outlined">hub</span>Network connection</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="rowMenu">
+  <div class="menu-header">This advertiser</div>
+  <button data-row-act="edit"><span class="material-symbols-outlined">edit</span>Edit advertiser</button>
+  <button data-row-act="view"><span class="material-symbols-outlined">visibility</span>View details</button>
+  <button data-row-act="invite"><span class="material-symbols-outlined">group_add</span>Invite user</button>
+  <button data-row-act="verify"><span class="material-symbols-outlined">verified</span>Mark verified</button>
+  <div class="sep"></div>
+  <div class="menu-header">Status</div>
+  <button data-row-act="suspend"><span class="material-symbols-outlined">block</span>Suspend</button>
+  <button data-row-act="restore"><span class="material-symbols-outlined">refresh</span>Restore</button>
+  <div class="sep"></div>
+  <button class="danger" data-row-act="close"><span class="material-symbols-outlined">do_not_disturb</span>Close account</button>
+</div>
+
+<!-- Peek drawer (row click) -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Advertiser</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekEdit" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Advertiser drawer (create + edit) -->
+<div class="drawer" id="advDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">person_add</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="advDrawerTitle">New advertiser</div>
+        <div class="text-[11px] text-on-surface-variant" id="advDrawerSub">Draft · not yet invited</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="advDrawerClose">
+      <span class="material-symbols-outlined text-[18px]">close</span>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+    <!-- Identity -->
+    <section>
+      <div class="section-h">Advertiser identity</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Legal business name</label>
+          <input class="field-input" id="avLegal" placeholder="e.g. Unsaid Company Inc."/>
+        </div>
+        <div>
+          <label class="field-label">Display name</label>
+          <input class="field-input" id="avDisplay" placeholder="e.g. Unsaid"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Contact email</label>
+            <input class="field-input" id="avEmail" type="email" placeholder="ads@company.com"/>
+          </div>
+          <div>
+            <label class="field-label">Contact phone</label>
+            <input class="field-input" id="avPhone" type="tel" placeholder="+1 (555) 010-0100"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Country</label>
+            <select class="field-input" id="avCountry">
+              <option>United States</option><option>Canada</option><option>United Kingdom</option><option>Australia</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Business type</label>
+            <select class="field-input" id="avBizType">
+              <option>LLC</option><option>C-Corp</option><option>S-Corp</option><option>Sole proprietor</option><option>Partnership</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Verification -->
+    <section>
+      <div class="section-h">Verification &amp; tax</div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Tax ID (EIN)</label>
+            <input class="field-input code-mono" id="avTax" placeholder="••-•••••••"/>
+          </div>
+          <div>
+            <label class="field-label">Verification</label>
+            <select class="field-input" id="avVerify">
+              <option value="Pending">Pending</option>
+              <option value="Verified">Verified</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+        <div class="border border-dashed border-surface-dim rounded-lg p-3 text-center cursor-pointer hover:bg-surface-container-low" id="uploadDocs">
+          <div class="text-[12px] font-semibold text-primary">Upload business documents</div>
+          <div class="text-[10px] text-on-surface-variant mt-1">Articles of incorporation, W-9, business license · PDF up to 10 MB</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Networks -->
+    <section>
+      <div class="section-h">Connected networks</div>
+      <div class="space-y-2">
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="flex items-center gap-2"><span class="adv-avatar" style="width:26px;height:26px;font-size:10px">M</span><span class="text-body-sm">Meta Ads</span></span>
+          <input type="checkbox" class="row-check adv-network" data-network="Meta" checked/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="flex items-center gap-2"><span class="adv-avatar" style="width:26px;height:26px;font-size:10px;background:#eef1f2;color:#27353a">T</span><span class="text-body-sm">TikTok Ads</span></span>
+          <input type="checkbox" class="row-check adv-network" data-network="TikTok" checked/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="flex items-center gap-2"><span class="adv-avatar" style="width:26px;height:26px;font-size:10px;background:#f8f0ee;color:#c45c5b">G</span><span class="text-body-sm">Google Ads</span></span>
+          <input type="checkbox" class="row-check adv-network" data-network="Google" checked/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="flex items-center gap-2"><span class="adv-avatar" style="width:26px;height:26px;font-size:10px;background:#f9eeee;color:#bd5558">P</span><span class="text-body-sm">Pinterest Ads</span></span>
+          <input type="checkbox" class="row-check adv-network" data-network="Pinterest"/>
+        </label>
+      </div>
+    </section>
+
+    <!-- Billing -->
+    <section>
+      <div class="section-h">Billing profile</div>
+      <div class="space-y-2">
+        <label class="flex items-center justify-between py-1 text-body-sm">
+          <span>Use workspace billing profile</span>
+          <input type="checkbox" id="avUseWorkspaceBilling" class="row-check" checked/>
+        </label>
+        <div class="grid grid-cols-2 gap-3" id="billingFields">
+          <div>
+            <label class="field-label">Payment method</label>
+            <select class="field-input" id="avPayment">
+              <option>Visa •4421</option><option>Mastercard •8801</option><option>Bank transfer</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Monthly credit limit</label>
+            <input type="number" class="field-input" id="avCredit" value="15000"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Access -->
+    <section>
+      <div class="section-h">Access &amp; roles</div>
+      <div id="accessHost" class="space-y-2"></div>
+      <button class="mt-2 h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="inviteUserBtn">
+        <span class="material-symbols-outlined text-[14px]">group_add</span>Invite user
+      </button>
+    </section>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="advCancel">Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" id="advSaveNew">Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" id="advSave">Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Invite user modal -->
+<div class="modal-scrim" id="inviteModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Invite user</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">They will receive an email invitation for this advertiser.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="field-label">Email</label>
+        <input class="field-input" id="inviteEmail" type="email" placeholder="teammate@company.com"/>
+      </div>
+      <div>
+        <label class="field-label">Role</label>
+        <select class="field-input" id="inviteRole">
+          <option>Owner</option><option>Manager</option><option>Billing</option><option>Analyst</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="inviteCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="inviteConfirm">Send invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- Billing profile modal -->
+<div class="modal-scrim" id="billingModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">New billing profile</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Create a billing profile to attach to advertiser accounts.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="field-label">Profile name</label>
+        <input class="field-input" id="billName" placeholder="e.g. US Card •4421"/>
+      </div>
+      <div>
+        <label class="field-label">Payment method</label>
+        <select class="field-input" id="billPayment">
+          <option>Visa •4421</option><option>Mastercard •8801</option><option>Bank transfer</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Monthly credit limit</label>
+        <input type="number" class="field-input" id="billCredit" value="15000"/>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="billCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="billConfirm">Create profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- Network connection modal -->
+<div class="modal-scrim" id="networkModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Connect a network</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Authorize this advertiser to spend on a network.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="field-label">Network</label>
+        <select class="field-input" id="netSelect">
+          <option>Meta Ads</option><option>TikTok Ads</option><option>Google Ads</option><option>Pinterest Ads</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Ad account ID</label>
+        <input class="field-input" id="netAccount" placeholder="act_1234567890"/>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="netCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="netConfirm">Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save split menu -->
+<div class="row-menu" id="saveMenu">
+  <div class="menu-header">Save</div>
+  <button data-save-kind="close"><span class="material-symbols-outlined">save</span>Save and close</button>
+  <button data-save-kind="new"><span class="material-symbols-outlined">add</span>Save and new</button>
+  <button data-save-kind="invite"><span class="material-symbols-outlined">mail</span>Save and send invite</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function initials(s){return (s||"").split(/\s+/).map(w=>w[0]||"").join("").slice(0,2).toUpperCase()||"A";}
+function pillFor(status){
+  const cls = status==="Active"?"active":status==="Pending"?"pending":status==="Suspended"?"suspended":status==="Invited"?"invited":"closed";
+  return `<span class="stat ${cls}">${status}</span>`;
+}
+function avatarClass(status){
+  return status==="Suspended"?"suspended":status==="Pending"?"pending":status==="Invited"?"invited":status==="Closed"?"closed":"";
+}
+
+/* ─── data ─── */
+const ADVERTISERS = [
+  { id:"ADV-1001", legalName:"Unsaid Company Inc.", displayName:"Unsaid", email:"ads@unsaid.app", phone:"+1 (901) 210-3145", country:"United States", bizType:"C-Corp", taxId:"••-•••4471", verify:"Verified", status:"Active", networks:["Meta","TikTok","Google"], billing:"Visa •4421", creditLimit:15000, campaigns:4, spend:18420, access:[{email:"jordan@unsaid.app", role:"Owner"},{email:"sarah@unsaid.app", role:"Manager"}], created:"2026-01-15" },
+  { id:"ADV-1002", legalName:"Orion Apparel LLC", displayName:"Orion Apparel", email:"billing@orion.co", phone:"+1 (555) 220-4412", country:"United States", bizType:"LLC", taxId:"••-•••8821", verify:"Verified", status:"Active", networks:["Meta","Pinterest"], billing:"Mastercard •8801", creditLimit:8000, campaigns:2, spend:6210, access:[{email:"ap@orion.co", role:"Owner"},{email:"media@orion.co", role:"Analyst"}], created:"2026-03-02" },
+  { id:"ADV-1003", legalName:"Blue Ridge Co.", displayName:"Blue Ridge", email:"ads@blueridge.co", phone:"+1 (555) 882-1102", country:"United States", bizType:"LLC", taxId:"••-•••1144", verify:"Pending", status:"Pending", networks:["Meta"], billing:"Visa •4421", creditLimit:5000, campaigns:0, spend:0, access:[{email:"billing@blueridge.co", role:"Owner"}], created:"2026-10-20" },
+  { id:"ADV-1004", legalName:"Maple Supply Inc.", displayName:"Maple Supply", email:"ar@maplesupply.io", phone:"+1 (555) 774-9810", country:"Canada", bizType:"C-Corp", taxId:"••-•••7789", verify:"Verified", status:"Suspended", networks:["Google"], billing:"Bank transfer", creditLimit:12000, campaigns:1, spend:0, access:[{email:"ar@maplesupply.io", role:"Owner"},{email:"finance@maplesupply.io", role:"Billing"}], created:"2026-05-14" },
+  { id:"ADV-1005", legalName:"Northwind Labs LLC", displayName:"Northwind Labs", email:"marketing@northwindlabs.io", phone:"+1 (555) 310-8844", country:"United States", bizType:"LLC", taxId:"••-•••6620", verify:"Verified", status:"Active", networks:["Meta","Google"], billing:"Visa •4421", creditLimit:20000, campaigns:3, spend:9840, access:[{email:"marketing@northwindlabs.io", role:"Owner"},{email:"ops@northwindlabs.io", role:"Manager"},{email:"reporting@northwindlabs.io", role:"Analyst"}], created:"2026-02-10" },
+  { id:"ADV-1006", legalName:"Acme Corp", displayName:"Acme Corp", email:"ap@acme.com", phone:"+1 (555) 001-9921", country:"United States", bizType:"C-Corp", taxId:"••-•••4410", verify:"Pending", status:"Pending", networks:["Meta","TikTok","Google","Pinterest"], billing:"—", creditLimit:0, campaigns:0, spend:0, access:[{email:"ap@acme.com", role:"Owner"}], created:"2026-11-01" },
+  { id:"ADV-1007", legalName:"Gelato Pty Ltd", displayName:"Gelato", email:"ads@gelato.co", phone:"+61 2 8000 0000", country:"Australia", bizType:"Partnership", taxId:"••-•••3390", verify:"Verified", status:"Active", networks:["TikTok"], billing:"Mastercard •8801", creditLimit:6000, campaigns:1, spend:3120, access:[{email:"ads@gelato.co", role:"Owner"},{email:"billing@gelato.co", role:"Billing"}], created:"2026-06-30" },
+  { id:"ADV-1008", legalName:"Printify Ltd.", displayName:"Printify", email:"hello@printify.com", phone:"+1 (555) 400-1120", country:"United States", bizType:"S-Corp", taxId:"••-•••2201", verify:"Verified", status:"Invited", networks:["Meta","Pinterest"], billing:"—", creditLimit:0, campaigns:0, spend:0, access:[{email:"hello@printify.com", role:"Owner"}], created:"2026-11-02" },
+];
+
+const NETWORKS = ["Meta","TikTok","Google","Pinterest"];
+const ROLES = ["Owner","Manager","Billing","Analyst"];
+
+/* ─── state ─── */
+const filters = {
+  q:"",
+  tab:"All",
+  networks:new Set(NETWORKS),
+  roles:new Set(ROLES)
+};
+let editing = null;
+let draftAccess = [];
+let peekId = null;
+let rowMenuForId = null;
+
+/* ─── network / role chip in table ─── */
+function netChip(n){ return `<span class="net-chip net-${n}">${n}</span>`; }
+
+/* ─── render table ─── */
+function renderTable(){
+  const rows = ADVERTISERS.filter(a=>{
+    const q = filters.q.toLowerCase();
+    const qOK = !q || (a.id + " " + a.displayName + " " + a.legalName + " " + a.email + " " + a.networks.join(" ")).toLowerCase().includes(q);
+    const tabOK = filters.tab === "All" || a.status === filters.tab;
+    const netOK = a.networks.some(n=>filters.networks.has(n));
+    const roleOK = a.access.some(u=>filters.roles.has(u.role));
+    return qOK && tabOK && netOK && roleOK;
+  });
+
+  const tbody = document.querySelector("[data-adv-tbody]");
+  tbody.innerHTML = rows.map(a=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${a.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check adv-check" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="adv-avatar ${avatarClass(a.status)}">${initials(a.displayName)}</div>
+          <div class="min-w-0">
+            <div class="font-medium truncate">${esc(a.displayName)}</div>
+            <div class="text-[11px] text-on-surface-variant truncate">${esc(a.legalName)} · ${esc(a.email)}</div>
+          </div>
+        </div>
+      </td>
+      <td class="px-3 py-2"><span class="code-mono">${a.id}</span></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-1 flex-wrap">${a.networks.map(netChip).join("")}</div></td>
+      <td class="px-3 py-2 text-[11px]">${esc(a.billing)}</td>
+      <td class="px-3 py-2">${pillFor(a.verify==="Verified"?"Active":a.verify==="Pending"?"Pending":"Suspended")}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${a.campaigns}</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${a.spend.toLocaleString()}</td>
+      <td class="px-3 py-2">${pillFor(a.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu="${a.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelector("[data-b-count]").textContent = `${rows.length} of ${ADVERTISERS.length}`;
+  document.querySelector("[data-adv-empty]").classList.toggle("hidden-imp", rows.length > 0);
+  tbody.classList.toggle("hidden-imp", rows.length === 0);
+  syncCounts();
+  syncSelectAll();
+  syncBulk();
+  syncClearAll();
+}
+
+function syncCounts(){
+  const total = ADVERTISERS.length;
+  const active = ADVERTISERS.filter(a=>a.status === "Active").length;
+  const pending = ADVERTISERS.filter(a=>a.status === "Pending").length;
+  const suspended = ADVERTISERS.filter(a=>a.status === "Suspended").length;
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statActive").textContent = active;
+  document.getElementById("statPending").textContent = pending;
+  document.getElementById("statSuspended").textContent = suspended;
+}
+
+/* ─── row click → peek ─── */
+document.querySelector("[data-adv-tbody]").addEventListener("click", e=>{
+  const row = e.target.closest("[data-row]");
+  if (!row) return;
+  if (e.target.closest("button") || e.target.closest("input")) return;
+  openPeek(row.dataset.row);
+});
+
+/* ─── row ⋯ menu ─── */
+const rowMenu = document.getElementById("rowMenu");
+document.querySelector("[data-adv-tbody]").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-row-menu]");
+  if (!btn) return;
+  e.stopPropagation();
+  rowMenuForId = btn.dataset.rowMenu;
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+});
+rowMenu.querySelectorAll("[data-row-act]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.rowAct;
+  const a = ADVERTISERS.find(x=>x.id === rowMenuForId);
+  rowMenu.classList.remove("open");
+  if (!a) return;
+  switch(act){
+    case "edit": openAdvertiserDrawer(a.id); break;
+    case "view": openPeek(a.id); break;
+    case "invite": openInviteModal(); break;
+    case "verify": a.verify = "Verified"; a.status = a.status === "Pending" ? "Active" : a.status; renderTable(); toast(`Marked verified: ${a.displayName}`); break;
+    case "suspend": a.status = "Suspended"; renderTable(); toast(`Suspended: ${a.displayName}`); break;
+    case "restore": a.status = "Active"; renderTable(); toast(`Restored: ${a.displayName}`); break;
+    case "close":
+      if (confirm("Close this advertiser account? This cannot be undone.")){
+        a.status = "Closed"; renderTable(); toast(`Closed: ${a.displayName}`);
+      }
+      break;
+  }
+}));
+
+/* close menus on outside click */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#rowMenu") && !e.target.closest("[data-row-menu]")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+  if (!e.target.closest("#saveMenu") && !e.target.closest("#saveArrow") && !e.target.closest("#advSave")) saveMenu.classList.remove("open");
+  if (!e.target.closest("#popNetwork") && !e.target.closest("#btnNetwork")) popNetwork.classList.remove("open");
+  if (!e.target.closest("#popRole") && !e.target.closest("#btnRole")) popRole.classList.remove("open");
+});
+
+/* ─── view tabs ─── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  filters.tab = b.dataset.viewtab;
+  renderTable();
+}));
+
+/* ─── filter search ─── */
+document.querySelector("[data-filter]").addEventListener("input", e=>{ filters.q = e.target.value; renderTable(); });
+
+/* ─── network + role popovers ─── */
+const popNetwork = document.getElementById("popNetwork");
+const popRole = document.getElementById("popRole");
+document.getElementById("btnNetwork").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popNetwork.style.top = (r.bottom + 4) + "px";
+  popNetwork.style.left = Math.min(r.left, window.innerWidth - 240) + "px";
+  popRole.classList.remove("open");
+  popNetwork.classList.toggle("open");
+});
+document.getElementById("btnRole").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popRole.style.top = (r.bottom + 4) + "px";
+  popRole.style.left = Math.min(r.left, window.innerWidth - 220) + "px";
+  popNetwork.classList.remove("open");
+  popRole.classList.toggle("open");
+});
+document.getElementById("networkApply").addEventListener("click", ()=>{
+  filters.networks = new Set([...document.querySelectorAll(".filter-network:checked")].map(cb=>cb.value));
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+document.getElementById("networkClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked=true);
+  filters.networks = new Set(NETWORKS);
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+document.getElementById("roleApply").addEventListener("click", ()=>{
+  filters.roles = new Set([...document.querySelectorAll(".filter-role:checked")].map(cb=>cb.value));
+  popRole.classList.remove("open");
+  renderTable();
+});
+document.getElementById("roleClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-role").forEach(cb=>cb.checked=true);
+  filters.roles = new Set(ROLES);
+  popRole.classList.remove("open");
+  renderTable();
+});
+
+/* ─── clear all / saved views ─── */
+function syncClearAll(){
+  const active = filters.q || filters.tab !== "All" || filters.networks.size !== NETWORKS.length || filters.roles.size !== ROLES.length;
+  document.getElementById("btnClearAll").classList.toggle("hidden-imp", !active);
+}
+document.getElementById("btnClearAll").addEventListener("click", ()=>{
+  filters.q = ""; document.querySelector("[data-filter]").value = "";
+  filters.tab = "All";
+  document.querySelectorAll("[data-viewtab]").forEach(b=>b.classList.toggle("active", b.dataset.viewtab === "All"));
+  filters.networks = new Set(NETWORKS);
+  filters.roles = new Set(ROLES);
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked=true);
+  document.querySelectorAll(".filter-role").forEach(cb=>cb.checked=true);
+  renderTable();
+});
+document.getElementById("emptyClear").addEventListener("click", ()=>document.getElementById("btnClearAll").click());
+document.getElementById("btnSaved").addEventListener("click", ()=>toast("Saved views — pick or save current filters"));
+
+/* ─── bulk ─── */
+function syncSelectAll(){
+  const all = document.querySelector("[data-check-all]");
+  const rows = [...document.querySelectorAll(".adv-check")].filter(cb=>cb.closest("tr").style.display !== "none");
+  const checked = rows.filter(cb=>cb.checked);
+  all.checked = rows.length > 0 && checked.length === rows.length;
+  all.indeterminate = checked.length > 0 && checked.length < rows.length;
+}
+function syncBulk(){
+  const n = [...document.querySelectorAll(".adv-check")].filter(cb=>cb.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  bar.classList.toggle("show", n > 0);
+  document.querySelector("[data-bulk-count]").textContent = `${n} selected`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.classList.contains("adv-check")) syncBulk();
+  if (e.target.matches("[data-check-all]")){
+    const on = e.target.checked;
+    document.querySelectorAll(".adv-check").forEach(cb=>{
+      if (cb.closest("tr").style.display !== "none") cb.checked = on;
+    });
+    syncBulk();
+  }
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".adv-check").forEach(cb=>cb.checked=false);
+    document.querySelector("[data-check-all]").checked = false;
+    syncBulk(); return;
+  }
+  const n = document.querySelectorAll(".adv-check:checked").length;
+  if (act === "suspend"){
+    document.querySelectorAll(".adv-check:checked").forEach(cb=>{
+      const tr = cb.closest("tr"); const a = ADVERTISERS.find(x=>x.id===tr.dataset.row);
+      if (a) a.status = "Suspended";
+    });
+    renderTable(); toast(`Suspended ${n} advertiser(s)`);
+  } else if (act === "restore"){
+    document.querySelectorAll(".adv-check:checked").forEach(cb=>{
+      const tr = cb.closest("tr"); const a = ADVERTISERS.find(x=>x.id===tr.dataset.row);
+      if (a) a.status = "Active";
+    });
+    renderTable(); toast(`Restored ${n} advertiser(s)`);
+  } else if (act === "verify"){
+    document.querySelectorAll(".adv-check:checked").forEach(cb=>{
+      const tr = cb.closest("tr"); const a = ADVERTISERS.find(x=>x.id===tr.dataset.row);
+      if (a){ a.verify = "Verified"; if (a.status === "Pending") a.status = "Active"; }
+    });
+    renderTable(); toast(`Marked ${n} advertiser(s) verified`);
+  }
+  document.querySelectorAll(".adv-check").forEach(cb=>cb.checked=false);
+  document.querySelector("[data-check-all]").checked = false;
+  syncBulk();
+}));
+
+/* ─── peek ─── */
+function openPeek(id){
+  peekId = id;
+  const a = ADVERTISERS.find(x=>x.id === id);
+  if (!a) return;
+  document.getElementById("peekTitle").textContent = a.displayName;
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-3 flex items-center gap-2">${pillFor(a.status)}<span class="code-mono text-on-surface-variant">${a.id}</span></div>
+    <div class="mb-3 flex items-center gap-1 flex-wrap">${a.networks.map(netChip).join("")}</div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3 text-center">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Spend (30d)</div>
+      <div class="text-headline-md tabular-nums">$${a.spend.toLocaleString()}</div>
+    </div>
+    <dl class="text-body-sm">
+      <div class="kv"><dt>Legal name</dt><dd>${esc(a.legalName)}</dd></div>
+      <div class="kv"><dt>Email</dt><dd>${esc(a.email)}</dd></div>
+      <div class="kv"><dt>Phone</dt><dd>${esc(a.phone)}</dd></div>
+      <div class="kv"><dt>Country</dt><dd>${esc(a.country)}</dd></div>
+      <div class="kv"><dt>Business type</dt><dd>${esc(a.bizType)}</dd></div>
+      <div class="kv"><dt>Tax ID</dt><dd class="code-mono">${esc(a.taxId)}</dd></div>
+      <div class="kv"><dt>Verification</dt><dd>${esc(a.verify)}</dd></div>
+      <div class="kv"><dt>Billing</dt><dd>${esc(a.billing)}</dd></div>
+      <div class="kv"><dt>Credit limit</dt><dd class="tabular-nums">$${a.creditLimit.toLocaleString()}</dd></div>
+      <div class="kv"><dt>Campaigns</dt><dd class="tabular-nums">${a.campaigns}</dd></div>
+      <div class="kv"><dt>Created</dt><dd>${a.created}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim">
+      <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Access</div>
+      <div class="space-y-1">
+        ${a.access.map(u=>`<div class="flex items-center justify-between py-1 text-body-sm">
+          <span class="truncate">${esc(u.email)}</span>
+          <span class="role-chip"><span class="material-symbols-outlined">badge</span>${u.role}</span>
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="edit"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="invite"><span class="material-symbols-outlined text-[16px]">group_add</span>Invite</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="suspend"><span class="material-symbols-outlined text-[16px]">block</span>Suspend</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="restore"><span class="material-symbols-outlined text-[16px]">refresh</span>Restore</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    const act = b.dataset.peek;
+    if (act === "edit"){ closePeek(); openAdvertiserDrawer(a.id); }
+    else if (act === "invite"){ openInviteModal(); }
+    else if (act === "suspend"){ a.status = "Suspended"; renderTable(); closePeek(); toast("Suspended"); }
+    else if (act === "restore"){ a.status = "Active"; renderTable(); closePeek(); toast("Restored"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", ()=>{
+  if (document.getElementById("advDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peekEdit").addEventListener("click", ()=>{
+  if (!peekId) return;
+  const id = peekId; closePeek(); openAdvertiserDrawer(id);
+});
+
+/* ─── advertiser drawer ─── */
+function openAdvertiserDrawer(id){
+  editing = id ? ADVERTISERS.find(a=>a.id === id) : null;
+  document.getElementById("advDrawerTitle").textContent = editing ? "Edit advertiser" : "New advertiser";
+  document.getElementById("advDrawerSub").textContent = editing ? editing.status + " · " + editing.id : "Draft · not yet invited";
+
+  document.getElementById("avLegal").value = editing ? editing.legalName : "";
+  document.getElementById("avDisplay").value = editing ? editing.displayName : "";
+  document.getElementById("avEmail").value = editing ? editing.email : "";
+  document.getElementById("avPhone").value = editing ? editing.phone : "";
+  document.getElementById("avCountry").value = editing ? editing.country : "United States";
+  document.getElementById("avBizType").value = editing ? editing.bizType : "LLC";
+  document.getElementById("avTax").value = editing ? editing.taxId : "";
+  document.getElementById("avVerify").value = editing ? editing.verify : "Pending";
+  document.getElementById("avUseWorkspaceBilling").checked = editing ? editing.billing === "Visa •4421" : true;
+  document.getElementById("avPayment").value = editing ? editing.billing : "Visa •4421";
+  document.getElementById("avCredit").value = editing ? editing.creditLimit : 15000;
+  document.getElementById("billingFields").style.opacity = document.getElementById("avUseWorkspaceBilling").checked ? ".6" : "1";
+
+  document.querySelectorAll(".adv-network").forEach(cb=>{
+    cb.checked = editing ? editing.networks.includes(cb.dataset.network) : ["Meta","TikTok","Google"].includes(cb.dataset.network);
+  });
+
+  draftAccess = editing ? JSON.parse(JSON.stringify(editing.access)) : [];
+  renderAccess();
+
+  document.getElementById("advDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closeAdvertiserDrawer(){
+  document.getElementById("advDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing = null;
+}
+document.getElementById("advDrawerClose").addEventListener("click", closeAdvertiserDrawer);
+document.getElementById("advCancel").addEventListener("click", closeAdvertiserDrawer);
+document.getElementById("avUseWorkspaceBilling").addEventListener("change", e=>{
+  document.getElementById("billingFields").style.opacity = e.target.checked ? ".6" : "1";
+});
+
+function renderAccess(){
+  const host = document.getElementById("accessHost");
+  host.innerHTML = draftAccess.map((u, i)=>`
+    <div class="flex items-center gap-2 px-2.5 py-1.5 rounded border border-surface-dim text-body-sm">
+      <span class="material-symbols-outlined text-[16px] text-primary">person</span>
+      <div class="min-w-0 flex-1">
+        <div class="font-medium truncate">${esc(u.email)}</div>
+        <div class="text-[11px] text-on-surface-variant">${u.role}</div>
+      </div>
+      <select class="h-7 px-1 border border-surface-dim rounded text-body-sm" data-role-change="${i}">
+        ${ROLES.map(r=>`<option ${r===u.role?"selected":""}>${r}</option>`).join("")}
+      </select>
+      <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-remove-user="${i}"><span class="material-symbols-outlined text-[14px] text-error">close</span></button>
+    </div>
+  `).join("") || `<div class="text-[11px] text-on-surface-variant">No users yet.</div>`;
+  host.querySelectorAll("[data-role-change]").forEach(sel=>sel.addEventListener("change", ()=>{
+    draftAccess[parseInt(sel.dataset.roleChange,10)].role = sel.value;
+  }));
+  host.querySelectorAll("[data-remove-user]").forEach(b=>b.addEventListener("click", ()=>{
+    draftAccess.splice(parseInt(b.dataset.removeUser,10), 1);
+    renderAccess();
+  }));
+}
+
+/* ─── save ─── */
+function collectAdvertiser(){
+  const legal = document.getElementById("avLegal").value.trim();
+  const display = document.getElementById("avDisplay").value.trim();
+  const email = document.getElementById("avEmail").value.trim();
+  if (!legal){ toast("Legal business name is required"); return null; }
+  if (!display){ toast("Display name is required"); return null; }
+  if (!email){ toast("Contact email is required"); return null; }
+  const networks = [...document.querySelectorAll(".adv-network:checked")].map(cb=>cb.dataset.network);
+  return {
+    id: editing ? editing.id : "ADV-" + String(ADVERTISERS.length + 1001).padStart(4, "0"),
+    legalName: legal,
+    displayName: display,
+    email,
+    phone: document.getElementById("avPhone").value,
+    country: document.getElementById("avCountry").value,
+    bizType: document.getElementById("avBizType").value,
+    taxId: document.getElementById("avTax").value || "—",
+    verify: document.getElementById("avVerify").value,
+    status: editing ? editing.status : "Pending",
+    networks,
+    billing: document.getElementById("avUseWorkspaceBilling").checked ? "Visa •4421" : document.getElementById("avPayment").value,
+    creditLimit: parseInt(document.getElementById("avCredit").value || "0", 10),
+    campaigns: editing ? editing.campaigns : 0,
+    spend: editing ? editing.spend : 0,
+    access: JSON.parse(JSON.stringify(draftAccess)),
+    created: editing ? editing.created : new Date().toISOString().slice(0, 10)
+  };
+}
+document.getElementById("advSave").addEventListener("click", ()=>{
+  const a = collectAdvertiser(); if (!a) return;
+  if (editing){ const idx = ADVERTISERS.findIndex(x=>x.id === editing.id); if (idx>=0) ADVERTISERS[idx] = a; }
+  else ADVERTISERS.unshift(a);
+  closeAdvertiserDrawer(); renderTable();
+  toast(editing ? "Advertiser updated" : "Advertiser created");
+});
+document.getElementById("advSaveNew").addEventListener("click", ()=>{
+  const a = collectAdvertiser(); if (!a) return;
+  if (editing){ const idx = ADVERTISERS.findIndex(x=>x.id === editing.id); if (idx>=0) ADVERTISERS[idx] = a; }
+  else ADVERTISERS.unshift(a);
+  editing = null;
+  document.getElementById("advDrawerTitle").textContent = "New advertiser";
+  document.getElementById("advDrawerSub").textContent = "Draft · not yet invited";
+  document.getElementById("avLegal").value = "";
+  document.getElementById("avDisplay").value = "";
+  document.getElementById("avEmail").value = "";
+  document.getElementById("avPhone").value = "";
+  document.getElementById("avTax").value = "";
+  document.getElementById("avVerify").value = "Pending";
+  draftAccess = []; renderAccess();
+  renderTable();
+  toast("Saved. New advertiser form ready.");
+});
+
+/* ─── invite modal ─── */
+function openInviteModal(){
+  document.getElementById("inviteEmail").value = "";
+  document.getElementById("inviteRole").value = "Manager";
+  document.getElementById("inviteModal").classList.add("open");
+}
+document.getElementById("inviteCancel").addEventListener("click", ()=>document.getElementById("inviteModal").classList.remove("open"));
+document.getElementById("inviteConfirm").addEventListener("click", ()=>{
+  const email = document.getElementById("inviteEmail").value.trim();
+  const role = document.getElementById("inviteRole").value;
+  if (!email){ toast("Email is required"); return; }
+  draftAccess.push({ email, role });
+  renderAccess();
+  document.getElementById("inviteModal").classList.remove("open");
+  toast(`Invited ${email} (${role})`);
+});
+document.getElementById("inviteUserBtn").addEventListener("click", ()=>openInviteModal());
+
+/* ─── billing modal ─── */
+document.getElementById("billCancel").addEventListener("click", ()=>document.getElementById("billingModal").classList.remove("open"));
+document.getElementById("billConfirm").addEventListener("click", ()=>{
+  const name = document.getElementById("billName").value.trim();
+  if (!name){ toast("Profile name is required"); return; }
+  toast(`Billing profile created: ${name}`);
+  document.getElementById("billingModal").classList.remove("open");
+});
+
+/* ─── network connection modal ─── */
+document.getElementById("netCancel").addEventListener("click", ()=>document.getElementById("networkModal").classList.remove("open"));
+document.getElementById("netConfirm").addEventListener("click", ()=>{
+  const net = document.getElementById("netSelect").value;
+  const id = document.getElementById("netAccount").value.trim();
+  if (!id){ toast("Ad account ID is required"); return; }
+  toast(`Connected ${net} (${id})`);
+  document.getElementById("networkModal").classList.remove("open");
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.querySelectorAll("[data-new-advertiser]").forEach(b=>b.addEventListener("click", ()=>openAdvertiserDrawer(null)));
+document.querySelectorAll("[data-create-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  const kind = b.dataset.createKind;
+  createMenu.classList.remove("open");
+  if (kind === "advertiser") openAdvertiserDrawer(null);
+  else if (kind === "invite") openInviteModal();
+  else if (kind === "billing") document.getElementById("billingModal").classList.add("open");
+  else if (kind === "network") document.getElementById("networkModal").classList.add("open");
+}));
+
+/* ─── save split menu ─── */
+const saveMenu = document.getElementById("saveMenu");
+const saveArrow = document.createElement("div"); // not used, kept for clarity
+document.getElementById("advSave").addEventListener("click", ()=>saveMenu.classList.remove("open"));
+/* save arrow is the split-btn-arrow inside the drawer footer */
+document.querySelectorAll("#advDrawer .split-btn-arrow").forEach((el, idx)=>{
+  if (idx === 1){ // primary save arrow
+    el.addEventListener("click", e=>{
+      e.stopPropagation();
+      const r = e.currentTarget.getBoundingClientRect();
+      saveMenu.style.top = (r.bottom + 4) + "px";
+      saveMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+      saveMenu.classList.toggle("open");
+    });
+  }
+});
+saveMenu.querySelectorAll("[data-save-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  const kind = b.dataset.saveKind;
+  saveMenu.classList.remove("open");
+  if (kind === "close"){ document.getElementById("advSave").click(); }
+  else if (kind === "new"){ document.getElementById("advSaveNew").click(); }
+  else if (kind === "invite"){
+    const a = collectAdvertiser(); if (!a) return;
+    if (editing){ const idx = ADVERTISERS.findIndex(x=>x.id===editing.id); if (idx>=0) ADVERTISERS[idx] = a; }
+    else ADVERTISERS.unshift(a);
+    closeAdvertiserDrawer(); renderTable(); toast("Saved and sent invite");
+  }
+}));
+
+/* ─── toolbar extras ─── */
+document.querySelector("[data-action='export']").addEventListener("click", ()=>toast("Exporting advertisers…"));
+document.querySelector("[data-action='customize']").addEventListener("click", ()=>toast("Customize panel — Data / Visual tabs"));
+
+/* ─── pagination (visual) ─── */
+document.getElementById("rowsPerPage").addEventListener("change", ()=>toast("Rows per page updated"));
+document.getElementById("pagePrev").addEventListener("click", ()=>toast("Previous page"));
+document.getElementById("pageNext").addEventListener("click", ()=>toast("Next page"));
+
+/* ─── boot ─── */
+renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Vendors — Expenses & Bills</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  /* Avatar */
+  .v-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+  /* W-9 badge */
+  .w9{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.02em}
+  .w9.on{background:#8af5be;color:#00714b}
+  .w9.off{background:#ffdad6;color:#93000a}
+  .w9.pending{background:#fff4dc;color:#8a5a00}
+  .w9.na{background:#f4f3f7;color:#5a6355}
+  /* Type chip */
+  .role{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .role.supplier{background:#e8f0fb;color:#0055a5}
+  .role.contractor{background:#fff4dc;color:#8a5a00}
+  .role.consultant{background:#e8f5e8;color:#1e5a38}
+  .role.utility{background:#f4e8f8;color:#6b1e8a}
+  /* KPI cards */
+  .kpi-card{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px}
+  .kpi-label{font:600 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .kpi-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.1}
+  /* Row menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  /* Field labels */
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:6px;border-bottom:1px solid #dad9dd;margin-bottom:10px}
+  /* Role chips in drawer */
+  .role-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:14px;font-size:11px;font-weight:600;border:1px solid #dad9dd;background:#fff;cursor:pointer;color:#5a6355}
+  .role-chip.active{background:#e8f0fb;color:#0055a5;border-color:#0077c5}
+  /* Collapsible section */
+  .sec-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0;user-select:none}
+  .sec-header:hover{color:#0077c5}
+  .sec-chevron{transition:transform .15s}
+  .sec-chevron.open{transform:rotate(180deg)}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Expenses &amp; Bills</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Vendors</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Vendors</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Party list · role=Vendor / Supplier / Contractor · §B2</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-vendor>
+          <span class="material-symbols-outlined text-[16px]">add</span>New vendor
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-new-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-customize>
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="kpi-card">
+      <div class="kpi-label">Total vendors</div>
+      <div class="kpi-val">42</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">6 with open bills</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">W-9 on file</div>
+      <div class="kpi-val">36</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">86% complete</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">1099 eligible</div>
+      <div class="kpi-val">6</div>
+      <div class="text-[11px] text-tertiary mt-1">Filing due Jan 31, 2027</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">YTD spend</div>
+      <div class="kpi-val">$24,967</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">5 top vendors · 36 bills</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Vendor">
+      <span class="material-symbols-outlined text-[16px]">domain_add</span>Vendor</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Supplier">
+      <span class="material-symbols-outlined text-[16px]">factory</span>Supplier</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Contractor">
+      <span class="material-symbols-outlined text-[16px]">engineering</span>Contractor</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-request-w9>
+      <span class="material-symbols-outlined text-[16px]">badge</span>Request W-9</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Suppliers">Suppliers</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Contractors">Contractors</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="1099">1099 eligible</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="missing-w9">Missing W-9</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name, email…" data-filter/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-v-count>1–8 of 8</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="request-w9"><span class="material-symbols-outlined text-[14px] align-middle mr-1">badge</span>Request W-9</button>
+      <button data-bulk="email"><span class="material-symbols-outlined text-[14px] align-middle mr-1">mail</span>Email</button>
+      <button data-bulk="merge"><span class="material-symbols-outlined text-[14px] align-middle mr-1">merge</span>Merge</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Vendor</th>
+          <th class="px-3 py-2">Role</th>
+          <th class="px-3 py-2 text-right">Open bills</th>
+          <th class="px-3 py-2 text-right">YTD paid</th>
+          <th class="px-3 py-2">W-9</th>
+          <th class="px-3 py-2">1099</th>
+          <th class="px-3 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-v-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Supplier" data-w9="on" data-1099="true" data-name="Printful">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-blue">P</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Printful</div>
+                <div class="text-[11px] text-on-surface-variant truncate">billing@printful.com</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role supplier">Supplier</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$2,880.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$12,410.00</td>
+          <td class="px-3 py-2"><span class="w9 on"><span class="material-symbols-outlined text-[10px]">check</span>On file</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">check_circle</span>Eligible</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Supplier" data-w9="on" data-1099="true" data-name="Gelato">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-green">G</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Gelato</div>
+                <div class="text-[11px] text-on-surface-variant truncate">billing@gelato.com</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role supplier">Supplier</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,200.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$6,240.00</td>
+          <td class="px-3 py-2"><span class="w9 on"><span class="material-symbols-outlined text-[10px]">check</span>On file</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">check_circle</span>Eligible</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Supplier" data-w9="pending" data-1099="true" data-name="Printify">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-maroon">P</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Printify</div>
+                <div class="text-[11px] text-on-surface-variant truncate">accounts@printify.com</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role supplier">Supplier</span></td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">$640.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$4,180.00</td>
+          <td class="px-3 py-2"><span class="w9 pending"><span class="material-symbols-outlined text-[10px]">schedule</span>Requested</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-tertiary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">schedule</span>Blocked</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Contractor" data-w9="on" data-1099="true" data-name="Lakeside Design">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-teal">L</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Lakeside Design</div>
+                <div class="text-[11px] text-on-surface-variant truncate">hello@lakeside.design</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role contractor">Contractor</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,850.00</td>
+          <td class="px-3 py-2"><span class="w9 on"><span class="material-symbols-outlined text-[10px]">check</span>On file</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">check_circle</span>Eligible</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Contractor" data-w9="off" data-1099="false" data-name="Raj Patel Consulting">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-navy">R</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Raj Patel Consulting</div>
+                <div class="text-[11px] text-on-surface-variant truncate">raj@rpc.dev</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role contractor">Contractor</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$740.00</td>
+          <td class="px-3 py-2"><span class="w9 off"><span class="material-symbols-outlined text-[10px]">warning</span>Missing</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-error flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">error</span>Blocked</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Consultant" data-w9="on" data-1099="true" data-name="Adobe">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-maroon">A</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Adobe</div>
+                <div class="text-[11px] text-on-surface-variant truncate">billing@adobe.com</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role consultant">Software</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$719.88</td>
+          <td class="px-3 py-2"><span class="w9 on"><span class="material-symbols-outlined text-[10px]">check</span>On file</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">remove</span>Not eligible</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Utility" data-w9="na" data-1099="false" data-name="Knoxville Utilities Board">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-green">K</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Knoxville Utilities Board</div>
+                <div class="text-[11px] text-on-surface-variant truncate">billing@kub.org</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role utility">Utility</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$384.00</td>
+          <td class="px-3 py-2"><span class="w9 na">N/A</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">remove</span>Not eligible</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer v-row" data-role="Contractor" data-w9="missing" data-1099="true" data-name="Elena Sokolov">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="v-avatar bg-qb-blue">E</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">Elena Sokolov</div>
+                <div class="text-[11px] text-on-surface-variant truncate">elena@sokolov.studio</div>
+              </div>
+            </div>
+          </td>
+          <td class="px-3 py-2"><span class="role contractor">Contractor</span></td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$2,400.00</td>
+          <td class="px-3 py-2"><span class="w9 off"><span class="material-symbols-outlined text-[10px]">warning</span>Missing</span></td>
+          <td class="px-3 py-2"><span class="text-[11px] text-error flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">error</span>Blocked</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ═══════════ NEW SPLIT MENU ═══════════ -->
+<div class="row-menu" id="new-menu">
+  <div class="menu-header">New party</div>
+  <button data-new-kind="Vendor"><span class="material-symbols-outlined">domain_add</span>Vendor</button>
+  <button data-new-kind="Supplier"><span class="material-symbols-outlined">factory</span>Supplier</button>
+  <button data-new-kind="Contractor"><span class="material-symbols-outlined">engineering</span>Contractor</button>
+  <div class="sep"></div>
+  <div class="menu-header">From existing</div>
+  <button data-new-kind="Import CSV"><span class="material-symbols-outlined">upload</span>Import from CSV</button>
+  <button data-new-kind="From customer"><span class="material-symbols-outlined">person</span>Promote from customer</button>
+</div>
+
+<!-- ═══════════ ROW ⋯ MENU ═══════════ -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This vendor</div>
+  <button data-action="view"><span class="material-symbols-outlined">open_in_new</span>Open vendor</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit</button>
+  <button data-action="view-bills"><span class="material-symbols-outlined">receipt_long</span>View bills</button>
+  <button data-action="create-bill"><span class="material-symbols-outlined">description</span>Create bill</button>
+  <div class="sep"></div>
+  <div class="menu-header">Compliance</div>
+  <button data-action="request-w9"><span class="material-symbols-outlined">badge</span>Request W-9…</button>
+  <button data-action="view-w9"><span class="material-symbols-outlined">description</span>View W-9 on file</button>
+  <button data-action="toggle-1099"><span class="material-symbols-outlined">tune</span>Toggle 1099 eligibility</button>
+  <div class="sep"></div>
+  <div class="menu-header">Pay</div>
+  <button data-action="pay-bills"><span class="material-symbols-outlined">account_balance_wallet</span>Pay bills…</button>
+  <button data-action="ach"><span class="material-symbols-outlined">account_balance</span>Set up ACH…</button>
+  <div class="sep"></div>
+  <button class="danger" data-action="deactivate"><span class="material-symbols-outlined">visibility_off</span>Make inactive</button>
+</div>
+
+<!-- ═══════════ VENDOR DRAWER (§B2) ═══════════ -->
+<div class="drawer-scrim" id="vendor-scrim"></div>
+<div class="drawer" id="vendor-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">domain</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-v-title>New vendor</div>
+        <div class="text-[11px] text-on-surface-variant" data-v-sub>Party record · §B2</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" title="Maximize">
+        <span class="material-symbols-outlined text-[18px]">open_in_full</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-vendor>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+
+    <!-- Role chips -->
+    <div>
+      <label class="field-label">Role</label>
+      <div class="flex flex-wrap gap-1.5" data-role-chips>
+        <button class="role-chip" data-role="Customer">Customer</button>
+        <button class="role-chip active" data-role="Vendor">Vendor</button>
+        <button class="role-chip" data-role="Supplier">Supplier</button>
+        <button class="role-chip" data-role="Contractor">Contractor</button>
+        <button class="role-chip" data-role="Contact">Contact</button>
+      </div>
+      <p class="text-[11px] text-on-surface-variant mt-1">Roles stack — one party can be both vendor and supplier.</p>
+    </div>
+
+    <!-- Names and contact -->
+    <div class="pt-2">
+      <div class="section-h">Names and contact</div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="field-label">Company name</label><input class="field-input" data-f-company/></div>
+          <div><label class="field-label">Display name</label><input class="field-input" data-f-display/></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div><label class="field-label">First name</label><input class="field-input" data-f-first/></div>
+          <div><label class="field-label">Middle</label><input class="field-input" data-f-middle/></div>
+          <div><label class="field-label">Last name</label><input class="field-input" data-f-last/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="field-label">Email</label><input class="field-input" type="email" data-f-email/></div>
+          <div><label class="field-label">Phone</label><input class="field-input" type="tel" data-f-phone/></div>
+        </div>
+        <div><label class="field-label">Website</label><input class="field-input" data-f-website/></div>
+        <div><label class="field-label">Name to print on checks</label><input class="field-input" data-f-checkname/></div>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="pt-2">
+      <div class="section-h">Address</div>
+      <div class="space-y-3">
+        <div><label class="field-label">Street</label><input class="field-input" data-f-street/></div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="col-span-1"><label class="field-label">City</label><input class="field-input" data-f-city/></div>
+          <div><label class="field-label">State</label><input class="field-input" data-f-state/></div>
+          <div><label class="field-label">ZIP</label><input class="field-input" data-f-zip/></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendor-specific fields -->
+    <div class="pt-2" data-vendor-fields>
+      <div class="section-h">Vendor terms &amp; payment</div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Terms</label>
+            <select class="field-input" data-f-terms>
+              <option>Net 30</option><option>Net 15</option><option>Net 60</option><option>Due on receipt</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Default expense account</label>
+            <select class="field-input" data-f-default-account>
+              <option>Office supplies</option><option>Shipping</option><option>Software</option>
+              <option>COGS</option><option>Advertising</option><option>Contract labor</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Payment method</label>
+          <select class="field-input" data-f-payment-method>
+            <option>Check</option><option>ACH</option><option>Credit card</option><option>Wire</option>
+          </select>
+        </div>
+        <div class="border-t border-surface-dim pt-3">
+          <div class="section-h">Bill Pay ACH info</div>
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div><label class="field-label">Account number</label><input class="field-input" placeholder="•••• •••• 4421" data-f-ach-account/></div>
+              <div><label class="field-label">Routing number</label><input class="field-input" placeholder="•••• •••• 9910" data-f-ach-routing/></div>
+            </div>
+            <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check" data-f-ach-enabled/> Enable ACH payments</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax info / 1099 -->
+    <div class="pt-2">
+      <div class="section-h">Tax &amp; 1099</div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div><label class="field-label">Tax ID (EIN/SSN)</label><input class="field-input" placeholder="••-••• ••••" data-f-taxid/></div>
+          <div>
+            <label class="field-label">Business type</label>
+            <select class="field-input" data-f-business-type>
+              <option>LLC</option><option>Corporation</option><option>Sole proprietor</option><option>Partnership</option><option>Individual</option>
+            </select>
+          </div>
+        </div>
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check" data-f-1099/> Track for 1099-NEC</label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check" data-f-w9/> W-9 on file</label>
+        <div>
+          <label class="field-label">W-9 attachment</label>
+          <button class="w-full h-16 border-2 border-dashed border-surface-dim rounded-lg text-[11px] text-primary font-semibold hover:bg-surface-container-low flex flex-col items-center justify-center gap-1" data-upload-w9>
+            <span class="material-symbols-outlined text-[18px]">upload</span>Upload W-9 (PDF)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="pt-2">
+      <div class="section-h">Notes and attachments</div>
+      <textarea class="field-input" style="height:72px;padding:8px 10px;font-family:inherit" placeholder="Internal notes visible to staff only"></textarea>
+    </div>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-vendor>Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-save-new>Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-save-vendor>Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ═══════════════════════════════════════════════════════════ */
+/* New split menu                                             */
+/* ═══════════════════════════════════════════════════════════ */
+const newMenu = document.getElementById("new-menu");
+document.querySelector("[data-new-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  newMenu.style.top = (r.bottom + 4) + "px";
+  newMenu.style.left = Math.min(r.right - 240, window.innerWidth - 260) + "px";
+  newMenu.classList.toggle("open");
+});
+document.querySelectorAll("#new-menu [data-new-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  newMenu.classList.remove("open");
+  openVendorDrawer(null, b.dataset.newKind);
+}));
+document.querySelector("[data-new-vendor]").addEventListener("click", ()=>openVendorDrawer(null, "Vendor"));
+document.querySelectorAll("[data-new]").forEach(b=>b.addEventListener("click", ()=>{
+  openVendorDrawer(null, b.dataset.new);
+}));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout"));
+document.querySelector("[data-request-w9]").addEventListener("click", ()=>toast("Request W-9 batch — 2 vendors missing or pending"));
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Vendor drawer                                              */
+/* ═══════════════════════════════════════════════════════════ */
+let currentVendorRow = null;
+const VENDOR_DATA = {
+  "Printful": { company:"Printful, Inc.", display:"Printful", first:"", last:"", email:"billing@printful.com", phone:"+1 (704) 802-5600", website:"printful.com", checkname:"Printful, Inc.", street:"3335 Ringsby Court", city:"Charlotte", state:"NC", zip:"28206", terms:"Net 30", account:"COGS", method:"ACH", achAccount:"•••• •••• 7712", achRouting:"•••• •••• 0042", achEnabled:true, taxid:"••-••• 1103", type:"Corporation", is1099:true, w9:true, role:"Supplier" },
+  "Gelato": { company:"Gelato", display:"Gelato", first:"", last:"", email:"billing@gelato.com", phone:"+47 23 96 30 50", website:"gelato.com", checkname:"Gelato", street:"Drammensveien 145", city:"Oslo", state:"NO", zip:"0277", terms:"Net 30", account:"COGS", method:"Wire", achAccount:"", achRouting:"", achEnabled:false, taxid:"••-••• 0841", type:"Corporation", is1099:true, w9:true, role:"Supplier" },
+  "Printify": { company:"Printify, Inc.", display:"Printify", first:"", last:"", email:"accounts@printify.com", phone:"+1 (415) 562-4100", website:"printify.com", checkname:"Printify, Inc.", street:"600 California St", city:"San Francisco", state:"CA", zip:"94108", terms:"Net 15", account:"COGS", method:"ACH", achAccount:"", achRouting:"", achEnabled:false, taxid:"", type:"Corporation", is1099:true, w9:false, role:"Supplier" },
+  "Lakeside Design": { company:"Lakeside Design LLC", display:"Lakeside Design", first:"Ben", last:"Ortiz", email:"hello@lakeside.design", phone:"+1 (615) 220-4433", website:"lakeside.design", checkname:"Lakeside Design LLC", street:"1024 Elm St", city:"Nashville", state:"TN", zip:"37207", terms:"Net 30", account:"Contract labor", method:"Check", achAccount:"", achRouting:"", achEnabled:false, taxid:"••-••• 5544", type:"LLC", is1099:true, w9:true, role:"Contractor" },
+  "Raj Patel Consulting": { company:"Raj Patel Consulting", display:"Raj Patel", first:"Raj", last:"Patel", email:"raj@rpc.dev", phone:"+1 (404) 550-9822", website:"rpc.dev", checkname:"Raj Patel", street:"180 Peachtree", city:"Atlanta", state:"GA", zip:"30303", terms:"Net 30", account:"Contract labor", method:"Check", achAccount:"", achRouting:"", achEnabled:false, taxid:"", type:"Individual", is1099:false, w9:false, role:"Contractor" },
+  "Adobe": { company:"Adobe Inc.", display:"Adobe", first:"", last:"", email:"billing@adobe.com", phone:"+1 (800) 833-6687", website:"adobe.com", checkname:"Adobe Inc.", street:"345 Park Ave", city:"San Jose", state:"CA", zip:"95110", terms:"Due on receipt", account:"Software", method:"Credit card", achAccount:"", achRouting:"", achEnabled:false, taxid:"••-••• 0011", type:"Corporation", is1099:false, w9:true, role:"Consultant" },
+  "Knoxville Utilities Board": { company:"Knoxville Utilities Board", display:"KUB", first:"", last:"", email:"billing@kub.org", phone:"+1 (865) 524-2911", website:"kub.org", checkname:"KUB", street:"P.O. Box 59017", city:"Knoxville", state:"TN", zip:"37950", terms:"Net 15", account:"Utilities", method:"ACH", achAccount:"•••• •••• 2201", achRouting:"•••• •••• 1102", achEnabled:true, taxid:"", type:"Corporation", is1099:false, w9:false, role:"Utility" },
+  "Elena Sokolov": { company:"Sokolov Studio", display:"Elena Sokolov", first:"Elena", last:"Sokolov", email:"elena@sokolov.studio", phone:"+1 (512) 441-7788", website:"sokolov.studio", checkname:"Elena Sokolov", street:"800 Congress Ave", city:"Austin", state:"TX", zip:"78701", terms:"Net 30", account:"Contract labor", method:"Check", achAccount:"", achRouting:"", achEnabled:false, taxid:"", type:"Sole proprietor", is1099:true, w9:false, role:"Contractor" },
+};
+function openVendorDrawer(row, role){
+  currentVendorRow = row;
+  const isNew = !row;
+  const data = isNew ? {} : (VENDOR_DATA[row.dataset.name] || {});
+
+  document.querySelector("[data-v-title]").textContent = isNew ? `New ${role || "Vendor"}` : (data.display || row.dataset.name);
+  document.querySelector("[data-v-sub]").textContent = isNew ? "Party record · §B2" : `${data.company} · ${row.dataset.role}`;
+
+  document.querySelector("[data-f-company]").value = data.company || "";
+  document.querySelector("[data-f-display]").value = data.display || "";
+  document.querySelector("[data-f-first]").value = data.first || "";
+  document.querySelector("[data-f-middle]").value = "";
+  document.querySelector("[data-f-last]").value = data.last || "";
+  document.querySelector("[data-f-email]").value = data.email || "";
+  document.querySelector("[data-f-phone]").value = data.phone || "";
+  document.querySelector("[data-f-website]").value = data.website || "";
+  document.querySelector("[data-f-checkname]").value = data.checkname || "";
+  document.querySelector("[data-f-street]").value = data.street || "";
+  document.querySelector("[data-f-city]").value = data.city || "";
+  document.querySelector("[data-f-state]").value = data.state || "";
+  document.querySelector("[data-f-zip]").value = data.zip || "";
+  document.querySelector("[data-f-terms]").value = data.terms || "Net 30";
+  document.querySelector("[data-f-default-account]").value = data.account || "Office supplies";
+  document.querySelector("[data-f-payment-method]").value = data.method || "Check";
+  document.querySelector("[data-f-ach-account]").value = data.achAccount || "";
+  document.querySelector("[data-f-ach-routing]").value = data.achRouting || "";
+  document.querySelector("[data-f-ach-enabled]").checked = !!data.achEnabled;
+  document.querySelector("[data-f-taxid]").value = data.taxid || "";
+  document.querySelector("[data-f-business-type]").value = data.type || "LLC";
+  document.querySelector("[data-f-1099]").checked = !!data.is1099;
+  document.querySelector("[data-f-w9]").checked = !!data.w9;
+
+  // Roles — clear then set
+  document.querySelectorAll("[data-role-chips] .role-chip").forEach(chip=>chip.classList.remove("active"));
+  if (isNew){
+    document.querySelector(`[data-role="${role || "Vendor"}"]`)?.classList.add("active");
+  } else {
+    // activate based on data.role + base Vendor
+    document.querySelector(`[data-role="${data.role || "Vendor"}"]`)?.classList.add("active");
+    if (data.role !== "Vendor") document.querySelector(`[data-role="Vendor"]`)?.classList.add("active");
+  }
+
+  document.getElementById("vendor-scrim").classList.add("open");
+  document.getElementById("vendor-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-vendor]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("vendor-scrim").classList.remove("open");
+  document.getElementById("vendor-drawer").classList.remove("open");
+}));
+document.getElementById("vendor-scrim").addEventListener("click", ()=>{
+  document.getElementById("vendor-scrim").classList.remove("open");
+  document.getElementById("vendor-drawer").classList.remove("open");
+});
+
+/* Role chip toggles */
+document.querySelectorAll("[data-role-chips] .role-chip").forEach(chip=>{
+  chip.addEventListener("click", ()=>chip.classList.toggle("active"));
+});
+
+/* W-9 upload */
+document.querySelector("[data-upload-w9]").addEventListener("click", ()=>{
+  document.querySelector("[data-f-w9]").checked = true;
+  toast("W-9 uploaded — marked as on file");
+});
+
+/* Save */
+function saveVendor(andNew){
+  const company = document.querySelector("[data-f-company]").value.trim();
+  const display = document.querySelector("[data-f-display]").value.trim() || company;
+  const email = document.querySelector("[data-f-email]").value.trim();
+  if (!company){ toast("Company name is required"); return; }
+  const is1099 = document.querySelector("[data-f-1099]").checked;
+  const hasW9 = document.querySelector("[data-f-w9]").checked;
+  const activeRoles = [...document.querySelectorAll("[data-role-chips] .role-chip.active")].map(c=>c.dataset.role);
+  const primaryRole = activeRoles.find(r => r === "Supplier" || r === "Contractor") || "Vendor";
+
+  if (currentVendorRow){
+    currentVendorRow.dataset.name = display;
+    currentVendorRow.querySelector("td:nth-child(2) .font-medium").textContent = display;
+    currentVendorRow.querySelector("td:nth-child(2) .text-\\[11px\\]").textContent = email || "—";
+    currentVendorRow.querySelector(".role").textContent = primaryRole;
+    currentVendorRow.querySelector(".role").className = `role ${primaryRole.toLowerCase()}`;
+    const w9 = currentVendorRow.querySelector(".w9");
+    if (hasW9){
+      w9.className = "w9 on";
+      w9.innerHTML = `<span class="material-symbols-outlined text-[10px]">check</span>On file`;
+    } else {
+      w9.className = "w9 off";
+      w9.innerHTML = `<span class="material-symbols-outlined text-[10px]">warning</span>Missing`;
+    }
+    toast(`"${display}" saved`);
+  } else {
+    // new row
+    const tbody = document.querySelector("[data-v-tbody]");
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface-container-low cursor-pointer v-row";
+    tr.dataset.role = primaryRole; tr.dataset.w9 = hasW9 ? "on" : "off"; tr.dataset["1099"] = is1099 ? "true" : "false"; tr.dataset.name = display;
+    const initial = (display[0] || "?").toUpperCase();
+    const avatarColors = {Supplier:"bg-qb-blue",Contractor:"bg-qb-maroon",Consultant:"bg-qb-green",Utility:"bg-qb-teal",Vendor:"bg-qb-navy"};
+    tr.innerHTML = `
+      <td class="px-3 py-2"><input type="checkbox" class="row-check v-check"/></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2">
+        <div class="v-avatar ${avatarColors[primaryRole] || "bg-qb-navy"}">${initial}</div>
+        <div class="min-w-0"><div class="font-medium truncate">${display}</div>
+        <div class="text-[11px] text-on-surface-variant truncate">${email || "—"}</div></div>
+      </div></td>
+      <td class="px-3 py-2"><span class="role ${primaryRole.toLowerCase()}">${primaryRole}</span></td>
+      <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+      <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+      <td class="px-3 py-2">${hasW9 ? `<span class="w9 on"><span class="material-symbols-outlined text-[10px]">check</span>On file</span>` : `<span class="w9 off"><span class="material-symbols-outlined text-[10px]">warning</span>Missing</span>`}</td>
+      <td class="px-3 py-2">${is1099 ? `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">check_circle</span>Eligible</span>` : `<span class="text-[11px] text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">remove</span>Not eligible</span>`}</td>
+      <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>`;
+    tbody.insertBefore(tr, tbody.firstChild);
+    wireVendorRow(tr);
+    toast(`"${display}" added`);
+    updateCounts();
+  }
+  if (andNew){
+    openVendorDrawer(null, primaryRole);
+  } else {
+    document.getElementById("vendor-scrim").classList.remove("open");
+    document.getElementById("vendor-drawer").classList.remove("open");
+  }
+}
+document.querySelector("[data-save-vendor]").addEventListener("click", ()=>saveVendor(false));
+document.querySelector("[data-save-new]").addEventListener("click", ()=>saveVendor(true));
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Row click + ⋯ menu                                         */
+/* ═══════════════════════════════════════════════════════════ */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+function wireVendorRow(tr){
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-row-menu]")) return;
+    openVendorDrawer(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    currentMenuRow = tr;
+    // context
+    const hasW9 = tr.dataset.w9 === "on";
+    rowMenu.querySelector('[data-action="view-w9"]').style.display = hasW9 ? "" : "none";
+    rowMenu.querySelector('[data-action="request-w9"]').style.display = hasW9 ? "none" : "";
+    const eligible = tr.dataset["1099"] === "true";
+    rowMenu.querySelector('[data-action="toggle-1099"]').textContent = "";
+    rowMenu.querySelector('[data-action="toggle-1099"]').innerHTML = `<span class="material-symbols-outlined">tune</span>${eligible ? "Disable 1099" : "Enable 1099"}`;
+    const r = e.currentTarget.getBoundingClientRect();
+    rowMenu.style.top = (r.bottom + 4) + "px";
+    rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+    rowMenu.classList.add("open");
+  });
+}
+document.querySelectorAll(".v-row").forEach(wireVendorRow);
+
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  const name = tr.dataset.name;
+  switch(act){
+    case "view": case "edit":
+      openVendorDrawer(tr); break;
+    case "view-bills":
+      toast(`Bills list filtered to ${name}`); break;
+    case "create-bill":
+      toast(`Create bill for ${name}`); break;
+    case "request-w9":
+      toast(`W-9 request sent to ${name}`); break;
+    case "view-w9":
+      toast(`Opening W-9 for ${name}`); break;
+    case "toggle-1099": {
+      const eligible = tr.dataset["1099"] === "true";
+      tr.dataset["1099"] = eligible ? "false" : "true";
+      const cell = tr.querySelectorAll("td")[6];
+      if (!eligible){
+        cell.innerHTML = `<span class="text-[11px] text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">check_circle</span>Eligible</span>`;
+      } else {
+        cell.innerHTML = `<span class="text-[11px] text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">remove</span>Not eligible</span>`;
+      }
+      toast(`${name} ${eligible ? "removed from" : "marked for"} 1099`); break;
+    }
+    case "pay-bills":
+      toast(`Pay bills workspace — ${name}`); break;
+    case "ach":
+      toast(`ACH setup for ${name}`); break;
+    case "deactivate":
+      tr.style.opacity = "0.4";
+      toast(`${name} made inactive`); break;
+  }
+}));
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Filters + tabs                                             */
+/* ═══════════════════════════════════════════════════════════ */
+let currentTab = "All";
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentTab = b.dataset.viewtab;
+  applyFilters();
+}));
+document.querySelector("[data-filter]").addEventListener("input", applyFilters);
+function applyFilters(){
+  const q = document.querySelector("[data-filter]").value.toLowerCase();
+  let shown = 0, total = 0;
+  document.querySelectorAll(".v-row").forEach(tr=>{
+    total++;
+    const nameOk = !q || (tr.dataset.name||"").toLowerCase().includes(q);
+    let tabOk = true;
+    if (currentTab === "Suppliers") tabOk = tr.dataset.role === "Supplier";
+    if (currentTab === "Contractors") tabOk = tr.dataset.role === "Contractor";
+    if (currentTab === "1099") tabOk = tr.dataset["1099"] === "true";
+    if (currentTab === "missing-w9") tabOk = tr.dataset.w9 === "off" || tr.dataset.w9 === "pending" || tr.dataset.w9 === "missing";
+    const vis = nameOk && tabOk;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-v-count]").textContent = `1–${shown} of ${total}`;
+}
+function updateCounts(){ applyFilters(); }
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Bulk bar                                                   */
+/* ═══════════════════════════════════════════════════════════ */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".v-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{ if (e.target.matches(".v-check")) updateBulk(); });
+document.querySelector("[data-check-all]").addEventListener("change", e=>{
+  document.querySelectorAll(".v-check").forEach(c=>{ if (c.closest("tr").style.display !== "none") c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".v-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked=false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".v-check:checked").length;
+  if (act === "delete"){
+    document.querySelectorAll(".v-check:checked").forEach(c=>{const tr=c.closest("tr"); if(tr) tr.remove();});
+    updateBulk(); updateCounts();
+  }
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} vendor${n!==1?"s":""}`);
+  document.querySelectorAll(".v-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked=false;
+  updateBulk();
+}));
+
+/* ═══════════════════════════════════════════════════════════ */
+/* Misc                                                       */
+/* ═══════════════════════════════════════════════════════════ */
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Exporting vendor list…"));
+document.querySelector("[data-customize]").addEventListener("click", ()=>toast("Customize panel — Data / Visual tabs"));
+
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#new-menu") && !e.target.closest("[data-new-split]")) newMenu.classList.remove("open");
+});
+
+/* Init */
+applyFilters();
+</script>
+</body>
+</html>

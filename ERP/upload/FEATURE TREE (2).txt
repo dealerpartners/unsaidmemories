@@ -1,0 +1,412 @@
+FEATURE TREE  v3   (updated 2026-11-02, reconciled against s screenshots)
+=====================================================================
+Changes from v2
+  * Finance regrouped to five groups (Accounting, Business Tax, Expenses & Bills,
+    Sales & Get Paid, Customer Hub). Every group starts with Overview.
+  * Create menu regrouped by counterparty: Customers | Vendors & suppliers | Team | Other,
+    plus two commerce columns (Catalog & marketing, Support)
+  * Business view / Accountant view toggle (ERP books sidebar becomes Accountant view)
+  * Product drawer gets Sales / Purchasing / Accounting sections (income + COGS mapping)
+  * Universal footer grammar, split-button "New transaction" menus, empty states with Import
+  * Party list surfaces in three places (Customer Hub, Expenses & Bills, Catalog) from one data list
+  * Added: Business Tax group, Lists & Tools (gear menu), setup checklist, receipts inbox
+    with forwarding address, recurring template types, list customizer, reconcile setup,
+    contractor invite modal, unified transaction lists, per-domain pickable create actions
+  * Cleanup: Customers page columns swap Pets/Appointments for commerce columns
+  * Skipped on purpose: Mileage, Lending, Payroll (revisit later)
+Legend:  [D] document  [R] right drawer  [M] modal  [W] workspace/wizard  [P] full page
+         [inline] = page-local, no shared component yet   (P1/P2/P3) = build priority
+
+=====================================================================
+A. SHARED PLATFORM LAYER
+=====================================================================
+├── Containers
+│   ├── [D] document-engine (P1)     Tabs: Edit | Email view | Payor view | PDF view
+│   ├── [R] record-shell (P1)        drawer + full page; collapsible sections; maximize icon
+│   ├── [M] decision-modal           1-3 fields, one decision
+│   ├── [W] workspace-shell          canvas or multi-stage
+│   └── stacked-drawer               inline create from a picker, returns with value selected
+│
+├── Container rule (5-second test)
+│   ├── line items + totals -> [D]     canvas or stages -> [W]
+│   └── one record, 4-10 fields -> [R]     one decision -> [M]
+│
+├── Universal footer grammar (every create)
+│   ├── Left:  Cancel
+│   ├── Right: Save and new | Save and close   (split-button menu on primary)
+│   └── Documents add: Print or download | Make recurring | Save ▾ | Review and send ▾
+│
+├── Five doors to every create
+│   ├── 1. Global Create flyout (Cmd+K)
+│   ├── 2. List-page "New transaction" SPLIT MENU (only that family's creates)
+│   ├── 3. Inline "+ Add new" inside a picker (stacked drawer)
+│   ├── 4. Contextual create from a parent record (prefilled)
+│   └── 5. Capture: drop file / forward email / snap photo -> draft in intake queue
+│
+├── Create actions row (P2)
+│   ├── Chip row on every domain Overview ("Create actions:")
+│   ├── Customize drawer: "Select up to 10", Favorites + domain list, drag to reorder
+│   └── "Show all" opens the Global Create flyout
+│
+├── Navigation
+│   ├── Main rail: Create | Favorites/Bookmarks | Home | Feed | Reports | All apps | pinned apps | Customize
+│   ├── Side rail: groups, each starting with Overview, count badges, gated items show lock/gem
+│   ├── Gear menu (see section G Settings): Your company | Lists | Tools | Profile
+│   ├── View switch: Business view <-> Accountant view
+│   └── Gated route -> "This product isn't available for your account" empty page (feature flag)
+│
+├── Lists (P1)
+│   └── list-system
+│       ├── view-tabs (All / Open / Overdue / Paid, or For review / Unpaid / Paid for bills)
+│       ├── filter bar + date range + saved views
+│       ├── Customize panel: Data tab (filters, columns reorderable incl. Created by/on,
+│       │   Modified by/on) | Visual tab (number format, negatives, decimals, divide by 1000)
+│       ├── sort, sticky first column, money right-aligned tabular, status pills
+│       ├── row click -> right peek drawer; "Open full" -> record page
+│       ├── bulk-bar (entity-specific), export, pagination "1-75"
+│       ├── row actions in a ⋯ menu (not inline text links)
+│       └── EMPTY STATE: illustration + 3 steps + [Import] [Add] buttons
+│
+├── Records (P1)
+│   └── record-shell: notes, tasks, activity, attachments, contextual-create menu
+│
+├── Forms
+│   ├── form-customizer     "Choose what you use" gear (e.g. toggle Tags on bills)
+│   ├── inline-picker (P1)  search | recent | "+ Add new" | stacked drawer
+│   └── managed-vocab
+│
+├── Intake (P2)
+│   └── intake-queue / Receipts inbox
+│       ├── forwarding email address shown on page (send files in, drafts out)
+│       ├── drop zone + Upload from device + Snap photo
+│       ├── tabs: For review | Reviewed
+│       ├── columns: Receipt, Date, Vendor, Payment account, Amount/Tax, Category, Action
+│       └── Bill document has same capture panel on its left ("Add bills", multi-file)
+│
+├── Overviews
+│   └── insight-cards / overview-funnel / "Business at a glance" / suggestions
+│       └── Setup checklist card until company setup complete
+│
+└── Specialized shared interfaces
+    ├── party-stub (P1)               one drawer, role chips (B2)
+    ├── recurring-template (P3)       Template name | Type: Scheduled / Reminder / Unscheduled |
+    │                                 Create X days in advance | Interval | Start | End
+    ├── payment-options-rail (P3)     right rail on Payor/PDF view of invoice
+    │                                 Accepted methods + details | More options toggles:
+    │                                 Invoice total, Deposit, Discount, Shipping fee, Late fees |
+    │                                 Design | Scheduling
+    └── report-customizer             same Customize panel as lists, for reports
+
+=====================================================================
+B. CREATE_REGISTRY  (regrouped by counterparty)
+=====================================================================
+B1. Columns of the Global Create flyout
+│
+├── CUSTOMERS
+│   ├── Invoice            [D]
+│   ├── Payment link       [M]  amount, description, share link / QR
+│   ├── Receive payment    [M]  apply to open invoices
+│   ├── Statement          [W]
+│   ├── Estimate           [D]  -> convert to Invoice
+│   ├── Sales receipt      [D]
+│   ├── Credit memo        [D]  doors incl. Invoice/Order (RMA)
+│   └── Add customer       [R]  Party drawer, role=Customer
+│
+├── VENDORS & SUPPLIERS
+│   ├── Expense            [R]  payee, date, paid-from, category, amount, receipt, memo
+│   ├── Check              [D]  print later option
+│   ├── Bill               [D]  left capture panel, Tags toggle, Save and schedule payment
+│   ├── Pay bills          [W]  payment account, date, starting check no., Print later,
+│   │                           due-date filter, checkbox table, TOTAL PAYMENT AMOUNT top right
+│   ├── Purchase order     [D]  blank/SKU lines
+│   ├── Vendor credit      [D]
+│   ├── Credit card credit [D]
+│   ├── Print checks       [W]
+│   ├── Add vendor         [R]  Party drawer, role=Vendor
+│   └── Add supplier       [R]  Party drawer, role=Supplier
+│
+├── TEAM
+│   ├── Add contractor     [M]  name, email, checkbox "email to complete their profile/W-9"
+│   └── Time entry         [M]  (optional, later)
+│
+├── OTHER (books)
+│   ├── Task               [M]
+│   ├── Bank deposit       [R]
+│   ├── Journal entry      [D]
+│   ├── Transfer           [M]
+│   ├── Reconcile          [W]  setup form first (see D2)
+│   ├── Settlement         [W]  Stripe/Shopify payout split
+│   ├── Add product/service[R]  see B3
+│   └── Add account        [R]  see section D
+│
+├── CATALOG & MARKETING   (commerce columns  does not have)
+│   ├── Design [W] | Product [R]->[W] | Collection [W] | Category [R]
+│   ├── Banner [R] | Popup [R] | Discount code [R]
+│   └── Campaign [W] | Post [W] | Newsletter [W]
+│
+└── SUPPORT & ORDERS
+    ├── Sales order [D] | Return/RMA [M] | Ticket [R] | Add note [M] | Void [M]
+
+B2. Party drawer (one drawer, role chips; collapsible sections, single Save footer)
+│
+├── Names and contact
+│   └── Company name | Display name | Title | First | Middle | Last | Suffix | Email |
+│       Phone | Mobile | Fax | Other | Website | Name to print on checks (vendor)
+├── Address                 street 1/2, city, state, ZIP, country
+├── Notes and attachments
+├── Role chips: Customer | Vendor | Supplier | Contact  (stackable)
+│   ├── Customer: shipping address, tax-exempt, credit limit, terms, marketing consent
+│   ├── Vendor:   terms, default expense account, payment method
+│   │             Bill Pay ACH info (account no. masked, routing) behind a step
+│   │             Additional info: Tax ID, 1099 toggle, request W-9
+│   ├── Supplier: account no., catalog/API URL, lead time, SLA, linked Integration
+│   └── Contact:  company, title
+└── Surfaces: Customer Hub > Customers | Expenses & Bills > Vendors | Catalog > Suppliers
+              (one data list, filtered by role)
+
+B3. Product/service drawer
+│
+├── Basic info      name | type (Service/Product/Bundle) | SKU | Category (+ Add new inline) | image
+├── Sales           description | price | income account (default by category)
+├── Purchasing      [x] I purchase this from a supplier ->
+│                   purchase description | cost | preferred supplier (+ Add new) | expense/COGS account (required)
+├── Inventory       track quantity, reorder point (blanks)
+├── Commerce        design link, variants, channels
+└── Footer          Cancel | Save and new | Save and close   (design products: "Open Studio")
+
+B4. Contractor invite modal -> feeds Expenses & Bills > Contractors and 1099s
+
+=====================================================================
+C. DOCUMENT ENGINE
+=====================================================================
+├── Shared header: history icon | title+number | tabs Edit/Email/Payor/PDF | Manage | Feedback | close
+├── Invoice
+│   ├── Edit: customer, terms, dates, lines, Customer payment options, Note to customer,
+│   │         Memo on statement (hidden), Attachments, totals (+ Charge a deposit, Edit totals)
+│   ├── Email view / Payor view / PDF view with right rail (payment-options-rail)
+│   └── Footer: Print or download | Save ▾ | Review and send ▾
+├── Bill
+│   ├── Left panel: "Add bills" capture (multi-file, snap photo)
+│   ├── Header: vendor, mailing address, terms, bill date, due date, bill no., Tags (optional), balance due
+│   ├── Lines: category-or-item toggle | description | qty | cost | amount | billable
+│   └── Footer: Cancel | Print | Make recurring | Save bill | Save and schedule payment ▾
+├── Line columns by type
+│   ├── Invoice/Estimate/Receipt/Credit: thumb | SKU-variant | description | qty | rate | discount | tax | amount
+│   ├── PO: blank/SKU | supplier SKU | size/color | qty | unit cost | amount
+│   ├── Sales order: design thumb | variant | qty | price | supplier routed | amount
+│   └── Journal: account | debit | credit | description | name
+└── Commerce-native: variant picker with thumbnail; cost + margin per line (staff only)
+
+=====================================================================
+D. CHART OF ACCOUNTS + RECONCILE
+=====================================================================
+D1. Chart of accounts [P]
+├── Toolbar: filter by name or number | type filter | Clean up ▾ (Start cleanup session,
+│            Open in edit mode, View cleanup history) | Run report | New account ▾
+├── Columns: Number | Name | Type | Detail type | Description | Total balance | Bank balance | Tax line | Status
+├── Edit mode: spreadsheet-style inline editing
+├── Row click: account register; edit in drawer; Customize panel (list-system)
+├── Drawer: type | detail type (cascades) | name | number | sub-account of | description |
+│           opening balance + as-of | tax line | active
+└── Seeded: Sales by category (Apparel, Wall Art, Drinkware), COGS by supplier, shipping income/expense,
+            Stripe fees, Stripe clearing, refunds, discounts, gift card liability, sales tax payable,
+            marketplace seller payable.  Product drawer maps to these.
+
+D2. Reconcile [W]
+├── Setup: account | beginning balance | statement ending balance + date |
+│          service charge (date, amount, expense account) | interest earned (date, amount, income account)
+├── Start reconciling -> tie-out workspace
+└── Top links: Chart of accounts | Register | Summary | History by account
+
+=====================================================================
+E. DESIGN STUDIO / T-SHIRT [W]
+=====================================================================
+├── Chain: Design -> Product (design on blank) -> Variants/SKUs -> Listing
+├── Product drawer (4 fields) -> Open Studio
+├── Layout: left rail (Upload, Text, Shapes, Layers, Library) | canvas + print guides + view tabs |
+│           right inspector (position, size, rotation, DPI) | top bar (blank colors, undo, zoom, Save draft) |
+│           Preflight + Mockups panel
+├── Preflight (blocking): DPI, outside print area, color limit, transparency, mockup missing
+└── Publish wizard: Variants -> Pricing -> Details -> Channels
+
+=====================================================================
+F. LIST SPECS (default columns / sort / bulk actions)
+=====================================================================
+├── Sales transactions  type filter (Invoice, Receipt, Credit, Payment)  | Date desc
+├── Expense transactions type filter (Bill, Expense, Check, Credits)     | Date desc
+├── Invoices        Date, No., Customer, Due, Amount, Balance, Status | Send, Remind, Print, Mark paid
+├── Bills           Due, Vendor, Bill no., Amount, Status (tabs For review/Unpaid/Paid) | Schedule, Pay selected
+├── Expenses        Date, Payee, Category, Paid from, Amount, Receipt | Categorize, Attach
+├── Customers       Name, Email, Orders, LTV, Balance, Last order, Marketing consent, Source | Tag, Email, Merge
+│                   KPI tiles: total, active, new, outstanding balance, at risk
+│                   tabs: All, Active, New, Recurring, Inactive, Needs follow-up
+│                   REMOVE leftovers: Pets, Lifecycle (pet), Next appointment, Upcoming appts, Locations
+├── Vendors/Suppl.  Name, Role, Open bills, YTD paid, 1099, SLA | Request W-9
+├── Products        Thumb, Name, SKUs, Supplier, Price, Margin, Status | Publish, Archive, Reprice
+├── Designs         Thumb, Name, Products using it, Updated, Status | Duplicate, Archive
+├── Orders          tabs: All, Unfulfilled, Ready to Ship, Local Pickup, Shipped, Delivered
+│                   No., Date, Customer, Items, Supplier status, Total, SLA | row ⋯ (View, Slip, Label, Refund)
+│                   header buttons: Create order, Report a problem, Create PO, Restock, Batch slips, Export, Pick list
+├── Discount codes  Code, Type, Value, Used/Limit, Window, Status | Pause, Expire
+└── Deposits        Date, Account, Items, Amount, Reconciled
+
+=====================================================================
+G. DOMAINS
+=====================================================================
+
+Dashboard
+├── Overview: /admin (Operations Vitals, setup checklist, create actions row), /dashboard (Executive GMV & Margins)
+├── Analytics: /analytics, /analytics/explorer
+└── Queues: /notifications (Attention), /customers, /seller
+
+Marketing
+├── Advertising (Ad Center)  /advertising, /sellers/advertising; adportal 313 pages (85 shells)
+├── Social publishing        /social (PublishingStudio) + calendar, channels, create, library, performance, queue, oversight
+├── Promotions               /promotions -> list + Discount drawer + TargetPicker
+├── Newsletter               /newsletter -> list + campaign builder
+└── Automation               /automation (wire or cut)
+
+Catalog
+├── Design Studio            /studio, /new-design, /collection-builder, /publish
+├── Products and listings    /catalog, /products, /listings, /bundles, /catalog-review
+├── Categories, collections  /categories, /collections, /filters
+├── Suppliers (role view of Parties)  /suppliers
+├── Brands                   /brands, /brand-registry
+├── Ecommerce                /ecommerce/*
+└── Website / CMS            /website/*, /media
+
+Orders
+├── Order management  /orders, /new, /[id], /packing-slip, /order-problem, /reports
+├── Purchasing        /purchase-orders, /purchasing, /supplier-orders
+├── Inventory         /inventory, /stock, counts, reorder, warehouses
+├── Fulfillment       /fulfillment, /shipping
+└── Returns           /returns
+
+Finance  ( groups; each group first item = Overview)
+├── Accounting
+│   ├── Bank transactions       /banking (For review feed, Rules)
+│   ├── Integration transactions (Stripe, Shopify, marketplaces)
+│   ├── Receipts                /receipts  (intake inbox)
+│   ├── Reconcile               D2
+│   ├── Rules                   bank rules
+│   ├── Chart of accounts       D1
+│   ├── Reports                 /reports, report-customizer, custom reports, budgets
+│   └── Accountant view (toggle)  Books, Journal, Ledger, Period close & locks, Transfers,
+│                                 Audit trail, Entities, Multi-currency, Controls
+├── Business Tax
+│   ├── Overview                tax deadlines, taxable profit estimate, create actions
+│   ├── Tax summary             income by tax category, deductions, business assets, map-accounts task
+│   └── Year-end and filing     (feature-gated page)
+├── Expenses & Bills
+│   ├── Overview, Expense transactions (New transaction ▾), Vendors, Bills (tabs)
+│   ├── Bill payments (Pay bills [W]), Contractors (invite modal), 1099s
+│   └── Refunds from suppliers
+├── Sales & Get Paid
+│   ├── Overview (payment-request funnel: Not paid / Paid / Deposited)
+│   ├── Sales transactions, Invoices, Recurring, Payment links
+│   ├── Sales channels (storefront, marketplaces), Payouts (Stripe/Shopify), Deposits, Refunds & disputes
+│   └── Products & services -> same list as Catalog > Products
+├── Customer Hub
+│   └── Overview, Customers, Estimates, Statements
+├── Team                         Employees (later), Contractors
+├── Gift cards and subscriptions
+├── Cap Table
+└── Financial configuration      Fees, financial settings
+
+Contacts
+├── CRM overview            /crm
+├── Parties                 one list, role tabs + role-filtered entry points (see B2)
+│   └── New customer: Party drawer (fast path) or 3-step CRM wizard (name+contact, address, first note)
+├── Leads, segments, templates, automations
+├── Seller relationships    /sellers, /[id], /feed
+└── Onboarding              /onboarding (sellers)
+
+Support  /support/*, /messages/*, Help center, Docs, Trust & Safety, Policies
+
+Settings / System
+├── Gear menu
+│   ├── Your company     Account and settings, Manage users, Custom form styles, Chart of accounts,
+│   │                    Subscriptions and billing
+│   ├── Lists            All lists, Products and services, Attachments, Custom fields, Rules
+│   ├── Tools            Reclassify transactions, Import data, Export data, Reconcile, Budgeting,
+│   │                    Audit log, Share screen, Resolution center
+│   └── Profile          What's new, Feedback, Privacy, Theme
+├── Company setup wizard    business profile (name, years, industry, tax type, revenue) ->
+│                           connect bank -> set up payments -> invoice branding (color, logo) -> goals
+├── Admin users and access  /users, /roles, /staff
+├── Integrations            /integrations/* (owns Printful/Printify/Gelato; Party drawer references)
+├── AI operations           /ai-ops/*
+└── System                  /system/*, /audit, /feature-flags
+
+Product card & PDP social spec   (NEW)
+├── Product card (grid)                       reads ONE row from ugc_product_counters
+│   ├── Save (bookmark icon)     private favorite -> customer_wishlist_items
+│   ├── Like (heart + count)     public -> ugc_reactions(target_type='product')
+│   ├── Share (arrow)            copy link / share sheet -> ugc_shares (ref_code)
+│   ├── Shows: star average + review count (rating_sum / review_count), like count
+│   └── NO comment on the card
+├── PDP (product detail page)
+│   ├── Action row: Share | Like | Save | Join the conversation (scrolls to Q&A)
+│   ├── Customer reviews        rating + text (+ photo/video); purchasers only; one per product
+│   ├── From customers          photo/video posts; purchasers only; pre-moderated
+│   └── Questions & conversation  any signed-in customer; question / tip / comment; threaded;
+│                                 seller and staff replies carry a badge; post-moderated
+├── Rules
+│   ├── Signed-out: can view and share; Like/Save/Comment prompt sign-in (guest checkout stays)
+│   ├── Purchase gate (reviews, posts): a delivered order item for THIS product, linked to the
+│   │   customer's portal account. Guest buyers claim the order by magic link to unlock it.
+│   ├── Moderation: reviews + posts = approve first; comments = publish, then hide/remove/report
+│   └── Counts: only status='published' items count
+└── Share links always use the canonical store domain (see PDP canonical fix)
+
+Customer Portal & Community   (NEW; storefront-facing, plus admin hooks)
+├── Customer portal  /account                         (portal_customer_accounts, magic links)
+│   ├── Home: recent orders, saved items, notifications, offers
+│   ├── Purchase history  (the customer's relationship with the store)
+│   │   ├── Orders list: status, tracking, total, reorder
+│   │   └── Order detail: items with thumbnails; per item: Reorder | Post about this | Return | Download
+│   │       (source of truth: ONE orders family, undecided: orders / commerce_orders / erp_orders)
+│   ├── Saved / Favorites       customer_wishlist_items (favorites live here, not in ugc_*)
+│   ├── My posts                drafts, pending, published, rejected/removed with reason
+│   ├── Addresses | Payment methods | Membership | Statements & invoices (pay) | Returns
+│   └── Notifications | Privacy requests | Support threads | AI disclosures
+├── Community (on storefront product pages and a later Discover feed)
+│   ├── Post gallery on product page: images + video, Verified purchase badge
+│   ├── Actions: Like (ugc_reactions) | Comment (ugc_comments, threaded) | Share (ugc_shares,
+│   │            copy link / TikTok / Instagram / Pinterest, with ref_code) | Report (ugc_reports)
+│   ├── Create post [W]: pick purchased item -> upload image/video -> caption/rating ->
+│   │                    grant reuse rights (optional) -> submit (status pending)
+│   └── Reviews stay on `reviews`; media can attach to a review via ugc_media.review_id
+├── Admin: Contacts > Customer record (new tabs)
+│   ├── Orders (purchase history) | Posts & reviews | Community activity
+│   └── Portal access: invite, magic link, status (invited/active/suspended/revoked), view-as-customer
+├── Admin: Trust & Safety > Moderation queue   (extends /trust-safety/moderation/*)
+│   ├── Pending posts and media (pre-moderation), reported comments (post-moderation)
+│   ├── Actions: approve | reject (reason) | remove | hide | restrict customer from posting
+│   └── Uses list-system + intake-queue pattern; bulk approve
+├── Admin: Marketing > UGC library   approved media with usage_rights_granted_at ->
+│                                    reuse in ads, social posts, product pages
+└── Shared components (P2): media-uploader (image + Mux video), reaction-button, comment-thread,
+                            share-sheet, report-dialog, moderation-queue
+
+Create registry additions
+├── Create post [W] (customer side) | Add comment [M] | Report [M]
+└── Invite to portal [M] (admin) | Approve/Reject post [M] (admin)
+
+Developers   Store API | Ad API | API keys | Developer portal  (not mapped in census)
+
+=====================================================================
+H. BUILD ORDER  (census: 607 pages, 0 import platform primitives, 265 fully bespoke)
+=====================================================================
+P1  list-system (incl. empty state + customizer + split New menu), record-shell,
+    document-engine (footer grammar), party-stub, inline-picker
+P2  Expense drawer, intake-queue / Receipts inbox, CREATE_REGISTRY driving flyout + drawers,
+    Create actions row (pick 10), Product drawer with accounts, CoA drawer
+P3  payment-options-rail, recurring-template, Pay bills workspace, reconcile setup,
+    Business Tax group, Lists & Tools, Business/Accountant view toggle, setup wizard
+P2  Community: hotfix Part C, media-uploader, moderation queue, portal Purchase history
+Cleanup now: swap pet/appointment columns on Customers; delete dead pawz/pets files
+
+
+
+

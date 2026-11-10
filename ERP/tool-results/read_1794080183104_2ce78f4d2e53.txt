@@ -1,0 +1,1963 @@
+     1→'use client';
+     2→
+     3→import React, { useState, useMemo, useRef, useEffect } from 'react';
+     4→import styles from './BillsScreen.module.css';
+     5→import { usePlatformStore, type Document, type DocumentStatus } from '@/lib/platformStore';
+     6→import DocumentEngine from '../DocumentEngine';
+     7→
+     8→export interface BillItem {
+     9→  id: string;
+    10→  vendor: string;
+    11→  source: 'Auto-scanned' | 'Email forwarded' | 'Manual' | 'Upload';
+    12→  billNo: string;
+    13→  billDate: string;
+    14→  category: string;
+    15→  className?: string;
+    16→  location?: string;
+    17→  memo: string;
+    18→  dueDate: string;
+    19→  amount: number;
+    20→  attachmentsCount: number;
+    21→  status: 'For review' | 'Unpaid' | 'Paid';
+    22→}
+    23→
+    24→/* ═══ Store → screen adapters ═══
+    25→   The screen keeps its approved layout and local row shape; every row is now
+    26→   derived from the shared platform store (§1.1 single source of truth). */
+    27→
+    28→/* The store uses ISO dates; the approved screen shows MM/DD/YYYY */
+    29→const toDisplayDate = (iso: string): string => {
+    30→  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((iso || '').trim());
+    31→  return m ? `${m[2]}/${m[3]}/${m[1]}` : iso || '—';
+    32→};
+    33→
+    34→/* The create form shows MM/DD/YYYY; the store stores ISO */
+    35→const toIsoDate = (display: string): string => {
+    36→  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec((display || '').trim());
+    37→  return m ? `${m[3]}-${m[1]}-${m[2]}` : display;
+    38→};
+    39→
+    40→/* Source badges derive from tags (set on create) and the activity log */
+    41→const SOURCE_FROM_TAG: Record<string, BillItem['source']> = {
+    42→  'source:upload': 'Upload',
+    43→  'source:email': 'Email forwarded',
+    44→  'source:scan': 'Auto-scanned',
+    45→};
+    46→
+    47→/* Store DocumentStatus → the screen's three tabs: For review / Unpaid / Paid.
+    48→   Drafts land in 'For review' (upload → review → approve → paid funnel);
+    49→   Approved/Overdue/etc. are payable, so they land in 'Unpaid'. */
+    50→const toTabStatus = (s: DocumentStatus): BillItem['status'] =>
+    51→  s === 'ForReview' || s === 'Draft'
+    52→    ? 'For review'
+    53→    : s === 'Paid' || s === 'Deposited'
+    54→    ? 'Paid'
+    55→    : 'Unpaid';
+    56→
+    57→/* Next bill number per the platform numbering scheme */
+    58→const nextBillNumber = () =>
+    59→  `BILL-${usePlatformStore.getState().documents.filter((d) => d.type === 'Bill').length + 2001}`;
+    60→
+    61→/* Store Document → the screen's local row type */
+    62→function toBillItem(doc: Document, vendorName: string): BillItem {
+    63→  const taggedSource = doc.tags.map((t) => SOURCE_FROM_TAG[t]).find(Boolean);
+    64→  const activityText = doc.activity.map((a) => a.text).join(' ').toLowerCase();
+    65→  const source: BillItem['source'] =
+    66→    taggedSource ??
+    67→    (activityText.includes('email')
+    68→      ? 'Email forwarded'
+    69→      : activityText.includes('upload') || activityText.includes('scan')
+    70→      ? 'Auto-scanned'
+    71→      : 'Manual');
+    72→  return {
+    73→    id: doc.id,
+    74→    vendor: vendorName || '—',
+    75→    source,
+    76→    billNo: doc.number,
+    77→    billDate: toDisplayDate(doc.date),
+    78→    category: doc.lines[0]?.description || 'Uncategorized',
+    79→    className: doc.lines[0]?.account || undefined,
+    80→    location: undefined,
+    81→    memo: doc.memo,
+    82→    dueDate: toDisplayDate(doc.dueDate),
+    83→    amount: doc.total,
+    84→    attachmentsCount: doc.attachments.length,
+    85→    status: toTabStatus(doc.status),
+    86→  };
+    87→}
+    88→
+    89→type ColumnKey =
+    90→  | 'vendor'
+    91→  | 'source'
+    92→  | 'billNo'
+    93→  | 'billDate'
+    94→  | 'category'
+    95→  | 'className'
+    96→  | 'location'
+    97→  | 'memo'
+    98→  | 'dueDate'
+    99→  | 'amount'
+   100→  | 'attachments';
+   101→
+   102→interface ColumnDef {
+   103→  key: ColumnKey;
+   104→  label: string;
+   105→  visible: boolean;
+   106→  align?: 'left' | 'right';
+   107→}
+   108→
+   109→const DEFAULT_COLUMNS: ColumnDef[] = [
+   110→  { key: 'vendor', label: 'Vendor', visible: true, align: 'left' },
+   111→  { key: 'source', label: 'Source', visible: true, align: 'left' },
+   112→  { key: 'billNo', label: 'Bill No.', visible: true, align: 'left' },
+   113→  { key: 'billDate', label: 'Bill Date', visible: true, align: 'left' },
+   114→  { key: 'category', label: 'Category', visible: true, align: 'left' },
+   115→  { key: 'className', label: 'Class', visible: false, align: 'left' },
+   116→  { key: 'location', label: 'Location', visible: false, align: 'left' },
+   117→  { key: 'memo', label: 'Memo', visible: true, align: 'left' },
+   118→  { key: 'dueDate', label: 'Due Date', visible: true, align: 'left' },
+   119→  { key: 'amount', label: 'Bill Amount', visible: true, align: 'right' },
+   120→  { key: 'attachments', label: 'Attachments', visible: true, align: 'right' },
+   121→];
+   122→
+   123→export interface BillsScreenProps {
+   124→  onPayBills?: () => void;
+   125→  onCreateBill?: () => void;
+   126→  onOpenPeek?: (title: string, details: Record<string, string | number>) => void;
+   127→  onToast?: (message: string) => void;
+   128→}
+   129→
+   130→export default function BillsScreen({
+   131→  onPayBills,
+   132→  onCreateBill,
+   133→  onOpenPeek,
+   134→  onToast,
+   135→}: BillsScreenProps) {
+   136→  // Shared platform store — single source of truth (§1.1)
+   137→  const store = usePlatformStore();
+   138→
+   139→  // Row-level "open in engine": editing a bill opens the Document Engine
+   140→  const [editingId, setEditingId] = useState<string | null>(null);
+   141→
+   142→  // Tabs: 'For review' | 'Unpaid' | 'Paid'
+   143→  const [activeTab, setActiveTab] = useState<'For review' | 'Unpaid' | 'Paid'>('For review');
+   144→
+   145→  // Bills collection — derived from store documents (no local mock array)
+   146→  const bills: BillItem[] = useMemo(
+   147→    () =>
+   148→      store.documents
+   149→        .filter((d) => d.type === 'Bill')
+   150→        .map((doc) => toBillItem(doc, store.getParty(doc.partyId)?.name || '')),
+   151→    [store]
+   152→  );
+   153→
+   154→  // Selected bill rows
+   155→  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+   156→
+   157→  // Filter toolbar
+   158→  const [selectedVendor, setSelectedVendor] = useState<string>('All');
+   159→  const [filterStatus, setFilterStatus] = useState<string>('All');
+   160→  const [filterCategory, setFilterCategory] = useState<string>('All');
+   161→
+   162→  // Date Popover & Date Pill
+   163→  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false);
+   164→  const [datePreset, setDatePreset] = useState<'This Year' | 'Last Year' | 'Custom'>('This Year');
+   165→  const [dateFrom, setDateFrom] = useState('01/01/2026');
+   166→  const [dateTo, setDateTo] = useState('12/31/2026');
+   167→  const [isDateFilterActive, setIsDateFilterActive] = useState(false);
+   168→  const [activeDateLabel, setActiveDateLabel] = useState('This Year');
+   169→
+   170→  // Filters Popover
+   171→  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false);
+   172→
+   173→  // Split Add Bill Menu
+   174→  const [isAddBillMenuOpen, setIsAddBillMenuOpen] = useState(false);
+   175→
+   176→  // Customize Drawer
+   177→  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+   178→  const [columns, setColumns] = useState<ColumnDef[]>(DEFAULT_COLUMNS);
+   179→  const [sortBy, setSortBy] = useState<'billDate' | 'dueDate' | 'amount' | 'vendor'>('billDate');
+   180→  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+   181→  const [rowsPerPage, setRowsPerPage] = useState<number>(50);
+   182→  const [rowHeight, setRowHeight] = useState<'Cozy' | 'Compact'>('Cozy');
+   183→  const [alternateRowColor, setAlternateRowColor] = useState(false);
+   184→
+   185→  // Modals
+   186→  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+   187→  const [isEmailSettingsOpen, setIsEmailSettingsOpen] = useState(false);
+   188→  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+   189→
+   190→  // Row Action Menu
+   191→  const [activeRowMenuId, setActiveRowMenuId] = useState<string | null>(null);
+   192→
+   193→  // New Bill form state
+   194→  const [newVendor, setNewVendor] = useState(
+   195→    () =>
+   196→      store.parties.find((p) => p.roles.includes('Vendor') || p.roles.includes('Supplier'))
+   197→        ?.name || 'Printful'
+   198→  );
+   199→  const [newBillNo, setNewBillNo] = useState<string>(nextBillNumber);
+   200→  const [newBillDate, setNewBillDate] = useState('11/04/2026');
+   201→  const [newDueDate, setNewDueDate] = useState('12/04/2026');
+   202→  const [newCategory, setNewCategory] = useState('Printing');
+   203→  const [newAmount, setNewAmount] = useState('250.00');
+   204→  const [newMemo, setNewMemo] = useState('Sample shipment invoice');
+   205→
+   206→  // File upload input ref
+   207→  const fileInputRef = useRef<HTMLInputElement>(null);
+   208→
+   209→  // Local Toast
+   210→  const [localToastMessage, setLocalToastMessage] = useState<string | null>(null);
+   211→  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+   212→
+   213→  const showToast = (msg: string) => {
+   214→    if (onToast) {
+   215→      onToast(msg);
+   216→    }
+   217→    setLocalToastMessage(msg);
+   218→    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+   219→    toastTimeoutRef.current = setTimeout(() => {
+   220→      setLocalToastMessage(null);
+   221→    }, 2500);
+   222→  };
+   223→
+   224→  useEffect(() => {
+   225→    return () => {
+   226→      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+   227→    };
+   228→  }, []);
+   229→
+   230→  // Close menus when clicking outside
+   231→  useEffect(() => {
+   232→    const handleClickOutside = (e: MouseEvent) => {
+   233→      const target = e.target as HTMLElement;
+   234→      if (!target.closest(`.${styles.dateTrigger}`) && !target.closest(`.${styles.datePopover}`)) {
+   235→        setIsDatePopoverOpen(false);
+   236→      }
+   237→      if (!target.closest(`.${styles.filterBtnTrigger}`) && !target.closest(`.${styles.filterPopover}`)) {
+   238→        setIsFilterPopoverOpen(false);
+   239→      }
+   240→      if (!target.closest(`.${styles.splitBtn}`)) {
+   241→        setIsAddBillMenuOpen(false);
+   242→      }
+   243→      if (!target.closest(`.${styles.rowMenu}`) && !target.closest('[data-row-menu-btn]')) {
+   244→        setActiveRowMenuId(null);
+   245→      }
+   246→    };
+   247→    document.addEventListener('click', handleClickOutside);
+   248→    return () => document.removeEventListener('click', handleClickOutside);
+   249→  }, []);
+   250→
+   251→  // Filtered & Sorted bills
+   252→  const filteredBills = useMemo(() => {
+   253→    return bills
+   254→      .filter((b) => {
+   255→        // Tab filter
+   256→        if (b.status !== activeTab) return false;
+   257→
+   258→        // Vendor filter
+   259→        if (selectedVendor !== 'All' && b.vendor !== selectedVendor) return false;
+   260→
+   261→        // Status popover filter
+   262→        if (filterStatus !== 'All' && b.status !== filterStatus) return false;
+   263→
+   264→        // Category filter
+   265→        if (filterCategory !== 'All' && b.category !== filterCategory) return false;
+   266→
+   267→        return true;
+   268→      })
+   269→      .sort((a, b) => {
+   270→        let valA: string | number = a[sortBy] ?? '';
+   271→        let valB: string | number = b[sortBy] ?? '';
+   272→        if (sortBy === 'amount') {
+   273→          return sortDirection === 'asc' ? (a.amount - b.amount) : (b.amount - a.amount);
+   274→        }
+   275→        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+   276→        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+   277→        return 0;
+   278→      });
+   279→  }, [bills, activeTab, selectedVendor, filterStatus, filterCategory, sortBy, sortDirection]);
+   280→
+   281→  // Vendor/category filter options derive from the live bills
+   282→  const vendorOptions = useMemo(
+   283→    () => Array.from(new Set(bills.map((b) => b.vendor))).sort(),
+   284→    [bills]
+   285→  );
+   286→  const categoryOptions = useMemo(
+   287→    () => Array.from(new Set(bills.map((b) => b.category))).sort(),
+   288→    [bills]
+   289→  );
+   290→
+   291→  // Find or create the Vendor party for a new bill
+   292→  const findOrCreateVendorParty = (vendorName: string): string => {
+   293→    const name = vendorName.trim() || 'Unknown Vendor';
+   294→    const existing = store.parties.find(
+   295→      (p) => p.name.toLowerCase() === name.toLowerCase()
+   296→    );
+   297→    if (existing) return existing.id;
+   298→    return store.addParty({
+   299→      name,
+   300→      displayName: name,
+   301→      firstName: '',
+   302→      lastName: '',
+   303→      email: '',
+   304→      phone: '',
+   305→      roles: ['Vendor'],
+   306→      balance: 0,
+   307→      address: '',
+   308→      city: '',
+   309→      state: '',
+   310→      zip: '',
+   311→      country: '',
+   312→      terms: 'Net 30',
+   313→      creditLimit: 0,
+   314→      taxId: '',
+   315→      taxExempt: false,
+   316→      track1099: false,
+   317→      notes: '',
+   318→      tags: [],
+   319→      owner: 'Current user',
+   320→      segmentIds: [],
+   321→    });
+   322→  };
+   323→
+   324→  // Bulk selection handlers
+   325→  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+   326→    if (e.target.checked) {
+   327→      setSelectedIds(new Set(filteredBills.map((b) => b.id)));
+   328→    } else {
+   329→      setSelectedIds(new Set());
+   330→    }
+   331→  };
+   332→
+   333→  const handleToggleRow = (id: string) => {
+   334→    const next = new Set(selectedIds);
+   335→    if (next.has(id)) next.delete(id);
+   336→    else next.add(id);
+   337→    setSelectedIds(next);
+   338→  };
+   339→
+   340→  const isAllSelected = filteredBills.length > 0 && selectedIds.size === filteredBills.length;
+   341→
+   342→  // Forwarding email copy
+   343→  const handleCopyEmail = () => {
+   344→    const email = 'unsaid+expenses@assist.intuit.com';
+   345→    if (navigator?.clipboard?.writeText) {
+   346→      navigator.clipboard.writeText(email);
+   347→    }
+   348→    showToast('Forwarding email copied to clipboard');
+   349→  };
+   350→
+   351→  // Date Filter Apply & Reset
+   352→  const handleApplyDateFilter = () => {
+   353→    setIsDatePopoverOpen(false);
+   354→    setIsDateFilterActive(true);
+   355→    setActiveDateLabel(`${dateFrom} - ${dateTo}`);
+   356→    showToast('Date filter applied');
+   357→  };
+   358→
+   359→  const handleResetDateFilter = (e?: React.MouseEvent) => {
+   360→    if (e) e.stopPropagation();
+   361→    setIsDateFilterActive(false);
+   362→    setActiveDateLabel('This Year');
+   363→    setDatePreset('This Year');
+   364→    setDateFrom('01/01/2026');
+   365→    setDateTo('12/31/2026');
+   366→    showToast('Date filter reset');
+   367→  };
+   368→
+   369→  // Upload files handler
+   370→  const handleTriggerUpload = () => {
+   371→    fileInputRef.current?.click();
+   372→  };
+   373→
+   374→  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+   375→    const files = e.target.files;
+   376→    if (files && files.length > 0) {
+   377→      const file = files[0];
+   378→      const amount = +(Math.random() * 500 + 45).toFixed(2);
+   379→      const today = new Date().toISOString().slice(0, 10);
+   380→      const due = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+   381→        .toISOString()
+   382→        .slice(0, 10);
+   383→      // Find or create the vendor party, then write the bill to the store
+   384→      const partyId = findOrCreateVendorParty(
+   385→        file.name.split('.')[0].replace(/[-_]/g, ' ') || 'New Vendor'
+   386→      );
+   387→      store.addDocument({
+   388→        type: 'Bill',
+   389→        number: `UL-${Math.floor(1000 + Math.random() * 9000)}`,
+   390→        partyId,
+   391→        status: 'ForReview',
+   392→        date: today,
+   393→        dueDate: due,
+   394→        lines: [
+   395→          {
+   396→            id: 'L1',
+   397→            itemId: null,
+   398→            description: 'Printing',
+   399→            qty: 1,
+   400→            rate: amount,
+   401→            amount,
+   402→            taxRate: 0,
+   403→            account: '',
+   404→            tags: [],
+   405→          },
+   406→        ],
+   407→        subtotal: amount,
+   408→        tax: 0,
+   409→        shipping: 0,
+   410→        total: amount,
+   411→        amountPaid: 0,
+   412→        balance: amount,
+   413→        memo: `Scanned from ${file.name}`,
+   414→        notes: '',
+   415→        tags: ['source:upload'],
+   416→        attachments: [file.name],
+   417→        orderId: null,
+   418→        poId: null,
+   419→        channelId: null,
+   420→        createdBy: 'Current user',
+   421→      });
+   422→      setActiveTab('For review');
+   423→      showToast(`Uploaded ${file.name} — Added to 'For review'`);
+   424→      e.target.value = '';
+   425→    }
+   426→  };
+   427→
+   428→  // Create Bill Modal submit — writes to the shared store
+   429→  const handleSaveNewBill = (e: React.FormEvent) => {
+   430→    e.preventDefault();
+   431→    const amount = parseFloat(newAmount) || 0;
+   432→    const partyId = findOrCreateVendorParty(newVendor);
+   433→    store.addDocument({
+   434→      type: 'Bill',
+   435→      number: newBillNo,
+   436→      partyId,
+   437→      status: 'ForReview',
+   438→      date: toIsoDate(newBillDate),
+   439→      dueDate: toIsoDate(newDueDate),
+   440→      lines: [
+   441→        {
+   442→          id: 'L1',
+   443→          itemId: null,
+   444→          description: newCategory,
+   445→          qty: 1,
+   446→          rate: amount,
+   447→          amount,
+   448→          taxRate: 0,
+   449→          account: '',
+   450→          tags: [],
+   451→        },
+   452→      ],
+   453→      subtotal: amount,
+   454→      tax: 0,
+   455→      shipping: 0,
+   456→      total: amount,
+   457→      amountPaid: 0,
+   458→      balance: amount,
+   459→      memo: newMemo,
+   460→      notes: '',
+   461→      tags: [],
+   462→      attachments: [],
+   463→      orderId: null,
+   464→      poId: null,
+   465→      channelId: null,
+   466→      createdBy: 'Current user',
+   467→    });
+   468→    setIsCreateModalOpen(false);
+   469→    setActiveTab('For review');
+   470→    showToast(`Bill ${newBillNo} created successfully`);
+   471→    // reset form
+   472→    setNewBillNo(nextBillNumber());
+   473→  };
+   474→
+   475→  // Review & Approve
+   476→  const handleApproveBill = (id: string) => {
+   477→    store.changeDocumentStatus(id, 'Unpaid');
+   478→    setActiveRowMenuId(null);
+   479→    showToast('Bill approved and moved to Unpaid');
+   480→  };
+   481→
+   482→  // Mark as Paid — records a full payment against the bill
+   483→  const handleMarkAsPaid = (id: string) => {
+   484→    const doc = store.getDocument(id);
+   485→    if (doc) store.recordPayment(id, doc.total, 'Check', 'Checking');
+   486→    setActiveRowMenuId(null);
+   487→    showToast('Bill marked as Paid');
+   488→  };
+   489→
+   490→  // Delete Bill
+   491→  const handleDeleteBill = (id: string) => {
+   492→    store.deleteDocument(id);
+   493→    setActiveRowMenuId(null);
+   494→    showToast('Bill deleted');
+   495→  };
+   496→
+   497→  // Column toggle
+   498→  const handleToggleColumn = (key: ColumnKey) => {
+   499→    setColumns((prev) =>
+   500→      prev.map((col) => (col.key === key ? { ...col, visible: !col.visible } : col))
+   501→    );
+   502→  };
+   503→
+   504→  const visibleColumns = columns.filter((c) => c.visible);
+   505→
+   506→  // ── Row-level "open in engine" — the Document Engine renders the bill ──
+   507→  if (editingId) {
+   508→    return (
+   509→      <DocumentEngine
+   510→        type="Bill"
+   511→        documentId={editingId}
+   512→        onToast={showToast}
+   513→        onClose={() => setEditingId(null)}
+   514→      />
+   515→    );
+   516→  }
+   517→
+   518→  return (
+   519→    <div className={styles.container}>
+   520→      {/* Hidden file input */}
+   521→      <input
+   522→        ref={fileInputRef}
+   523→        type="file"
+   524→        accept=".pdf,.png,.jpg,.jpeg,.csv"
+   525→        style={{ display: 'none' }}
+   526→        onChange={handleFileChange}
+   527→      />
+   528→
+   529→      {/* ═══════════ TOP HEADER ═══════════ */}
+   530→      <header className={styles.header}>
+   531→        {/* Breadcrumbs & Utility */}
+   532→        <div className={styles.breadcrumbsRow}>
+   533→          <div className={styles.breadcrumbText}>Expenses &amp; Pay Bills / Bills</div>
+   534→          <div className={styles.topRightActions}>
+   535→            <button
+   536→              type="button"
+   537→              className={styles.feedbackLink}
+   538→              onClick={() => showToast('Feedback form opened')}
+   539→            >
+   540→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   541→                chat_bubble_outline
+   542→              </span>
+   543→              Give feedback
+   544→            </button>
+   545→            <button
+   546→              type="button"
+   547→              className={styles.iconBtn}
+   548→              title="Open in new window"
+   549→              onClick={() => showToast('Opened in standalone tab')}
+   550→            >
+   551→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+   552→                open_in_new
+   553→              </span>
+   554→            </button>
+   555→            <button
+   556→              type="button"
+   557→              className={styles.iconBtn}
+   558→              title="Fullscreen"
+   559→              onClick={() => {
+   560→                if (document.fullscreenElement) {
+   561→                  document.exitFullscreen().catch(() => {});
+   562→                } else {
+   563→                  document.documentElement.requestFullscreen?.().catch(() => {});
+   564→                }
+   565→              }}
+   566→            >
+   567→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+   568→                fullscreen
+   569→              </span>
+   570→            </button>
+   571→          </div>
+   572→        </div>
+   573→
+   574→        {/* Title & Main Actions */}
+   575→        <div className={styles.titleRow}>
+   576→          <h1 className={styles.title}>Bills</h1>
+   577→          <div className={styles.mainActionsGroup}>
+   578→            <button
+   579→              type="button"
+   580→              className={styles.emailSettingsLink}
+   581→              onClick={() => setIsEmailSettingsOpen(true)}
+   582→            >
+   583→              Manage email settings
+   584→            </button>
+   585→            <button
+   586→              type="button"
+   587→              className={styles.payBillsBtn}
+   588→              onClick={() => {
+   589→                if (onPayBills) onPayBills();
+   590→                else showToast('Opening Pay Bills workspace...');
+   591→              }}
+   592→            >
+   593→              Pay bills
+   594→            </button>
+   595→
+   596→            {/* Split Add Bill */}
+   597→            <div className={styles.splitBtn}>
+   598→              <button
+   599→                type="button"
+   600→                className={styles.splitBtnMain}
+   601→                onClick={() => {
+   602→                  if (onCreateBill) onCreateBill();
+   603→                  else setIsCreateModalOpen(true);
+   604→                }}
+   605→              >
+   606→                Add bill
+   607→              </button>
+   608→              <button
+   609→                type="button"
+   610→                className={styles.splitBtnArrow}
+   611→                aria-label="More options"
+   612→                onClick={(e) => {
+   613→                  e.stopPropagation();
+   614→                  setIsAddBillMenuOpen((prev) => !prev);
+   615→                }}
+   616→              >
+   617→                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   618→                  expand_more
+   619→                </span>
+   620→              </button>
+   621→
+   622→              {isAddBillMenuOpen && (
+   623→                <div
+   624→                  className={styles.rowMenu}
+   625→                  style={{ top: 38, right: 0, minWidth: 160 }}
+   626→                >
+   627→                  <button
+   628→                    type="button"
+   629→                    className={styles.rowMenuItem}
+   630→                    onClick={() => {
+   631→                      setIsAddBillMenuOpen(false);
+   632→                      setIsCreateModalOpen(true);
+   633→                    }}
+   634→                  >
+   635→                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   636→                      add_circle
+   637→                    </span>
+   638→                    Create bill
+   639→                  </button>
+   640→                  <button
+   641→                    type="button"
+   642→                    className={styles.rowMenuItem}
+   643→                    onClick={() => {
+   644→                      setIsAddBillMenuOpen(false);
+   645→                      handleTriggerUpload();
+   646→                    }}
+   647→                  >
+   648→                    <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   649→                      upload_file
+   650→                    </span>
+   651→                    Upload bills
+   652→                  </button>
+   653→                </div>
+   654→              )}
+   655→            </div>
+   656→          </div>
+   657→        </div>
+   658→
+   659→        {/* Email Forwarding Banner */}
+   660→        <div className={styles.emailBanner}>
+   661→          <div className={styles.bannerContent}>
+   662→            <span className={`material-symbols-outlined ${styles.bannerIcon}`}>auto_awesome</span>
+   663→            <span className={styles.bannerBold}>Anyone can autofill multiple receipts</span>
+   664→            <span className={styles.bannerMuted}>or create bills and expenses by sending files to:</span>
+   665→            <span className={styles.bannerEmail}>unsaid+expenses@assist.intuit.com</span>
+   666→            <button
+   667→              type="button"
+   668→              className={styles.copyEmailBtn}
+   669→              title="Copy email address"
+   670→              onClick={handleCopyEmail}
+   671→            >
+   672→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   673→                content_copy
+   674→              </span>
+   675→            </button>
+   676→          </div>
+   677→        </div>
+   678→
+   679→        {/* Tabs */}
+   680→        <div className={styles.tabsRow}>
+   681→          <div className={styles.tabsList}>
+   682→            {(['For review', 'Unpaid', 'Paid'] as const).map((tab) => {
+   683→              const isActive = activeTab === tab;
+   684→              const count = bills.filter((b) => b.status === tab).length;
+   685→              return (
+   686→                <button
+   687→                  key={tab}
+   688→                  type="button"
+   689→                  className={`${styles.tabBtn} ${isActive ? styles.tabBtnActive : ''}`}
+   690→                  onClick={() => {
+   691→                    setActiveTab(tab);
+   692→                    setSelectedIds(new Set());
+   693→                    showToast(`Switched to ${tab} tab (${count} items)`);
+   694→                  }}
+   695→                >
+   696→                  {tab}
+   697→                </button>
+   698→              );
+   699→            })}
+   700→          </div>
+   701→          <button
+   702→            type="button"
+   703→            className={styles.howToLink}
+   704→            onClick={() => setIsHelpModalOpen(true)}
+   705→          >
+   706→            How to manage bills
+   707→          </button>
+   708→        </div>
+   709→      </header>
+   710→
+   711→      {/* ═══════════ MAIN CONTENT ═══════════ */}
+   712→      <main className={styles.main}>
+   713→        {/* Filter Bar */}
+   714→        <div className={styles.filterBar}>
+   715→          <div className={styles.filtersLeft}>
+   716→            <div className={styles.filtersRow}>
+   717→              {/* Vendor Filter */}
+   718→              <div className={styles.filterField}>
+   719→                <label className={styles.filterLabel}>Vendor</label>
+   720→                <div style={{ position: 'relative' }}>
+   721→                  <select
+   722→                    className={styles.fieldSelect}
+   723→                    value={selectedVendor}
+   724→                    onChange={(e) => {
+   725→                      setSelectedVendor(e.target.value);
+   726→                      showToast(`Vendor filter: ${e.target.value}`);
+   727→                    }}
+   728→                  >
+   729→                    <option value="All">All</option>
+   730→                    {vendorOptions.map((v) => (
+   731→                      <option key={v} value={v}>
+   732→                        {v}
+   733→                      </option>
+   734→                    ))}
+   735→                  </select>
+   736→                  <span
+   737→                    className="material-symbols-outlined"
+   738→                    style={{
+   739→                      position: 'absolute',
+   740→                      right: 10,
+   741→                      top: 10,
+   742→                      fontSize: 16,
+   743→                      color: '#5a6355',
+   744→                      pointerEvents: 'none',
+   745→                    }}
+   746→                  >
+   747→                    expand_more
+   748→                  </span>
+   749→                </div>
+   750→              </div>
+   751→
+   752→              {/* Bill Date Filter (Opens Popover) */}
+   753→              <div className={`${styles.filterField} ${styles.dateTrigger}`}>
+   754→                <label className={styles.filterLabel}>Bill Date</label>
+   755→                <div
+   756→                  className={styles.dateTriggerInner}
+   757→                  onClick={(e) => {
+   758→                    e.stopPropagation();
+   759→                    setIsDatePopoverOpen((prev) => !prev);
+   760→                    setIsFilterPopoverOpen(false);
+   761→                  }}
+   762→                >
+   763→                  <span>{isDateFilterActive ? activeDateLabel : 'This Year'}</span>
+   764→                  <span className="material-symbols-outlined" style={{ fontSize: 16, color: '#5a6355' }}>
+   765→                    calendar_today
+   766→                  </span>
+   767→                </div>
+   768→
+   769→                {/* Date Popover */}
+   770→                {isDatePopoverOpen && (
+   771→                  <div
+   772→                    className={`${styles.popover} ${styles.datePopover}`}
+   773→                    onClick={(e) => e.stopPropagation()}
+   774→                  >
+   775→                    <div className={styles.popoverHeader}>
+   776→                      <h3 className={styles.popoverTitle}>Bill Date</h3>
+   777→                      <button
+   778→                        type="button"
+   779→                        className={styles.iconBtn}
+   780→                        onClick={() => setIsDatePopoverOpen(false)}
+   781→                      >
+   782→                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+   783→                          close
+   784→                        </span>
+   785→                      </button>
+   786→                    </div>
+   787→
+   788→                    <div className={styles.dateInputsRow}>
+   789→                      <div style={{ flex: 1 }}>
+   790→                        <label className={styles.modalLabel}>Preset</label>
+   791→                        <select
+   792→                          className={styles.fieldSelect}
+   793→                          value={datePreset}
+   794→                          onChange={(e) => {
+   795→                            const val = e.target.value as 'This Year' | 'Last Year' | 'Custom';
+   796→                            setDatePreset(val);
+   797→                            if (val === 'This Year') {
+   798→                              setDateFrom('01/01/2026');
+   799→                              setDateTo('12/31/2026');
+   800→                            } else if (val === 'Last Year') {
+   801→                              setDateFrom('01/01/2025');
+   802→                              setDateTo('12/31/2025');
+   803→                            }
+   804→                          }}
+   805→                        >
+   806→                          <option value="This Year">This Year</option>
+   807→                          <option value="Last Year">Last Year</option>
+   808→                          <option value="Custom">Custom</option>
+   809→                        </select>
+   810→                      </div>
+   811→
+   812→                      <div style={{ flex: 1 }}>
+   813→                        <label className={styles.modalLabel}>From</label>
+   814→                        <div className={styles.inputWrapper}>
+   815→                          <input
+   816→                            type="text"
+   817→                            className={styles.fieldInput}
+   818→                            value={dateFrom}
+   819→                            onChange={(e) => setDateFrom(e.target.value)}
+   820→                          />
+   821→                          <span className={`material-symbols-outlined ${styles.inputIcon}`}>
+   822→                            calendar_today
+   823→                          </span>
+   824→                        </div>
+   825→                      </div>
+   826→
+   827→                      <div style={{ flex: 1 }}>
+   828→                        <label className={styles.modalLabel}>To</label>
+   829→                        <div className={styles.inputWrapper}>
+   830→                          <input
+   831→                            type="text"
+   832→                            className={styles.fieldInput}
+   833→                            value={dateTo}
+   834→                            onChange={(e) => setDateTo(e.target.value)}
+   835→                          />
+   836→                          <span className={`material-symbols-outlined ${styles.inputIcon}`}>
+   837→                            calendar_today
+   838→                          </span>
+   839→                        </div>
+   840→                      </div>
+   841→                    </div>
+   842→
+   843→                    <div className={styles.popoverFooter}>
+   844→                      <button
+   845→                        type="button"
+   846→                        className={styles.popoverResetBtn}
+   847→                        onClick={() => handleResetDateFilter()}
+   848→                      >
+   849→                        Reset
+   850→                      </button>
+   851→                      <button
+   852→                        type="button"
+   853→                        className={styles.popoverApplyBtn}
+   854→                        onClick={handleApplyDateFilter}
+   855→                      >
+   856→                        Apply
+   857→                      </button>
+   858→                    </div>
+   859→                  </div>
+   860→                )}
+   861→              </div>
+   862→
+   863→              {/* Filter By Button (Opens Popover) */}
+   864→              <div style={{ position: 'relative' }}>
+   865→                <button
+   866→                  type="button"
+   867→                  className={styles.filterBtnTrigger}
+   868→                  onClick={(e) => {
+   869→                    e.stopPropagation();
+   870→                    setIsFilterPopoverOpen((prev) => !prev);
+   871→                    setIsDatePopoverOpen(false);
+   872→                  }}
+   873→                >
+   874→                  <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+   875→                    filter_list
+   876→                  </span>
+   877→                  Filters
+   878→                  {(filterStatus !== 'All' || filterCategory !== 'All') && (
+   879→                    <span
+   880→                      style={{
+   881→                        width: 7,
+   882→                        height: 7,
+   883→                        borderRadius: '50%',
+   884→                        backgroundColor: '#0a6400',
+   885→                      }}
+   886→                    />
+   887→                  )}
+   888→                </button>
+   889→
+   890→                {/* Filter By Popover */}
+   891→                {isFilterPopoverOpen && (
+   892→                  <div
+   893→                    className={`${styles.popover} ${styles.filterPopover}`}
+   894→                    onClick={(e) => e.stopPropagation()}
+   895→                  >
+   896→                    <div className={styles.popoverHeader}>
+   897→                      <h3 className={styles.popoverTitle}>Filter By</h3>
+   898→                      <button
+   899→                        type="button"
+   900→                        className={styles.iconBtn}
+   901→                        onClick={() => setIsFilterPopoverOpen(false)}
+   902→                      >
+   903→                        <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+   904→                          close
+   905→                        </span>
+   906→                      </button>
+   907→                    </div>
+   908→
+   909→                    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 20 }}>
+   910→                      <div>
+   911→                        <label className={styles.modalLabel}>Status</label>
+   912→                        <div style={{ position: 'relative' }}>
+   913→                          <select
+   914→                            className={styles.fieldSelect}
+   915→                            value={filterStatus}
+   916→                            onChange={(e) => setFilterStatus(e.target.value)}
+   917→                          >
+   918→                            <option value="All">All</option>
+   919→                            <option value="For review">For review</option>
+   920→                            <option value="Unpaid">Unpaid</option>
+   921→                            <option value="Paid">Paid</option>
+   922→                          </select>
+   923→                          <span
+   924→                            className="material-symbols-outlined"
+   925→                            style={{
+   926→                              position: 'absolute',
+   927→                              right: 10,
+   928→                              top: 10,
+   929→                              fontSize: 16,
+   930→                              color: '#5a6355',
+   931→                              pointerEvents: 'none',
+   932→                            }}
+   933→                          >
+   934→                            expand_more
+   935→                          </span>
+   936→                        </div>
+   937→                      </div>
+   938→
+   939→                      <div>
+   940→                        <label className={styles.modalLabel}>Category</label>
+   941→                        <div style={{ position: 'relative' }}>
+   942→                          <select
+   943→                            className={styles.fieldSelect}
+   944→                            value={filterCategory}
+   945→                            onChange={(e) => setFilterCategory(e.target.value)}
+   946→                          >
+   947→                            <option value="All">All</option>
+   948→                            {categoryOptions.map((c) => (
+   949→                              <option key={c} value={c}>
+   950→                                {c}
+   951→                              </option>
+   952→                            ))}
+   953→                          </select>
+   954→                          <span
+   955→                            className="material-symbols-outlined"
+   956→                            style={{
+   957→                              position: 'absolute',
+   958→                              right: 10,
+   959→                              top: 10,
+   960→                              fontSize: 16,
+   961→                              color: '#5a6355',
+   962→                              pointerEvents: 'none',
+   963→                            }}
+   964→                          >
+   965→                            expand_more
+   966→                          </span>
+   967→                        </div>
+   968→                      </div>
+   969→                    </div>
+   970→
+   971→                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+   972→                      <button
+   973→                        type="button"
+   974→                        className={styles.popoverApplyBtn}
+   975→                        style={{ width: '100%', height: 36 }}
+   976→                        onClick={() => {
+   977→                          setIsFilterPopoverOpen(false);
+   978→                          showToast('Filters applied');
+   979→                        }}
+   980→                      >
+   981→                        Apply
+   982→                      </button>
+   983→                      <button
+   984→                        type="button"
+   985→                        className={styles.popoverResetBtn}
+   986→                        style={{ width: '100%', height: 36 }}
+   987→                        onClick={() => {
+   988→                          setFilterStatus('All');
+   989→                          setFilterCategory('All');
+   990→                          setIsFilterPopoverOpen(false);
+   991→                          showToast('Filters reset');
+   992→                        }}
+   993→                      >
+   994→                        Reset
+   995→                      </button>
+   996→                    </div>
+   997→                  </div>
+   998→                )}
+   999→              </div>
+  1000→            </div>
+  1001→
+  1002→            {/* Active Date Pill */}
+  1003→            {isDateFilterActive && (
+  1004→              <div>
+  1005→                <span className={styles.activeDatePill}>
+  1006→                  Bill Date: {activeDateLabel}
+  1007→                  <button
+  1008→                    type="button"
+  1009→                    className={styles.pillCloseBtn}
+  1010→                    onClick={handleResetDateFilter}
+  1011→                    title="Remove date filter"
+  1012→                  >
+  1013→                    <span className="material-symbols-outlined" style={{ fontSize: 14 }}>
+  1014→                      close
+  1015→                    </span>
+  1016→                  </button>
+  1017→                </span>
+  1018→              </div>
+  1019→            )}
+  1020→          </div>
+  1021→
+  1022→          {/* Right side icons */}
+  1023→          <div className={styles.filtersRight}>
+  1024→            <button
+  1025→              type="button"
+  1026→              className={styles.iconBtn}
+  1027→              title="Print table"
+  1028→              onClick={() => {
+  1029→                if (typeof window !== 'undefined') window.print();
+  1030→              }}
+  1031→            >
+  1032→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1033→                print
+  1034→              </span>
+  1035→            </button>
+  1036→            <button
+  1037→              type="button"
+  1038→              className={styles.customizeBtn}
+  1039→              onClick={() => setIsCustomizeOpen(true)}
+  1040→            >
+  1041→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1042→                tune
+  1043→              </span>
+  1044→              Customize
+  1045→            </button>
+  1046→          </div>
+  1047→        </div>
+  1048→
+  1049→        {/* ═══════════ TABLE AREA ═══════════ */}
+  1050→        <div className={styles.tableContainer}>
+  1051→          <table className={styles.table}>
+  1052→            <thead className={styles.tableHeader}>
+  1053→              <tr>
+  1054→                <th style={{ width: 40, paddingLeft: 12 }}>
+  1055→                  <input
+  1056→                    type="checkbox"
+  1057→                    checked={isAllSelected}
+  1058→                    onChange={handleSelectAll}
+  1059→                    style={{ accentColor: '#0a6400', cursor: 'pointer' }}
+  1060→                  />
+  1061→                </th>
+  1062→                {visibleColumns.map((col) => (
+  1063→                  <th
+  1064→                    key={col.key}
+  1065→                    style={{
+  1066→                      textAlign: col.align || 'left',
+  1067→                      cursor: 'pointer',
+  1068→                    }}
+  1069→                    onClick={() => {
+  1070→                      if (
+  1071→                        col.key === 'billDate' ||
+  1072→                        col.key === 'dueDate' ||
+  1073→                        col.key === 'amount' ||
+  1074→                        col.key === 'vendor'
+  1075→                      ) {
+  1076→                        if (sortBy === col.key) {
+  1077→                          setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+  1078→                        } else {
+  1079→                          setSortBy(col.key);
+  1080→                          setSortDirection('asc');
+  1081→                        }
+  1082→                      }
+  1083→                    }}
+  1084→                  >
+  1085→                    {col.label}
+  1086→                    {sortBy === col.key && (
+  1087→                      <span
+  1088→                        className="material-symbols-outlined"
+  1089→                        style={{ fontSize: 14, verticalAlign: 'middle', marginLeft: 4 }}
+  1090→                      >
+  1091→                        {sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward'}
+  1092→                      </span>
+  1093→                    )}
+  1094→                  </th>
+  1095→                ))}
+  1096→                <th style={{ textAlign: 'right', paddingRight: 16 }}>Action</th>
+  1097→              </tr>
+  1098→            </thead>
+  1099→            <tbody>
+  1100→              {filteredBills.length === 0 ? (
+  1101→                /* Empty State Row matching attachment screenshot exactly */
+  1102→                <tr>
+  1103→                  <td colSpan={visibleColumns.length + 2} className={styles.emptyStateCell}>
+  1104→                    <h3 className={styles.emptyStateTitle}>No bills found</h3>
+  1105→                    <p className={styles.emptyStateDesc}>
+  1106→                      Select Upload files to create bills automatically.
+  1107→                    </p>
+  1108→                    <button
+  1109→                      type="button"
+  1110→                      className={styles.uploadFilesBtn}
+  1111→                      onClick={handleTriggerUpload}
+  1112→                    >
+  1113→                      Upload files
+  1114→                    </button>
+  1115→                  </td>
+  1116→                </tr>
+  1117→              ) : (
+  1118→                filteredBills.map((bill, idx) => {
+  1119→                  const isChecked = selectedIds.has(bill.id);
+  1120→                  const isAlt = alternateRowColor && idx % 2 === 1;
+  1121→                  const rowClass = `${styles.tableRow} ${
+  1122→                    rowHeight === 'Compact' ? styles.compactRow : ''
+  1123→                  } ${isAlt ? styles.tableRowAlt : ''}`;
+  1124→
+  1125→                  return (
+  1126→                    <tr key={bill.id} className={rowClass}>
+  1127→                      <td style={{ width: 40, paddingLeft: 12 }}>
+  1128→                        <input
+  1129→                          type="checkbox"
+  1130→                          checked={isChecked}
+  1131→                          onChange={() => handleToggleRow(bill.id)}
+  1132→                          style={{ accentColor: '#0a6400', cursor: 'pointer' }}
+  1133→                        />
+  1134→                      </td>
+  1135→
+  1136→                      {visibleColumns.map((col) => {
+  1137→                        switch (col.key) {
+  1138→                          case 'vendor':
+  1139→                            return (
+  1140→                              <td key={col.key} style={{ fontWeight: 600 }}>
+  1141→                                <button
+  1142→                                  type="button"
+  1143→                                  style={{
+  1144→                                    background: 'none',
+  1145→                                    border: 'none',
+  1146→                                    padding: 0,
+  1147→                                    font: 'inherit',
+  1148→                                    color: '#0a6400',
+  1149→                                    cursor: 'pointer',
+  1150→                                    textAlign: 'left',
+  1151→                                    textDecoration: 'underline',
+  1152→                                  }}
+  1153→                                  onClick={() => {
+  1154→                                    if (onOpenPeek) {
+  1155→                                      onOpenPeek(`Bill ${bill.billNo} — ${bill.vendor}`, {
+  1156→                                        Vendor: bill.vendor,
+  1157→                                        'Bill No.': bill.billNo,
+  1158→                                        'Bill Date': bill.billDate,
+  1159→                                        'Due Date': bill.dueDate,
+  1160→                                        Amount: `$${bill.amount.toFixed(2)}`,
+  1161→                                        Category: bill.category,
+  1162→                                        Source: bill.source,
+  1163→                                        Status: bill.status,
+  1164→                                        Memo: bill.memo,
+  1165→                                      });
+  1166→                                    } else {
+  1167→                                      setEditingId(bill.id);
+  1168→                                    }
+  1169→                                  }}
+  1170→                                >
+  1171→                                  {bill.vendor}
+  1172→                                </button>
+  1173→                              </td>
+  1174→                            );
+  1175→                          case 'source':
+  1176→                            return (
+  1177→                              <td key={col.key}>
+  1178→                                <span className={styles.sourceBadge}>
+  1179→                                  <span
+  1180→                                    className="material-symbols-outlined"
+  1181→                                    style={{ fontSize: 13 }}
+  1182→                                  >
+  1183→                                    {bill.source === 'Auto-scanned'
+  1184→                                      ? 'document_scanner'
+  1185→                                      : bill.source === 'Email forwarded'
+  1186→                                      ? 'mail'
+  1187→                                      : 'edit_note'}
+  1188→                                  </span>
+  1189→                                  {bill.source}
+  1190→                                </span>
+  1191→                              </td>
+  1192→                            );
+  1193→                          case 'billNo':
+  1194→                            return (
+  1195→                              <td key={col.key} style={{ fontFamily: 'monospace' }}>
+  1196→                                {bill.billNo}
+  1197→                              </td>
+  1198→                            );
+  1199→                          case 'billDate':
+  1200→                            return <td key={col.key}>{bill.billDate}</td>;
+  1201→                          case 'category':
+  1202→                            return (
+  1203→                              <td key={col.key}>
+  1204→                                <span className={styles.categoryTag}>{bill.category}</span>
+  1205→                              </td>
+  1206→                            );
+  1207→                          case 'className':
+  1208→                            return <td key={col.key}>{bill.className || '—'}</td>;
+  1209→                          case 'location':
+  1210→                            return <td key={col.key}>{bill.location || '—'}</td>;
+  1211→                          case 'memo':
+  1212→                            return (
+  1213→                              <td
+  1214→                                key={col.key}
+  1215→                                style={{
+  1216→                                  maxWidth: 240,
+  1217→                                  overflow: 'hidden',
+  1218→                                  textOverflow: 'ellipsis',
+  1219→                                  whiteSpace: 'nowrap',
+  1220→                                }}
+  1221→                              >
+  1222→                                {bill.memo}
+  1223→                              </td>
+  1224→                            );
+  1225→                          case 'dueDate':
+  1226→                            return <td key={col.key}>{bill.dueDate}</td>;
+  1227→                          case 'amount':
+  1228→                            return (
+  1229→                              <td
+  1230→                                key={col.key}
+  1231→                                style={{
+  1232→                                  textAlign: 'right',
+  1233→                                  fontWeight: 600,
+  1234→                                  fontVariantNumeric: 'tabular-nums',
+  1235→                                }}
+  1236→                              >
+  1237→                                ${bill.amount.toFixed(2)}
+  1238→                              </td>
+  1239→                            );
+  1240→                          case 'attachments':
+  1241→                            return (
+  1242→                              <td key={col.key} style={{ textAlign: 'right' }}>
+  1243→                                {bill.attachmentsCount > 0 ? (
+  1244→                                  <span
+  1245→                                    style={{
+  1246→                                      display: 'inline-flex',
+  1247→                                      alignItems: 'center',
+  1248→                                      gap: 3,
+  1249→                                      color: '#5a6355',
+  1250→                                    }}
+  1251→                                  >
+  1252→                                    <span
+  1253→                                      className="material-symbols-outlined"
+  1254→                                      style={{ fontSize: 15 }}
+  1255→                                    >
+  1256→                                      attach_file
+  1257→                                    </span>
+  1258→                                    {bill.attachmentsCount}
+  1259→                                  </span>
+  1260→                                ) : (
+  1261→                                  <span style={{ color: '#becab6' }}>—</span>
+  1262→                                )}
+  1263→                              </td>
+  1264→                            );
+  1265→                          default:
+  1266→                            return <td key={col.key}>—</td>;
+  1267→                        }
+  1268→                      })}
+  1269→
+  1270→                      {/* Action Cell */}
+  1271→                      <td style={{ textAlign: 'right', paddingRight: 16, position: 'relative' }}>
+  1272→                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+  1273→                          {bill.status === 'For review' && (
+  1274→                            <button
+  1275→                              type="button"
+  1276→                              className={styles.popoverApplyBtn}
+  1277→                              style={{ height: 26, fontSize: 11, padding: '0 8px' }}
+  1278→                              onClick={() => handleApproveBill(bill.id)}
+  1279→                            >
+  1280→                              Approve
+  1281→                            </button>
+  1282→                          )}
+  1283→                          {bill.status === 'Unpaid' && (
+  1284→                            <button
+  1285→                              type="button"
+  1286→                              className={styles.popoverApplyBtn}
+  1287→                              style={{ height: 26, fontSize: 11, padding: '0 8px' }}
+  1288→                              onClick={() => handleMarkAsPaid(bill.id)}
+  1289→                            >
+  1290→                              Pay
+  1291→                            </button>
+  1292→                          )}
+  1293→                          <button
+  1294→                            type="button"
+  1295→                            data-row-menu-btn
+  1296→                            className={styles.iconBtn}
+  1297→                            style={{ width: 28, height: 28 }}
+  1298→                            onClick={(e) => {
+  1299→                              e.stopPropagation();
+  1300→                              setActiveRowMenuId(activeRowMenuId === bill.id ? null : bill.id);
+  1301→                            }}
+  1302→                          >
+  1303→                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1304→                              more_vert
+  1305→                            </span>
+  1306→                          </button>
+  1307→                        </div>
+  1308→
+  1309→                        {/* Row Action Popover */}
+  1310→                        {activeRowMenuId === bill.id && (
+  1311→                          <div
+  1312→                            className={styles.rowMenu}
+  1313→                            style={{ right: 16, top: 32, minWidth: 180 }}
+  1314→                            onClick={(e) => e.stopPropagation()}
+  1315→                          >
+  1316→                            <button
+  1317→                              type="button"
+  1318→                              className={styles.rowMenuItem}
+  1319→                              onClick={() => {
+  1320→                                if (onOpenPeek) {
+  1321→                                  onOpenPeek(`Bill ${bill.billNo} — ${bill.vendor}`, {
+  1322→                                    Vendor: bill.vendor,
+  1323→                                    'Bill No.': bill.billNo,
+  1324→                                    'Bill Date': bill.billDate,
+  1325→                                    'Due Date': bill.dueDate,
+  1326→                                    Amount: `$${bill.amount.toFixed(2)}`,
+  1327→                                    Category: bill.category,
+  1328→                                    Source: bill.source,
+  1329→                                    Status: bill.status,
+  1330→                                    Memo: bill.memo,
+  1331→                                  });
+  1332→                                }
+  1333→                                setActiveRowMenuId(null);
+  1334→                              }}
+  1335→                            >
+  1336→                              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1337→                                visibility
+  1338→                              </span>
+  1339→                              View bill details
+  1340→                            </button>
+  1341→                            <button
+  1342→                              type="button"
+  1343→                              className={styles.rowMenuItem}
+  1344→                              onClick={() => {
+  1345→                                setEditingId(bill.id);
+  1346→                                setActiveRowMenuId(null);
+  1347→                              }}
+  1348→                            >
+  1349→                              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1350→                                edit
+  1351→                              </span>
+  1352→                              Edit bill
+  1353→                            </button>
+  1354→                            {bill.status === 'For review' && (
+  1355→                              <button
+  1356→                                type="button"
+  1357→                                className={styles.rowMenuItem}
+  1358→                                onClick={() => handleApproveBill(bill.id)}
+  1359→                              >
+  1360→                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1361→                                  check_circle
+  1362→                                </span>
+  1363→                                Approve to Unpaid
+  1364→                              </button>
+  1365→                            )}
+  1366→                            {bill.status === 'Unpaid' && (
+  1367→                              <button
+  1368→                                type="button"
+  1369→                                className={styles.rowMenuItem}
+  1370→                                onClick={() => handleMarkAsPaid(bill.id)}
+  1371→                              >
+  1372→                                <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1373→                                  paid
+  1374→                                </span>
+  1375→                                Mark as Paid
+  1376→                              </button>
+  1377→                            )}
+  1378→                            <button
+  1379→                              type="button"
+  1380→                              className={styles.rowMenuItem}
+  1381→                              onClick={() => {
+  1382→                                showToast(`Downloading receipt for ${bill.billNo}...`);
+  1383→                                setActiveRowMenuId(null);
+  1384→                              }}
+  1385→                            >
+  1386→                              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1387→                                download
+  1388→                              </span>
+  1389→                              Download attachment
+  1390→                            </button>
+  1391→                            <button
+  1392→                              type="button"
+  1393→                              className={styles.rowMenuItem}
+  1394→                              style={{ color: '#ba1a1a' }}
+  1395→                              onClick={() => handleDeleteBill(bill.id)}
+  1396→                            >
+  1397→                              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1398→                                delete
+  1399→                              </span>
+  1400→                              Delete bill
+  1401→                            </button>
+  1402→                          </div>
+  1403→                        )}
+  1404→                      </td>
+  1405→                    </tr>
+  1406→                  );
+  1407→                })
+  1408→              )}
+  1409→            </tbody>
+  1410→          </table>
+  1411→        </div>
+  1412→
+  1413→        {/* ═══════════ PAGINATION ═══════════ */}
+  1414→        <div className={styles.pagination}>
+  1415→          <div>
+  1416→            {filteredBills.length === 0
+  1417→              ? '0 - 0 of 0 items'
+  1418→              : `1 - ${filteredBills.length} of ${filteredBills.length} items`}
+  1419→          </div>
+  1420→          <div className={styles.paginationControls}>
+  1421→            <button
+  1422→              type="button"
+  1423→              className={`${styles.iconBtn} ${styles.disabledIconBtn}`}
+  1424→              disabled
+  1425→            >
+  1426→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1427→                chevron_left
+  1428→              </span>
+  1429→            </button>
+  1430→            <span>Page</span>
+  1431→            <input
+  1432→              className={styles.pageInput}
+  1433→              defaultValue="1"
+  1434→              readOnly
+  1435→            />
+  1436→            <span>of 1</span>
+  1437→            <button
+  1438→              type="button"
+  1439→              className={`${styles.iconBtn} ${styles.disabledIconBtn}`}
+  1440→              disabled
+  1441→            >
+  1442→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1443→                chevron_right
+  1444→              </span>
+  1445→            </button>
+  1446→            <button
+  1447→              type="button"
+  1448→              className={`${styles.iconBtn} ${styles.disabledIconBtn}`}
+  1449→              disabled
+  1450→            >
+  1451→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1452→                last_page
+  1453→              </span>
+  1454→            </button>
+  1455→          </div>
+  1456→        </div>
+  1457→      </main>
+  1458→
+  1459→      {/* ═══════════ CUSTOMIZE DRAWER ═══════════ */}
+  1460→      <div
+  1461→        className={`${styles.drawerScrim} ${isCustomizeOpen ? styles.drawerScrimOpen : ''}`}
+  1462→        onClick={() => setIsCustomizeOpen(false)}
+  1463→      />
+  1464→      <aside
+  1465→        className={`${styles.drawer} ${isCustomizeOpen ? styles.drawerOpen : ''}`}
+  1466→        aria-label="Customize Table"
+  1467→      >
+  1468→        <div className={styles.drawerHeader}>
+  1469→          <h2 className={styles.drawerTitle}>Customize</h2>
+  1470→          <button
+  1471→            type="button"
+  1472→            className={styles.iconBtn}
+  1473→            onClick={() => setIsCustomizeOpen(false)}
+  1474→          >
+  1475→            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+  1476→              close
+  1477→            </span>
+  1478→          </button>
+  1479→        </div>
+  1480→
+  1481→        <div className={styles.drawerBody}>
+  1482→          {/* Sort Section */}
+  1483→          <div>
+  1484→            <div className={styles.drawerSectionTitle}>
+  1485→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1486→                expand_less
+  1487→              </span>
+  1488→              Sort
+  1489→            </div>
+  1490→            <div className={styles.sortBox}>
+  1491→              <div>
+  1492→                <label className={styles.filterLabel}>Sort by</label>
+  1493→                <div style={{ position: 'relative' }}>
+  1494→                  <select
+  1495→                    className={styles.fieldSelect}
+  1496→                    value={sortBy}
+  1497→                    onChange={(e) =>
+  1498→                      setSortBy(
+  1499→                        e.target.value as 'billDate' | 'dueDate' | 'amount' | 'vendor'
+  1500→                      )
+  1501→                    }
+  1502→                  >
+  1503→                    <option value="billDate">Bill Date</option>
+  1504→                    <option value="dueDate">Due Date</option>
+  1505→                    <option value="amount">Bill Amount</option>
+  1506→                    <option value="vendor">Vendor</option>
+  1507→                  </select>
+  1508→                  <span
+  1509→                    className="material-symbols-outlined"
+  1510→                    style={{
+  1511→                      position: 'absolute',
+  1512→                      right: 10,
+  1513→                      top: 10,
+  1514→                      fontSize: 16,
+  1515→                      color: '#5a6355',
+  1516→                      pointerEvents: 'none',
+  1517→                    }}
+  1518→                  >
+  1519→                    expand_more
+  1520→                  </span>
+  1521→                </div>
+  1522→              </div>
+  1523→
+  1524→              <div>
+  1525→                <label className={styles.filterLabel}>Direction</label>
+  1526→                <div style={{ position: 'relative' }}>
+  1527→                  <select
+  1528→                    className={styles.fieldSelect}
+  1529→                    value={sortDirection}
+  1530→                    onChange={(e) => setSortDirection(e.target.value as 'asc' | 'desc')}
+  1531→                  >
+  1532→                    <option value="desc">Descending</option>
+  1533→                    <option value="asc">Ascending</option>
+  1534→                  </select>
+  1535→                  <span
+  1536→                    className="material-symbols-outlined"
+  1537→                    style={{
+  1538→                      position: 'absolute',
+  1539→                      right: 10,
+  1540→                      top: 10,
+  1541→                      fontSize: 16,
+  1542→                      color: '#5a6355',
+  1543→                      pointerEvents: 'none',
+  1544→                    }}
+  1545→                  >
+  1546→                    expand_more
+  1547→                  </span>
+  1548→                </div>
+  1549→              </div>
+  1550→            </div>
+  1551→            <button
+  1552→              type="button"
+  1553→              className={styles.addSortBtn}
+  1554→              onClick={() => showToast('Secondary sort criteria added')}
+  1555→            >
+  1556→              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1557→                add
+  1558→              </span>
+  1559→              Add sort
+  1560→            </button>
+  1561→          </div>
+  1562→
+  1563→          {/* Rows Section */}
+  1564→          <div>
+  1565→            <div className={styles.drawerSectionTitle}>
+  1566→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1567→                expand_less
+  1568→              </span>
+  1569→              Rows
+  1570→            </div>
+  1571→            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+  1572→              <div>
+  1573→                <label className={styles.filterLabel}>Rows per page</label>
+  1574→                <div style={{ position: 'relative' }}>
+  1575→                  <select
+  1576→                    className={styles.fieldSelect}
+  1577→                    value={rowsPerPage}
+  1578→                    onChange={(e) => setRowsPerPage(Number(e.target.value))}
+  1579→                  >
+  1580→                    <option value={50}>50</option>
+  1581→                    <option value={75}>75</option>
+  1582→                    <option value={100}>100</option>
+  1583→                  </select>
+  1584→                  <span
+  1585→                    className="material-symbols-outlined"
+  1586→                    style={{
+  1587→                      position: 'absolute',
+  1588→                      right: 10,
+  1589→                      top: 10,
+  1590→                      fontSize: 16,
+  1591→                      color: '#5a6355',
+  1592→                      pointerEvents: 'none',
+  1593→                    }}
+  1594→                  >
+  1595→                    expand_more
+  1596→                  </span>
+  1597→                </div>
+  1598→              </div>
+  1599→
+  1600→              <div>
+  1601→                <label className={styles.filterLabel}>Row height</label>
+  1602→                <div style={{ position: 'relative' }}>
+  1603→                  <select
+  1604→                    className={styles.fieldSelect}
+  1605→                    value={rowHeight}
+  1606→                    onChange={(e) => setRowHeight(e.target.value as 'Cozy' | 'Compact')}
+  1607→                  >
+  1608→                    <option value="Cozy">Cozy</option>
+  1609→                    <option value="Compact">Compact</option>
+  1610→                  </select>
+  1611→                  <span
+  1612→                    className="material-symbols-outlined"
+  1613→                    style={{
+  1614→                      position: 'absolute',
+  1615→                      right: 10,
+  1616→                      top: 10,
+  1617→                      fontSize: 16,
+  1618→                      color: '#5a6355',
+  1619→                      pointerEvents: 'none',
+  1620→                    }}
+  1621→                  >
+  1622→                    expand_more
+  1623→                  </span>
+  1624→                </div>
+  1625→              </div>
+  1626→
+  1627→              <label
+  1628→                style={{
+  1629→                  display: 'flex',
+  1630→                  alignItems: 'center',
+  1631→                  gap: 8,
+  1632→                  fontSize: 13,
+  1633→                  cursor: 'pointer',
+  1634→                  userSelect: 'none',
+  1635→                }}
+  1636→              >
+  1637→                <input
+  1638→                  type="checkbox"
+  1639→                  checked={alternateRowColor}
+  1640→                  onChange={(e) => setAlternateRowColor(e.target.checked)}
+  1641→                  style={{ accentColor: '#0a6400' }}
+  1642→                />
+  1643→                Alternate row color
+  1644→              </label>
+  1645→            </div>
+  1646→          </div>
+  1647→
+  1648→          {/* Columns Section */}
+  1649→          <div>
+  1650→            <div className={styles.drawerSectionTitle}>
+  1651→              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+  1652→                expand_less
+  1653→              </span>
+  1654→              Columns
+  1655→            </div>
+  1656→            <p style={{ fontSize: 11, color: '#5a6355', marginBottom: 12 }}>
+  1657→              Drag to change the order of columns
+  1658→            </p>
+  1659→
+  1660→            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+  1661→              {columns.map((col) => (
+  1662→                <div key={col.key} className={styles.columnOrderItem}>
+  1663→                  <div className={styles.columnItemLeft}>
+  1664→                    <span className={`material-symbols-outlined ${styles.dragHandle}`}>
+  1665→                      drag_indicator
+  1666→                    </span>
+  1667→                    <input
+  1668→                      type="checkbox"
+  1669→                      checked={col.visible}
+  1670→                      onChange={() => handleToggleColumn(col.key)}
+  1671→                      style={{ accentColor: '#0a6400', cursor: 'pointer' }}
+  1672→                    />
+  1673→                    <span>{col.label}</span>
+  1674→                  </div>
+  1675→                </div>
+  1676→              ))}
+  1677→            </div>
+  1678→          </div>
+  1679→        </div>
+  1680→      </aside>
+  1681→
+  1682→      {/* ═══════════ MODALS ═══════════ */}
+  1683→
+  1684→      {/* Create Bill Modal */}
+  1685→      {isCreateModalOpen && (
+  1686→        <div className={styles.modalBackdrop} onClick={() => setIsCreateModalOpen(false)}>
+  1687→          <div
+  1688→            className={styles.modalContent}
+  1689→            onClick={(e) => e.stopPropagation()}
+  1690→          >
+  1691→            <div className={styles.modalHeader}>
+  1692→              <h2 className={styles.modalTitle}>Add Bill</h2>
+  1693→              <button
+  1694→                type="button"
+  1695→                className={styles.iconBtn}
+  1696→                onClick={() => setIsCreateModalOpen(false)}
+  1697→              >
+  1698→                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+  1699→                  close
+  1700→                </span>
+  1701→              </button>
+  1702→            </div>
+  1703→
+  1704→            <form onSubmit={handleSaveNewBill}>
+  1705→              <div className={styles.modalBody}>
+  1706→                <div className={styles.modalGrid}>
+  1707→                  <div>
+  1708→                    <label className={styles.modalLabel}>Vendor *</label>
+  1709→                    <input
+  1710→                      className={styles.fieldInput}
+  1711→                      value={newVendor}
+  1712→                      onChange={(e) => setNewVendor(e.target.value)}
+  1713→                      required
+  1714→                    />
+  1715→                  </div>
+  1716→                  <div>
+  1717→                    <label className={styles.modalLabel}>Bill Number *</label>
+  1718→                    <input
+  1719→                      className={styles.fieldInput}
+  1720→                      value={newBillNo}
+  1721→                      onChange={(e) => setNewBillNo(e.target.value)}
+  1722→                      required
+  1723→                    />
+  1724→                  </div>
+  1725→                  <div>
+  1726→                    <label className={styles.modalLabel}>Bill Date</label>
+  1727→                    <input
+  1728→                      className={styles.fieldInput}
+  1729→                      value={newBillDate}
+  1730→                      onChange={(e) => setNewBillDate(e.target.value)}
+  1731→                    />
+  1732→                  </div>
+  1733→                  <div>
+  1734→                    <label className={styles.modalLabel}>Due Date</label>
+  1735→                    <input
+  1736→                      className={styles.fieldInput}
+  1737→                      value={newDueDate}
+  1738→                      onChange={(e) => setNewDueDate(e.target.value)}
+  1739→                    />
+  1740→                  </div>
+  1741→                  <div>
+  1742→                    <label className={styles.modalLabel}>Category</label>
+  1743→                    <select
+  1744→                      className={styles.fieldSelect}
+  1745→                      value={newCategory}
+  1746→                      onChange={(e) => setNewCategory(e.target.value)}
+  1747→                    >
+  1748→                      <option value="Printing">Printing</option>
+  1749→                      <option value="Shipping">Shipping</option>
+  1750→                      <option value="Software">Software</option>
+  1751→                      <option value="Office Supplies">Office Supplies</option>
+  1752→                      <option value="Legal & Professional">Legal &amp; Professional</option>
+  1753→                    </select>
+  1754→                  </div>
+  1755→                  <div>
+  1756→                    <label className={styles.modalLabel}>Amount ($) *</label>
+  1757→                    <input
+  1758→                      className={styles.fieldInput}
+  1759→                      type="number"
+  1760→                      step="0.01"
+  1761→                      value={newAmount}
+  1762→                      onChange={(e) => setNewAmount(e.target.value)}
+  1763→                      required
+  1764→                    />
+  1765→                  </div>
+  1766→                  <div className={styles.modalFullWidth}>
+  1767→                    <label className={styles.modalLabel}>Memo / Notes</label>
+  1768→                    <input
+  1769→                      className={styles.fieldInput}
+  1770→                      value={newMemo}
+  1771→                      onChange={(e) => setNewMemo(e.target.value)}
+  1772→                      placeholder="e.g. Q4 Packaging supplies"
+  1773→                    />
+  1774→                  </div>
+  1775→                </div>
+  1776→              </div>
+  1777→
+  1778→              <div className={styles.modalFooter}>
+  1779→                <button
+  1780→                  type="button"
+  1781→                  className={styles.popoverResetBtn}
+  1782→                  onClick={() => setIsCreateModalOpen(false)}
+  1783→                >
+  1784→                  Cancel
+  1785→                </button>
+  1786→                <button type="submit" className={styles.popoverApplyBtn}>
+  1787→                  Save bill
+  1788→                </button>
+  1789→              </div>
+  1790→            </form>
+  1791→          </div>
+  1792→        </div>
+  1793→      )}
+  1794→
+  1795→      {/* Manage Email Settings Modal */}
+  1796→      {isEmailSettingsOpen && (
+  1797→        <div className={styles.modalBackdrop} onClick={() => setIsEmailSettingsOpen(false)}>
+  1798→          <div
+  1799→            className={styles.modalContent}
+  1800→            onClick={(e) => e.stopPropagation()}
+  1801→          >
+  1802→            <div className={styles.modalHeader}>
+  1803→              <h2 className={styles.modalTitle}>Manage Email Settings</h2>
+  1804→              <button
+  1805→                type="button"
+  1806→                className={styles.iconBtn}
+  1807→                onClick={() => setIsEmailSettingsOpen(false)}
+  1808→              >
+  1809→                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+  1810→                  close
+  1811→                </span>
+  1812→              </button>
+  1813→            </div>
+  1814→
+  1815→            <div className={styles.modalBody}>
+  1816→              <p style={{ fontSize: 13, color: '#5a6355', margin: 0 }}>
+  1817→                Forward receipts and digital bills from your vendors or team to this private
+  1818→                inbox address. Bills are scanned using automated extraction and placed into your
+  1819→                &apos;For review&apos; queue.
+  1820→              </p>
+  1821→
+  1822→              <div>
+  1823→                <label className={styles.modalLabel}>Your Ingestion Email Address</label>
+  1824→                <div style={{ display: 'flex', gap: 8 }}>
+  1825→                  <input
+  1826→                    className={styles.fieldInput}
+  1827→                    value="unsaid+expenses@assist.intuit.com"
+  1828→                    readOnly
+  1829→                  />
+  1830→                  <button
+  1831→                    type="button"
+  1832→                    className={styles.popoverApplyBtn}
+  1833→                    onClick={handleCopyEmail}
+  1834→                  >
+  1835→                    Copy
+  1836→                  </button>
+  1837→                </div>
+  1838→              </div>
+  1839→
+  1840→              <div>
+  1841→                <label className={styles.modalLabel}>Sender Whitelist / Authorization</label>
+  1842→                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13 }}>
+  1843→                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+  1844→                    <input type="radio" name="email_auth" defaultChecked style={{ accentColor: '#0a6400' }} />
+  1845→                    Anyone can forward bills to this address
+  1846→                  </label>
+  1847→                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+  1848→                    <input type="radio" name="email_auth" style={{ accentColor: '#0a6400' }} />
+  1849→                    Only team members and invited users
+  1850→                  </label>
+  1851→                </div>
+  1852→              </div>
+  1853→            </div>
+  1854→
+  1855→            <div className={styles.modalFooter}>
+  1856→              <button
+  1857→                type="button"
+  1858→                className={styles.popoverApplyBtn}
+  1859→                onClick={() => {
+  1860→                  setIsEmailSettingsOpen(false);
+  1861→                  showToast('Email settings updated');
+  1862→                }}
+  1863→              >
+  1864→                Done
+  1865→              </button>
+  1866→            </div>
+  1867→          </div>
+  1868→        </div>
+  1869→      )}
+  1870→
+  1871→      {/* How to Manage Bills Modal */}
+  1872→      {isHelpModalOpen && (
+  1873→        <div className={styles.modalBackdrop} onClick={() => setIsHelpModalOpen(false)}>
+  1874→          <div
+  1875→            className={styles.modalContent}
+  1876→            onClick={(e) => e.stopPropagation()}
+  1877→          >
+  1878→            <div className={styles.modalHeader}>
+  1879→              <h2 className={styles.modalTitle}>How to Manage Bills</h2>
+  1880→              <button
+  1881→                type="button"
+  1882→                className={styles.iconBtn}
+  1883→                onClick={() => setIsHelpModalOpen(false)}
+  1884→              >
+  1885→                <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+  1886→                  close
+  1887→                </span>
+  1888→              </button>
+  1889→            </div>
+  1890→
+  1891→            <div className={styles.modalBody}>
+  1892→              <div style={{ display: 'flex', gap: 12 }}>
+  1893→                <span className="material-symbols-outlined" style={{ color: '#0a6400', fontSize: 28 }}>
+  1894→                  document_scanner
+  1895→                </span>
+  1896→                <div>
+  1897→                  <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 600 }}>
+  1898→                    1. Forward or upload invoices
+  1899→                  </h4>
+  1900→                  <p style={{ margin: 0, fontSize: 12, color: '#5a6355' }}>
+  1901→                    Email invoices to your custom inbox or upload PDFs and images directly. OCR
+  1902→                    extracts vendor, total amount, line items, and due dates.
+  1903→                  </p>
+  1904→                </div>
+  1905→              </div>
+  1906→
+  1907→              <div style={{ display: 'flex', gap: 12 }}>
+  1908→                <span className="material-symbols-outlined" style={{ color: '#0a6400', fontSize: 28 }}>
+  1909→                  fact_check
+  1910→                </span>
+  1911→                <div>
+  1912→                  <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 600 }}>
+  1913→                    2. Review &amp; match
+  1914→                  </h4>
+  1915→                  <p style={{ margin: 0, fontSize: 12, color: '#5a6355' }}>
+  1916→                    Bills appear in &apos;For review&apos;. Match them against open Purchase Orders
+  1917→                    and assign expense categories.
+  1918→                  </p>
+  1919→                </div>
+  1920→              </div>
+  1921→
+  1922→              <div style={{ display: 'flex', gap: 12 }}>
+  1923→                <span className="material-symbols-outlined" style={{ color: '#0a6400', fontSize: 28 }}>
+  1924→                  payments
+  1925→                </span>
+  1926→                <div>
+  1927→                  <h4 style={{ margin: '0 0 4px 0', fontSize: 14, fontWeight: 600 }}>
+  1928→                    3. Approve and pay
+  1929→                  </h4>
+  1930→                  <p style={{ margin: 0, fontSize: 12, color: '#5a6355' }}>
+  1931→                    Approved bills move to &apos;Unpaid&apos;. Schedule payments via ACH, card, or paper
+  1932→                    check through &apos;Pay bills&apos;.
+  1933→                  </p>
+  1934→                </div>
+  1935→              </div>
+  1936→            </div>
+  1937→
+  1938→            <div className={styles.modalFooter}>
+  1939→              <button
+  1940→                type="button"
+  1941→                className={styles.popoverApplyBtn}
+  1942→                onClick={() => setIsHelpModalOpen(false)}
+  1943→              >
+  1944→                Got it
+  1945→              </button>
+  1946→            </div>
+  1947→          </div>
+  1948→        </div>
+  1949→      )}
+  1950→
+  1951→      {/* Local In-Screen Toast */}
+  1952→      {localToastMessage && (
+  1953→        <div className={styles.toast}>
+  1954→          <span className="material-symbols-outlined" style={{ fontSize: 16 }}>
+  1955→            check_circle
+  1956→          </span>
+  1957→          {localToastMessage}
+  1958→        </div>
+  1959→      )}
+  1960→    </div>
+  1961→  );
+  1962→}
+  1963→

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Chart of accounts — Accounting</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* Toolbar dropdown (Clean up, New account) */
+  .tb-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:220px;padding:4px;z-index:200;display:none}
+  .tb-menu.open{display:block}
+  .tb-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .tb-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .tb-menu button:hover{background:#f4f3f7}
+  .tb-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .tb-menu button.danger{color:#ba1a1a}
+  .tb-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .tb-menu button.danger:hover{background:#ffdad6}
+  .tb-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Row ⋯ menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:230px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  /* Register drawer */
+  .register-drawer{width:900px}
+  /* Inline edit mode */
+  .edit-mode tr[data-edit] td[data-field]{padding:0}
+  .edit-mode tr[data-edit] td[data-field] input,
+  .edit-mode tr[data-edit] td[data-field] select{width:100%;height:100%;border:1px solid #0077c5;border-radius:2px;padding:4px 6px;font-size:12px;background:#fff;font-variant-numeric:tabular-nums}
+  .edit-mode tr[data-edit] td[data-field] input:focus,
+  .edit-mode tr[data-edit] td[data-field] select:focus{outline:none;box-shadow:0 0 0 2px rgba(0,119,197,.2)}
+  /* Field labels */
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  /* Account type dots */
+  .type-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+  .type-dot.asset{background:#0077c5}
+  .type-dot.liability{background:#6b1e28}
+  .type-dot.equity{background:#0e5e6f}
+  .type-dot.income{background:#1e5a38}
+  .type-dot.expense{background:#5a6355}
+  /* Register rows */
+  .reg-row{display:flex;align-items:center;gap:12px;padding:10px 20px;border-bottom:1px solid #eeedf1;font-size:13px}
+  .reg-date{width:80px;color:#5a6355;font-size:12px}
+  .reg-desc{flex:1}
+  .reg-amt{width:110px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .reg-bal{width:120px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#5a6355}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Chart of accounts</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Chart of accounts</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">34 accounts · Numbered, typed, mapped to tax lines.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-account>
+          <span class="material-symbols-outlined text-[16px]">add</span>New account
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-new-account-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-run-report>
+        <span class="material-symbols-outlined text-[16px]">assessment</span>Run report</button>
+    </div>
+  </div>
+
+  <!-- Toolbar: filter + clean up + edit mode -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+      <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+      <input class="w-full h-7 pl-7 pr-2 bg-white border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name or number…" data-account-filter/>
+    </div>
+    <label class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 bg-white">
+      <span class="material-symbols-outlined text-[14px] text-on-surface-variant">category</span>
+      <span class="text-on-surface-variant">Type:</span>
+      <select class="bg-transparent border-none text-label-sm text-on-surface focus:outline-none" data-type-filter>
+        <option value="">All types</option>
+        <option>Asset</option><option>Liability</option><option>Equity</option><option>Income</option><option>Expense</option>
+      </select>
+    </label>
+    <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 bg-white" data-cleanup>
+      <span class="material-symbols-outlined text-[14px]">cleaning_services</span>Clean up
+      <span class="material-symbols-outlined text-[14px]">expand_more</span>
+    </button>
+    <div class="flex-1"></div>
+    <button class="h-7 px-2.5 border border-surface-dim rounded text-label-sm font-semibold hover:bg-surface-container-low flex items-center gap-1 bg-white" data-toggle-edit-mode>
+      <span class="material-symbols-outlined text-[14px]">edit</span>Edit mode
+    </button>
+    <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 bg-white" data-customize>
+      <span class="material-symbols-outlined text-[14px]">tune</span>Customize</button>
+  </div>
+
+  <!-- Edit-mode banner (hidden until edit mode on) -->
+  <div class="hidden-imp mb-3 bg-qb-blue/5 border border-qb-blue/30 rounded-lg px-4 py-2 flex items-center gap-2 text-body-sm text-qb-blue" data-edit-banner>
+    <span class="material-symbols-outlined text-[18px]">edit</span>
+    <span class="flex-1">Edit mode on — click any cell to edit inline. Press <kbd class="bg-white border border-surface-dim rounded px-1 text-[10px]">Esc</kbd> to cancel a cell.</span>
+    <button class="h-7 px-2 border border-qb-blue rounded text-label-sm font-semibold hover:bg-white" data-save-inline>Save changes</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2 w-16">Number</th>
+          <th class="px-3 py-2">Name</th>
+          <th class="px-3 py-2">Type</th>
+          <th class="px-3 py-2">Detail type</th>
+          <th class="px-3 py-2 text-right">Total balance</th>
+          <th class="px-3 py-2 text-right">Bank balance</th>
+          <th class="px-3 py-2">Tax line</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-coa-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Asset" data-name="Business checking" data-number="1000" data-detail="Checking" data-tax="—" data-balance="$84,210.40" data-bankbal="$84,210.40">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">1000</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Business checking</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot asset"></span>Asset</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Checking</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$84,210.40</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">$84,210.40</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Asset" data-name="Accounts receivable (A/R)" data-number="1100" data-detail="Accounts receivable" data-tax="—" data-balance="$8,420.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">1100</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Accounts receivable (A/R)</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot asset"></span>Asset</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Accounts receivable</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$8,420.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Asset" data-name="Stripe clearing" data-number="1010" data-detail="Cash and cash equivalents" data-tax="—" data-balance="$1,842.60" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">1010</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Stripe clearing</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot asset"></span>Asset</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Cash and cash equivalents</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$1,842.60</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Liability" data-name="Accounts payable (A/P)" data-number="2000" data-detail="Accounts payable" data-tax="—" data-balance="$4,080.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">2000</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Accounts payable (A/P)</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot liability"></span>Liability</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Accounts payable</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$4,080.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Liability" data-name="Sales tax payable" data-number="2200" data-detail="Sales tax payable" data-tax="—" data-balance="$1,880.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">2200</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Sales tax payable</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot liability"></span>Liability</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Sales tax payable</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$1,880.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Equity" data-name="Owner's equity" data-number="3000" data-detail="Owner's equity" data-tax="—" data-balance="$66,010.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">3000</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Owner's equity</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot equity"></span>Equity</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Owner's equity</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$66,010.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">—</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Income" data-name="Sales — Apparel" data-number="4000" data-detail="Sales of product income" data-tax="Sales" data-balance="$42,180.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">4000</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Sales — Apparel</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot income"></span>Income</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Sales of product income</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$42,180.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">Sales</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Income" data-name="Shipping income" data-number="4010" data-detail="Sales of product income" data-tax="Sales" data-balance="$1,204.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">4010</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Shipping income</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot income"></span>Income</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Sales of product income</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$1,204.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">Sales</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Expense" data-name="COGS — Apparel" data-number="5000" data-detail="Cost of goods sold" data-tax="COGS" data-balance="$8,140.00" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">5000</td>
+          <td class="px-3 py-2 font-medium" data-field="name">COGS — Apparel</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot expense"></span>Expense</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Cost of goods sold</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$8,140.00</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">COGS</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Expense" data-name="Office supplies" data-number="6100" data-detail="Office/General Administrative Expenses" data-tax="Office" data-balance="$142.50" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">6100</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Office supplies</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot expense"></span>Expense</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Office/General Administrative</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$142.50</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">Office</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer coa-row" data-type="Expense" data-name="Software &amp; subscriptions" data-number="6200" data-detail="Dues and subscriptions" data-tax="Software" data-balance="$59.99" data-bankbal="—">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">6200</td>
+          <td class="px-3 py-2 font-medium" data-field="name">Software &amp; subscriptions</td>
+          <td class="px-3 py-2" data-field="type"><span class="type-dot expense"></span>Expense</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="detail">Dues and subscriptions</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$59.99</td>
+          <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+          <td class="px-3 py-2 text-on-surface-variant" data-field="tax">Software</td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- ═══════════ ACCOUNT DRAWER ═══════════ -->
+<div class="drawer-scrim" id="acct-scrim"></div>
+<div class="drawer" id="acct-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">account_tree</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-acct-title>New account</div>
+        <div class="text-[11px] text-on-surface-variant">Chart of accounts</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" title="Maximize">
+        <span class="material-symbols-outlined text-[18px]">open_in_full</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-acct>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="field-label">Type</label>
+        <select class="field-input" data-acct-type>
+          <option value="">— Select type —</option>
+          <option>Asset</option><option>Liability</option><option>Equity</option><option>Income</option><option>Expense</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Detail type</label>
+        <select class="field-input" data-acct-detail>
+          <option value="">— Select type first —</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="field-label">Name</label>
+        <input class="field-input" data-acct-name placeholder="e.g. Business checking"/>
+      </div>
+      <div>
+        <label class="field-label">Number</label>
+        <input class="field-input" data-acct-number placeholder="e.g. 1000" type="text"/>
+      </div>
+    </div>
+
+    <div>
+      <label class="field-label">Sub-account of</label>
+      <select class="field-input" data-acct-parent>
+        <option value="">— None (top-level account) —</option>
+        <option>Business checking</option>
+        <option>Accounts receivable (A/R)</option>
+        <option>Stripe clearing</option>
+        <option>Accounts payable (A/P)</option>
+        <option>Sales — Apparel</option>
+        <option>Office supplies</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="field-label">Description</label>
+      <textarea class="field-input" style="height:60px;padding:8px 10px;font-family:inherit" data-acct-desc placeholder="Optional description visible to staff"></textarea>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 border-t border-surface-dim pt-4">
+      <div>
+        <label class="field-label">Opening balance</label>
+        <input class="field-input" data-acct-opening placeholder="0.00" type="text" style="text-align:right;font-variant-numeric:tabular-nums"/>
+      </div>
+      <div>
+        <label class="field-label">As of</label>
+        <input class="field-input" data-acct-asof type="date" value="2026-11-01"/>
+      </div>
+    </div>
+
+    <div class="border-t border-surface-dim pt-4">
+      <label class="field-label">Tax line</label>
+      <select class="field-input" data-acct-tax>
+        <option value="">— Not mapped —</option>
+        <option>Sales</option><option>COGS</option><option>Office</option><option>Software</option>
+        <option>Travel</option><option>Meals</option><option>Advertising</option>
+      </select>
+    </div>
+
+    <div class="border-t border-surface-dim pt-4">
+      <label class="flex items-center gap-2 text-body-sm">
+        <input type="checkbox" class="row-check" checked data-acct-active/>
+        Active account
+      </label>
+      <p class="text-[11px] text-on-surface-variant mt-1">Inactive accounts are hidden from pickers but remain in reports.</p>
+    </div>
+
+    <!-- Current balance display for existing accounts -->
+    <div class="bg-surface-container-low rounded-lg p-3 hidden-imp" data-acct-balance-block>
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] text-on-surface-variant uppercase font-bold">Current balance</span>
+        <span class="text-headline-sm tabular-nums" data-acct-balance>$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-acct>Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-save-new>Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-save-acct>Save account</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ REGISTER DRAWER ═══════════ -->
+<div class="drawer-scrim" id="reg-scrim"></div>
+<div class="drawer register-drawer" id="reg-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-reg-title>Register</div>
+        <div class="text-[11px] text-on-surface-variant" data-reg-sub>—</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="h-7 px-2.5 border border-surface-dim rounded text-label-sm font-semibold hover:bg-surface-container-low flex items-center gap-1" data-reg-filter>
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Nov 2026</button>
+      <button class="h-7 px-2.5 border border-surface-dim rounded text-label-sm font-semibold hover:bg-surface-container-low flex items-center gap-1" data-reg-export>
+        <span class="material-symbols-outlined text-[14px]">download</span>Export</button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-reg>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div class="bg-surface-container-low border-b border-surface-dim px-5 py-3 grid grid-cols-3 gap-4">
+    <div>
+      <div class="text-[10px] text-on-surface-variant uppercase font-bold">Opening balance</div>
+      <div class="text-headline-sm tabular-nums" data-reg-opening>—</div>
+    </div>
+    <div>
+      <div class="text-[10px] text-on-surface-variant uppercase font-bold">Period activity</div>
+      <div class="text-headline-sm tabular-nums" data-reg-activity>—</div>
+    </div>
+    <div>
+      <div class="text-[10px] text-on-surface-variant uppercase font-bold">Closing balance</div>
+      <div class="text-headline-sm tabular-nums" data-reg-closing>—</div>
+    </div>
+  </div>
+  <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim shrink-0">
+    <button class="h-full px-3 text-label-md tab-underline active" data-regtab="all">All</button>
+    <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-regtab="deposits">Deposits</button>
+    <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-regtab="payments">Payments</button>
+  </div>
+  <div class="flex-1 overflow-y-auto" data-reg-list>
+    <!-- rows injected -->
+  </div>
+</div>
+
+<!-- ═══════════ CLEAN UP ▾ MENU ═══════════ -->
+<div class="tb-menu" id="cleanup-menu">
+  <div class="menu-header">Clean up</div>
+  <button data-clean="start"><span class="material-symbols-outlined">cleaning_services</span>Start cleanup session</button>
+  <button data-clean="edit"><span class="material-symbols-outlined">edit</span>Open in edit mode</button>
+  <div class="sep"></div>
+  <button data-clean="history"><span class="material-symbols-outlined">history</span>View cleanup history</button>
+</div>
+
+<!-- ═══════════ NEW ACCOUNT ▾ MENU ═══════════ -->
+<div class="tb-menu" id="new-acct-menu">
+  <div class="menu-header">Quick create</div>
+  <button data-newkind="Asset"><span class="material-symbols-outlined">account_balance</span>Asset account</button>
+  <button data-newkind="Liability"><span class="material-symbols-outlined">credit_card</span>Liability account</button>
+  <button data-newkind="Equity"><span class="material-symbols-outlined">savings</span>Equity account</button>
+  <button data-newkind="Income"><span class="material-symbols-outlined">trending_up</span>Income account</button>
+  <button data-newkind="Expense"><span class="material-symbols-outlined">receipt_long</span>Expense account</button>
+</div>
+
+<!-- ═══════════ ROW ⋯ MENU ═══════════ -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This account</div>
+  <button data-action="view-register"><span class="material-symbols-outlined">receipt_long</span>View register</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit account</button>
+  <button data-action="run-report"><span class="material-symbols-outlined">assessment</span>Run report for this account</button>
+  <div class="sep"></div>
+  <div class="menu-header">Structure</div>
+  <button data-action="make-sub"><span class="material-symbols-outlined">subdirectory_arrow_right</span>Make sub-account of…</button>
+  <button data-action="merge"><span class="material-symbols-outlined">merge</span>Merge into another account…</button>
+  <div class="sep"></div>
+  <div class="menu-header">State</div>
+  <button data-action="deactivate"><span class="material-symbols-outlined">visibility_off</span>Make inactive</button>
+  <button data-action="activate" data-hide="true"><span class="material-symbols-outlined">visibility</span>Reactivate account</button>
+  <button class="danger" data-action="delete"><span class="material-symbols-outlined">delete</span>Delete account</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* ═══════════ Detail types per account type (cascading) ═══════════ */
+const DETAIL_TYPES = {
+  "Asset":["Cash and cash equivalents","Checking","Savings","Accounts receivable","Inventory","Fixed assets","Other current assets","Other assets"],
+  "Liability":["Accounts payable","Credit card","Sales tax payable","Payroll liabilities","Loan","Other current liabilities","Other long-term liabilities"],
+  "Equity":["Owner's equity","Retained earnings","Partner contributions","Partner distributions","Opening balance equity"],
+  "Income":["Sales of product income","Sales of services","Discounts","Shipping income","Interest income","Other income"],
+  "Expense":["Cost of goods sold","Advertising","Bank charges & fees","Dues and subscriptions","Insurance","Legal & professional","Meals & entertainment","Office/General Administrative","Rent or lease","Shipping & delivery","Software","Travel","Utilities","Other expenses"]
+};
+const TYPE_DOT = {Asset:"asset",Liability:"liability",Equity:"equity",Income:"income",Expense:"expense"};
+
+/* ═══════════ Account drawer ═══════════ */
+let currentAccountRow = null;
+function openAccountDrawer(row){
+  currentAccountRow = row;
+  const title = document.querySelector("[data-acct-title]");
+  const type = document.querySelector("[data-acct-type]");
+  const detail = document.querySelector("[data-acct-detail]");
+  const name = document.querySelector("[data-acct-name]");
+  const number = document.querySelector("[data-acct-number]");
+  const desc = document.querySelector("[data-acct-desc]");
+  const tax = document.querySelector("[data-acct-tax]");
+  const opening = document.querySelector("[data-acct-opening]");
+  const balanceBlock = document.querySelector("[data-acct-balance-block]");
+  const balance = document.querySelector("[data-acct-balance]");
+
+  if (row){
+    title.textContent = "Edit account";
+    type.value = row.dataset.type || "";
+    populateDetail(row.dataset.type, row.dataset.detail);
+    name.value = row.dataset.name || "";
+    number.value = row.dataset.number || "";
+    tax.value = row.dataset.tax !== "—" ? (row.dataset.tax||"") : "";
+    opening.value = "";
+    balanceBlock.classList.remove("hidden-imp");
+    balance.textContent = row.dataset.balance || "$0.00";
+  } else {
+    title.textContent = "New account";
+    type.value = "";
+    populateDetail("", "");
+    name.value = ""; number.value = ""; desc.value = ""; tax.value = ""; opening.value = "";
+    balanceBlock.classList.add("hidden-imp");
+  }
+  document.getElementById("acct-scrim").classList.add("open");
+  document.getElementById("acct-drawer").classList.add("open");
+}
+function populateDetail(type, selected){
+  const detail = document.querySelector("[data-acct-detail]");
+  if (!type){ detail.innerHTML = `<option value="">— Select type first —</option>`; return; }
+  const opts = DETAIL_TYPES[type] || [];
+  detail.innerHTML = `<option value="">— Select detail type —</option>` + opts.map(o=>`<option${o===selected?" selected":""}>${o}</option>`).join("");
+}
+document.querySelector("[data-acct-type]").addEventListener("change", e=>populateDetail(e.target.value, ""));
+
+document.querySelectorAll("[data-close-acct]").forEach(b=>b.addEventListener("click", closeAccountDrawer));
+document.getElementById("acct-scrim").addEventListener("click", closeAccountDrawer);
+function closeAccountDrawer(){
+  document.getElementById("acct-scrim").classList.remove("open");
+  document.getElementById("acct-drawer").classList.remove("open");
+}
+
+function saveAccount(andClose){
+  const type = document.querySelector("[data-acct-type]").value;
+  const detail = document.querySelector("[data-acct-detail]").value;
+  const name = document.querySelector("[data-acct-name]").value.trim();
+  const number = document.querySelector("[data-acct-number]").value.trim();
+  const tax = document.querySelector("[data-acct-tax]").value;
+  if (!type){ toast("Select an account type"); return; }
+  if (!name){ toast("Account name required"); return; }
+  if (!number){ toast("Account number required"); return; }
+
+  if (currentAccountRow){
+    // Edit existing
+    currentAccountRow.dataset.name = name;
+    currentAccountRow.dataset.number = number;
+    currentAccountRow.dataset.type = type;
+    currentAccountRow.dataset.detail = detail;
+    currentAccountRow.dataset.tax = tax || "—";
+    currentAccountRow.querySelector('[data-field="name"]').textContent = name;
+    currentAccountRow.querySelector('[data-field="number"]').textContent = number;
+    currentAccountRow.querySelector('[data-field="type"]').innerHTML = `<span class="type-dot ${TYPE_DOT[type]}"></span>${type}`;
+    currentAccountRow.querySelector('[data-field="detail"]').textContent = detail;
+    currentAccountRow.querySelector('[data-field="tax"]').textContent = tax || "—";
+    toast("Account updated");
+  } else {
+    // Create new — insert at top of table
+    const tbody = document.querySelector("[data-coa-tbody]");
+    const tr = document.createElement("tr");
+    tr.className = "hover:bg-surface-container-low cursor-pointer coa-row";
+    tr.dataset.type = type; tr.dataset.name = name; tr.dataset.number = number;
+    tr.dataset.detail = detail; tr.dataset.tax = tax || "—";
+    tr.dataset.balance = "$0.00"; tr.dataset.bankbal = "—";
+    tr.innerHTML = `
+      <td class="px-3 py-2"><input type="checkbox" class="row-check coa-check"/></td>
+      <td class="px-3 py-2 font-mono text-on-surface-variant" data-field="number">${number}</td>
+      <td class="px-3 py-2 font-medium" data-field="name">${name}</td>
+      <td class="px-3 py-2" data-field="type"><span class="type-dot ${TYPE_DOT[type]}"></span>${type}</td>
+      <td class="px-3 py-2 text-on-surface-variant" data-field="detail">${detail}</td>
+      <td class="px-3 py-2 text-right tabular-nums" data-field="balance">$0.00</td>
+      <td class="px-3 py-2 text-right tabular-nums" data-field="bankbal">—</td>
+      <td class="px-3 py-2 text-on-surface-variant" data-field="tax">${tax||"—"}</td>
+      <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+    `;
+    tbody.insertBefore(tr, tbody.firstChild);
+    wireAccountRow(tr);
+    toast(`Account "${name}" created`);
+  }
+  if (andClose) closeAccountDrawer();
+  else { currentAccountRow = null; openAccountDrawer(null); }
+}
+document.querySelector("[data-save-acct]").addEventListener("click", ()=>saveAccount(true));
+document.querySelector("[data-save-new]").addEventListener("click", ()=>saveAccount(false));
+
+/* ═══════════ New account buttons ═══════════ */
+document.querySelector("[data-new-account]").addEventListener("click", ()=>openAccountDrawer(null));
+document.querySelector("[data-new-account-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  openTbMenu(e.currentTarget, "new-acct-menu");
+});
+
+/* ═══════════ Clean up ▾ menu ═══════════ */
+document.querySelector("[data-cleanup]").addEventListener("click", e=>{
+  e.stopPropagation();
+  openTbMenu(e.currentTarget, "cleanup-menu");
+});
+document.querySelectorAll("[data-clean]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.clean;
+  closeTbMenus();
+  if (act === "start") toast("Cleanup session started — inactive accounts and duplicates flagged");
+  if (act === "edit") toggleEditMode(true);
+  if (act === "history") toast("Cleanup history — last session: 3 accounts merged, 1 archived");
+}));
+document.querySelectorAll("[data-newkind]").forEach(b=>b.addEventListener("click", ()=>{
+  closeTbMenus();
+  openAccountDrawer(null);
+  document.querySelector("[data-acct-type]").value = b.dataset.newkind;
+  populateDetail(b.dataset.newkind, "");
+}));
+
+/* ═══════════ Toolbar menu positioning ═══════════ */
+function openTbMenu(anchor, menuId){
+  closeTbMenus();
+  const menu = document.getElementById(menuId);
+  const r = anchor.getBoundingClientRect();
+  menu.style.top = (r.bottom + 4) + "px";
+  menu.style.left = Math.min(r.left, window.innerWidth - 240) + "px";
+  menu.classList.add("open");
+}
+function closeTbMenus(){
+  document.querySelectorAll(".tb-menu").forEach(m=>m.classList.remove("open"));
+}
+
+/* ═══════════ Edit mode ═══════════ */
+let editMode = false;
+function toggleEditMode(on){
+  editMode = on !== undefined ? on : !editMode;
+  const tbody = document.querySelector("[data-coa-tbody]");
+  const banner = document.querySelector("[data-edit-banner]");
+  const btn = document.querySelector("[data-toggle-edit-mode]");
+  if (editMode){
+    tbody.classList.add("edit-mode");
+    banner.classList.remove("hidden-imp");
+    btn.classList.add("!bg-qb-blue","!text-white","!border-qb-blue");
+    makeCellsEditable();
+  } else {
+    tbody.classList.remove("edit-mode");
+    banner.classList.add("hidden-imp");
+    btn.classList.remove("!bg-qb-blue","!text-white","!border-qb-blue");
+    makeCellsReadonly();
+  }
+}
+function makeCellsEditable(){
+  document.querySelectorAll(".coa-row").forEach(tr=>{
+    tr.querySelectorAll("td[data-field]").forEach(td=>{
+      if (td.querySelector("input,select")) return;
+      const field = td.dataset.field;
+      const val = td.textContent.trim();
+      if (field === "number" || field === "name"){
+        const input = document.createElement("input");
+        input.type = "text"; input.value = val;
+        input.addEventListener("keydown", ev=>{ if(ev.key==="Escape"){ input.value = tr.dataset[field] || val; input.blur(); } });
+        input.addEventListener("change", ()=>{ tr.dataset[field] = input.value; });
+        td.innerHTML = ""; td.appendChild(input);
+      } else if (field === "detail" || field === "tax"){
+        const select = document.createElement("select");
+        const options = field === "detail" ? (DETAIL_TYPES[tr.dataset.type]||[]) : ["—","Sales","COGS","Office","Software","Travel","Meals","Advertising"];
+        select.innerHTML = options.map(o=>`<option${o===val||(o==="—"&&val==="—")?" selected":""}>${o}</option>`).join("");
+        select.addEventListener("change", ()=>{ tr.dataset[field] = select.value; });
+        td.innerHTML = ""; td.appendChild(select);
+      } else if (field === "type"){
+        const select = document.createElement("select");
+        select.innerHTML = Object.keys(DETAIL_TYPES).map(o=>`<option${o===tr.dataset.type?" selected":""}>${o}</option>`).join("");
+        select.addEventListener("change", ()=>{
+          tr.dataset.type = select.value;
+          const detailTd = tr.querySelector('[data-field="detail"]');
+          if (detailTd){
+            const detailSelect = detailTd.querySelector("select");
+            if (detailSelect){
+              detailSelect.innerHTML = (DETAIL_TYPES[select.value]||[]).map(o=>`<option>${o}</option>`).join("");
+            }
+          }
+        });
+        td.innerHTML = ""; td.appendChild(select);
+      }
+    });
+  });
+}
+function makeCellsReadonly(){
+  document.querySelectorAll(".coa-row").forEach(tr=>{
+    // restore from dataset
+    tr.querySelector('[data-field="number"]').textContent = tr.dataset.number;
+    tr.querySelector('[data-field="name"]').textContent = tr.dataset.name;
+    tr.querySelector('[data-field="type"]').innerHTML = `<span class="type-dot ${TYPE_DOT[tr.dataset.type]}"></span>${tr.dataset.type}`;
+    tr.querySelector('[data-field="detail"]').textContent = tr.dataset.detail;
+    tr.querySelector('[data-field="tax"]').textContent = tr.dataset.tax || "—";
+  });
+}
+document.querySelector("[data-toggle-edit-mode]").addEventListener("click", ()=>toggleEditMode());
+document.querySelector("[data-save-inline]").addEventListener("click", ()=>{
+  toast("Inline changes saved");
+  toggleEditMode(false);
+});
+
+/* ═══════════ Register drawer ═══════════ */
+const REG_TXNS = {
+  "Business checking": [
+    {date:"11/01/2026", desc:"ACME CORP — ACH", amt:1240.00},
+    {date:"11/03/2026", desc:"STAPLES #0412", amt:-142.50},
+    {date:"11/05/2026", desc:"FEDEX 001239847", amt:-84.20},
+    {date:"11/10/2026", desc:"STRIPE PAYOUT", amt:1842.60},
+    {date:"11/18/2026", desc:"AWS EMEA CHARGES", amt:-124.88},
+    {date:"11/24/2026", desc:"BLUE RIDGE CO. — ACH", amt:8540.00},
+  ],
+  "Accounts receivable (A/R)": [
+    {date:"11/01/2026", desc:"Invoice 1002 issued", amt:1240.00},
+    {date:"10/28/2026", desc:"Invoice 1001 issued", amt:3410.00},
+    {date:"10/15/2026", desc:"Invoice 0998 issued", amt:890.00},
+  ],
+  "Accounts payable (A/P)": [
+    {date:"11/01/2026", desc:"Bill PF-9211 — Printful", amt:-2880.00},
+    {date:"10/28/2026", desc:"Bill GL-4402 — Gelato", amt:-1200.00},
+  ],
+  "Sales — Apparel": [
+    {date:"11/01/2026", desc:"Invoice 1002", amt:1240.00},
+    {date:"10/30/2026", desc:"Sales receipt SR-889", amt:540.00},
+  ],
+  "Office supplies": [
+    {date:"11/03/2026", desc:"STAPLES #0412", amt:142.50},
+  ]
+};
+let currentRegAccount = null;
+let currentRegTab = "all";
+function openRegister(row){
+  currentRegAccount = row;
+  const name = row.dataset.name;
+  document.querySelector("[data-reg-title]").textContent = name;
+  document.querySelector("[data-reg-sub]").textContent = `Account ${row.dataset.number} · ${row.dataset.type}`;
+  // balances
+  const bal = row.dataset.balance || "$0.00";
+  const opening = "$"+(Math.max(0, parseFloat(bal.replace(/[$,]/g,"")) - 3000).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,","));
+  document.querySelector("[data-reg-opening]").textContent = opening;
+  document.querySelector("[data-reg-activity]").textContent = bal;
+  document.querySelector("[data-reg-closing]").textContent = bal;
+  // list
+  const list = document.querySelector("[data-reg-list]");
+  const txns = REG_TXNS[name] || [];
+  if (txns.length === 0){
+    list.innerHTML = `<div class="p-8 text-center text-body-sm text-on-surface-variant">No transactions in this account for the selected period.</div>`;
+  } else {
+    let running = parseFloat(opening.replace(/[$,]/g,""));
+    list.innerHTML = txns.map(t=>{
+      running += t.amt;
+      const isDep = t.amt >= 0;
+      return `<div class="reg-row" data-reg-kind="${isDep?"deposits":"payments"}">
+        <span class="reg-date">${t.date}</span>
+        <span class="reg-desc">${t.desc}</span>
+        <span class="reg-amt ${isDep?"text-secondary":"text-error"}">${isDep?"+":"−"}$${Math.abs(t.amt).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
+        <span class="reg-bal">$${running.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,",")}</span>
+      </div>`;
+    }).join("");
+  }
+  applyRegTab();
+  document.getElementById("reg-scrim").classList.add("open");
+  document.getElementById("reg-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-reg]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("reg-scrim").classList.remove("open");
+  document.getElementById("reg-drawer").classList.remove("open");
+}));
+document.getElementById("reg-scrim").addEventListener("click", ()=>{
+  document.getElementById("reg-scrim").classList.remove("open");
+  document.getElementById("reg-drawer").classList.remove("open");
+});
+document.querySelectorAll("[data-regtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-regtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentRegTab = b.dataset.regtab;
+  applyRegTab();
+}));
+function applyRegTab(){
+  document.querySelectorAll("#reg-list .reg-row").forEach(r=>{
+    const vis = currentRegTab === "all" || r.dataset.regKind === currentRegTab;
+    r.style.display = vis ? "" : "none";
+  });
+}
+
+/* ═══════════ Row click + ⋯ menu ═══════════ */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+function openRowMenu(btn, tr){
+  currentMenuRow = tr;
+  const inactive = tr.dataset.inactive === "true";
+  rowMenu.querySelector('[data-action="deactivate"]').style.display = inactive ? "none" : "";
+  rowMenu.querySelector('[data-action="activate"]').style.display = inactive ? "" : "none";
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 240, window.innerWidth - 260) + "px";
+  rowMenu.classList.add("open");
+}
+function wireAccountRow(tr){
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-field] input,[data-field] select")) return;
+    openRegister(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    openRowMenu(e.currentTarget, tr);
+  });
+}
+document.querySelectorAll(".coa-row").forEach(wireAccountRow);
+
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  switch(act){
+    case "view-register": openRegister(tr); break;
+    case "edit": openAccountDrawer(tr); break;
+    case "run-report": toast(`Running report for ${tr.dataset.name}`); break;
+    case "make-sub": toast("Make sub-account of… — opens parent picker"); break;
+    case "merge": toast("Merge into another account — opens account picker"); break;
+    case "deactivate":
+      tr.dataset.inactive = "true";
+      tr.classList.add("opacity-60");
+      toast(`${tr.dataset.name} made inactive`); break;
+    case "activate":
+      tr.dataset.inactive = "false";
+      tr.classList.remove("opacity-60");
+      toast(`${tr.dataset.name} reactivated`); break;
+    case "delete":
+      tr.remove();
+      toast(`${tr.dataset.name} deleted`); break;
+  }
+}));
+
+/* ═══════════ Filters ═══════════ */
+function applyFilters(){
+  const q = (document.querySelector("[data-account-filter]").value || "").toLowerCase();
+  const typeFilter = document.querySelector("[data-type-filter]").value;
+  let shown = 0, total = 0;
+  document.querySelectorAll(".coa-row").forEach(tr=>{
+    total++;
+    const matchQ = !q || (tr.dataset.name||"").toLowerCase().includes(q) || (tr.dataset.number||"").includes(q);
+    const matchType = !typeFilter || tr.dataset.type === typeFilter;
+    const vis = matchQ && matchType;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  return {shown, total};
+}
+document.querySelector("[data-account-filter]").addEventListener("input", applyFilters);
+document.querySelector("[data-type-filter]").addEventListener("change", applyFilters);
+
+/* ═══════════ Check-all + other toolbar ═══════════ */
+document.querySelector("[data-check-all]")?.addEventListener("change", e=>{
+  document.querySelectorAll(".coa-check").forEach(c=>c.checked = e.target.checked);
+});
+
+document.querySelector("[data-run-report]").addEventListener("click", ()=>toast("Running report across all accounts…"));
+document.querySelector("[data-customize]").addEventListener("click", ()=>toast("Customize panel — Data / Visual tabs"));
+
+/* Global close for menus */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#cleanup-menu") && !e.target.closest("[data-cleanup]")) document.getElementById("cleanup-menu").classList.remove("open");
+  if (!e.target.closest("#new-acct-menu") && !e.target.closest("[data-new-account-split]")) document.getElementById("new-acct-menu").classList.remove("open");
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+});
+</script>
+</body>
+</html>

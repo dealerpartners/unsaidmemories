@@ -1,0 +1,1285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Advertising — Pixels</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .pill.ok{background:#8af5be;color:#00714b}
+  .pill.warn{background:#fbf5ec;color:#98713e}
+  .pill.bad{background:#ffdad6;color:#93000a}
+  .pill.neutral{background:#f4f3f7;color:#5a6355}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:660px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:6px;background:#fff;min-height:140px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+  .field-textarea:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:12px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .net-chip{display:inline-flex;align-items:center;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600}
+  .net-Meta{background:#edf3fc;color:#4b77b8}
+  .net-TikTok{background:#eef1f2;color:#27353a}
+  .net-GoogleAds{background:#f8f0ee;color:#c45c5b}
+  .net-Pinterest{background:#f9eeee;color:#bd5558}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+  .fin-link{display:inline-flex;align-items:center;gap:4px;color:#0077c5;font-weight:600;font-size:11px;cursor:pointer}
+  .fin-link:hover{text-decoration:underline}
+  .fin-link .material-symbols-outlined{font-size:13px}
+  .px-icon{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff}
+  .px-icon.meta{background:linear-gradient(135deg,#4b77b8,#1f2937)}
+  .px-icon.tiktok{background:linear-gradient(135deg,#27353a,#0e5e6f)}
+  .px-icon.googleads{background:linear-gradient(135deg,#c45c5b,#6b1e28)}
+  .px-icon.pinterest{background:linear-gradient(135deg,#bd5558,#6b1e28)}
+  .event-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f3}
+  .event-row:last-child{border-bottom:0}
+  .event-row.new-flash{animation:flash 1s}
+  @keyframes flash { from{background:#8af5be;} to{background:transparent;} }
+  .event-tag{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+  .event-tag.bad{background:#fff0ef;color:#bf5c59}
+  .selftest-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .selftest-badge.ok{background:#e9f5ef;color:#388064}
+  .selftest-badge.bad{background:#fff0ef;color:#bf5c59}
+  .selftest-badge.pending{background:#fbf7ec;color:#98713e}
+  .pill-note{font-size:11px;color:#5a6355;margin-top:2px}
+  .channel-tile{border:1px solid #dad9dd;border-radius:8px;padding:10px;background:#fff;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .channel-tile:hover{border-color:#becab6;background:#f4fbfa}
+  .channel-tile.selected{border-color:#0a6400;background:#f4fbfa}
+  .channel-tile.disabled{opacity:.45;cursor:not-allowed;background:#f4f3f7}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Advertising</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">Pixels</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Pixels</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Ad-network conversion pixels installed on your storefront, and the events they fire into Meta / TikTok / Google Ads / Pinterest.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnEventVolume">
+        <span class="material-symbols-outlined text-[16px]">bar_chart</span>Event volume in Reports
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnExportEvents">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export events
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" id="btnNewPixel">
+          <span class="material-symbols-outlined text-[16px]">add</span>New pixel
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── INFO BANNER ─── -->
+  <div class="bg-surface-container-low border border-outline-variant rounded-xl p-3 mb-4 flex items-start gap-3">
+    <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">info</span>
+    <div class="text-body-sm text-on-surface-variant flex-1">
+      <span class="font-semibold text-on-surface">Ad-network conversion pixels only.</span>
+      This page manages the pixels that fire purchase and cart events back to <span class="font-semibold">Meta, TikTok, Google Ads, and Pinterest</span> for attribution and retargeting.
+      <span class="block mt-1">
+        Installing <span class="font-semibold">GA4, PostHog, Microsoft Clarity, Hotjar, Segment, or GTM containers</span> is a <span class="font-semibold">product analytics</span> concern — those installs live in
+        <button class="fin-link" id="btnOpenIntegrations" type="button"><span class="material-symbols-outlined">open_in_new</span>Settings → Integrations</button>.
+      </span>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Pixels installed</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statInstalled">—</div>
+      <div class="pill-note" id="statInstalledNote">—</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Events (24h)</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="statEvents24">—</div>
+      <div class="pill-note">Received by webhook</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Events (30d)</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statEvents30">—</div>
+      <div class="pill-note" id="statEventsNote">—</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Last self-test</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statSelftest">—</div>
+      <div class="pill-note" id="statSelftestNote">—</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       PIXELS LIST
+       ═══════════════════════════════════════════════════════════════ -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden mb-4">
+
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Live">Live</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Paused">Paused</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Error">Error</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input id="searchInput" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter pixels…"/>
+      </div>
+      <div class="relative">
+        <button id="btnNetwork" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">hub</span>Network
+        </button>
+        <div id="popNetwork" class="row-menu" style="min-width:220px">
+          <div class="menu-header">Filter by network</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Meta" checked/>Meta</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="TikTok" checked/>TikTok</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="GoogleAds" checked/>Google Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Pinterest" checked/>Pinterest</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="networkClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="networkApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnSaved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+        </button>
+        <div id="popSaved" class="row-menu" style="min-width:240px">
+          <div class="menu-header">Saved views</div>
+          <div id="savedList" class="max-h-[220px] overflow-y-auto"></div>
+          <div class="sep"></div>
+          <button id="saveCurrentView" class="w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2 text-primary font-semibold">
+            <span class="material-symbols-outlined text-[16px]">bookmark_add</span>Save current view…
+          </button>
+        </div>
+      </div>
+      <button id="btnClearAll" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 hidden-imp">
+        <span class="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-b-count>—</span>
+    </div>
+
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="pause"><span class="material-symbols-outlined text-[14px] align-middle mr-1">pause_circle</span>Pause</button>
+      <button data-bulk="resume"><span class="material-symbols-outlined text-[14px] align-middle mr-1">play_circle</span>Resume</button>
+      <button data-bulk="selftest"><span class="material-symbols-outlined text-[14px] align-middle mr-1">science</span>Run self-test</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" id="checkAll"/></th>
+          <th class="px-3 py-2">Pixel</th>
+          <th class="px-3 py-2">Network</th>
+          <th class="px-3 py-2">Pixel ID</th>
+          <th class="px-3 py-2">Install</th>
+          <th class="px-3 py-2 text-right">Events (24h)</th>
+          <th class="px-3 py-2 text-right">Events (30d)</th>
+          <th class="px-3 py-2">Last event</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-10 px-2 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" id="pxTbody"></tbody>
+    </table>
+
+    <div class="hidden-imp py-12 px-6 text-center" id="pxEmpty">
+      <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+        <span class="material-symbols-outlined text-[28px] text-outline">sensors</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No pixels match</h3>
+      <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or install a new pixel.</p>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="emptyClear">Clear filters</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white" id="rowsPerPage">
+          <option>25</option><option>50</option><option>75</option><option>100</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pagePrev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span id="pageLabel">Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pageNext"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── RECENT EVENTS ─── -->
+  <div class="bg-white rounded-xl border border-surface-dim">
+    <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+      <div>
+        <h2 class="text-headline-sm">Recent events</h2>
+        <div class="text-[11px] text-on-surface-variant">Live stream from the webhook. New events appear automatically while the page is open.</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="flex items-center gap-1 text-[11px] text-on-surface-variant">
+          <input type="checkbox" id="streamToggle" class="row-check" checked/>
+          Auto-refresh (3s)
+        </label>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="refreshEvents">
+          <span class="material-symbols-outlined text-[14px]">refresh</span>Refresh
+        </button>
+      </div>
+    </div>
+    <div class="p-4" id="eventsHost"></div>
+  </div>
+
+</main>
+
+<!-- Scrim -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New</div>
+  <button id="createPixelBtn"><span class="material-symbols-outlined">sensors</span>Pixel</button>
+  <button id="createFromNetworkBtn"><span class="material-symbols-outlined">download</span>Pick from network</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="rowMenu">
+  <div class="menu-header">This pixel</div>
+  <button data-row-act="edit"><span class="material-symbols-outlined">edit</span>Edit pixel</button>
+  <button data-row-act="view"><span class="material-symbols-outlined">visibility</span>View details</button>
+  <button data-row-act="selftest"><span class="material-symbols-outlined">science</span>Run self-test</button>
+  <button data-row-act="snippet"><span class="material-symbols-outlined">code</span>Copy install snippet</button>
+  <div class="sep"></div>
+  <div class="menu-header">Status</div>
+  <button data-row-act="pause"><span class="material-symbols-outlined">pause_circle</span>Pause</button>
+  <button data-row-act="resume"><span class="material-symbols-outlined">play_circle</span>Resume</button>
+  <div class="sep"></div>
+  <button class="danger" data-row-act="delete"><span class="material-symbols-outlined">delete</span>Delete</button>
+</div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">sensors</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Pixel</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekEdit" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Pixel drawer -->
+<div class="drawer" id="pxDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">sensors</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="pxDrawerTitle">New pixel</div>
+        <div class="text-[11px] text-on-surface-variant" id="pxDrawerSub">Draft · not yet installed</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="pxDrawerClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+    <section>
+      <div class="section-h">Network</div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="channel-tile" data-network-tile="Meta">
+          <div class="px-icon meta">ME</div>
+          <div class="min-w-0"><div class="text-body-sm font-semibold">Meta Pixel</div><div class="text-[10px] text-on-surface-variant">Facebook + Instagram</div></div>
+        </div>
+        <div class="channel-tile" data-network-tile="TikTok">
+          <div class="px-icon tiktok">TI</div>
+          <div class="min-w-0"><div class="text-body-sm font-semibold">TikTok Pixel</div><div class="text-[10px] text-on-surface-variant">TikTok Ads</div></div>
+        </div>
+        <div class="channel-tile" data-network-tile="GoogleAds">
+          <div class="px-icon googleads">GA</div>
+          <div class="min-w-0"><div class="text-body-sm font-semibold">Google Ads tag</div><div class="text-[10px] text-on-surface-variant">gtag / AW-… · not GA4</div></div>
+        </div>
+        <div class="channel-tile" data-network-tile="Pinterest">
+          <div class="px-icon pinterest">PI</div>
+          <div class="min-w-0"><div class="text-body-sm font-semibold">Pinterest Tag</div><div class="text-[10px] text-on-surface-variant">Pinterest Ads</div></div>
+        </div>
+        <div class="channel-tile disabled" title="GA4, PostHog, Clarity, Segment, GTM containers belong in Settings → Integrations.">
+          <div class="px-icon" style="background:#f4f3f7;color:#8a938c">+</div>
+          <div class="min-w-0"><div class="text-body-sm font-semibold text-on-surface-variant">Analytics pixels</div><div class="text-[10px] text-on-surface-variant">GA4 / PostHog / Clarity → Settings</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-h">Pixel basics</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Pixel name</label>
+          <input class="field-input" id="pxName" placeholder="e.g. Meta Pixel — Storefront"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Status</label>
+            <select class="field-input" id="pxStatus">
+              <option>Live</option><option>Paused</option><option>Error</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Install method</label>
+            <select class="field-input" id="pxInstall">
+              <option>Script in &lt;head&gt;</option>
+              <option>GTM container</option>
+              <option>Shopify app</option>
+              <option>Server-side (CAPI / Events API)</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Pixel ID</label>
+          <input class="field-input code-mono" id="pxId" placeholder="e.g. 1029XXXXXXXX4471"/>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-h">
+        <span>Events fired</span>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="addEventBtn">
+          <span class="material-symbols-outlined text-[14px]">add</span>Add event
+        </button>
+      </div>
+      <div id="eventsEditorHost" class="space-y-1"></div>
+      <div class="text-[10px] text-on-surface-variant mt-2">
+        Purchase events are posted to Finance as a conversion and attached to the matching journal entry for the period.
+      </div>
+    </section>
+
+    <section>
+      <div class="section-h">Install snippet</div>
+      <div class="space-y-2">
+        <div class="text-[11px] text-on-surface-variant">Paste into the &lt;head&gt; of every page where the pixel should fire.</div>
+        <textarea class="field-textarea" id="pxSnippet" readonly>Select a network and enter a Pixel ID to see the snippet…</textarea>
+        <div class="flex items-center gap-2">
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="copySnippetBtn">
+            <span class="material-symbols-outlined text-[14px]">content_copy</span>Copy snippet
+          </button>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="sendTestBtn">
+            <span class="material-symbols-outlined text-[14px]">science</span>Send test event
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="pxCancel">Cancel</button>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" id="pxSaveNew">Save and new</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="pxSave">Save and close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Self-test modal -->
+<div class="modal-scrim" id="selftestModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-headline-sm">Self-test</h3>
+      <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" id="selftestClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+    <p class="text-body-sm text-on-surface-variant mb-3">Sending a synthetic <span class="code-mono">PageView</span> to <span id="selftestPixel" class="font-semibold text-on-surface"></span>…</p>
+    <div id="selftestHost" class="space-y-2"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="selftestCloseBtn">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="selftestRun">Run again</button>
+    </div>
+  </div>
+</div>
+
+<!-- Destination modal -->
+<div class="modal-scrim" id="destModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1" id="destTitle">Open destination</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="destBody">This would navigate to the corresponding surface.</p>
+    <div class="p-3 rounded border border-outline-variant bg-surface-container-low text-[11px] code-mono mb-3" id="destRoute">—</div>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="destCancel">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="destConfirm">Open</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save view modal -->
+<div class="modal-scrim" id="saveViewModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Save current view</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Name this combination of filters so you can reuse it.</p>
+    <input class="field-input mb-3" id="saveViewName" placeholder="e.g. Error pixels only"/>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="saveViewCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="saveViewConfirm">Save view</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SNIPPET TEMPLATES (safe from </script> leakage) ─── -->
+<template id="tpl-meta">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '__PIXEL_ID__');
+fbq('track', 'PageView');
+<\/script>
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=__PIXEL_ID__&ev=PageView&noscript=1"/><\/noscript>
+<!-- End Meta Pixel Code -->
+</template>
+
+<template id="tpl-tiktok">
+<!-- TikTok Pixel Code -->
+<script>
+!function (w, d, t) {
+  w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+  ttq.load('__PIXEL_ID__');
+  ttq.page();
+}(window, document, 'ttq');
+<\/script>
+<!-- End TikTok Pixel Code -->
+</template>
+
+<template id="tpl-googleads">
+<!-- Google Ads tag (AW-…) — note: not GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=__PIXEL_ID__"><\/script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '__PIXEL_ID__');
+<\/script>
+<!-- End Google Ads tag -->
+</template>
+
+<template id="tpl-pinterest">
+<!-- Pinterest Tag -->
+<script>
+!function(e){if(!window.pintrk){window.pintrk = function () {
+window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+  n=window.pintrk;n.queue=[],n.version="3.0";var
+  t=document.createElement("script");t.async=!0;t.src=e;var
+  r=document.getElementsByTagName("script")[0];r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+pintrk('load', '__PIXEL_ID__');
+pintrk('page');
+<\/script>
+<noscript>
+<img height="1" width="1" style="display:none;" alt="" src="https://ct.pinterest.com/v3/?event=init&tid=__PIXEL_ID__&noscript=1" />
+<\/noscript>
+<!-- End Pinterest Tag -->
+</template>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){ return (n||0).toLocaleString("en-US"); }
+function fmtDate(iso){
+  if (!iso) return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+function netLabel(n){ return n === "GoogleAds" ? "Google Ads" : n; }
+function netChip(n){ return `<span class="net-chip net-${n}">${netLabel(n)}</span>`; }
+function pill(kind, text){ return `<span class="pill ${kind}">${text}</span>`; }
+function iconClass(n){
+  const k = n==="Meta"?"meta":n==="TikTok"?"tiktok":n==="GoogleAds"?"googleads":"pinterest";
+  return `px-icon ${k}`;
+}
+function nowIso(){ return new Date().toISOString(); }
+
+/* ─── data ─── */
+const NETWORKS = ["Meta","TikTok","GoogleAds","Pinterest"];
+
+let PIXELS = [
+  { id:"PX-101", name:"Meta Pixel — Storefront", network:"Meta", pixelId:"1029XXXX4471", install:"Script in <head>", status:"Live",
+    events24:1240, events30:38420, lastEvent:"2026-11-03T09:42:11",
+    events:[
+      { name:"PageView", kind:"standard" },
+      { name:"ViewContent", kind:"standard" },
+      { name:"AddToCart", kind:"standard" },
+      { name:"InitiateCheckout", kind:"standard" },
+      { name:"Purchase", kind:"standard", valueField:"value" }
+    ]},
+  { id:"PX-102", name:"TikTok Pixel — Storefront", network:"TikTok", pixelId:"C4XXXXT9", install:"Script in <head>", status:"Live",
+    events24:412, events30:9821, lastEvent:"2026-11-03T09:40:02",
+    events:[
+      { name:"Pageview", kind:"standard" },
+      { name:"ViewContent", kind:"standard" },
+      { name:"AddToCart", kind:"standard" },
+      { name:"CompletePayment", kind:"standard", valueField:"value" }
+    ]},
+  { id:"PX-103", name:"Google Ads tag", network:"GoogleAds", pixelId:"AW-XXXXXX", install:"GTM container", status:"Live",
+    events24:588, events30:14620, lastEvent:"2026-11-03T09:39:55",
+    events:[
+      { name:"page_view", kind:"standard" },
+      { name:"view_item", kind:"standard" },
+      { name:"add_to_cart", kind:"standard" },
+      { name:"purchase", kind:"standard", valueField:"value" }
+    ]},
+  { id:"PX-104", name:"Pinterest Tag", network:"Pinterest", pixelId:"2617XXXX", install:"Script in <head>", status:"Paused",
+    events24:0, events30:2140, lastEvent:"2026-10-28T14:10:00",
+    events:[
+      { name:"PageVisit", kind:"standard" },
+      { name:"AddToCart", kind:"standard" },
+      { name:"Checkout", kind:"standard" }
+    ]},
+  { id:"PX-105", name:"Server-side events (CAPI)", network:"Meta", pixelId:"CAPI-XXXX", install:"Server-side (CAPI / Events API)", status:"Error",
+    events24:0, events30:0, lastEvent:null,
+    events:[
+      { name:"Purchase", kind:"standard", valueField:"value" }
+    ]}
+];
+
+let RECENT_EVENTS = [
+  { at:"2026-11-03T09:42:11", pixel:"PX-101", event:"PageView", value:null, ok:true },
+  { at:"2026-11-03T09:41:52", pixel:"PX-103", event:"view_item", value:null, ok:true },
+  { at:"2026-11-03T09:41:31", pixel:"PX-101", event:"AddToCart", value:18.00, ok:true },
+  { at:"2026-11-03T09:41:02", pixel:"PX-102", event:"AddToCart", value:24.00, ok:true },
+  { at:"2026-11-03T09:40:02", pixel:"PX-102", event:"ViewContent", value:null, ok:true },
+  { at:"2026-11-03T09:39:55", pixel:"PX-103", event:"page_view", value:null, ok:true },
+  { at:"2026-11-03T09:39:21", pixel:"PX-101", event:"Purchase", value:58.00, ok:true },
+  { at:"2026-11-03T09:38:40", pixel:"PX-103", event:"purchase", value:58.00, ok:true },
+  { at:"2026-11-03T09:37:12", pixel:"PX-105", event:"Purchase", value:null, ok:false, err:"Server-side token expired" },
+  { at:"2026-11-03T09:36:09", pixel:"PX-101", event:"InitiateCheckout", value:null, ok:true }
+];
+
+let SAVED_VIEWS = [
+  { id:"sv-1", name:"Live Meta", tab:"Live", q:"", networks:["Meta"] },
+  { id:"sv-2", name:"Error pixels", tab:"Error", q:"", networks:[...NETWORKS] }
+];
+
+/* ─── state ─── */
+const filters = { q:"", tab:"All", networks:new Set(NETWORKS) };
+let editing = null;
+let peekId = null;
+let draftEvents = [];
+let currentNetworkTile = "Meta";
+let streamTimer = null;
+
+/* ─── safe snippet builder ─── */
+function buildSnippet(network, pixelId){
+  const map = { Meta:"tpl-meta", TikTok:"tpl-tiktok", GoogleAds:"tpl-googleads", Pinterest:"tpl-pinterest" };
+  const tpl = document.getElementById(map[network] || "tpl-meta");
+  if (!tpl) return "";
+  let html = tpl.innerHTML.replace(/__PIXEL_ID__/g, pixelId || "XXXX");
+  html = html.replace(/<\\\//g, "</");
+  return html.trim();
+}
+
+/* ─── filtering ─── */
+function filteredPixels(){
+  return PIXELS.filter(p=>{
+    const q = filters.q.toLowerCase();
+    const qOK = !q || (p.id + " " + p.name + " " + p.network + " " + p.pixelId).toLowerCase().includes(q);
+    const tabOK = filters.tab === "All" || p.status === filters.tab;
+    const netOK = filters.networks.has(p.network);
+    return qOK && tabOK && netOK;
+  });
+}
+
+/* ─── render table ─── */
+function renderTable(){
+  const rows = filteredPixels();
+  const tbody = document.getElementById("pxTbody");
+  tbody.innerHTML = rows.map(p=>{
+    const pillKind = p.status === "Live" ? "ok" : p.status === "Paused" ? "warn" : "bad";
+    const installClass = p.install.startsWith("Server") ? "text-qb-teal" : p.install === "GTM container" ? "text-qb-blue" : "text-on-surface";
+    return `
+      <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${p.id}">
+        <td class="px-3 py-2"><input type="checkbox" class="row-check px-check" onclick="event.stopPropagation()"/></td>
+        <td class="px-3 py-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="${iconClass(p.network)}">${p.network.slice(0,2).toUpperCase()}</div>
+            <div class="min-w-0">
+              <div class="font-medium truncate">${esc(p.name)}</div>
+              <div class="text-[11px] text-on-surface-variant">${p.id}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-3 py-2">${netChip(p.network)}</td>
+        <td class="px-3 py-2"><span class="code-mono">${esc(p.pixelId)}</span></td>
+        <td class="px-3 py-2 text-[11px] ${installClass}">${esc(p.install)}</td>
+        <td class="px-3 py-2 text-right tabular-nums">${p.events24 ? fmt(p.events24) : "—"}</td>
+        <td class="px-3 py-2 text-right tabular-nums">${p.events30 ? fmt(p.events30) : "—"}</td>
+        <td class="px-3 py-2 text-[11px]">${fmtDate(p.lastEvent)}</td>
+        <td class="px-3 py-2">${pill(pillKind, p.status)}</td>
+        <td class="px-2 py-2 text-right">
+          <button class="w-7 h-7 rounded border border-surface-dim hover:bg-surface-container flex items-center justify-center mx-auto" data-row-menu="${p.id}" title="Row actions"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  document.querySelector("[data-b-count]").textContent = `${rows.length} of ${PIXELS.length}`;
+  document.getElementById("pxEmpty").classList.toggle("hidden-imp", rows.length > 0);
+  tbody.classList.toggle("hidden-imp", rows.length === 0);
+  syncCounts();
+  syncSelectAll();
+  syncBulk();
+  syncClearAll();
+}
+
+function syncCounts(){
+  const live = PIXELS.filter(p=>p.status === "Live").length;
+  const ev24 = PIXELS.reduce((s,p)=>s + p.events24, 0);
+  const ev30 = PIXELS.reduce((s,p)=>s + p.events30, 0);
+  document.getElementById("statInstalled").textContent = PIXELS.length;
+  document.getElementById("statInstalledNote").textContent = live + " live · " + PIXELS.filter(p=>p.status === "Error").length + " error";
+  document.getElementById("statEvents24").textContent = fmt(ev24);
+  document.getElementById("statEvents30").textContent = fmt(ev30);
+  document.getElementById("statEventsNote").textContent = "Across " + PIXELS.filter(p=>p.events30 > 0).length + " active pixels";
+  const last = PIXELS.reduce((m,p)=>!m || (p.lastEvent && p.lastEvent > m) ? p.lastEvent : m, null);
+  document.getElementById("statSelftest").textContent = last ? fmtDate(last) : "Never";
+  document.getElementById("statSelftestNote").textContent = last ? "Most recent event" : "Run self-test";
+}
+
+/* ─── row click → peek ─── */
+document.getElementById("pxTbody").addEventListener("click", e=>{
+  const row = e.target.closest("[data-row]");
+  if (!row) return;
+  if (e.target.closest("button") || e.target.closest("input")) return;
+  openPeek(row.dataset.row);
+});
+
+/* ─── row ⋯ menu ─── */
+const rowMenu = document.getElementById("rowMenu");
+document.getElementById("pxTbody").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-row-menu]");
+  if (!btn) return;
+  e.stopPropagation();
+  const id = btn.dataset.rowMenu;
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+  rowMenu.dataset.target = id;
+});
+rowMenu.querySelectorAll("[data-row-act]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.rowAct;
+  const id = rowMenu.dataset.target;
+  const p = PIXELS.find(x=>x.id === id);
+  rowMenu.classList.remove("open");
+  if (!p) return;
+  switch(act){
+    case "edit": openPxDrawer(p.id); break;
+    case "view": openPeek(p.id); break;
+    case "selftest": openSelftest(p.id); break;
+    case "snippet": copySnippet(p); break;
+    case "pause": p.status = "Paused"; renderTable(); toast(`Paused: ${p.name}`); break;
+    case "resume": p.status = "Live"; renderTable(); toast(`Resumed: ${p.name}`); break;
+    case "delete":
+      if (confirm(`Delete pixel "${p.name}"?`)){
+        PIXELS = PIXELS.filter(x=>x.id !== p.id);
+        renderTable(); toast(`Deleted: ${p.name}`);
+      }
+      break;
+  }
+}));
+
+/* ─── outside click ─── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#rowMenu") && !e.target.closest("[data-row-menu]")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+  if (!e.target.closest("#popNetwork") && !e.target.closest("#btnNetwork")) popNetwork.classList.remove("open");
+  if (!e.target.closest("#popSaved") && !e.target.closest("#btnSaved")) popSaved.classList.remove("open");
+});
+
+/* ─── tabs ─── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  filters.tab = b.dataset.viewtab;
+  renderTable();
+}));
+
+/* ─── search ─── */
+document.getElementById("searchInput").addEventListener("input", e=>{ filters.q = e.target.value; renderTable(); });
+
+/* ─── network popover ─── */
+const popNetwork = document.getElementById("popNetwork");
+document.getElementById("btnNetwork").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popNetwork.style.top = (r.bottom + 4) + "px";
+  popNetwork.style.left = Math.min(r.left, window.innerWidth - 240) + "px";
+  popSaved.classList.remove("open");
+  popNetwork.classList.toggle("open");
+});
+document.getElementById("networkApply").addEventListener("click", ()=>{
+  filters.networks = new Set([...document.querySelectorAll(".filter-network:checked")].map(cb=>cb.value));
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+document.getElementById("networkClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked = true);
+  filters.networks = new Set(NETWORKS);
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+
+/* ─── saved views ─── */
+const popSaved = document.getElementById("popSaved");
+document.getElementById("btnSaved").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popSaved.style.top = (r.bottom + 4) + "px";
+  popSaved.style.left = Math.min(r.left, window.innerWidth - 260) + "px";
+  popNetwork.classList.remove("open");
+  renderSavedViews();
+  popSaved.classList.toggle("open");
+});
+function renderSavedViews(){
+  document.getElementById("savedList").innerHTML = SAVED_VIEWS.map(v=>`
+    <div class="w-full px-3 py-1.5 hover:bg-surface-container-low flex items-center gap-2">
+      <button class="flex-1 text-left flex items-center gap-2" data-apply-view="${v.id}">
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">bookmark</span>
+        <span class="truncate">${esc(v.name)}</span>
+      </button>
+      <button class="w-5 h-5 rounded hover:bg-surface-container flex items-center justify-center" data-delete-view="${v.id}"><span class="material-symbols-outlined text-[14px] text-outline">close</span></button>
+    </div>
+  `).join("") || `<div class="px-3 py-2 text-[11px] text-on-surface-variant">No saved views yet.</div>`;
+  document.querySelectorAll("[data-apply-view]").forEach(b=>b.addEventListener("click", ()=>{
+    const v = SAVED_VIEWS.find(x=>x.id === b.dataset.applyView); if (!v) return;
+    filters.tab = v.tab;
+    filters.q = v.q;
+    document.getElementById("searchInput").value = v.q;
+    filters.networks = new Set(v.networks);
+    document.querySelectorAll(".filter-network").forEach(cb=>cb.checked = v.networks.includes(cb.value));
+    document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x.dataset.viewtab === v.tab));
+    popSaved.classList.remove("open");
+    renderTable();
+    toast("Applied view: " + v.name);
+  }));
+  document.querySelectorAll("[data-delete-view]").forEach(b=>b.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    SAVED_VIEWS = SAVED_VIEWS.filter(x=>x.id !== b.dataset.deleteView);
+    renderSavedViews();
+    toast("View deleted");
+  }));
+}
+document.getElementById("saveCurrentView").addEventListener("click", ()=>{
+  popSaved.classList.remove("open");
+  document.getElementById("saveViewName").value = "";
+  document.getElementById("saveViewModal").classList.add("open");
+});
+document.getElementById("saveViewCancel").addEventListener("click", ()=>document.getElementById("saveViewModal").classList.remove("open"));
+document.getElementById("saveViewConfirm").addEventListener("click", ()=>{
+  const name = document.getElementById("saveViewName").value.trim();
+  if (!name){ toast("Name is required"); return; }
+  SAVED_VIEWS.push({ id:"sv-" + Date.now(), name, tab: filters.tab, q: filters.q, networks:[...filters.networks] });
+  document.getElementById("saveViewModal").classList.remove("open");
+  toast("Saved view: " + name);
+  renderSavedViews();
+});
+
+/* ─── clear all ─── */
+function syncClearAll(){
+  const active = filters.q || filters.tab !== "All" || filters.networks.size !== NETWORKS.length;
+  document.getElementById("btnClearAll").classList.toggle("hidden-imp", !active);
+}
+document.getElementById("btnClearAll").addEventListener("click", ()=>{
+  filters.q = ""; document.getElementById("searchInput").value = "";
+  filters.tab = "All";
+  document.querySelectorAll("[data-viewtab]").forEach(b=>b.classList.toggle("active", b.dataset.viewtab === "All"));
+  filters.networks = new Set(NETWORKS);
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked = true);
+  renderTable();
+});
+document.getElementById("emptyClear").addEventListener("click", ()=>document.getElementById("btnClearAll").click());
+
+/* ─── bulk ─── */
+function syncSelectAll(){
+  const all = document.getElementById("checkAll");
+  const rows = [...document.querySelectorAll(".px-check")].filter(cb=>cb.closest("tr").style.display !== "none");
+  const checked = rows.filter(cb=>cb.checked);
+  all.checked = rows.length > 0 && checked.length === rows.length;
+  all.indeterminate = checked.length > 0 && checked.length < rows.length;
+}
+function syncBulk(){
+  const n = [...document.querySelectorAll(".px-check")].filter(cb=>cb.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  bar.classList.toggle("show", n > 0);
+  document.querySelector("[data-bulk-count]").textContent = `${n} selected`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.classList.contains("px-check")) syncBulk();
+  if (e.target.id === "checkAll"){
+    const on = e.target.checked;
+    document.querySelectorAll(".px-check").forEach(cb=>{
+      if (cb.closest("tr").style.display !== "none") cb.checked = on;
+    });
+    syncBulk();
+  }
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".px-check").forEach(cb=>cb.checked = false);
+    document.getElementById("checkAll").checked = false;
+    syncBulk(); return;
+  }
+  const selected = [...document.querySelectorAll(".px-check:checked")].map(cb=>cb.closest("tr").dataset.row);
+  const n = selected.length;
+  if (act === "pause"){ selected.forEach(id=>{ const p = PIXELS.find(x=>x.id===id); if (p) p.status = "Paused"; }); toast(`Paused ${n} pixel(s)`); }
+  else if (act === "resume"){ selected.forEach(id=>{ const p = PIXELS.find(x=>x.id===id); if (p) p.status = "Live"; }); toast(`Resumed ${n} pixel(s)`); }
+  else if (act === "selftest"){ selected.forEach(id=>openSelftest(id)); }
+  else if (act === "delete"){
+    if (confirm(`Delete ${n} pixel(s)?`)){
+      selected.forEach(id=>{ PIXELS = PIXELS.filter(x=>x.id !== id); });
+      toast(`Deleted ${n} pixel(s)`);
+    }
+  }
+  renderTable();
+  document.querySelectorAll(".px-check").forEach(cb=>cb.checked = false);
+  document.getElementById("checkAll").checked = false;
+  syncBulk();
+}));
+
+/* ─── peek ─── */
+function openPeek(id){
+  peekId = id;
+  const p = PIXELS.find(x=>x.id === id); if (!p) return;
+  const pillKind = p.status === "Live" ? "ok" : p.status === "Paused" ? "warn" : "bad";
+  document.getElementById("peekTitle").textContent = p.name;
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-3 flex items-center gap-2">${pill(pillKind, p.status)}${netChip(p.network)}</div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-center">
+      <div><div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Events (24h)</div><div class="text-body-md font-semibold tabular-nums">${fmt(p.events24)}</div></div>
+      <div><div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Events (30d)</div><div class="text-body-md font-semibold tabular-nums">${fmt(p.events30)}</div></div>
+    </div>
+    <dl class="text-body-sm">
+      <div class="kv"><dt>Pixel ID</dt><dd class="code-mono">${esc(p.pixelId)}</dd></div>
+      <div class="kv"><dt>Install method</dt><dd>${esc(p.install)}</dd></div>
+      <div class="kv"><dt>Last event</dt><dd>${fmtDate(p.lastEvent)}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim">
+      <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Events fired</div>
+      <div class="space-y-1">
+        ${p.events.map(ev=>`<div class="event-row">
+          <span class="event-tag">standard</span>
+          <span class="text-body-sm flex-1">${esc(ev.name)}</span>
+          ${ev.valueField ? `<span class="text-[11px] text-on-surface-variant">value: <span class="code-mono">${esc(ev.valueField)}</span></span>` : ""}
+        </div>`).join("")}
+      </div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="edit"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="selftest"><span class="material-symbols-outlined text-[16px]">science</span>Self-test</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="snippet"><span class="material-symbols-outlined text-[16px]">code</span>Snippet</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="reports"><span class="material-symbols-outlined text-[16px]">bar_chart</span>Reports</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    const act = b.dataset.peek;
+    if (act === "edit"){ closePeek(); openPxDrawer(p.id); }
+    else if (act === "selftest"){ openSelftest(p.id); }
+    else if (act === "snippet"){ copySnippet(p); }
+    else if (act === "reports"){ openDest("reports"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", ()=>{
+  if (document.getElementById("pxDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peekEdit").addEventListener("click", ()=>{
+  if (!peekId) return;
+  const id = peekId; closePeek(); openPxDrawer(id);
+});
+
+/* ─── self-test modal ─── */
+function openSelftest(id){
+  const p = PIXELS.find(x=>x.id === id); if (!p) return;
+  peekId = id;
+  document.getElementById("selftestPixel").textContent = p.name;
+  const host = document.getElementById("selftestHost");
+  host.innerHTML = `
+    <div class="p-3 rounded border border-outline-variant bg-surface-container-low text-body-sm" id="stStep1">
+      <div class="flex items-center justify-between mb-1"><span class="text-on-surface-variant">Step 1 — reachability</span><span class="selftest-badge pending" id="stStep1Badge">running…</span></div>
+      <div class="text-[11px] text-on-surface-variant">Contacting ${esc(netLabel(p.network))} endpoint for ${esc(p.pixelId)}</div>
+    </div>
+    <div class="p-3 rounded border border-outline-variant bg-surface-container-low text-body-sm" id="stStep2">
+      <div class="flex items-center justify-between mb-1"><span class="text-on-surface-variant">Step 2 — synthetic event</span><span class="selftest-badge pending" id="stStep2Badge">waiting…</span></div>
+      <div class="text-[11px] text-on-surface-variant">Sending <span class="code-mono">PageView</span></div>
+    </div>
+    <div class="p-3 rounded border border-outline-variant bg-surface-container-low text-body-sm" id="stStep3">
+      <div class="flex items-center justify-between mb-1"><span class="text-on-surface-variant">Step 3 — delivery</span><span class="selftest-badge pending" id="stStep3Badge">waiting…</span></div>
+      <div class="text-[11px] text-on-surface-variant">Confirming the event was accepted by the network</div>
+    </div>
+  `;
+  document.getElementById("selftestModal").classList.add("open");
+  runSelftest(p);
+}
+function runSelftest(p){
+  const step1 = document.getElementById("stStep1Badge");
+  const step2 = document.getElementById("stStep2Badge");
+  const step3 = document.getElementById("stStep3Badge");
+  if (!step1) return;
+  step1.textContent = "running…"; step1.className = "selftest-badge pending";
+  step2.textContent = "waiting…"; step2.className = "selftest-badge pending";
+  step3.textContent = "waiting…"; step3.className = "selftest-badge pending";
+
+  setTimeout(()=>{
+    step1.textContent = "✓ reachable"; step1.className = "selftest-badge ok";
+    setTimeout(()=>{
+      if (p.status === "Error"){
+        step2.textContent = "✗ rejected"; step2.className = "selftest-badge bad";
+        step3.textContent = "✗ not delivered"; step3.className = "selftest-badge bad";
+        appendStreamEvent({ at: nowIso(), pixel: p.id, event:"PageView", value:null, ok:false, err:"Self-test rejected — check install" });
+      } else {
+        step2.textContent = "✓ fired"; step2.className = "selftest-badge ok";
+        setTimeout(()=>{
+          step3.textContent = "✓ acknowledged"; step3.className = "selftest-badge ok";
+          p.events24 += 1;
+          p.events30 += 1;
+          p.lastEvent = nowIso();
+          appendStreamEvent({ at: nowIso(), pixel: p.id, event:"PageView", value:null, ok:true });
+          renderTable();
+        }, 500);
+      }
+    }, 400);
+  }, 300);
+}
+document.getElementById("selftestClose").addEventListener("click", ()=>document.getElementById("selftestModal").classList.remove("open"));
+document.getElementById("selftestCloseBtn").addEventListener("click", ()=>document.getElementById("selftestModal").classList.remove("open"));
+document.getElementById("selftestRun").addEventListener("click", ()=>{
+  if (peekId){ const p = PIXELS.find(x=>x.id === peekId); if (p) runSelftest(p); }
+});
+
+/* ─── copy snippet ─── */
+function copySnippet(p){
+  const snip = buildSnippet(p.network, p.pixelId);
+  navigator.clipboard?.writeText(snip).then(()=>toast("Snippet copied — paste into <head>")).catch(()=>{
+    document.getElementById("pxSnippet").value = snip;
+    toast("Clipboard unavailable. Snippet placed in editor.");
+  });
+}
+
+/* ─── drawer ─── */
+function openPxDrawer(id){
+  editing = id ? PIXELS.find(p=>p.id === id) : null;
+  document.getElementById("pxDrawerTitle").textContent = editing ? "Edit pixel" : "New pixel";
+  document.getElementById("pxDrawerSub").textContent = editing ? editing.status + " · " + editing.id : "Draft · not yet installed";
+
+  document.getElementById("pxName").value = editing ? editing.name : "";
+  document.getElementById("pxStatus").value = editing ? editing.status : "Live";
+  document.getElementById("pxId").value = editing ? editing.pixelId : "";
+  document.getElementById("pxInstall").value = editing ? editing.install : "Script in <head>";
+
+  currentNetworkTile = editing ? editing.network : "Meta";
+  document.querySelectorAll("[data-network-tile]").forEach(t=>t.classList.toggle("selected", t.dataset.networkTile === currentNetworkTile));
+
+  draftEvents = editing ? JSON.parse(JSON.stringify(editing.events)) : [
+    { name:"PageView", kind:"standard" },
+    { name:"Purchase", kind:"standard", valueField:"value" }
+  ];
+  renderEventsEditor();
+  renderSnippetPreview();
+
+  document.getElementById("pxDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closePxDrawer(){
+  document.getElementById("pxDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing = null;
+}
+document.getElementById("pxDrawerClose").addEventListener("click", closePxDrawer);
+document.getElementById("pxCancel").addEventListener("click", closePxDrawer);
+
+document.querySelectorAll("[data-network-tile]").forEach(t=>t.addEventListener("click", ()=>{
+  if (t.classList.contains("disabled")){ openDest("integrations"); return; }
+  currentNetworkTile = t.dataset.networkTile;
+  document.querySelectorAll("[data-network-tile]").forEach(x=>x.classList.toggle("selected", x === t));
+  renderSnippetPreview();
+}));
+
+function renderEventsEditor(){
+  const host = document.getElementById("eventsEditorHost");
+  host.innerHTML = draftEvents.map((ev, i)=>`
+    <div class="flex items-center gap-2 py-1">
+      <input class="flex-1 h-8 px-2 border border-surface-dim rounded text-[12px]" data-ev-name="${i}" value="${esc(ev.name)}" placeholder="Event name"/>
+      <input class="flex-1 h-8 px-2 border border-surface-dim rounded text-[12px]" data-ev-value="${i}" value="${esc(ev.valueField || "")}" placeholder="value field (optional)"/>
+      <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" data-remove-event="${i}"><span class="material-symbols-outlined text-[14px] text-error">close</span></button>
+    </div>
+  `).join("") || `<div class="text-[11px] text-on-surface-variant">No events configured.</div>`;
+  host.querySelectorAll("[data-ev-name]").forEach(inp=>inp.addEventListener("input", ()=>{ draftEvents[parseInt(inp.dataset.evName,10)].name = inp.value; }));
+  host.querySelectorAll("[data-ev-value]").forEach(inp=>inp.addEventListener("input", ()=>{ draftEvents[parseInt(inp.dataset.evValue,10)].valueField = inp.value; }));
+  host.querySelectorAll("[data-remove-event]").forEach(b=>b.addEventListener("click", ()=>{
+    draftEvents.splice(parseInt(b.dataset.removeEvent,10), 1);
+    renderEventsEditor();
+  }));
+}
+document.getElementById("addEventBtn").addEventListener("click", ()=>{
+  draftEvents.push({ name:"NewEvent", kind:"standard" });
+  renderEventsEditor();
+});
+
+function renderSnippetPreview(){
+  const id = document.getElementById("pxId").value || "XXXX";
+  document.getElementById("pxSnippet").value = buildSnippet(currentNetworkTile, id);
+}
+document.getElementById("pxId").addEventListener("input", renderSnippetPreview);
+document.getElementById("copySnippetBtn").addEventListener("click", ()=>{
+  const snip = document.getElementById("pxSnippet").value;
+  navigator.clipboard?.writeText(snip).then(()=>toast("Snippet copied")).catch(()=>toast("Copy failed — select and copy manually"));
+});
+document.getElementById("sendTestBtn").addEventListener("click", ()=>{
+  if (editing){ openSelftest(editing.id); return; }
+  toast("Save the pixel first, then run a self-test");
+});
+
+function collectPixel(){
+  const name = document.getElementById("pxName").value.trim();
+  if (!name){ toast("Pixel name is required"); return null; }
+  const id = document.getElementById("pxId").value.trim();
+  if (!id){ toast("Pixel ID is required"); return null; }
+  return {
+    id: editing ? editing.id : "PX-" + String(PIXELS.length + 101).slice(-3),
+    name,
+    network: currentNetworkTile,
+    pixelId: id,
+    install: document.getElementById("pxInstall").value,
+    status: document.getElementById("pxStatus").value,
+    events24: editing ? editing.events24 : 0,
+    events30: editing ? editing.events30 : 0,
+    lastEvent: editing ? editing.lastEvent : null,
+    events: JSON.parse(JSON.stringify(draftEvents))
+  };
+}
+document.getElementById("pxSave").addEventListener("click", ()=>{
+  const p = collectPixel(); if (!p) return;
+  if (editing){ const idx = PIXELS.findIndex(x=>x.id === editing.id); if (idx >= 0) PIXELS[idx] = p; }
+  else PIXELS.unshift(p);
+  closePxDrawer(); renderTable();
+  toast(editing ? "Pixel updated" : "Pixel created");
+});
+document.getElementById("pxSaveNew").addEventListener("click", ()=>{
+  const p = collectPixel(); if (!p) return;
+  if (editing){ const idx = PIXELS.findIndex(x=>x.id === editing.id); if (idx >= 0) PIXELS[idx] = p; }
+  else PIXELS.unshift(p);
+  editing = null;
+  document.getElementById("pxDrawerTitle").textContent = "New pixel";
+  document.getElementById("pxDrawerSub").textContent = "Draft · not yet installed";
+  document.getElementById("pxName").value = "";
+  document.getElementById("pxId").value = "";
+  renderTable();
+  toast("Saved. New pixel form ready.");
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.getElementById("createPixelBtn").addEventListener("click", ()=>{ createMenu.classList.remove("open"); openPxDrawer(null); });
+document.getElementById("createFromNetworkBtn").addEventListener("click", ()=>{
+  createMenu.classList.remove("open");
+  openDest("pick-from-network");
+});
+document.getElementById("btnNewPixel").addEventListener("click", ()=>openPxDrawer(null));
+
+/* ─── recent events stream ─── */
+function renderEvents(flashNewest=false){
+  const host = document.getElementById("eventsHost");
+  host.innerHTML = RECENT_EVENTS.slice(0, 20).map((ev, idx)=>{
+    const p = PIXELS.find(x=>x.id === ev.pixel);
+    const pixelName = p ? p.name : ev.pixel;
+    const tagClass = ev.ok ? "" : "bad";
+    return `
+      <div class="event-row ${flashNewest && idx === 0 ? "new-flash" : ""}">
+        <span class="code-mono text-[11px] text-on-surface-variant w-[130px] shrink-0">${fmtDate(ev.at)}</span>
+        <span class="event-tag ${tagClass}">${ev.ok ? "ok" : "error"}</span>
+        <span class="text-body-sm font-medium flex-1 truncate">${esc(ev.event)}</span>
+        <span class="text-[11px] text-on-surface-variant truncate">${esc(pixelName)}</span>
+        <span class="text-[11px] tabular-nums">${ev.value != null ? "$" + ev.value.toFixed(2) : ""}</span>
+        ${ev.err ? `<span class="text-[11px] text-error truncate">${esc(ev.err)}</span>` : `<span class="w-[0px]"></span>`}
+      </div>
+    `;
+  }).join("");
+}
+function appendStreamEvent(ev){
+  RECENT_EVENTS.unshift(ev);
+  RECENT_EVENTS = RECENT_EVENTS.slice(0, 20);
+  renderEvents(true);
+}
+document.getElementById("refreshEvents").addEventListener("click", ()=>{
+  renderEvents();
+  toast("Events refreshed");
+});
+
+/* auto stream simulation */
+function pushSyntheticEvent(){
+  const live = PIXELS.filter(p=>p.status === "Live");
+  if (!live.length) return;
+  const p = live[Math.floor(Math.random() * live.length)];
+  const ev = p.events[Math.floor(Math.random() * p.events.length)];
+  const value = ev.valueField ? Math.round((10 + Math.random() * 90) * 100) / 100 : null;
+  const isPurchase = /purchase|completepayment|add_to_cart|addtocart/i.test(ev.name);
+  appendStreamEvent({ at: nowIso(), pixel: p.id, event: ev.name, value, ok: true });
+  p.events24 += 1; p.events30 += 1; p.lastEvent = nowIso();
+  if (isPurchase) toast(`${p.name} fired ${ev.name}${value != null ? " · $" + value.toFixed(2) : ""}`);
+  renderTable();
+}
+function startStream(){
+  if (streamTimer) return;
+  streamTimer = setInterval(()=>{ if (document.getElementById("streamToggle").checked) pushSyntheticEvent(); }, 3000);
+}
+function stopStream(){ clearInterval(streamTimer); streamTimer = null; }
+document.getElementById("streamToggle").addEventListener("change", e=>{
+  if (e.target.checked) startStream(); else stopStream();
+});
+
+/* ─── destinations ─── */
+const DESTS = {
+  "reports": { title:"Finance → Reports", body:"Event volume rolls into the Advertising performance report.", route:"/finance/reports?category=advertising" },
+  "pick-from-network": { title:"Pick from network", body:"Fetch an existing pixel from the advertiser's connected network account.", route:"/advertising/pixels/from-network" },
+  "integrations": { title:"Settings → Integrations", body:"Install GA4, PostHog, Clarity, Hotjar, Segment, or GTM containers — those live in Integrations, not Advertising.", route:"/settings/integrations" },
+  "event-volume": { title:"Finance → Reports", body:"Event volume by pixel and period.", route:"/finance/reports?metric=events" }
+};
+function openDest(key){
+  const meta = DESTS[key] || { title:"Open destination", body:"", route:"/" + key };
+  document.getElementById("destTitle").textContent = meta.title;
+  document.getElementById("destBody").textContent = meta.body;
+  document.getElementById("destRoute").textContent = meta.route;
+  document.getElementById("destModal").classList.add("open");
+}
+document.getElementById("destCancel").addEventListener("click", ()=>document.getElementById("destModal").classList.remove("open"));
+document.getElementById("destConfirm").addEventListener("click", ()=>{
+  document.getElementById("destModal").classList.remove("open");
+  toast("Navigating: " + document.getElementById("destRoute").textContent);
+});
+document.getElementById("btnEventVolume").addEventListener("click", ()=>openDest("event-volume"));
+document.getElementById("btnOpenIntegrations").addEventListener("click", ()=>openDest("integrations"));
+
+/* ─── export ─── */
+document.getElementById("btnExportEvents").addEventListener("click", ()=>{
+  const rows = [["at","pixel","pixel_name","event","value","ok","error"], ...RECENT_EVENTS.map(ev=>{
+    const p = PIXELS.find(x=>x.id === ev.pixel);
+    return [ev.at, ev.pixel, p ? p.name : "", ev.event, ev.value ?? "", ev.ok, ev.err || ""];
+  })];
+  const csv = rows.map(r=>r.map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `pixel-events-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Exported events CSV");
+});
+
+/* ─── pagination ─── */
+document.getElementById("rowsPerPage").addEventListener("change", ()=>toast("Rows per page updated"));
+document.getElementById("pagePrev").addEventListener("click", ()=>toast("Previous page"));
+document.getElementById("pageNext").addEventListener("click", ()=>toast("Next page"));
+
+/* ─── boot ─── */
+renderTable();
+renderEvents();
+startStream();
+</script>
+</body>
+</html>

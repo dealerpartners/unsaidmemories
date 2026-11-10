@@ -1,0 +1,663 @@
+     1→'use client';
+     2→/* DocumentEngine.tsx — The ONE engine that renders every multi-line transaction.
+     3→   Per platform-component-map.md §1.1 Rule:
+     4→   "Every Document is rendered by one Document Engine (header → lines → totals →
+     5→   attachments/memo → status → activity). Invoice, Bill, PO, Sales order, Estimate,
+     6→   Credit memo, Vendor credit differ only by config."
+     7→   
+     8→   This replaces the 8+ separate finance screen implementations. */
+     9→
+    10→import { useState, useMemo, useEffect, useRef } from 'react';
+    11→import { usePlatformStore, type DocumentType, type Document, type DocumentLine, type PartyRole, type Item } from '@/lib/platformStore';
+    12→import { PartyPicker, AccountPicker } from './UniversalPickers';
+    13→
+    14→/* ─── Document Config (what makes each type different) ─── */
+    15→interface DocConfig {
+    16→  type: DocumentType;
+    17→  label: string;           // "Invoice", "Bill", "Purchase Order"
+    18→  numberPrefix: string;    // "INV-", "BILL-", "PO-"
+    19→  partyLabel: string;      // "Customer", "Vendor", "Supplier"
+    20→  partyRole: string;       // "Customer", "Vendor", "Supplier"
+    21→  dateLabel: string;       // "Invoice date", "Bill date"
+    22→  dueLabel: string;        // "Due date", "Due date"
+    23→  lineColumns: { key: string; label: string; width?: string; align?: 'left' | 'right' }[];
+    24→  statuses: string[];
+    25→  canRecordPayment: boolean;
+    26→  canSend: boolean;
+    27→  canPrint: boolean;
+    28→  showShipTo: boolean;
+    29→  showPaymentOptions: boolean;
+    30→  primaryAction: string;   // "Review and send", "Save bill", "Send to supplier"
+    31→}
+    32→
+    33→const CONFIGS: Record<DocumentType, DocConfig> = {
+    34→  Invoice: {
+    35→    type: 'Invoice', label: 'Invoice', numberPrefix: 'INV-', partyLabel: 'Customer', partyRole: 'Customer',
+    36→    dateLabel: 'Invoice date', dueLabel: 'Due date',
+    37→    lineColumns: [
+    38→      { key: 'description', label: 'Product/service', align: 'left' },
+    39→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+    40→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+    41→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+    42→    ],
+    43→    statuses: ['Draft', 'Sent', 'Unpaid', 'Overdue', 'Paid', 'Deposited', 'Void'],
+    44→    canRecordPayment: true, canSend: true, canPrint: true, showShipTo: false, showPaymentOptions: true,
+    45→    primaryAction: 'Review and send',
+    46→  },
+    47→  Estimate: {
+    48→    type: 'Estimate', label: 'Estimate', numberPrefix: 'EST-', partyLabel: 'Customer', partyRole: 'Customer',
+    49→    dateLabel: 'Estimate date', dueLabel: 'Expiration date',
+    50→    lineColumns: [
+    51→      { key: 'description', label: 'Product/service', align: 'left' },
+    52→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+    53→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+    54→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+    55→    ],
+    56→    statuses: ['Draft', 'Sent', 'Converted', 'Declined', 'Closed'],
+    57→    canRecordPayment: false, canSend: true, canPrint: true, showShipTo: false, showPaymentOptions: false,
+    58→    primaryAction: 'Review and send',
+    59→  },
+    60→  Bill: {
+    61→    type: 'Bill', label: 'Bill', numberPrefix: 'BILL-', partyLabel: 'Vendor', partyRole: 'Vendor',
+    62→    dateLabel: 'Bill date', dueLabel: 'Due date',
+    63→    lineColumns: [
+    64→      { key: 'description', label: 'Category / Item', align: 'left' },
+    65→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+    66→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+    67→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+    68→    ],
+    69→    statuses: ['ForReview', 'Approved', 'Unpaid', 'Overdue', 'Paid', 'Void'],
+    70→    canRecordPayment: true, canSend: false, canPrint: true, showShipTo: false, showPaymentOptions: false,
+    71→    primaryAction: 'Save bill',
+    72→  },
+    73→  PurchaseOrder: {
+    74→    type: 'PurchaseOrder', label: 'Purchase Order', numberPrefix: 'PO-', partyLabel: 'Supplier', partyRole: 'Supplier',
+    75→    dateLabel: 'Order date', dueLabel: 'Expected delivery',
+    76→    lineColumns: [
+    77→      { key: 'description', label: 'Item', align: 'left' },
+    78→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+    79→      { key: 'rate', label: 'Unit cost', width: '100px', align: 'right' },
+    80→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+    81→    ],
+    82→    statuses: ['Draft', 'Open', 'Sent', 'PartiallyReceived', 'Received', 'Closed'],
+    83→    canRecordPayment: false, canSend: true, canPrint: true, showShipTo: true, showPaymentOptions: false,
+    84→    primaryAction: 'Send to supplier',
+    85→  },
+    86→  SalesReceipt: {
+    87→    type: 'SalesReceipt', label: 'Sales Receipt', numberPrefix: 'SR-', partyLabel: 'Customer', partyRole: 'Customer',
+    88→    dateLabel: 'Sale date', dueLabel: '',
+    89→    lineColumns: [
+    90→      { key: 'description', label: 'Product/service', align: 'left' },
+    91→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+    92→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+    93→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+    94→    ],
+    95→    statuses: ['Draft', 'Paid', 'Deposited'],
+    96→    canRecordPayment: false, canSend: true, canPrint: true, showShipTo: false, showPaymentOptions: true,
+    97→    primaryAction: 'Save and print',
+    98→  },
+    99→  CreditMemo: {
+   100→    type: 'CreditMemo', label: 'Credit Memo', numberPrefix: 'CM-', partyLabel: 'Customer', partyRole: 'Customer',
+   101→    dateLabel: 'Date', dueLabel: '',
+   102→    lineColumns: [
+   103→      { key: 'description', label: 'Product/service', align: 'left' },
+   104→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   105→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   106→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+   107→    ],
+   108→    statuses: ['Draft', 'Applied', 'Refunded', 'Void'],
+   109→    canRecordPayment: true, canSend: true, canPrint: true, showShipTo: false, showPaymentOptions: false,
+   110→    primaryAction: 'Save',
+   111→  },
+   112→  SalesOrder: {
+   113→    type: 'SalesOrder', label: 'Sales Order', numberPrefix: 'SO-', partyLabel: 'Customer', partyRole: 'Customer',
+   114→    dateLabel: 'Order date', dueLabel: 'Expected ship',
+   115→    lineColumns: [
+   116→      { key: 'description', label: 'Product/service', align: 'left' },
+   117→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   118→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   119→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+   120→    ],
+   121→    statuses: ['Draft', 'Open', 'Fulfilled', 'Closed'],
+   122→    canRecordPayment: true, canSend: true, canPrint: true, showShipTo: true, showPaymentOptions: false,
+   123→    primaryAction: 'Save order',
+   124→  },
+   125→  VendorCredit: {
+   126→    type: 'VendorCredit', label: 'Vendor Credit', numberPrefix: 'VC-', partyLabel: 'Vendor', partyRole: 'Vendor',
+   127→    dateLabel: 'Date', dueLabel: '',
+   128→    lineColumns: [
+   129→      { key: 'description', label: 'Category / Item', align: 'left' },
+   130→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   131→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   132→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+   133→    ],
+   134→    statuses: ['Draft', 'Applied', 'Void'],
+   135→    canRecordPayment: false, canSend: false, canPrint: true, showShipTo: false, showPaymentOptions: false,
+   136→    primaryAction: 'Save',
+   137→  },
+   138→  JournalEntry: {
+   139→    type: 'JournalEntry', label: 'Journal Entry', numberPrefix: 'JE-', partyLabel: '—', partyRole: '',
+   140→    dateLabel: 'Date', dueLabel: '',
+   141→    lineColumns: [
+   142→      { key: 'account', label: 'Account', align: 'left' },
+   143→      { key: 'description', label: 'Description', align: 'left' },
+   144→      { key: 'debit', label: 'Debit', width: '120px', align: 'right' },
+   145→      { key: 'credit', label: 'Credit', width: '120px', align: 'right' },
+   146→    ],
+   147→    statuses: ['Draft', 'Posted'],
+   148→    canRecordPayment: false, canSend: false, canPrint: true, showShipTo: false, showPaymentOptions: false,
+   149→    primaryAction: 'Post',
+   150→  },
+   151→  RMA: {
+   152→    type: 'RMA', label: 'Return / RMA', numberPrefix: 'RMA-', partyLabel: 'Customer', partyRole: 'Customer',
+   153→    dateLabel: 'Date', dueLabel: '',
+   154→    lineColumns: [
+   155→      { key: 'description', label: 'Item', align: 'left' },
+   156→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   157→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   158→      { key: 'amount', label: 'Refund amount', width: '120px', align: 'right' },
+   159→    ],
+   160→    statuses: ['Requested', 'Approved', 'Received', 'Refunded', 'Declined'],
+   161→    canRecordPayment: true, canSend: true, canPrint: true, showShipTo: true, showPaymentOptions: false,
+   162→    primaryAction: 'Save',
+   163→  },
+   164→  Expense: {
+   165→    type: 'Expense', label: 'Expense', numberPrefix: 'EXP-', partyLabel: 'Payee', partyRole: 'Vendor',
+   166→    dateLabel: 'Date', dueLabel: '',
+   167→    lineColumns: [
+   168→      { key: 'description', label: 'Category / Item', align: 'left' },
+   169→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   170→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   171→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+   172→    ],
+   173→    statuses: ['Draft', 'Paid'],
+   174→    canRecordPayment: false, canSend: false, canPrint: true, showShipTo: false, showPaymentOptions: false,
+   175→    primaryAction: 'Save expense',
+   176→  },
+   177→  Check: {
+   178→    type: 'Check', label: 'Check', numberPrefix: 'CHK-', partyLabel: 'Payee', partyRole: 'Vendor',
+   179→    dateLabel: 'Date', dueLabel: '',
+   180→    lineColumns: [
+   181→      { key: 'description', label: 'Category / Item', align: 'left' },
+   182→      { key: 'qty', label: 'Qty', width: '80px', align: 'right' },
+   183→      { key: 'rate', label: 'Rate', width: '100px', align: 'right' },
+   184→      { key: 'amount', label: 'Amount', width: '120px', align: 'right' },
+   185→    ],
+   186→    statuses: ['Draft', 'Printed', 'Paid'],
+   187→    canRecordPayment: false, canSend: false, canPrint: true, showShipTo: false, showPaymentOptions: false,
+   188→    primaryAction: 'Save check',
+   189→  },
+   190→};
+   191→
+   192→export { CONFIGS as DOC_CONFIGS };
+   193→export type { DocConfig };
+   194→
+   195→/* ─── The Document Engine Component ─── */
+   196→interface DocumentEngineProps {
+   197→  type?: DocumentType;
+   198→  documentId?: string | null; // null = new document
+   199→  onToast: (msg: string) => void;
+   200→  onClose?: () => void;
+   201→  partyId?: string | null; // prefill from envelope
+   202→  /** Open a different document (used by duplicate/convert to chain) */
+   203→  onOpenDocument?: (id: string) => void;
+   204→  /** Legacy controlled API (GlobalShell): open + activeTab + onSelectTab */
+   205→  open?: boolean;
+   206→  activeTab?: string;
+   207→  onSelectTab?: (tab: string) => void;
+   208→}
+   209→
+   210→export type DocTabType = 'edit' | 'email' | 'payor' | 'pdf';
+   211→
+   212→export default function DocumentEngine(props: DocumentEngineProps) {
+   213→  // Legacy controlled mode (GlobalShell): open=false → render nothing.
+   214→  if (props.open === false) return null;
+   215→  return <DocumentEngineInner key={`${props.type || 'Invoice'}:${props.documentId || 'new'}`} {...props} />;
+   216→}
+   217→
+   218→function DocumentEngineInner({ type = 'Invoice', documentId, onToast, onClose, partyId: prefillPartyId, activeTab, onSelectTab, onOpenDocument }: DocumentEngineProps) {
+   219→  const config = CONFIGS[type] || CONFIGS.Invoice;
+   220→  const store = usePlatformStore();
+   221→
+   222→  const existing = documentId ? store.getDocument(documentId) : null;
+   223→  const isNew = !existing;
+   224→
+   225→  // §1.3 Context Envelope — capture once at mount. Creating from a record
+   226→  // prefills from that record; creating from the global menu inherits the
+   227→  // active tab's envelope.
+   228→  const initialEnv = useRef(usePlatformStore.getState().envelope).current;
+   229→
+   230→  // Form state
+   231→  const [number, setNumber] = useState(existing?.number || `${config.numberPrefix}${String(store.documents.filter(d => d.type === type).length + 1001)}`);
+   232→  const [partyId, setPartyId] = useState(existing?.partyId || prefillPartyId || initialEnv.partyId || '');
+   233→  const [status, setStatus] = useState(existing?.status || 'Draft');
+   234→  const [date, setDate] = useState(existing?.date || new Date().toISOString().slice(0, 10));
+   235→  const [dueDate, setDueDate] = useState(existing?.dueDate || '');
+   236→  const [lines, setLines] = useState<DocumentLine[]>(existing?.lines || [{ id: 'L1', itemId: null, description: '', qty: 1, rate: 0, amount: 0, taxRate: 0, account: '', tags: [] }]);
+   237→  const [shipping, setShipping] = useState(existing?.shipping || 0);
+   238→  const [memo, setMemo] = useState(existing?.memo || '');
+   239→  const [notes, setNotes] = useState(existing?.notes || '');
+   240→  const [viewState, setViewState] = useState<'edit' | 'email' | 'payor' | 'pdf'>((activeTab as 'edit' | 'email' | 'payor' | 'pdf') || 'edit');
+   241→  const [showPaymentModal, setShowPaymentModal] = useState(false);
+   242→  const [payAmount, setPayAmount] = useState('');
+   243→  const [payMethod, setPayMethod] = useState('Cash');
+   244→  const [payAccount, setPayAccount] = useState<string | null>(null);
+   245→
+   246→  // §1.3: "On Order #1042 → Create → Invoice: party, lines, channel, and
+   247→  // order_id are prefilled and linked."
+   248→  useEffect(() => {
+   249→    if (existing || prefillPartyId) return;
+   250→    if (initialEnv.orderId) {
+   251→      const order = usePlatformStore.getState().getDocument(initialEnv.orderId);
+   252→      if (order) {
+   253→        setPartyId(order.partyId);
+   254→        if (order.lines.length > 0) setLines(order.lines.map((l, i) => ({ ...l, id: `L${i + 1}` })));
+   255→      }
+   256→    }
+   257→  }, []);
+   258→
+   259→  // Legacy tab sync
+   260→  const setView = (v: 'edit' | 'email' | 'payor' | 'pdf') => { setViewState(v); onSelectTab?.(v); };
+   261→
+   262→  const party = partyId ? store.getParty(partyId) : null;
+   263→  
+   264→  const subtotal = useMemo(() => lines.reduce((s, l) => s + l.amount, 0), [lines]);
+   265→  const tax = useMemo(() => lines.reduce((s, l) => s + (l.amount * l.taxRate / 100), 0), [lines]);
+   266→  const total = subtotal + tax + shipping;
+   267→  const balance = existing ? existing.balance : total;
+   268→
+   269→  function updateLine(idx: number, updates: Partial<DocumentLine>) {
+   270→    setLines(prev => prev.map((l, i) => {
+   271→      if (i !== idx) return l;
+   272→      const updated = { ...l, ...updates };
+   273→      updated.amount = updated.qty * updated.rate;
+   274→      return updated;
+   275→    }));
+   276→  }
+   277→
+   278→  function addLine() {
+   279→    setLines(prev => [...prev, { id: `L${prev.length + 1}`, itemId: null, description: '', qty: 1, rate: 0, amount: 0, taxRate: 0, account: '', tags: [] }]);
+   280→  }
+   281→
+   282→  function removeLine(idx: number) {
+   283→    setLines(prev => prev.filter((_, i) => i !== idx));
+   284→  }
+   285→
+   286→  function save(andNew = false) {
+   287→    if (!partyId && config.partyRole) { onToast(`${config.partyLabel} is required`); return; }
+   288→    const docData = {
+   289→      type, number, partyId, status, date, dueDate, lines, subtotal, tax: Math.round(tax * 100) / 100, shipping, total, amountPaid: existing?.amountPaid || 0, balance: total - (existing?.amountPaid || 0), memo, notes, tags: existing?.tags || [], attachments: existing?.attachments || [],
+   290→      // §1.3 Context Envelope: creating from a record links back to it
+   291→      orderId: existing?.orderId || (isNew ? initialEnv.orderId : null),
+   292→      poId: existing?.poId || null,
+   293→      channelId: existing?.channelId || (isNew ? initialEnv.channelId : null),
+   294→      createdBy: 'Current user',
+   295→    };
+   296→    if (existing) {
+   297→      store.updateDocument(existing.id, docData);
+   298→      store.recalcDocument(existing.id);
+   299→      onToast(`${config.label} saved`);
+   300→      if (!andNew) onClose?.();
+   301→    } else {
+   302→      const id = store.addDocument(docData as Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'activity'>);
+   303→      onToast(`${config.label} ${number} created`);
+   304→      if (andNew) {
+   305→        // Save & new: reset the form for the next document
+   306→        setNumber(`${config.numberPrefix}${String(store.documents.filter(d => d.type === type).length + 1002)}`);
+   307→        setPartyId(initialEnv.partyId || '');
+   308→        setLines([{ id: 'L1', itemId: null, description: '', qty: 1, rate: 0, amount: 0, taxRate: 0, account: '', tags: [] }]);
+   309→        setShipping(0); setMemo(''); setNotes('');
+   310→      } else {
+   311→        onClose?.();
+   312→      }
+   313→    }
+   314→  }
+   315→
+   316→  /* §1.7 Duplicate — "Edit · Duplicate" on every document */
+   317→  function duplicate() {
+   318→    if (!existing) return;
+   319→    const newId = store.duplicateDocument(existing.id);
+   320→    if (newId) {
+   321→      onToast(`${config.label} duplicated`);
+   322→      if (onOpenDocument) onOpenDocument(newId);
+   323→      else onClose?.();
+   324→    }
+   325→  }
+   326→
+   327→  /* Estimate → Invoice (per doc: "button Convert to invoice") */
+   328→  function convertToInvoice() {
+   329→    if (!existing) return;
+   330→    const newId = store.convertDocument(existing.id, 'Invoice');
+   331→    if (newId) {
+   332→      onToast(`${existing.number} converted to invoice`);
+   333→      if (onOpenDocument) onOpenDocument(newId);
+   334→      else onClose?.();
+   335→    }
+   336→  }
+   337→
+   338→  function send() {
+   339→    if (!existing && isNew) { save(); return; }
+   340→    if (existing) {
+   341→      store.changeDocumentStatus(existing.id, 'Sent' as any);
+   342→      onToast(`${config.label} ${number} sent to ${party?.email || 'customer'}`);
+   343→    }
+   344→  }
+   345→
+   346→  function openPaymentModal() {
+   347→    setPayAmount(balance.toFixed(2));
+   348→    const bank = store.getAccountsByType('Bank')[0];
+   349→    setPayAccount(bank ? bank.id : null);
+   350→    setShowPaymentModal(true);
+   351→  }
+   352→
+   353→  function recordPayment() {
+   354→    const amount = parseFloat(payAmount || '0');
+   355→    if (!existing) { onToast('Save the document first'); return; }
+   356→    if (!amount || amount <= 0) { onToast('Enter a payment amount'); return; }
+   357→    const accountName = payAccount ? (store.getAccount(payAccount)?.name || 'Checking') : 'Checking';
+   358→    store.recordPayment(existing.id, amount, payMethod, accountName);
+   359→    onToast(`Payment of $${amount.toFixed(2)} recorded via ${payMethod}`);
+   360→    setShowPaymentModal(false);
+   361→  }
+   362→
+   363→  return (
+   364→    <div className="flex flex-col h-full">
+   365→      {/* Header */}
+   366→      <header className="h-12 bg-white border-b border-surface-dim flex items-center justify-between px-4 shrink-0">
+   367→        <div className="flex items-center gap-1">
+   368→          {(['edit', 'email', 'payor', 'pdf'] as const).map(v => (
+   369→            <button key={v} className={`px-3 py-2 text-[13px] tab-underline ${viewState === v ? 'active' : 'text-on-surface-variant'}`} onClick={() => setView(v)}>
+   370→              {v === 'edit' ? 'Edit' : v === 'email' ? 'Email view' : v === 'payor' ? 'Payor view' : 'PDF view'}
+   371→            </button>
+   372→          ))}
+   373→        </div>
+   374→        <div className="flex items-center gap-3 text-[13px] text-on-surface-variant">
+   375→          {onClose && <button className="icon-btn" onClick={onClose}><span className="material-symbols-outlined">close</span></button>}
+   376→        </div>
+   377→      </header>
+   378→
+   379→      {/* Main */}
+   380→      <div className="flex-1 flex overflow-hidden bg-[#faf9fc]">
+   381→        {viewState === 'edit' && (
+   382→          <div className="flex-1 overflow-y-auto p-6 flex justify-center">
+   383→            <div className="w-full max-w-[900px] space-y-4">
+   384→              {/* Document paper */}
+   385→              <div className="bg-white border border-surface-dim shadow-sm rounded-sm min-h-[600px] p-8">
+   386→                {/* Header row */}
+   387→                <div className="flex justify-between items-start mb-6">
+   388→                  <div>
+   389→                    <h1 className="text-[24px] font-bold text-primary mb-1">{config.label.toUpperCase()}</h1>
+   390→                    <div className="text-[13px] font-semibold">{number}</div>
+   391→                  </div>
+   392→                  <div className="text-right">
+   393→                    <div className="text-[12px] text-on-surface-variant uppercase font-bold mb-1">{config.label} total</div>
+   394→                    <div className="text-[24px] font-bold">${total.toFixed(2)}</div>
+   395→                  </div>
+   396→                </div>
+   397→
+   398→                {/* Party + dates */}
+   399→                <div className="grid grid-cols-2 gap-8 mb-6">
+   400→                  <div>
+   401→                    {config.partyRole ? (
+   402→                      <PartyPicker
+   403→                        value={partyId || null}
+   404→                        onChange={id => setPartyId(id || '')}
+   405→                        role={config.partyRole as PartyRole}
+   406→                        label={config.partyLabel}
+   407→                        required
+   408→                      />
+   409→                    ) : (
+   410→                      <div>
+   411→                        <label className="block text-[11px] text-on-surface-variant uppercase font-bold mb-1">{config.partyLabel}</label>
+   412→                        <div className="text-[13px] text-on-surface-variant italic">No party required</div>
+   413→                      </div>
+   414→                    )}
+   415→                    {party && (
+   416→                      <div className="mt-2 text-[12px] text-on-surface-variant">
+   417→                        {party.address}, {party.city}, {party.state} {party.zip}
+   418→                      </div>
+   419→                    )}
+   420→                  </div>
+   421→                  <div className="space-y-3">
+   422→                    <div>
+   423→                      <label className="block text-[11px] text-on-surface-variant uppercase font-bold mb-1">{config.dateLabel}</label>
+   424→                      <input type="date" className="field-input" value={date} onChange={e => setDate(e.target.value)} />
+   425→                    </div>
+   426→                    {config.dueLabel && (
+   427→                      <div>
+   428→                        <label className="block text-[11px] text-on-surface-variant uppercase font-bold mb-1">{config.dueLabel}</label>
+   429→                        <input type="date" className="field-input" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+   430→                      </div>
+   431→                    )}
+   432→                  </div>
+   433→                </div>
+   434→
+   435→                {/* Lines table */}
+   436→                <table className="w-full text-left text-[13px] border border-surface-dim rounded">
+   437→                  <thead>
+   438→                    <tr className="text-[11px] text-on-surface-variant uppercase font-bold bg-surface-container-low border-b border-surface-dim">
+   439→                      <th className="py-2 px-3 w-8"></th>
+   440→                      {config.lineColumns.map(col => (
+   441→                        <th key={col.key} className={`py-2 px-3 ${col.align === 'right' ? 'text-right' : ''}`} style={col.width ? { width: col.width } : undefined}>{col.label}</th>
+   442→                      ))}
+   443→                      <th className="py-2 px-3 w-8"></th>
+   444→                    </tr>
+   445→                  </thead>
+   446→                  <tbody>
+   447→                    {lines.map((line, idx) => (
+   448→                      <tr key={idx} className="border-b border-surface-dim">
+   449→                        <td className="py-2 px-3 text-on-surface-variant text-center"><span className="material-symbols-outlined text-[16px] cursor-grab">drag_indicator</span></td>
+   450→                        <td className="py-2 px-3">
+   451→                          <LineItemSearch
+   452→                            line={line}
+   453→                            costBased={type === 'Bill' || type === 'PurchaseOrder' || type === 'VendorCredit'}
+   454→                            onPick={item => updateLine(idx, { itemId: item.id, description: item.name, rate: type === 'Bill' || type === 'PurchaseOrder' || type === 'VendorCredit' ? item.cost : item.price })}
+   455→                            onText={text => updateLine(idx, { description: text, itemId: null })}
+   456→                          />
+   457→                        </td>
+   458→                        <td className="py-2 px-3"><input type="number" className="w-full border-0 bg-transparent text-[13px] text-right focus:outline-none focus:border-b focus:border-primary" value={line.qty} onChange={e => updateLine(idx, { qty: parseFloat(e.target.value) || 0 })} /></td>
+   459→                        <td className="py-2 px-3"><input type="number" className="w-full border-0 bg-transparent text-[13px] text-right focus:outline-none focus:border-b focus:border-primary" value={line.rate} onChange={e => updateLine(idx, { rate: parseFloat(e.target.value) || 0 })} /></td>
+   460→                        <td className="py-2 px-3 text-right tabular-nums">${line.amount.toFixed(2)}</td>
+   461→                        <td className="py-2 px-3 text-center"><button className="text-on-surface-variant hover:text-error" onClick={() => removeLine(idx)}><span className="material-symbols-outlined text-[16px]">close</span></button></td>
+   462→                      </tr>
+   463→                    ))}
+   464→                  </tbody>
+   465→                </table>
+   466→                <button className="mt-2 text-[12px] text-primary font-semibold hover:underline flex items-center gap-1" onClick={addLine}><span className="material-symbols-outlined text-[16px]">add</span>Add line</button>
+   467→
+   468→                {/* Totals */}
+   469→                <div className="flex justify-end mt-6">
+   470→                  <div className="w-64 space-y-2 text-[13px]">
+   471→                    <div className="flex justify-between"><span className="text-on-surface-variant">Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
+   472→                    <div className="flex justify-between"><span className="text-on-surface-variant">Tax</span><span>${tax.toFixed(2)}</span></div>
+   473→                    <div className="flex justify-between"><span className="text-on-surface-variant">Shipping</span><input type="number" className="w-20 border-0 bg-transparent text-right" value={shipping} onChange={e => setShipping(parseFloat(e.target.value) || 0)} /></div>
+   474→                    <div className="flex justify-between font-bold border-t border-surface-dim pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div>
+   475→                    {existing && existing.amountPaid > 0 && (
+   476→                      <>
+   477→                        <div className="flex justify-between text-on-surface-variant"><span>Amount paid</span><span>${existing.amountPaid.toFixed(2)}</span></div>
+   478→                        <div className="flex justify-between font-bold"><span>Balance due</span><span className={balance > 0 ? 'text-error' : 'text-secondary'}>${balance.toFixed(2)}</span></div>
+   479→                      </>
+   480→                    )}
+   481→                  </div>
+   482→                </div>
+   483→
+   484→                {/* Memo + notes */}
+   485→                <div className="grid grid-cols-2 gap-6 mt-8">
+   486→                  <div><label className="block text-[12px] text-on-surface-variant mb-1">Memo (on statement)</label><textarea className="field-input" style={{ height: 56 }} value={memo} onChange={e => setMemo(e.target.value)} /></div>
+   487→                  <div><label className="block text-[12px] text-on-surface-variant mb-1">Note to {config.partyLabel.toLowerCase()}</label><textarea className="field-input" style={{ height: 56 }} value={notes} onChange={e => setNotes(e.target.value)} /></div>
+   488→                </div>
+   489→
+   490→                {/* Activity log (existing docs only) */}
+   491→                {existing && existing.activity.length > 0 && (
+   492→                  <div className="mt-8 border-t border-surface-dim pt-4">
+   493→                    <h3 className="text-[13px] font-bold mb-2">Activity</h3>
+   494→                    {existing.activity.map((a, i) => (
+   495→                      <div key={i} className="flex items-center gap-3 py-1 text-[12px]">
+   496→                        <span className="text-on-surface-variant w-24">{a.date}</span>
+   497→                        <span className="font-medium">{a.text}</span>
+   498→                        <span className="text-on-surface-variant ml-auto">{a.actor}</span>
+   499→                      </div>
+   500→                    ))}
+   501→                  </div>
+   502→                )}
+   503→              </div>
+   504→            </div>
+   505→          </div>
+   506→        )}
+   507→
+   508→        {viewState === 'email' && (
+   509→          <div className="flex-1 overflow-y-auto p-6 flex justify-center">
+   510→            <div className="w-full max-w-[800px] bg-white border border-surface-dim shadow-sm rounded-xl overflow-hidden">
+   511→              <div className="bg-[#f4fbfa] p-8 text-center border-b border-[#d9eae8]">
+   512→                <h2 className="text-[24px] font-semibold mb-2">ManageKube LLC sent you an {config.label.toLowerCase()}</h2>
+   513→                <div className="text-[14px] text-on-surface-variant mb-6">{number}</div>
+   514→                <div className="inline-flex flex-col items-center p-6 bg-white rounded-lg border border-surface-dim shadow-sm min-w-[240px]">
+   515→                  <div className="text-[12px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{config.label} total</div>
+   516→                  <div className="text-[32px] font-semibold">${total.toFixed(2)}</div>
+   517→                </div>
+   518→              </div>
+   519→              <div className="p-8">
+   520→                <div className="text-[14px] mb-6"><p className="mb-4">Hi {party?.name || 'Customer'},</p><p className="mb-4">Here is the {config.label.toLowerCase()} we discussed. Please review and let us know if you have any questions.</p></div>
+   521→                <div className="text-center mb-8"><button className="h-10 px-6 bg-primary text-white rounded-full text-[14px] font-semibold hover:bg-primary-container">Review and accept</button></div>
+   522→              </div>
+   523→            </div>
+   524→          </div>
+   525→        )}
+   526→
+   527→        {viewState === 'payor' && (
+   528→          <div className="flex-1 overflow-y-auto p-6 flex justify-center">
+   529→            <div className="w-full max-w-[900px] bg-white border border-surface-dim shadow-sm rounded-sm p-8">
+   530→              <div className="flex justify-between items-start mb-8">
+   531→                <div><h1 className="text-[28px] font-semibold text-primary mb-1">{config.label.toUpperCase()}</h1><div className="text-[14px] font-semibold">ManageKube LLC</div></div>
+   532→                <div className="text-right text-[13px]"><div className="text-on-surface-variant uppercase font-semibold mb-1">{config.label} total</div><div className="text-[24px] font-semibold">${total.toFixed(2)}</div></div>
+   533→              </div>
+   534→              <div className="grid grid-cols-2 gap-8 mb-8 text-[13px]">
+   535→                <div><div className="text-on-surface-variant font-semibold mb-1 uppercase tracking-wider text-[11px]">From</div><div className="font-semibold mb-1">ManageKube LLC</div></div>
+   536→                <div><div className="text-on-surface-variant font-semibold mb-1 uppercase tracking-wider text-[11px]">To</div><div className="font-semibold mb-1">{party?.name || '—'}</div></div>
+   537→              </div>
+   538→              <table className="w-full text-left text-[13px] mb-8"><thead><tr className="border-b-2 border-surface-dim text-[11px] text-on-surface-variant uppercase font-semibold">{config.lineColumns.map(c => <th key={c.key} className={`py-2 ${c.align === 'right' ? 'text-right' : ''}`}>{c.label}</th>)}</tr></thead>
+   539→                <tbody>{lines.map((l, i) => <tr key={i} className="border-b border-surface-dim"><td className="py-3">{l.description}</td><td className="py-3 text-right">{l.qty}</td><td className="py-3 text-right">${l.rate.toFixed(2)}</td><td className="py-3 text-right">${l.amount.toFixed(2)}</td></tr>)}</tbody>
+   540→              </table>
+   541→              <div className="flex justify-end mb-12"><div className="w-64 space-y-2 text-[13px]"><div className="flex justify-between"><span className="text-on-surface-variant">Subtotal</span><span>${subtotal.toFixed(2)}</span></div><div className="flex justify-between font-semibold border-t border-surface-dim pt-2"><span>Total</span><span>${total.toFixed(2)}</span></div></div></div>
+   542→              {config.canRecordPayment && balance > 0 && <div className="border-t border-surface-dim pt-8 text-center"><button className="h-10 px-8 bg-primary text-white rounded-full text-[14px] font-semibold hover:bg-primary-container mb-4" onClick={() => setShowPaymentModal(true)}>Pay ${balance.toFixed(2)}</button></div>}
+   543→            </div>
+   544→          </div>
+   545→        )}
+   546→
+   547→        {viewState === 'pdf' && (
+   548→          <div className="flex-1 overflow-y-auto p-6 flex justify-center">
+   549→            <div className="w-full max-w-[850px] bg-white shadow-lg min-h-[1100px] p-12">
+   550→              <div className="flex justify-between items-start mb-12"><div><div className="text-[24px] font-bold text-primary mb-1">{config.label.toUpperCase()}</div><div className="text-[14px] font-semibold">ManageKube LLC</div></div><div className="text-right"><div className="text-[12px] font-semibold text-gray-500 uppercase tracking-widest mb-1">{config.label} Total</div><div className="text-[28px] font-bold">${total.toFixed(2)}</div></div></div>
+   551→              <table className="w-full text-left text-[12px] mb-8"><thead><tr className="border-b-2 border-gray-300 text-[10px] text-gray-500 uppercase font-bold tracking-widest">{config.lineColumns.map(c => <th key={c.key} className={`py-3 ${c.align === 'right' ? 'text-right' : ''}`}>{c.label}</th>)}</tr></thead><tbody>{lines.map((l, i) => <tr key={i} className="border-b border-gray-200"><td className="py-4">{l.description}</td><td className="py-4 text-right">{l.qty}</td><td className="py-4 text-right">${l.rate.toFixed(2)}</td><td className="py-4 text-right">${l.amount.toFixed(2)}</td></tr>)}</tbody></table>
+   552→              <div className="flex justify-end border-t-2 border-gray-300 pt-4"><div className="w-64"><div className="flex justify-between py-1 text-[12px]"><span className="text-gray-500">Subtotal</span><span className="font-semibold">${subtotal.toFixed(2)}</span></div><div className="flex justify-between py-2 text-[14px] font-bold border-t border-gray-200 mt-1"><span>Total</span><span>${total.toFixed(2)}</span></div></div></div>
+   553→            </div>
+   554→          </div>
+   555→        )}
+   556→      </div>
+   557→
+   558→      {/* Footer */}
+   559→      <footer className="h-16 bg-white border-t border-surface-dim px-6 flex items-center justify-between shrink-0 z-20">
+   560→        <div className="w-1/4 min-w-0">
+   561→          {existing && <span className={`st ${existing.status === 'Paid' || existing.status === 'Deposited' ? 'paid' : existing.status === 'Overdue' ? 'overdue' : existing.status === 'Draft' ? 'draft' : 'sent'}`}>{existing.status}</span>}
+   562→        </div>
+   563→        <div className="flex-1 flex justify-center gap-2 flex-wrap">
+   564→          {config.canPrint && <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={() => setView('pdf')}><span className="material-symbols-outlined text-[16px] align-middle">print</span>Print</button>}
+   565→          {existing && <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={duplicate}><span className="material-symbols-outlined text-[16px] align-middle">content_copy</span>Duplicate</button>}
+   566→          {existing && config.canSend && <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={send}><span className="material-symbols-outlined text-[16px] align-middle">send</span>Send</button>}
+   567→          {existing && type === 'Estimate' && <button className="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold text-primary hover:bg-primary-container hover:text-white" onClick={convertToInvoice}><span className="material-symbols-outlined text-[16px] align-middle">swap_horiz</span>Convert to invoice</button>}
+   568→          {existing && config.canRecordPayment && balance > 0 && <button className="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" onClick={openPaymentModal}>Record payment</button>}
+   569→        </div>
+   570→        <div className="w-1/4 flex justify-end gap-2">
+   571→          {onClose && <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={onClose}>Cancel</button>}
+   572→          {isNew && <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={() => save(true)}>Save &amp; new</button>}
+   573→          <button className="h-8 px-4 bg-primary text-white text-body-md font-semibold rounded hover:bg-primary-container" onClick={() => save(false)}>{existing ? 'Save' : config.primaryAction}</button>
+   574→        </div>
+   575→      </footer>
+   576→
+   577→      {/* Payment modal — §1.2 Modal: single decision, ≤5 fields */}
+   578→      {showPaymentModal && existing && (
+   579→        <div className="modal-scrim open" onClick={() => setShowPaymentModal(false)}>
+   580→          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-5" onClick={e => e.stopPropagation()}>
+   581→            <h3 className="text-headline-sm mb-1">Record payment</h3>
+   582→            <div className="text-[12px] text-on-surface-variant mb-4">{config.label} {existing.number} · Balance ${balance.toFixed(2)}</div>
+   583→            <div className="space-y-3">
+   584→              <div>
+   585→                <label className="field-label">Amount</label>
+   586→                <input type="number" step="0.01" className="field-input" value={payAmount} onChange={e => setPayAmount(e.target.value)} autoFocus />
+   587→              </div>
+   588→              <div>
+   589→                <label className="field-label">Payment method</label>
+   590→                <select className="field-input" value={payMethod} onChange={e => setPayMethod(e.target.value)}>
+   591→                  <option>Cash</option><option>Check</option><option>ACH</option><option>Card</option><option>PayPal</option><option>Bank transfer</option>
+   592→                </select>
+   593→              </div>
+   594→              <AccountPicker value={payAccount} onChange={id => setPayAccount(id)} label="Deposit to" filterType="Bank" />
+   595→            </div>
+   596→            <div className="flex justify-end gap-2 mt-4">
+   597→              <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={() => setShowPaymentModal(false)}>Cancel</button>
+   598→              <button className="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" onClick={recordPayment}>Record payment</button>
+   599→            </div>
+   600→          </div>
+   601→        </div>
+   602→      )}
+   603→    </div>
+   604→  );
+   605→}
+   606→
+   607→/* ─── LineItemSearch — §1.4 Item picker on document lines ───
+   608→   "Search by name/SKU/barcode, shows price, cost, stock pill".
+   609→   Typing shows matching items; picking one fills description + rate
+   610→   (cost for Bill/PO/Vendor credit, price otherwise). Free text stays
+   611→   valid for Blank/Service lines. */
+   612→function LineItemSearch({ line, costBased, onPick, onText }: {
+   613→  line: DocumentLine;
+   614→  costBased: boolean;
+   615→  onPick: (item: Item) => void;
+   616→  onText: (text: string) => void;
+   617→}) {
+   618→  const items = usePlatformStore(s => s.items);
+   619→  const [open, setOpen] = useState(false);
+   620→  const ref = useRef<HTMLDivElement>(null);
+   621→
+   622→  useEffect(() => {
+   623→    if (!open) return;
+   624→    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+   625→    document.addEventListener('mousedown', h);
+   626→    return () => document.removeEventListener('mousedown', h);
+   627→  }, [open]);
+   628→
+   629→  const q = line.description.toLowerCase().trim();
+   630→  const matches = q
+   631→    ? items.filter(i => (i.name + ' ' + i.sku + ' ' + i.category).toLowerCase().includes(q)).slice(0, 6)
+   632→    : [];
+   633→
+   634→  return (
+   635→    <div ref={ref} className="relative">
+   636→      <div className="flex items-center gap-1">
+   637→        {line.itemId && <span className="material-symbols-outlined text-[14px] text-primary" title="Linked catalog item">inventory_2</span>}
+   638→        <input
+   639→          className="w-full border-0 bg-transparent text-[13px] focus:outline-none focus:border-b focus:border-primary"
+   640→          placeholder="Type to search items or enter description"
+   641→          value={line.description}
+   642→          onChange={e => { onText(e.target.value); setOpen(true); }}
+   643→          onFocus={() => setOpen(true)}
+   644→        />
+   645→      </div>
+   646→      {open && matches.length > 0 && (
+   647→        <div className="row-menu open" style={{ position: 'absolute', top: '100%', left: 0, minWidth: 280, zIndex: 9999 }}>
+   648→          {matches.map(i => (
+   649→            <button key={i.id} type="button" className="w-full text-left px-3 py-2 hover:bg-surface-container-low flex items-center gap-2" onClick={() => { onPick(i); setOpen(false); }}>
+   650→              <div className="flex-1 min-w-0">
+   651→                <div className="text-[13px] font-medium truncate">{i.name}</div>
+   652→                <div className="text-[10px] text-on-surface-variant">{i.sku} · {costBased ? `cost $${i.cost.toFixed(2)}` : `$${i.price.toFixed(2)}`}</div>
+   653→              </div>
+   654→              {i.trackInventory && <span className={`pill ${i.stockOnHand <= i.reorderPoint ? 'bad' : 'ok'}`} style={{ fontSize: 8, padding: '1px 4px' }}>{i.stockOnHand}</span>}
+   655→              <span className="pill role" style={{ fontSize: 8, padding: '1px 4px' }}>{i.type}</span>
+   656→            </button>
+   657→          ))}
+   658→        </div>
+   659→      )}
+   660→    </div>
+   661→  );
+   662→}
+   663→

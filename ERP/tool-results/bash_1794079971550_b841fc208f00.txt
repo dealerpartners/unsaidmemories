@@ -1,0 +1,301 @@
+
+### 1.4 Rules that have no storage
+
+13. **No bank rules table exists.** `acct_bank_transactions` has `match_status text NOT NULL` (no CHECK, values undefined) and **no category or account column**; the only link is `matched_journal_line_id`.
+14. **No approval evaluation function exists.** `acct_workflows`, `acct_workflow_instances`, `acct_workflow_actions` and `acct_ap_approvals` are tables only. Something outside the database must route and advance approvals.
+15. **No per-user or per-role spend/payment limit** is stored anywhere. `acct_workflows.threshold_amount` is the only amount field.
+16. **No recurring bill/expense table.** Recurring exists for invoices (`acct_recurring_invoices`, plus a second pair `recurring_invoices` / `recurring_invoice_items`) and journals (`acct_recurring_journals`).
+
+### 1.5 Scatter
+
+17. **Four generic settings stores:** `tenant_settings(tenant_id, section, data jsonb)`, `policy_settings(tenant_id, scope, key, value text)`, `app_settings(key, value jsonb)` (**not tenant-scoped**), and `tenants.settings jsonb`. `tenant_settings.section` has no CHECK.
+18. **Five tax structures:** `acct_tax_jurisdictions` + `acct_tax_codes` (effective dates, compound, recoverable %, payable/receivable accounts), `acct_tax_rates`, `acct_tax_rules` (**hard-coded default `state_code = 'TN'`**), `taxes` (simple), `commerce_sale_taxes`. No tax-category or tax-exempt column was found on `products`, `product_variants`, `orders`, `order_items` or `crm_customers`.
+19. **Vendors live in four tables:** `acct_vendors`, `erp_vendors`, `vendors`, plus `suppliers` and `commerce_suppliers`. Customers: `crm_customers` (`customer_type`, `lifecycle_status`), `commerce_customer_accounts`, `portal_customer_accounts`. Products: `products` (canonical per hotfix E), `commerce_products`, `erp_products`, `commerce_catalog_items`. Orders: `orders`, `commerce_orders`, `erp_orders`. **The Party and Item entities in `contracts.ts` need an explicit mapping layer** (see section 4, G-14).
+20. **Leftover vertical fields:** roles `groomer` and `front_desk`; feature-flag audience `vet`; `crm_settings` columns `vaccine_reminder_enabled`, `birthday_campaign_enabled`, `station_turnaround_buffer_minutes`; tables `jurisdiction_rules` (telemedicine) and `state_rules`. Do not surface these in Settings.
+
+### 1.6 Already in the schema (use these, do not rebuild)
+
+| Need | Existing backing |
+|---|---|
+| Import hub | `acct_import_jobs` (entity_type, status, total/processed/success/error rows, `error_report_uri`) |
+| Export | `commerce_export_jobs`, `analytics_export_runs` |
+| Idempotency | `acct_integration_idempotency`, `erp_idempotency_keys`, `crm_idempotency_keys`, `commerce_idempotency` |
+| Event layer | `commerce_outbox_events`, `social_outbox_events`, outbox triggers (`outbox_emit`) |
+| Create menu registry | `platform_quick_action_registry` (action_code, module, display_name, api_route) and `platform_create_favorites` (per user) |
+| Saved views | `platform_saved_views`, `crm_saved_views` |
+| State machines | `platform_objects.state_machine`, `platform_lenses.transitions`, `platform_workflow_transition_validation` |
+| Gift cards | `commerce_gift_cards`, `commerce_gift_card_transactions`, `commerce_gift_card_designs` |
+| POS-adjacent | `commerce_branches`, `commerce_cash_movements`, `commerce_receipts`, `commerce_deposits` (NOT REVIEWED) |
+| Budgets | `acct_budget_versions`, `acct_budget_lines` |
+| FX | `acct_exchange_rates`, `acct_fx_revaluation_runs` |
+| Document numbering | `erp_document_sequences` + `erp_next_document_number()` |
+| Doc concurrency | `row_version` columns on support rule/SLA/macro tables |
+| Backups | `platform_backups`, `tenants.backup_addon_enabled` |
+
+---
+
+## 2. Which Settings drive behavior elsewhere
+
+| Setting | Backing | Read by | Effect on the rest of the platform |
+|---|---|---|---|
+| Roles and permissions | `tenant_memberships`, `platform_module_permissions`, `platform_permission_registry`, `platform_form_field_visibility` | Every API call, Create menu, right-click menus, field masking | Decides `meta.can`, `maskedFields`, visible Create actions |
+| Approvals and limits | `acct_workflows` (+ instances/actions), `acct_ap_approvals` | Bills, POs, payments | Puts documents into `pending_approval`; "Approve to Unpaid"; blocks Pay bills until approved |
+| Chart of Accounts | `acct_chart_of_accounts` (+ `acct_account_dimension_rules`) | Account picker, Journal, Bills/Expenses lines, Reconcile, Tax, Reports | Which accounts can be posted to, reconciled, required to carry dimensions |
+| Bank rules | MISSING | Bank transactions | Auto-categorize, auto-match, exclude |
+| Financial settings (periods, books, entities) | `acct_periods`, `acct_fiscal_years`, `acct_books`, `acct_entities` | Posting, Reports, entity switcher | Period locks, fiscal year, multi-entity scope |
+| Document numbering | `erp_document_sequences` | Every Document Engine save | Number format for new documents |
+| Business tax | `acct_tax_*` | Invoices, Orders, Tax summary | Tax lines and liability |
+| Recurring templates | `acct_recurring_invoices`, `acct_recurring_journals` | "Make recurring" on Invoice | Scheduled drafts or sends |
+| Integrations / API tokens | `integration_keys`, `integration_secrets`, `api_keys`, `platform_integration_health_registry`, `tenant_stripe_accounts` | Payments, channels, sync pill | Sync status, connect/disconnect, payouts |
+| Notifications | `user_notifications`, `support_notification_prefs`, `seller_notification_preferences` | Notification inbox | What reaches the user and how |
+| Support SLA / routing | `support_sla_policies`, `support_routing_rules`, `support_escalation_rules`, `support_business_hours` | Tickets | SLA timers, routing, escalation |
+| Feature flags | `platform_feature_flags` | Shell and nav | Hides modules behind flags (the 14-day cut line) |
+| Custom fields / field visibility | `platform_custom_fields`, `platform_form_field_visibility` | Drawers and Document Engine | Extra fields; per-role field hiding |
+
+---
+
+## 3. Page-by-page spec
+
+**Pattern for every Settings page:** left nav group → page header (title + one-line purpose + Import/Export where relevant) → **cards** (one card per setting group) → inline edit for simple fields, **drawer** for records, **modal** for destructive/confirm. Every save writes an audit entry and shows the Existing Record banner when the setting is shared (tier rules from the component map).
+
+### 3.1 Priority pages (full spec)
+
+#### Roles and permissions: BACKED / PARTIAL
+
+| Tab | Surface | Fields and columns | Notes |
+|---|---|---|---|
+| **People** (this is also *Teammates*) | List + drawer | `tenant_memberships`: user, `invited_email`, `role`, `status`, `active`, `last_active_at`, `mfa_enabled`, `mfa_method` | Invite sets `invited_email`, `invite_token_hash`, `invite_sent_at`, `invite_expires_at`. Deactivate sets `active = false`. Reset MFA sets `mfa_reset_requested_at`, `mfa_reset_by`. |
+| **Roles** | Read-only reference + role picker | Seven fixed roles from the CHECK constraint | **DECISION:** hide `groomer`, `front_desk` (finding 20) |
+| **Module access** | Matrix | Rows = staff (`crm_staff`), columns = distinct `platform_permission_registry.module`, cell = `access_level` | Only `write` and `full` are enforced (finding 3). Save upserts `platform_module_permissions` with `granted_by`, `granted_at`. |
+| **Field visibility** | List | `platform_form_field_visibility`: form, field, role, visible | Drives `maskedFields` |
+| **Permission registry** | Read-only list | `permission_code`, `module`, `description` | Owner/admin view |
+
+Row actions (right-click): Change role · Resend invite · Reset MFA · Deactivate · Copy invite link.
+**Gaps:** custom roles (G-01), read-only level (G-02), Create-menu-to-permission link (G-03), staff without `crm_staff` row (finding 4).
+
+#### Approvals and limits: PARTIAL
+
+| Section | Surface | Fields | Backing |
+|---|---|---|---|
+| **Approval workflows** | List + drawer | Name, Applies to (`entity_type`), Threshold amount, Steps (`rules` jsonb), Active | `acct_workflows` |
+| **Pending approvals** (runtime) | Queue (also the Notifications inbox action) | Entity, amount, requester, current step, status | `acct_workflow_instances` (`status`: pending / approved / rejected / cancelled; `current_step`) |
+| **Approval history** | On each record's Activity | Step, approver, action, comments, time | `acct_workflow_actions` |
+| **Bill and PO approvals** | Same queue, filtered | Approver, sequence, status | `acct_ap_approvals` |
+| **Limits** | Card | Per-role or per-user limits | **MISSING** (finding 15) |
+
+**What the UI cannot do yet:** `rules` has no defined JSON shape, `entity_type` is free text, and no function routes approvals (finding 14).
+**DECISION D-1:** two parallel mechanisms (`acct_workflows` generic vs `acct_ap_approvals` bill/PO-specific). One must be the source of truth; the other becomes a projection.
+**Enforcement contract (server):** on submit, find active workflow for `entity_type` where amount ≥ `threshold_amount` → create instance → set document status `pending_approval` → on each action write `acct_workflow_actions` and advance `current_step` → on final step mark `approved` and set status `approved` → notify next approver via `user_notifications`.
+Document statuses available: `acct_document_status` includes `pending_approval, approved, rejected`. The older `bill_status` enum does **not**; which one the bills table uses must be verified (query 6.5).
+
+**Cross-module surfaces fed by this page:** "Approve to Unpaid" and "Setup Bill Approval" in Expenses & Bills, Pay bills "Approval" column, Notification inbox approve-in-place.
+
+#### Chart of Accounts: BACKED (one contract fix needed)
+
+| Item | Spec |
+|---|---|
+| **List columns** | Code · Name · Type · Subtype · Normal balance · Parent (tree) · Currency · Flags pills (System, Control, Reconcilable, No posting) · Active · Balance (derived from journal lines, not a column) |
+| **Scope** | Rows belong to an `entity_id` (multi-entity): entity switcher filters the list |
+| **Drawer fields** | Entity · Code · Name · Type · Normal balance (auto from type) · Subtype · Parent account · Description · Currency · `is_posting_allowed` · `is_reconcilable` · `is_control_account` · Active |
+| **Dimension rules section** | `acct_account_dimension_rules`: dimension (`acct_dimensions`), `is_required`, `allowed_values` |
+| **Rules the UI enforces** | `is_system` rows: no delete, no type change. `is_posting_allowed = false`: excluded from Account picker. `is_reconcilable = true`: appears in Reconcile account list. |
+| **Right-click** | View register · Edit · Add child · Run report · Make inactive · (Merge: no backing) |
+| **Picked up elsewhere** | `products.income_account_id` / `cogs_account_id` (hotfix E), `acct_bank_accounts.gl_account_id`, `acct_tax_codes.payable_account_id` / `receivable_account_id`, `commerce_accounting_mappings` (NOT REVIEWED) |
+
+**Contract fix required:** `acct_chart_of_accounts.account_type` is text; the existing `acct_account_type` enum values are `asset, liability, equity, revenue, expense, contra_asset, contra_liability, contra_equity, statistical`. The older enum `account_type` uses `income`. `contracts.ts` currently says `income` and `cogs`; there is **no `cogs` type** in either enum (COGS must be a `subtype`). **DECISION D-2:** confirm the allowed `account_type` values (query 6.4).
+**DECISION D-3:** what `is_control_account` blocks (manual journal posting is the usual meaning; the schema does not say).
+**Not backed:** Merge accounts, Cleanup, Accounts wizard (UI-only workflows over the same table; define behavior before building).
+
+#### Bank rules: MISSING
+
+**Why it matters:** the Bank transactions screen (match / categorize / create) depends on rules, and nothing stores them. `acct_bank_transactions` has no category column, so "categorize" must mean **post a journal entry and set `matched_journal_line_id`**.
+
+**PROPOSED table (not in schema):**
+
+```sql
+create table acct_bank_rules (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null,
+  entity_id uuid not null,
+  name text not null,
+  priority int not null default 100,
+  bank_account_id uuid references acct_bank_accounts(id),  -- null = all accounts
+  conditions jsonb not null default '{}',   -- same all/any/not shape as rules_engine.sql
+  action jsonb not null,                    -- {type: categorize|match|exclude|transfer, account_id, payee, tag_ids, auto_post}
+  is_active boolean not null default true,
+  created_by uuid,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+-- match_status needs a defined set, e.g.: unmatched | suggested | matched | categorized | excluded
+```
+
+**Reuse the pattern already in `rules_engine.sql`:** JSON conditions compiled by an allow-listed function (`rule_where`) plus `preview_rule` (count + sample, no writes). `rule_where` is hard-wired to `product_facts` fields, so bank rules need their own facts view (`bank_txn_facts`: description, payee, amount, direction, bank account) and a separate allow-list.
+
+**Page spec**
+
+| Element | Spec |
+|---|---|
+| List | Priority (drag to reorder) · Name · Applies to account · Condition summary · Action summary · Matches last 30 days · Active · ⋯ |
+| Drawer | Name · Bank account scope · Condition builder (description contains, payee equals, amount between, money in/out) · Action (Categorize to Account picker, set payee, add tags, mark transfer, exclude) · **Auto-apply** vs **Suggest only** |
+| **Preview** | Live count + sample of existing transactions it would touch (mirrors `preview_rule`) |
+| **Apply to existing** | Modal: dry run → confirm → undo (mirrors `apply_bulk` / `undo_bulk` in `rules_engine.sql`) |
+| Entry points | "Create rule from this" in the Bank transactions right-click; Accounting setup checklist item "Set up bank rules" |
+| Cross-module | Targets the Account picker; sets tags; writes journal via `acct_post_journal` with `source = 'bank'` |
+
+### 3.2 Workspace group
+
+| Page | Surface | Fields → backing | Status | Drives / notes |
+|---|---|---|---|---|
+| **Home** | Settings landing | Setup progress, shortcuts | n/a | UI only |
+| **General** | Cards | `tenants`: `name`, `legal_name`, `dba_name`, `tax_id`, `default_currency`, `support_email`, `support_phone`, `website_url`, `slug`; locations: `tenant_locations` (name, address, timezone, is_primary) | BACKED | Currency and timezone defaults for all new records |
+| **Teammates** | See Roles and permissions → People | `tenant_memberships` | BACKED | Same page, one source |
+| **External access** | List + drawer | `portal_users`, `portal_module_permissions` (module_key, permission_level), `portal_action_permissions` (action_key, is_allowed), `portal_permission_audit_log` | PARTIAL | Portal users (customers/sellers) have a separate permission model from staff. **DECISION D-4:** confirm this is what "External access" means |
+| **Approvals and limits** | Section 3.1 | | PARTIAL | |
+| **Workspace owners** | List | `tenant_memberships` where `role = 'owner'`; `platform_admins` (platform-level) | BACKED | Ownership transfer flow has no function; define |
+| **Office hours** | List + drawer | `support_business_hours` (name, timezone, `schedule`, is_default), `support_holidays`, `crm_operating_hours`, `location_hours`, `location_hour_exceptions` | PARTIAL | Four overlapping hour tables. **DECISION D-5:** one canonical source; SLA policies reference `support_business_hours` |
+| **Brands** | List + drawer | `brands`, `brand_profiles`, `brand_placements`, `commerce_brands`, `tenants` branding columns (`logo_url`, `logo_dark_url`, `favicon_url`, `primary_color`, `secondary_color`, `accent_color`, `brand_font`) | NOT REVIEWED (`brands`) | Two brand structures exist (tenant branding vs `brands` table) |
+| **Security** | Cards | MFA state: `tenant_memberships.mfa_*`; session/device: `user_workspace_sessions`; login activity: `seller_login_activity` (seller side) | PARTIAL | Workspace-wide MFA enforcement setting: no column found |
+| **Activity log** | List (read-only) | `acct_audit_log` (actor, action, table, record, before/after, ip, user agent), plus `commerce_audit_log`, `erp_audit_log`, `crm_audit_log`, `cms_audit_log`, `platform_admin_access_log` | PARTIAL | Five audit tables, no unified view. Tamper-evidence not enforced (findings 10, 11) |
+| **Multilingual** | List + drawer | `cms_locales` (`locale_code`, `language`, `currency_code`, symbol/position, `status`, `is_default`, `sort_order`) | BACKED | Storefront locales only; no app-UI translation table found |
+
+### 3.3 Accounting and Finance group
+
+| Page | Surface | Fields → backing | Status | Drives / notes |
+|---|---|---|---|---|
+| **Chart of Accounts** | Section 3.1 | | BACKED | |
+| **Bank rules** | Section 3.1 | | MISSING | |
+| **Recurring templates** | List + drawer | Invoices: `acct_recurring_invoices` (name, `frequency`, `interval_count`, `starts_on`, `ends_on`, `next_run_on`, `occurrences_limit`, `auto_send`, `auto_charge`, `payment_method_id`, `lines`, `status`). Journals: `acct_recurring_journals` (name, `frequency`, `interval_n`, `next_run_date`, `end_date`, `active`, `template`) | PARTIAL | Bills/expenses: no table (finding 16). Invoice table has duplicate date columns (`next_run_date` and `next_run_on`, `end_date` and `ends_on`); pick one |
+| **Business tax** | Tabs: Jurisdictions · Codes and rates · Filings · Exemptions | `acct_tax_jurisdictions` (code, name, country, state, locality, registration number), `acct_tax_codes` (rate, `recoverable_percent`, payable/receivable accounts, `effective_from/to`, `is_compound`), `acct_tax_filings` (period, taxable sales, collected, remitted, status, `confirmation_ref`), `seller_tax_exemptions` | PARTIAL | **DECISION D-6:** make `acct_tax_codes` + `acct_tax_jurisdictions` canonical; retire or map `acct_tax_rules` (default `'TN'`), `acct_tax_rates`, `taxes`. Missing: per-item tax category, per-customer exemption (finding 18) |
+| **Reports and budgets** | List + grid | `acct_budget_versions` (name, fiscal year, version, scenario, status, approved by/at), `acct_budget_lines` (period, account, amount, dimensions) | BACKED | Report templates: see Reports group |
+| **Financial settings** | Cards | Entities `acct_entities` (legal name, `functional_currency`, `reporting_currency`, `fiscal_year_start_month`), books `acct_books` (type, basis, currency, primary), fiscal years `acct_fiscal_years`, **periods** `acct_periods` (status), FX `acct_exchange_rates`, dimensions `acct_dimensions`, numbering `erp_document_sequences` (prefix, next number, padding) | PARTIAL | **Period lock is the setting that matters most**; enforcement is not in `acct_post_journal` (finding 12). Numbering default prefix is `UPPER(LEFT(type,3)) || '-'`, padding 6 |
+
+### 3.4 CRM and Contacts group
+
+| Page | Surface | Fields → backing | Status | Notes |
+|---|---|---|---|---|
+| **Customer hub** | Cards | `crm_settings` (default timezone, currency, communication defaults), `crm_customer_tags`, `crm_communication_preferences` | PARTIAL | `crm_settings` mixes in leftover vertical fields (finding 20) |
+| **Vendors and suppliers** | Cards | Default terms, 1099 flag: columns exist on `erp_vendors` (`tax_identifier`) and `vendors` (`payment_terms`) | PARTIAL | Four vendor tables (finding 19); this page cannot be finalized until the Party mapping decision (G-14) |
+| **Segments and lists** | List + rule drawer | `crm_segments`, `crm_segment_memberships`, `cms_audience_segments` | NOT REVIEWED | Two segment systems; marketing audience uses one of them |
+| **Lead capture forms** | List + drawer | `crm_lead_sources`, `support_forms` | NOT REVIEWED | No dedicated lead-form table found; confirm |
+
+### 3.5 Catalog and Design group
+
+| Page | Surface | Fields → backing | Status | Notes |
+|---|---|---|---|---|
+| **Design Studio** | Cards | `product_canvas_templates`, `supplier_mockup_templates`, `supplier_print_specs`, `design_*` (3 tables) | NOT REVIEWED | |
+| **Products and bundles** | Cards | Defaults, lifecycle/season rules: `rules_engine.sql` (`season_windows`, `categories.default_seasons`, `saved_views`, `bulk_jobs`) | BACKED | **Season windows page:** edit `season_windows` (start/end month/day, wraps year end). **Work queues:** `saved_views` (is_queue) with `queue_counts()`. Functions are locked to admin/service role: server API only |
+| **Pricing and discounts** | Lists | `commerce_price_lists`, `commerce_prices`, `commerce_promotions`, `commerce_coupons`, `crm_pricing_rules`, `cms_offers`, `cms_volume_tiers`, `cms_bundle_rules` | NOT REVIEWED | Three overlapping discount systems (commerce / crm / cms); choose canonical |
+| **Categories and tags** | Tree + drawer | `categories` (`default_seasons`), `taxonomy_nodes`, `commerce_categories`, `erp_product_categories`, `commerce_product_tags`, `crm_tags` | NOT REVIEWED | Multiple category structures; `taxonomy_nodes` appears to drive brand placement |
+
+### 3.6 Marketing and Social, Website/CMS
+
+| Page | Fields → backing | Status |
+|---|---|---|
+| **Social channels** | `social_accounts`, `social_oauth_tokens`, `social_platform_apps`, `social_platform_capabilities` | NOT REVIEWED |
+| **Publishing queue** | `social_schedule_slots`, `social_post_series`, `social_publish_attempts` | NOT REVIEWED |
+| **Newsletter and email** | `newsletter`, `newsletter_subscribers`, `crm_message_templates`, `seller_email_templates` | NOT REVIEWED |
+| **Ad center** | `ad_accounts`, `ad_advertisers`, `ad_tiers`, `ad_rate_cards`, `ad_budget_tiers`, `ad_placements`, `ad_audiences` | NOT REVIEWED |
+| **Google My Business** | No GMB table found. `google_*` tables are GA4, Search Console, Merchant sync, indexing | **MISSING** |
+| **Website / CMS** | `cms_website_settings`, `cms_navigation_menus`, `cms_global_copy`, `cms_design_tokens`, `cms_redirects`, `cms_seo`, `cms_cdn_profiles` | NOT REVIEWED |
+| **Banners / Popups / Pages / Blocks** | `cms_banners`, `cms_slots`, `cms_slot_items`, `cms_pages`, `cms_page_revisions`, `cms_content_blocks`, `cms_block_schemas`; no popup table found | PARTIAL (popups MISSING) |
+
+### 3.7 Operations and Orders, Support
+
+| Page | Fields → backing | Status | Notes |
+|---|---|---|---|
+| **Fulfillment and shipping** | `erp_carriers` (code, name, `api_provider`, active), `erp_shipping_methods` (carrier, code, `service_level`), `shipping_profiles`, `supplier_fulfillment_locations` | BACKED / PARTIAL | Carrier row actions (Test rates, Manage services, Disable carrier): `is_active` covers disable; test-rates has no storage (API call) |
+| **Inventory and warehouses** | `erp_warehouses` (type, address, timezone, links to `commerce_branch_id` and `crm_location_id`), `erp_warehouse_zones`, `erp_warehouse_locations`, `erp_replenishment_rules` (method, reorder point, safety stock, max, EOQ, lead time, preferred vendor), `seller_inventory_settings`, `erp_uom_conversions` | BACKED | Replenishment rules drive reorder alerts and Replenishment POs. `fulfillment type` per item: **no column found** (G-12) |
+| **Support channels** | `support_channels`, `support_channel_threads` | NOT REVIEWED | |
+| **Help center / Knowledge base** | `support_kb_articles`; no help-center site-config table found | PARTIAL | |
+| **Outbound** | `support_webhooks_outbound`, `support_webhook_deliveries`, `seller_webhooks`, `social_webhook_endpoints` | BACKED | |
+| **Ticket channels** | `support_channels`, `support_forms` | NOT REVIEWED | |
+| **SLA policies** | `support_sla_policies` (`first_response_minutes`, `next_reply_minutes`, `resolution_minutes`, `uses_business_hours`, `business_hours_id`, `is_default`, `is_active`, `row_version`) | BACKED | Uses `scope`, `inherits_from_id`, `locked_by_master`: platform-level defaults that tenants inherit but cannot override when locked. UI must show a "Locked by platform" pill |
+| **Automation rules** | `support_routing_rules` (conditions, `strategy`, target team/staff, `set_priority`, `set_tags`, `sla_policy_id`, `rule_order`), `support_escalation_rules` (trigger, condition, action), `support_automations`, `support_macros` (`actions`) | BACKED | Same scope/inheritance model |
+| **Templates** | `support_templates`, `support_canned_replies`, `support_signatures` | NOT REVIEWED | |
+
+### 3.8 Dashboard, Suppliers, Reports, System
+
+| Page | Fields → backing | Status | Notes |
+|---|---|---|---|
+| **Dashboards and widgets** | `platform_lenses` (lens, object, audience, `surface_default`, `transitions`), `platform_lens_fields`, `platform_saved_views` | PARTIAL | No dashboard or widget table found |
+| **KPI targets** | No table found | **MISSING** | |
+| **Analytics configuration** | `analytics_export_runs`; `google_ga4_*` | NOT REVIEWED | |
+| **Supplier portal / Integration feeds** | `supplier_imports`, `supplier_import_items`, `supplier_catalog_*`, `supplier_category_mapping`, `supplier_category_visibility`, `supplier_product_mappings` | NOT REVIEWED | `supplier_category_memory` / `supplier_category_visibility` have no RLS and hotfix B left them alone pending your intent |
+| **Contracts and pricing** | `supplier_product_costs`, `acct_revenue_contracts` (revenue side) | PARTIAL | No supplier contract table found |
+| **Compliance and 1099** | `seller_1099k_generations`, `acct_payroll_tax_forms`, `payroll_tax_forms`, `erp_vendors.tax_identifier` | PARTIAL | No contractor W-9 status table found |
+| **Report templates / Scheduled reports / Report dashboards** | `acct_expense_reports` (expense reports, not report templates), `support_report_daily`, `analytics_export_runs` | **MISSING** | No saved report template, schedule or dashboard table found |
+| **Integrations** | `integration_keys`, `integration_secrets` (service, category, label, `last_four`, `is_set`), `platform_integration_health_registry` (status, last checked/success, last error, latency, consecutive failures), `tenant_stripe_accounts`, `tenant_wordpress_connections`, `cms_integrations` | BACKED | Health registry feeds the **Sync status** panel from the sidebar. Never return secret values; return `last_four` and `is_set` |
+| **Data and privacy** | Import hub: `acct_import_jobs`; Export: `commerce_export_jobs`; Backups: `platform_backups`; privacy: `social_data_deletion_requests`, `seller_data_processing`, `seller_dpa_acceptances`, `customer_ai_disclosure_acks`, `cms_policy_acceptances` | PARTIAL | |
+| **Notifications** | `user_notifications` (type, title, body, priority, `is_read`, `action_url`); preferences: `support_notification_prefs`, `seller_notification_preferences`, `crm_settings.notification_frequency` | PARTIAL | No single per-user preference table for the platform |
+| **API tokens** | `api_keys` (label, `key_prefix`, `key_hash`, `tier`, `status`, `last_used_at`, `revoked_at`) | BACKED | Only prefix shown after creation; full key shown once |
+| **Audit log** | See Activity log | PARTIAL | |
+| **Feature flags** (platform admin) | `platform_feature_flags` (audience, `flag_key`, enabled) | BACKED | Audience values: seller, customer, employee, vet, global |
+| **Custom fields** | `platform_custom_fields` (entity_type, `field_key`, label, `field_type`, options, required, sort); `tenant_id` null = global defaults | BACKED | Rendered by the drawer engine as extra fields |
+
+---
+
+## 4. Gap Register
+
+| ID | Gap | Fact in schema | Needed |
+|---|---|---|---|
+| G-01 | No custom roles | Roles are a 7-value CHECK | **DECISION:** keep fixed roles + per-module access, or add a roles table |
+| G-02 | No read-only module level | Only `write`/`full` are read | Define the `access_level` set and constraint |
+| G-03 | Create menu not permission-linked | `platform_quick_action_registry` has no permission column | Add `permission_code` or a mapping |
+| G-04 | Bank rules | No table | Create `acct_bank_rules` (section 3.1) and define `match_status` values |
+| G-05 | Approval routing | Tables only, no function | Server-side routing contract (section 3.1) |
+| G-06 | Spend/payment limits | No storage | Table or `rules` JSON shape |
+| G-07 | Period lock enforcement | `acct_post_journal` has no period-status check; column is text | Guard in posting function; use the enum |
+| G-08 | Audit immutability | Policies allow UPDATE/DELETE; triggers not found | Verify triggers; restrict audit policies |
+| G-09 | Recurring bills/expenses | No table | Table or generalize templates |
+| G-10 | Tax canonical model | Five structures, `'TN'` default | **DECISION D-6**; per-item tax category; per-customer exemption |
+| G-11 | Zero-policy tables | RLS on, no policies (finding 8) | Server-only Settings API (this is intended; document it) |
+| G-12 | `fulfillment_type` on items | No column found on `products` | Add column (Stock / POD / Supplier-fulfilled / Digital / Service / Bundle) |
+| G-13 | Missing pages' storage | KPI targets, report templates/schedules, dashboards, GMB, popups | New tables or defer behind flags |
+| G-14 | Party and Item entity mapping | Customers, vendors, suppliers and products each span several tables | **DECISION:** which tables are canonical for `Party` and `Item` in `contracts.ts`, or a view that unions them |
+| G-15 | Four settings stores | `tenant_settings`, `policy_settings`, `app_settings`, `tenants.settings` | **DECISION:** which store each page uses (suggested rule: relational enforcement needs a typed table; page-level preferences go to `tenant_settings.section`) |
+| G-16 | Leftover vertical fields | `groomer`, `front_desk`, `vet`, vaccine/birthday columns | Hide from UI; plan removal |
+| G-17 | `contracts.ts` mismatches | Account type `income`/`cogs`, Party roles, Document types vs `acct_source_type` | Reconcile after G-14 |
+
+---
+
+## 5. Settings API Contract
+
+All Settings reads and writes go through the server (finding 8). Conventions match the build spec.
+
+| Endpoint | Purpose | Backing |
+|---|---|---|
+| `GET /settings` | Page index with status, permission, and completion | registry in code |
+| `GET /settings/{section}` / `PATCH /settings/{section}` | Section-style pages | `tenant_settings(tenant_id, section)`; `PATCH` carries `If-Match` on `updated_at` |
+| `GET/POST/PATCH /team/members` | People tab | `tenant_memberships` |
+| `POST /team/members/{id}/invite` · `/reset-mfa` · `/deactivate` | Row actions | same |
+| `GET/PUT /permissions/modules` | Matrix | `platform_module_permissions`, `platform_permission_registry` |
+| `GET/PUT /permissions/field-visibility` | Field masking | `platform_form_field_visibility` |
+| `GET/POST/PATCH /approvals/workflows` | Workflow definitions | `acct_workflows` |
+| `GET /approvals/queue` · `POST /approvals/{instanceId}/act` | Runtime | `acct_workflow_instances`, `acct_workflow_actions`, `acct_ap_approvals` |
+| `GET/POST/PATCH /accounts` (+ `/accounts/{id}/register`) | Chart of Accounts | `acct_chart_of_accounts`, `acct_account_dimension_rules` |
+| `GET/POST/PATCH/DELETE /bank-rules` · `POST /bank-rules/preview` · `POST /bank-rules/apply` · `POST /bank-rules/apply/{jobId}/undo` | Bank rules (after G-04) | `acct_bank_rules`, journal posting |
+| `GET/PATCH /finance/periods` · `POST /finance/periods/{id}/close` | Period control | `acct_periods` (after G-07) |
+| `GET/PATCH /finance/numbering` | Numbering | `erp_document_sequences` |
+| `GET/POST/PATCH /tax/jurisdictions` · `/tax/codes` · `/tax/filings` | Business tax | `acct_tax_*` (after D-6) |
+| `GET/POST/PATCH /recurring/invoices` · `/recurring/journals` | Recurring templates | `acct_recurring_*` |
+| `GET/POST /integrations` · `POST /integrations/{code}/connect` · `/disconnect` · `/test` | Integrations | `integration_keys` / `integration_secrets` / health registry (never return values) |
+| `GET/POST/DELETE /api-keys` | API tokens | `api_keys` |
+| `GET /audit` | Unified activity log | union of audit tables (read-only) |
+| `GET/POST /import/jobs` | Import hub | `acct_import_jobs` |
+| `GET /sync-status` | Sidebar sync panel | `platform_integration_health_registry` |
+
+**Permission codes:** every endpoint is guarded by a `settings.*` code in `platform_permission_registry`, resolved by `platform_has_permission`. Money-affecting and structure-affecting settings (approvals, period close, CoA type change, API keys, roles) are `risk = 'money'` or `'irreversible'` in `platform_capabilities` terms and always write an audit entry.
+
+---
+
+## 6. Verification Queries (run on the live database)
+
+```sql
+-- 6.1 Are the audit and posted-entry guards actually attached?
+select tgname, tgrelid::regclass as on_table, tgfoid::regproc as fn
+from pg_trigger
+where not tgisinternal
+  and tgfoid::regproc::text in ('acct_audit_row_change','acct_block_posted_mutation');
+
+-- 6.2 Is there any bank-rule-like table I missed?

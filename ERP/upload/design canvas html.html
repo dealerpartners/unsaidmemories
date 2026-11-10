@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Design Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "studio-green":"#1e5a38"
+    },
+    fontFamily:{ sans:["Inter"] },
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none; overflow:hidden; background-color:#f4f5f7}
+  
+  .canvas-area {
+    background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* FLOATING TOOL DRAWER */
+  .tool-drawer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 460px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 40;
+  }
+
+  /* Positioning Logic (Right by default) */
+  .tool-drawer.pos-right {
+    right: 0;
+    left: auto;
+    border-left: 1px solid #dad9dd;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.1);
+  }
+  .tool-drawer.pos-right.closed {
+    transform: translateX(100%);
+  }
+
+  /* Positioning Logic (Left) */
+  .tool-drawer.pos-left {
+    left: 0;
+    right: auto;
+    border-right: 1px solid #dad9dd;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+  }
+  .tool-drawer.pos-left.closed {
+    transform: translateX(-100%);
+  }
+
+  /* Floating Plus Button */
+  .floating-btn-container {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 30;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), right 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+  }
+  .floating-btn-container.pos-right { right: 24px; }
+  .floating-btn-container.pos-left { left: 24px; }
+
+  /* Tool Rail inside Drawer */
+  .tool-btn { 
+    display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    width: 100%; height: 52px; gap: 2px; color: #5a6355; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent;
+  }
+  .tool-btn:hover { background-color: #f4f3f7; color: #1a1c1e; }
+  .tool-btn.active { background-color: #f0fdf4; color: #0a6400; border-left-color: #0a6400; font-weight: 600; }
+  .tool-btn .material-symbols-outlined { font-size: 20px; }
+  .tool-btn span:last-child { font-size: 9px; font-weight: 500; text-align: center; line-height: 1.1; }
+
+  /* Child Indentation */
+  .tool-btn.child { height: 40px; padding-left: 8px; }
+  .tool-btn.child .material-symbols-outlined { font-size: 16px; }
+
+  /* Print Area & Asset Controls */
+  .print-area {
+    border: 2px dashed #0a6400; background: rgba(10, 100, 0, 0.03);
+    position: absolute; top: 25%; left: 30%; width: 40%; height: 50%;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+  }
+  .print-area:hover { background: rgba(10, 100, 0, 0.08); }
+  .print-area-label { position: absolute; top: -12px; left: 0; background: #0a6400; color: white; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  
+  .asset-selected { border: 2px solid #1e6dc9 !important; background: rgba(30, 109, 201, 0.05) !important; }
+  .control-bar {
+    position: absolute; top: -56px; left: 50%; transform: translateX(-50%);
+    background: #1a1c1e; color: white; border-radius: 8px; padding: 6px;
+    display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    white-space: nowrap; z-index: 50;
+  }
+  .control-bar button { padding: 6px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .control-bar button:hover { background: rgba(255,255,255,0.2); }
+  .control-bar .divider { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 4px; }
+  
+  .rotate-handle {
+    position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
+    width: 24px; height: 24px; background: white; border: 2px solid #1e6dc9;
+    border-radius: 50%; cursor: grab; display: flex; align-items: center; justify-content: center; z-index: 50;
+  }
+  .asset-content { transition: transform 0.1s; transform-origin: center; }
+
+  /* Drawer Tabs */
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  /* Settings specific styles */
+  .setting-checkbox { width: 16px; height: 16px; accent-color: #1a1c1e; border-radius: 4px; cursor: pointer; }
+  .color-swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); transition: transform 0.1s; }
+  .color-swatch:hover { transform: scale(1.15); }
+  .color-swatch.active { border: 2px solid #0a6400; box-shadow: 0 0 0 2px white inset; }
+  .toggle-group { display: flex; background: #f4f3f7; border-radius: 6px; padding: 2px; border: 1px solid #dad9dd; }
+  .toggle-btn { flex: 1; padding: 6px 0; text-align: center; font-size: 12px; font-weight: 500; border-radius: 4px; cursor: pointer; color: #5a6355; }
+  .toggle-btn.active { background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #1a1c1e; }
+
+  /* UI Panels */
+  .grid-card { aspect-ratio: 1; background: #eeedf1; border-radius: 8px; overflow: hidden; border: 1px solid #dad9dd; cursor: pointer; transition: border-color 0.2s; }
+  .grid-card:hover { border-color: #0a6400; }
+  .grid-card img { width: 100%; height: 100%; object-fit: cover; }
+  .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-radius: 4px; border: 1px solid transparent; cursor: pointer; }
+  .layer-item:hover { background: #f4f3f7; }
+  .layer-item.active { background: #f0fdf4; border-color: #0a6400; }
+</style>
+</head>
+<body class="font-sans text-on-surface antialiased h-screen w-screen flex flex-col overflow-hidden">
+
+  <!-- TOP TOOLBAR -->
+  <header class="h-12 bg-white border-b border-surface-dim flex items-center justify-between px-4 shrink-0 z-20">
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">undo</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[20px]">redo</span></button>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <div class="flex items-center bg-surface-container-low rounded-lg p-1 border border-surface-dim">
+        <button class="px-4 py-1 rounded-md bg-white shadow-sm text-[12px] font-semibold text-on-surface">Edit</button>
+        <button class="px-4 py-1 rounded-md text-[12px] font-medium text-on-surface-variant hover:text-on-surface">Preview</button>
+      </div>
+      <div class="w-px h-4 bg-surface-dim"></div>
+      <div class="flex items-center bg-surface-container-low rounded-lg p-1 border border-surface-dim">
+        <button class="px-3 py-1 rounded-md bg-white shadow-sm text-[12px] font-semibold text-on-surface flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">photo</span> Photo
+        </button>
+        <button class="px-3 py-1 rounded-md text-[12px] font-medium text-on-surface-variant hover:text-on-surface flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">grid_on</span> Outline
+        </button>
+      </div>
+      <button class="w-7 h-7 rounded-full border border-surface-dim flex items-center justify-center text-on-surface-variant hover:bg-surface-container"><span class="material-symbols-outlined text-[16px]">question_mark</span></button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-4 rounded border border-surface-dim text-[12px] font-semibold text-on-surface hover:bg-surface-container">Save</button>
+      <button class="h-8 px-4 rounded bg-[#006400] text-white text-[12px] font-semibold hover:bg-green-800">Preview & Publish</button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 relative overflow-hidden flex">
+    
+    <!-- FLOATING + BUTTON (Moves with Drawer) -->
+    <div class="floating-btn-container pos-right" id="floatingPlusBtn">
+      <button onclick="toggleDrawer()" class="w-14 h-14 bg-white border border-surface-dim rounded-full shadow-xl flex items-center justify-center text-on-surface hover:bg-surface-container transition-transform hover:scale-105">
+        <span class="material-symbols-outlined text-[28px]">add</span>
+      </button>
+    </div>
+
+    <!-- CENTER CANVAS -->
+    <main class="flex-1 canvas-area relative flex items-center justify-center">
+      <div class="relative w-[800px] h-[600px] flex items-center justify-center">
+        <img src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&q=80&w=1000&h=800" alt="Cap" class="w-full h-full object-contain drop-shadow-2xl opacity-90 mix-blend-multiply pointer-events-none" />
+        
+        <div class="print-area" id="canvasAsset" onclick="selectAsset(event)">
+          <div class="print-area-label">Print area</div>
+          <span class="asset-content text-7xl font-medium text-black select-none" id="assetText">Your text</span>
+
+          <div class="control-bar hidden" id="assetControls" onclick="event.stopPropagation()">
+            <button title="Move"><span class="material-symbols-outlined text-[20px]">open_with</span></button>
+            <button title="Scale"><span class="material-symbols-outlined text-[20px]">aspect_ratio</span></button>
+            <div class="divider"></div>
+            <button title="Rotate Left" onclick="rotateAsset(-15)"><span class="material-symbols-outlined text-[20px]">rotate_90_degrees_ccw</span></button>
+            <button title="Rotate Right" onclick="rotateAsset(15)"><span class="material-symbols-outlined text-[20px]">rotate_90_degrees_cw</span></button>
+            <div class="divider"></div>
+            <button title="Bring Forward"><span class="material-symbols-outlined text-[20px]">flip_to_front</span></button>
+            <button title="Send Backward"><span class="material-symbols-outlined text-[20px]">flip_to_back</span></button>
+            <div class="divider"></div>
+            <button title="Duplicate"><span class="material-symbols-outlined text-[20px]">content_copy</span></button>
+            <button title="Delete" class="text-red-400 hover:bg-red-500/20"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+          </div>
+          
+          <div class="rotate-handle hidden" id="rotateHandle" onclick="rotateAsset(45)">
+             <span class="material-symbols-outlined text-[14px] text-[#1e6dc9]">refresh</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zoom Controls -->
+      <div class="absolute bottom-6 left-6 flex items-center gap-1 bg-white border border-surface-dim rounded-lg p-1 shadow-sm text-[13px] z-10">
+        <button class="w-7 h-7 hover:bg-surface-container rounded flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">add</span></button>
+        <button class="w-7 h-7 hover:bg-surface-container rounded flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+        <span class="px-3 font-medium">100%</span>
+      </div>
+    </main>
+
+    <!-- SLIDING TOOL DRAWER -->
+    <div class="tool-drawer pos-right closed" id="toolDrawer">
+      
+      <!-- Header -->
+      <div class="h-14 border-b border-surface-dim flex items-center justify-between px-4 shrink-0 bg-white">
+        <div class="flex items-center gap-2 font-semibold text-on-surface">
+          <span class="material-symbols-outlined">magic_button</span> <span id="drawerTitle">Graphics</span>
+        </div>
+        <div class="flex items-center gap-1">
+          <!-- Dock Toggle -->
+          <button onclick="toggleDock()" class="h-8 px-2 rounded text-on-surface-variant hover:bg-surface-container flex items-center gap-1 text-[12px] font-medium" title="Dock to Left/Right">
+            <span class="material-symbols-outlined text-[18px]" id="dockIcon">dock_to_left</span>
+          </button>
+          <button onclick="toggleDrawer()" class="w-8 h-8 rounded flex items-center justify-center text-on-surface-variant hover:bg-surface-container">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content & Vertical Nav -->
+      <div class="flex-1 overflow-hidden flex">
+        
+        <!-- Vertical Icon Nav -->
+        <div class="w-[70px] border-r border-surface-dim flex flex-col items-center py-2 bg-surface-container-lowest shrink-0 overflow-y-auto">
+          
+          <button class="tool-btn" onclick="switchView('upload')" id="btn-upload">
+            <span class="material-symbols-outlined">cloud_upload</span><span>Upload</span>
+          </button>
+          
+          <button class="tool-btn" onclick="switchView('images')" id="btn-images">
+            <span class="material-symbols-outlined">image</span><span>Images</span>
+          </button>
+          
+          <button class="tool-btn active" onclick="switchView('graphics')" id="btn-graphics">
+            <span class="material-symbols-outlined">interests</span><span>Graphics</span>
+          </button>
+          <div class="w-full flex flex-col border-l-2 border-transparent">
+            <button class="tool-btn child" onclick="switchView('templates')" id="btn-templates">
+              <span class="material-symbols-outlined">dashboard</span><span>Templates</span>
+            </button>
+            <button class="tool-btn child" onclick="switchView('shapes')" id="btn-shapes">
+              <span class="material-symbols-outlined">category</span><span>Shapes</span>
+            </button>
+          </div>
+
+          <button class="tool-btn" onclick="switchView('text')" id="btn-text">
+            <span class="material-symbols-outlined">title</span><span>Add text</span>
+          </button>
+          
+          <button class="tool-btn" onclick="switchView('ai')" id="btn-ai">
+            <span class="material-symbols-outlined">magic_button</span><span>AI</span>
+          </button>
+          
+          <button class="tool-btn" onclick="switchView('product')" id="btn-product">
+            <span class="material-symbols-outlined">inventory_2</span><span>Product</span>
+          </button>
+          <div class="w-full flex flex-col border-l-2 border-transparent">
+            <button class="tool-btn child" onclick="switchView('layers')" id="btn-layers">
+              <span class="material-symbols-outlined">layers</span><span>Layers</span>
+            </button>
+          </div>
+
+          <button class="tool-btn" onclick="switchView('layouts')" id="btn-layouts">
+            <span class="material-symbols-outlined">view_quilt</span><span>Layouts</span>
+          </button>
+          
+          <button class="tool-btn" onclick="switchView('files')" id="btn-files">
+            <span class="material-symbols-outlined">folder</span><span>Files</span>
+          </button>
+
+          <button class="tool-btn" onclick="switchView('themes')" id="btn-themes">
+            <span class="material-symbols-outlined">palette</span><span>Themes</span>
+          </button>
+          
+          <button class="tool-btn" onclick="switchView('settings')" id="btn-settings">
+            <span class="material-symbols-outlined">settings</span><span>Settings</span>
+          </button>
+        </div>
+
+        <!-- Panels Container -->
+        <div class="flex-1 relative overflow-y-auto p-4 text-[13px] bg-white">
+          
+          <!-- 1. GRAPHICS VIEW -->
+          <div id="view-graphics" class="view-panel active">
+            <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <button class="px-3 py-1 bg-surface-container rounded-full text-[12px] font-medium whitespace-nowrap">Trending</button>
+              <button class="px-3 py-1 hover:bg-surface-container rounded-full text-[12px] font-medium whitespace-nowrap">Shapes</button>
+              <button class="px-3 py-1 hover:bg-surface-container rounded-full text-[12px] font-medium whitespace-nowrap">Lines</button>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=200" /></div>
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80&w=200" /></div>
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=200" /></div>
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1508615039623-a25605d2b022?auto=format&fit=crop&q=80&w=200" /></div>
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?auto=format&fit=crop&q=80&w=200" /></div>
+              <div class="grid-card"><img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=200" /></div>
+            </div>
+          </div>
+
+          <!-- 2. UPLOAD VIEW -->
+          <div id="view-upload" class="view-panel space-y-4">
+            <div class="border-2 border-dashed border-surface-dim rounded-xl p-8 text-center bg-surface-container-lowest">
+              <span class="material-symbols-outlined text-[48px] text-outline mb-2">cloud_upload</span>
+              <div class="text-[14px] font-semibold text-on-surface mb-1">Click to upload or drag and drop</div>
+              <div class="text-[11px] text-on-surface-variant">SVG, PNG, JPG or GIF (max. 800x400px)</div>
+            </div>
+            <button class="w-full h-10 bg-primary text-white rounded-lg font-semibold hover:bg-green-800">Browse Files</button>
+            <div class="mt-6">
+              <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Recent Uploads</div>
+              <div class="grid grid-cols-3 gap-2">
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=150" /></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. IMAGES VIEW -->
+          <div id="view-images" class="view-panel space-y-4">
+             <div class="grid grid-cols-2 gap-2">
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=300" /></div>
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=300" /></div>
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1562157873-818bc0726f68?auto=format&fit=crop&q=80&w=300" /></div>
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&q=80&w=300" /></div>
+              </div>
+          </div>
+
+          <!-- 4. TEMPLATES VIEW -->
+          <div id="view-templates" class="view-panel">
+            <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-3">Start with a template</div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="grid-card aspect-[4/5] flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200"><span class="text-[12px] font-medium text-blue-800">Business Card</span></div>
+              <div class="grid-card aspect-[4/5] flex flex-col items-center justify-center bg-gradient-to-br from-pink-100 to-pink-50 border border-pink-200"><span class="text-[12px] font-medium text-pink-800">Social Post</span></div>
+              <div class="grid-card aspect-[4/5] flex flex-col items-center justify-center bg-gradient-to-br from-green-100 to-green-50 border border-green-200"><span class="text-[12px] font-medium text-green-800">Poster</span></div>
+              <div class="grid-card aspect-[4/5] flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 to-purple-50 border border-purple-200"><span class="text-[12px] font-medium text-purple-800">Flyer</span></div>
+            </div>
+          </div>
+
+          <!-- 5. SHAPES VIEW -->
+          <div id="view-shapes" class="view-panel">
+            <div class="grid grid-cols-4 gap-2">
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-8 h-8 border-2 border-on-surface rounded-sm"></div></div>
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-8 h-8 border-2 border-on-surface rounded-full"></div></div>
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-b-[28px] border-b-on-surface"></div></div>
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-8 h-8 border-2 border-on-surface rotate-45"></div></div>
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-8 h-4 border-2 border-on-surface rounded-full"></div></div>
+              <div class="aspect-square bg-surface-container rounded hover:bg-surface-dim cursor-pointer flex items-center justify-center"><div class="w-8 h-8 bg-on-surface rounded-full" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);"></div></div>
+            </div>
+          </div>
+
+          <!-- 6. TEXT VIEW -->
+          <div id="view-text" class="view-panel space-y-4">
+            <button class="w-full h-14 border border-surface-dim rounded-lg text-left px-4 font-bold text-[24px] hover:bg-surface-container">Add a heading</button>
+            <button class="w-full h-12 border border-surface-dim rounded-lg text-left px-4 font-semibold text-[18px] hover:bg-surface-container">Add a subheading</button>
+            <button class="w-full h-10 border border-surface-dim rounded-lg text-left px-4 font-normal text-[14px] hover:bg-surface-container">Add a body text</button>
+            
+            <div class="mt-6 border-t border-surface-dim pt-4">
+              <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Font Combinations</div>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="p-3 border border-surface-dim rounded-lg hover:bg-surface-container text-left">
+                  <div class="font-bold text-[16px] leading-tight">Inter</div>
+                  <div class="text-[11px] text-on-surface-variant mt-1">The quick brown fox</div>
+                </button>
+                <button class="p-3 border border-surface-dim rounded-lg hover:bg-surface-container text-left">
+                  <div class="font-serif font-bold text-[16px] leading-tight">Playfair</div>
+                  <div class="font-serif text-[11px] text-on-surface-variant mt-1">The quick brown fox</div>
+                </button>
+                <button class="p-3 border border-surface-dim rounded-lg hover:bg-surface-container text-left">
+                  <div class="font-mono font-bold text-[16px] leading-tight">Roboto Mono</div>
+                  <div class="font-mono text-[11px] text-on-surface-variant mt-1">The quick brown fox</div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. AI VIEW -->
+          <div id="view-ai" class="view-panel space-y-4">
+            <div>
+              <label class="block text-on-surface-variant mb-2 text-[12px] font-medium">Describe the art you need</label>
+              <textarea class="w-full h-24 p-3 border border-surface-dim rounded-lg bg-surface-container-lowest focus:outline-none focus:border-primary resize-none text-[13px]" placeholder="e.g. retro mountain sunset, vector style..."></textarea>
+            </div>
+            <button class="w-full h-10 bg-[#1e5a38] text-white rounded-lg font-semibold hover:bg-green-800 flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">auto_awesome</span> Generate 4 variations
+            </button>
+            <div class="mt-4">
+              <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Recent Generations</div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="grid-card"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=200" /></div>
+                <div class="aspect-square bg-surface-container rounded-lg border-2 border-dashed border-surface-dim flex items-center justify-center text-on-surface-variant cursor-pointer hover:bg-surface-container-high"><span class="material-symbols-outlined">add</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. PRODUCT VIEW (Expanded with Variants, Counts, Sizes) -->
+          <div id="view-product" class="view-panel space-y-5">
+            <div class="p-3 bg-surface-container-low rounded-lg border border-surface-dim">
+              <div class="font-bold text-[14px]">5 Panel Mid-Profile Baseball Cap</div>
+              <div class="text-[11px] text-on-surface-variant mt-1">SKU: CAP-5P-MP-BLK</div>
+            </div>
+
+            <!-- Variants -->
+            <div>
+              <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Variant</div>
+              <div class="flex gap-2">
+                <button class="w-10 h-10 rounded-full border-2 border-on-surface p-0.5"><div class="w-full h-full bg-black rounded-full"></div></button>
+                <button class="w-10 h-10 rounded-full border border-surface-dim p-0.5 hover:border-on-surface"><div class="w-full h-full bg-white rounded-full border border-gray-200"></div></button>
+                <button class="w-10 h-10 rounded-full border border-surface-dim p-0.5 hover:border-on-surface"><div class="w-full h-full bg-[#1e3a8a] rounded-full"></div></button>
+                <button class="w-10 h-10 rounded-full border border-surface-dim p-0.5 hover:border-on-surface"><div class="w-full h-full bg-[#b91c1c] rounded-full"></div></button>
+              </div>
+            </div>
+
+            <!-- Size & Quantity -->
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Size</div>
+                <select class="w-full border border-surface-dim rounded p-2 text-[12px] bg-white focus:outline-none focus:border-primary">
+                  <option>OSFA (One Size Fits All)</option>
+                  <option>S/M</option>
+                  <option>L/XL</option>
+                </select>
+              </div>
+              <div>
+                <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Quantity</div>
+                <div class="flex items-center border border-surface-dim rounded overflow-hidden">
+                  <button class="w-8 h-8 flex items-center justify-center bg-surface-container hover:bg-surface-dim">-</button>
+                  <input type="text" value="1" class="w-full text-center text-[12px] focus:outline-none">
+                  <button class="w-8 h-8 flex items-center justify-center bg-surface-container hover:bg-surface-dim">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Print Locations -->
+            <div>
+              <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-2">Print Locations</div>
+              <div class="space-y-2">
+                <div class="p-2 border border-surface-dim rounded flex justify-between items-center cursor-pointer hover:bg-surface-container">
+                  <span class="text-[12px] font-medium">Front Center</span>
+                  <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+                </div>
+                <div class="p-2 border border-surface-dim rounded flex justify-between items-center cursor-pointer hover:bg-surface-container">
+                  <span class="text-[12px] font-medium">Back</span>
+                  <span class="material-symbols-outlined text-[16px] text-surface-dim">circle</span>
+                </div>
+                <div class="p-2 border border-surface-dim rounded flex justify-between items-center cursor-pointer hover:bg-surface-container">
+                  <span class="text-[12px] font-medium">Left Side</span>
+                  <span class="material-symbols-outlined text-[16px] text-surface-dim">circle</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. LAYERS VIEW -->
+          <div id="view-layers" class="view-panel space-y-2">
+            <div class="layer-item active">
+              <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">title</span> <span class="text-[12px] font-medium">Your text</span></div>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant cursor-pointer hover:text-on-surface">visibility</span>
+            </div>
+            <div class="layer-item">
+              <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">image</span> <span class="text-[12px] font-medium">Background Image</span></div>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant cursor-pointer hover:text-on-surface">visibility</span>
+            </div>
+            <div class="layer-item">
+              <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[16px]">category</span> <span class="text-[12px] font-medium">Shape 1</span></div>
+              <span class="material-symbols-outlined text-[16px] text-on-surface-variant cursor-pointer hover:text-on-surface">visibility</span>
+            </div>
+            <div class="text-center text-[11px] text-on-surface-variant mt-4 cursor-pointer hover:underline">Group selected layers</div>
+          </div>
+
+          <!-- 10. LAYOUTS VIEW -->
+          <div id="view-layouts" class="view-panel">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="grid-card aspect-video flex items-center justify-center bg-surface-container hover:bg-surface-dim border border-transparent hover:border-primary"><span class="text-[11px] font-medium">Centered</span></div>
+              <div class="grid-card aspect-video flex items-center justify-center bg-surface-container hover:bg-surface-dim border border-transparent hover:border-primary"><span class="text-[11px] font-medium">Split Left</span></div>
+              <div class="grid-card aspect-video flex items-center justify-center bg-surface-container hover:bg-surface-dim border border-transparent hover:border-primary"><span class="text-[11px] font-medium">Split Right</span></div>
+              <div class="grid-card aspect-video flex items-center justify-center bg-surface-container hover:bg-surface-dim border border-transparent hover:border-primary"><span class="text-[11px] font-medium">Grid 2x2</span></div>
+            </div>
+          </div>
+
+          <!-- 11. FILES VIEW -->
+          <div id="view-files" class="view-panel space-y-2">
+            <div class="flex items-center gap-2 p-2 hover:bg-surface-container rounded cursor-pointer border border-transparent hover:border-surface-dim">
+              <span class="material-symbols-outlined text-[24px] text-amber-500">folder</span>
+              <div>
+                <div class="text-[13px] font-medium">Brand Assets</div>
+                <div class="text-[11px] text-on-surface-variant">12 items</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2 hover:bg-surface-container rounded cursor-pointer border border-transparent hover:border-surface-dim">
+              <span class="material-symbols-outlined text-[24px] text-amber-500">folder</span>
+              <div>
+                <div class="text-[13px] font-medium">Project Logos</div>
+                <div class="text-[11px] text-on-surface-variant">4 items</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 p-2 hover:bg-surface-container rounded cursor-pointer border border-transparent hover:border-surface-dim">
+              <span class="material-symbols-outlined text-[24px] text-blue-500">description</span>
+              <div>
+                <div class="text-[13px] font-medium">style-guide.pdf</div>
+                <div class="text-[11px] text-on-surface-variant">2.4 MB</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12. THEMES VIEW -->
+          <div id="view-themes" class="view-panel space-y-3">
+            <div class="p-3 border border-surface-dim rounded-lg bg-white cursor-pointer hover:border-primary">
+              <div class="h-16 rounded bg-[#1e5a38] mb-2 flex items-center justify-center text-white font-bold text-[14px]">Studio Green</div>
+              <div class="text-[12px] font-medium">Primary Theme</div>
+            </div>
+            <div class="p-3 border border-surface-dim rounded-lg bg-white cursor-pointer hover:border-primary">
+              <div class="h-16 rounded bg-blue-600 mb-2 flex items-center justify-center text-white font-bold text-[14px]">Ocean Blue</div>
+              <div class="text-[12px] font-medium">Secondary Theme</div>
+            </div>
+            <div class="p-3 border border-surface-dim rounded-lg bg-white cursor-pointer hover:border-primary">
+              <div class="h-16 rounded bg-[#1a1c1e] mb-2 flex items-center justify-center text-white font-bold text-[14px]">Midnight</div>
+              <div class="text-[12px] font-medium">Dark Mode</div>
+            </div>
+          </div>
+
+          <!-- 13. SETTINGS VIEW -->
+          <div id="view-settings" class="view-panel space-y-6">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="setting-checkbox" checked>
+                <span class="font-semibold text-[13px]">Show grid</span>
+              </label>
+              <div class="h-6 w-full border border-dashed border-surface-dim bg-surface-container-lowest rounded relative overflow-hidden flex items-center">
+                 <div class="w-full h-full" style="background-image: linear-gradient(to right, #e0e0e0 1px, transparent 1px), linear-gradient(to bottom, #e0e0e0 1px, transparent 1px); background-size: 10px 10px; opacity: 0.5;"></div>
+              </div>
+              <p class="text-[11px] text-on-surface-variant">Simple 10x10mm grid</p>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="setting-checkbox" checked>
+                <span class="font-semibold text-[13px]">Show guides</span>
+              </label>
+              <div class="w-full h-[1px] bg-[#ff00ff]"></div>
+              <p class="text-[11px] text-on-surface-variant">Guides are helpful in establishing site content</p>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="setting-checkbox" checked>
+                <span class="font-semibold text-[13px]">Show bleeds</span>
+              </label>
+              <p class="text-[11px] text-on-surface-variant leading-relaxed">Bleed is the extra area of the design beyond the final print edge. It is trimmed off when printing.</p>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="setting-checkbox" checked>
+                <span class="font-semibold text-[13px]">Show rulers</span>
+              </label>
+              <div class="w-full h-[1px] border-t border-dashed border-on-surface-variant/50"></div>
+              <p class="text-[11px] text-on-surface-variant">Show rulers over design. You can move the ruler using a handle with position.</p>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-2">
+              <div class="font-semibold text-[13px]">Units</div>
+              <div class="toggle-group">
+                <div class="toggle-btn active">cm</div>
+                <div class="toggle-btn">inch</div>
+              </div>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-3">
+              <div class="font-semibold text-[13px]">Background color</div>
+              <button class="w-full h-9 border border-blue-400 rounded-full flex items-center justify-center gap-2 text-[12px] font-medium text-on-surface hover:bg-blue-50">
+                <span class="w-4 h-[1px] bg-red-500 transform rotate-45"></span> No background
+              </button>
+              <div class="text-[11px] text-on-surface-variant text-center mt-2">Pick from palette</div>
+              <div class="grid grid-cols-10 gap-1 justify-items-center">
+                <div class="color-swatch bg-black"></div><div class="color-swatch bg-gray-700"></div><div class="color-swatch bg-gray-500"></div><div class="color-swatch bg-gray-400"></div><div class="color-swatch bg-gray-300"></div><div class="color-swatch bg-gray-200"></div><div class="color-swatch bg-gray-100"></div><div class="color-swatch bg-white border-gray-300"></div><div class="color-swatch bg-[#e87a7a]"></div><div class="color-swatch bg-[#e8c17a]"></div>
+                <div class="color-swatch bg-[#e8e87a]"></div><div class="color-swatch bg-[#b9e87a]"></div><div class="color-swatch bg-[#7ae8a3]"></div><div class="color-swatch bg-[#7ae8e8]"></div><div class="color-swatch bg-[#7ab9e8]"></div><div class="color-swatch bg-[#7a7ae8]"></div><div class="color-swatch bg-[#b97ae8]"></div><div class="color-swatch bg-[#e87ad1]"></div><div class="color-swatch bg-[#e87aa3]"></div><div class="color-swatch bg-[#cc7a7a]"></div>
+              </div>
+              <div class="text-[11px] text-on-surface-variant mt-2">Create custom color</div>
+              <div class="flex border border-surface-dim rounded overflow-hidden">
+                <div class="flex-1 text-center py-1.5 text-[11px] font-medium bg-white border-r border-surface-dim">sRGB</div>
+                <div class="flex-1 text-center py-1.5 text-[11px] font-medium bg-surface-container">CMYK</div>
+              </div>
+              <div class="h-16 w-full rounded border border-surface-dim bg-gradient-to-r from-red-500 via-green-500 to-blue-500"></div>
+              <div class="h-16 w-full rounded border border-surface-dim bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"></div>
+              <input type="text" placeholder="HEX" class="w-full border border-surface-dim rounded p-2 text-center text-[12px] uppercase" disabled>
+            </div>
+            <hr class="border-surface-dim">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="font-semibold text-[13px]">Image format</div>
+                <div class="flex border border-surface-dim rounded bg-white overflow-hidden">
+                  <button class="px-4 py-1 text-[12px] font-semibold bg-surface-container border-r border-surface-dim">JPG</button>
+                  <button class="px-4 py-1 text-[12px] font-medium text-on-surface-variant hover:bg-surface-container">WebP</button>
+                  <button class="px-4 py-1 text-[12px] font-medium text-on-surface-variant hover:bg-surface-container">PNG</button>
+                </div>
+              </div>
+            </div>
+            <hr class="border-surface-dim">
+            <button class="w-full h-10 border border-on-surface rounded flex items-center justify-center text-[13px] font-semibold hover:bg-surface-container mt-4">
+              Reset settings to default
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <footer class="h-16 bg-white border-t border-surface-dim flex items-center justify-between px-6 shrink-0 z-20">
+    <div class="flex items-center gap-4">
+      <div class="text-[14px] font-semibold text-on-surface">5 Panel Mid-Profile Baseball Cap</div>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <button class="h-9 px-4 rounded-lg border border-surface-dim hover:bg-surface-container flex items-center gap-2 text-[13px] font-medium text-on-surface-variant">
+        <span class="material-symbols-outlined text-[18px]">360</span> Rotate Product
+      </button>
+    </div>
+
+    <div class="flex items-center gap-3 text-[13px] font-semibold">
+      <button class="h-9 px-6 rounded-lg bg-[#1e5a38] text-white hover:bg-green-800 flex items-center gap-2">
+        Preview & Publish
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    const drawer = document.getElementById('toolDrawer');
+    const floatingBtnContainer = document.getElementById('floatingPlusBtn');
+    const dockIcon = document.getElementById('dockIcon');
+
+    // Drawer state tracking
+    let isLeft = false;
+    let isOpen = false;
+
+    function toggleDrawer() {
+      isOpen = !isOpen;
+      
+      if (isOpen) {
+        drawer.classList.remove('closed');
+        floatingBtnContainer.classList.add('opacity-0', 'pointer-events-none');
+      } else {
+        drawer.classList.add('closed');
+        floatingBtnContainer.classList.remove('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    function toggleDock() {
+      isLeft = !isLeft;
+
+      if (isLeft) {
+        // Switch to Left
+        drawer.classList.remove('pos-right');
+        drawer.classList.add('pos-left');
+        
+        floatingBtnContainer.classList.remove('pos-right');
+        floatingBtnContainer.classList.add('pos-left');
+        
+        dockIcon.textContent = 'dock_to_right';
+      } else {
+        // Switch to Right
+        drawer.classList.remove('pos-left');
+        drawer.classList.add('pos-right');
+        
+        floatingBtnContainer.classList.remove('pos-left');
+        floatingBtnContainer.classList.add('pos-right');
+        
+        dockIcon.textContent = 'dock_to_left';
+      }
+    }
+
+    function switchView(viewName) {
+      // 1. Hide all panels
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      
+      // 2. Show target panel
+      const target = document.getElementById('view-' + viewName);
+      if (target) target.classList.add('active');
+      
+      // 3. Reset all buttons
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      
+      // 4. Highlight active button
+      const activeBtn = document.getElementById('btn-' + viewName);
+      if(activeBtn) activeBtn.classList.add('active');
+
+      // 5. Update header title
+      const titles = {
+        'ai': 'AI Generation', 'upload': 'Upload', 'text': 'Add text', 
+        'images': 'Images', 'graphics': 'Graphics', 'shapes': 'Shapes', 
+        'themes': 'Themes', 'templates': 'Templates',
+        'product': 'Product details', 'layers': 'Layers', 'layouts': 'Layouts',
+        'files': 'Files', 'settings': 'Settings'
+      };
+      document.getElementById('drawerTitle').textContent = titles[viewName] || 'Studio';
+    }
+
+    // Canvas Asset Logic
+    const canvasAsset = document.getElementById('canvasAsset');
+    const assetControls = document.getElementById('assetControls');
+    const rotateHandle = document.getElementById('rotateHandle');
+    const assetText = document.getElementById('assetText');
+    let currentRotation = 0;
+
+    function selectAsset(e) {
+      e.stopPropagation();
+      canvasAsset.classList.add('asset-selected');
+      assetControls.classList.remove('hidden');
+      rotateHandle.classList.remove('hidden');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!canvasAsset.contains(e.target)) {
+        canvasAsset.classList.remove('asset-selected');
+        assetControls.classList.add('hidden');
+        rotateHandle.classList.add('hidden');
+      }
+    });
+
+    function rotateAsset(degrees) {
+      currentRotation += degrees;
+      assetText.style.transform = `rotate(${currentRotation}deg)`;
+    }
+  </script>
+</body>
+</html>

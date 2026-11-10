@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Automation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .bulk-bar{background:#1f2937;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:94vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .flow-node{border:1px solid #dad9dd;border-radius:10px;background:#fff;padding:12px;position:relative}
+  .flow-node.trigger{border-color:#0a6400;background:#f4fbfa}
+  .flow-node.condition{border-color:#0077c5;background:#f1f8ff}
+  .flow-node.action{border-color:#6b1e28;background:#fbf5f5}
+  .flow-node.wait{border-color:#bd8734;background:#fbf7ec}
+  .flow-connector{height:22px;display:flex;align-items:center;justify-content:center;position:relative}
+  .flow-connector:before{content:"";position:absolute;top:0;bottom:0;width:1.5px;background:#dad9dd}
+  .flow-add{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:20px;padding:1px 8px;font-size:11px;color:#5a6355;cursor:pointer;z-index:2}
+  .flow-add:hover{border-color:#0a6400;color:#0a6400}
+  .trigger-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #dad9dd;border-radius:10px;background:#fff;cursor:pointer}
+  .trigger-row.selected{border-color:#0a6400;background:#f4fbfa}
+  .canvas-bg{background-image:linear-gradient(#f4f3f7 1px, transparent 1px), linear-gradient(90deg,#f4f3f7 1px, transparent 1px);background-size:24px 24px;background-color:#faf9fc}
+  .run-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f2f3}
+  .run-row:last-child{border-bottom:0}
+  .run-step-pill{font-size:10px;padding:2px 6px;border-radius:6px;background:#f0f6f5;color:#0a6400;font-weight:600;white-space:nowrap}
+  .run-step-pill.pending{background:#fbf7ec;color:#98713e}
+  .run-step-pill.failed{background:#fff0ef;color:#bf5c59}
+  .run-step-pill.ok{background:#e9f5ef;color:#388064}
+  .step-line{height:1px;background:#dad9dd;flex:1;max-width:50px}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP (Marketing) ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="performance">Performance</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="oversight">Oversight</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="promotions">Promotions</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="newsletter">Newsletter</button>
+    <button class="h-9 px-3 text-label-md tab-underline active" data-nav="automation">Automation</button>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Marketing</span><span class="text-outline">/</span><span>Automation</span>
+      </div>
+      <h1 class="text-headline-lg">Automation</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Trigger → condition → action workflows across Marketing, Commerce, and Finance. Every node is visible and every run is logged.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="view-toggle" id="automation-view">
+        <button class="active" data-aview="recipes">Recipes</button>
+        <button data-aview="runs">Runs</button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-import>
+        <span class="material-symbols-outlined text-[16px]">upload</span>Import
+      </button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new-automation>
+        <span class="material-symbols-outlined text-[16px]">add</span>New automation
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Active automations</span>
+      <div class="text-headline-lg mt-1" id="statActiveAuto">4</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">2 paused · 1 draft</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Runs (7d)</span>
+      <div class="text-headline-lg mt-1">1,486</div>
+      <div class="text-[11px] text-secondary mt-1">+22% vs prior week</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Success rate</span>
+      <div class="text-headline-lg mt-1">98.7%</div>
+      <div class="text-[11px] text-secondary mt-1">19 failed runs</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Avg. latency</span>
+      <div class="text-headline-lg mt-1">1.4s</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">Trigger → action</div>
+    </div>
+  </div>
+
+  <!-- ─── CREATE ACTIONS ROW ─── -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new-automation>
+      <span class="material-symbols-outlined text-[16px]">bolt</span>Blank automation
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-template="welcome">
+      <span class="material-symbols-outlined text-[16px]">waving_hand</span>Welcome series
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-template="abandoned">
+      <span class="material-symbols-outlined text-[16px]">shopping_cart</span>Abandoned cart
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-template="review">
+      <span class="material-symbols-outlined text-[16px]">star</span>Post-purchase review
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-template="winback">
+      <span class="material-symbols-outlined text-[16px]">history</span>Win-back
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RECIPES VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-recipes">
+
+    <!-- Filters -->
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input id="recipe-search" class="w-full h-8 pl-7 pr-2 bg-white border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name, trigger, or action…"/>
+      </div>
+
+      <div class="relative">
+        <button id="btn-trigger" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">bolt</span>Trigger
+        </button>
+        <div id="pop-trigger" class="popover hidden-imp absolute left-0 top-9 p-3 w-64">
+          <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by trigger</div>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-trigger" value="Order created" checked/> Order created</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-trigger" value="Customer created" checked/> Customer created</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-trigger" value="Cart abandoned" checked/> Cart abandoned</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-trigger" value="Invoice paid" checked/> Invoice paid</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-trigger" value="Schedule" checked/> Schedule</label>
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="trigger-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+            <button id="trigger-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button id="btn-status" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">toggle_on</span>Status
+        </button>
+        <div id="pop-status" class="popover hidden-imp absolute left-0 top-9 p-3 w-56">
+          <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by status</div>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-status" value="Active" checked/> Active</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-status" value="Paused" checked/> Paused</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-status" value="Draft" checked/> Draft</label>
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="status-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+            <button id="status-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <span id="recipe-count" class="ml-auto text-[11px] text-on-surface-variant">1–6 of 6</span>
+    </div>
+
+    <!-- Active chips -->
+    <div id="recipe-chips" class="flex items-center gap-1.5 flex-wrap mb-2 hidden-imp">
+      <span class="text-[10px] uppercase tracking-wider font-bold text-outline">Active:</span>
+      <div id="recipe-chip-container" class="flex items-center gap-1.5 flex-wrap"></div>
+      <button id="recipe-clear-all" class="text-[11px] text-primary hover:underline font-medium ml-1">Clear all</button>
+    </div>
+
+    <!-- Recipes table -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1100px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">Automation</th>
+              <th class="px-3 py-2">Trigger</th>
+              <th class="px-3 py-2">Actions</th>
+              <th class="px-3 py-2 text-right">Runs (7d)</th>
+              <th class="px-3 py-2 text-right">Success</th>
+              <th class="px-3 py-2">Last run</th>
+              <th class="px-3 py-2">Status</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="recipe-tbody"></tbody>
+        </table>
+      </div>
+      <div class="hidden-imp py-12 px-8 text-center" id="recipe-empty">
+        <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-[28px] text-outline">bolt</span>
+        </div>
+        <h3 class="text-headline-sm mb-1">No automations match your filters</h3>
+        <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or start a new automation.</p>
+        <button id="recipe-empty-clear" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Clear filters</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RUNS VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-runs" class="hidden-imp">
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-4 h-11 border-b border-surface-dim">
+        <div class="flex items-center gap-1">
+          <button class="h-full px-3 text-label-md tab-underline active" data-runstab="all">All runs</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-runstab="success">Success</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-runstab="failed">Failed</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-runstab="pending">Pending</button>
+        </div>
+        <span class="text-[11px] text-on-surface-variant">Immutable run log</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1100px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">Started</th>
+              <th class="px-3 py-2">Automation</th>
+              <th class="px-3 py-2">Subject</th>
+              <th class="px-3 py-2">Current step</th>
+              <th class="px-3 py-2">Steps</th>
+              <th class="px-3 py-2">Duration</th>
+              <th class="px-3 py-2">Result</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="runs-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Scrim -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">bolt</span>
+      <span id="peek-title" class="text-headline-sm truncate">Automation</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peek-open-full" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">open_in_full</span>Open editor</button>
+      <button id="peek-close" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peek-body" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Row menu popover -->
+<div class="popover hidden-imp" id="rowMenu" style="position:fixed;min-width:220px"></div>
+
+<!-- Automation editor (full-screen, canvas) -->
+<div id="editor" class="hidden-imp fixed inset-0 bg-white z-[90] flex flex-col">
+  <div class="h-14 bg-white border-b border-surface-dim flex items-center justify-between px-5 shrink-0">
+    <div class="flex items-center gap-3 min-w-0">
+      <button id="editorClose" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">arrow_back</span></button>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="editorTitle">Untitled automation</div>
+        <div class="text-[11px] text-on-surface-variant" id="editorSub">Draft · not yet active</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1 h-full">
+      <button class="editor-tab tab-underline active h-full px-3 text-body-md" data-etab="canvas">Canvas</button>
+      <button class="editor-tab tab-underline h-full px-3 text-body-md text-on-surface-variant" data-etab="settings">Settings</button>
+      <button class="editor-tab tab-underline h-full px-3 text-body-md text-on-surface-variant" data-etab="runs">Runs</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="editorTest" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">play_arrow</span>Test run
+      </button>
+      <div class="flex">
+        <button id="editorSave" class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">save</span>Save &amp; close
+        </button>
+        <button id="editorActivateArrow" class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] overflow-hidden">
+    <!-- LEFT: canvas tabs -->
+    <div class="overflow-y-auto canvas-bg">
+      <div id="etab-canvas" class="p-6">
+        <div class="max-w-2xl mx-auto">
+          <!-- Trigger slot -->
+          <div class="mb-1 flex items-center justify-between">
+            <div class="text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Trigger</div>
+            <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-pick-trigger>
+              <span class="material-symbols-outlined text-[14px]">swap_horiz</span>Change trigger
+            </button>
+          </div>
+          <div id="triggerNode" class="flow-node trigger mb-0">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-primary">bolt</span>
+              <div class="min-w-0 flex-1">
+                <div class="text-body-md font-semibold" id="triggerLabel">Order created</div>
+                <div class="text-[11px] text-on-surface-variant" id="triggerDesc">Fires when an order is created in any channel</div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container" id="triggerSourcePill">System</span>
+            </div>
+          </div>
+
+          <!-- Step chain (rendered) -->
+          <div id="stepChain"></div>
+
+          <div class="flow-connector">
+            <button class="flow-add" data-add-step>+ Add step</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="etab-settings" class="hidden-imp p-6">
+        <div class="max-w-2xl mx-auto space-y-3">
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-headline-sm mb-2">Automation details</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Name</label>
+                <input id="e-name" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="e.g. Abandoned cart recovery"/>
+              </div>
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Description</label>
+                <textarea id="e-desc" class="w-full min-h-[80px] p-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="What this automation does and why."></textarea>
+              </div>
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Environment</label>
+                <select id="e-env" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+                  <option value="live">Live</option>
+                  <option value="test">Test</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-headline-sm mb-2">Run rules</div>
+            <div class="space-y-2">
+              <label class="flex items-center justify-between py-1 text-body-sm"><span>Allow re-entry once completed</span><input type="checkbox" id="e-reentry" class="row-check"/></label>
+              <label class="flex items-center justify-between py-1 text-body-sm"><span>Stop after goal is met</span><input type="checkbox" id="e-stopgoal" class="row-check" checked/></label>
+              <label class="flex items-center justify-between py-1 text-body-sm"><span>Send test before activating</span><input type="checkbox" id="e-testbefore" class="row-check" checked/></label>
+              <label class="flex items-center justify-between py-1 text-body-sm"><span>Notify on failure</span><input type="checkbox" id="e-notify" class="row-check" checked/></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="etab-runs" class="hidden-imp p-6">
+        <div class="max-w-3xl mx-auto">
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-headline-sm mb-2">Recent runs</div>
+            <div id="editorRuns" class="text-body-sm text-on-surface-variant">No runs yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: inspector -->
+    <div class="border-l border-surface-dim bg-surface-container-low overflow-y-auto p-4">
+      <div class="text-label-sm uppercase tracking-wider text-on-surface-variant font-bold mb-2">Inspector</div>
+      <div id="inspector" class="text-body-sm text-on-surface-variant">Select a step to edit it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Trigger picker modal -->
+<div class="modal-scrim" id="triggerModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1">Choose a trigger</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Every automation starts from exactly one trigger.</p>
+    <div class="space-y-1 max-h-[320px] overflow-y-auto">
+      ${""}
+      <label class="trigger-row selected" data-trg="Order created"><input type="radio" name="trg" value="Order created" checked style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Order created</div><div class="text-[11px] text-on-surface-variant">Fires when an order is created in any channel</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Commerce</span></label>
+      <label class="trigger-row" data-trg="Customer created"><input type="radio" name="trg" value="Customer created" style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Customer created</div><div class="text-[11px] text-on-surface-variant">Fires when a new customer is created</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">CRM</span></label>
+      <label class="trigger-row" data-trg="Cart abandoned"><input type="radio" name="trg" value="Cart abandoned" style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Cart abandoned</div><div class="text-[11px] text-on-surface-variant">Fires 1h after a customer leaves checkout with items</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Commerce</span></label>
+      <label class="trigger-row" data-trg="Invoice paid"><input type="radio" name="trg" value="Invoice paid" style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Invoice paid</div><div class="text-[11px] text-on-surface-variant">Fires when an invoice is paid in Finance</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Finance</span></label>
+      <label class="trigger-row" data-trg="Schedule"><input type="radio" name="trg" value="Schedule" style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Schedule</div><div class="text-[11px] text-on-surface-variant">Fires on a recurring cadence</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Schedule</span></label>
+      <label class="trigger-row" data-trg="Form submitted"><input type="radio" name="trg" value="Form submitted" style="accent-color:#0a6400"/><div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">Form submitted</div><div class="text-[11px] text-on-surface-variant">Fires when a marketing form is submitted</div></div><span class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Marketing</span></label>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="triggerCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="triggerConfirm">Use this trigger</button>
+    </div>
+  </div>
+</div>
+
+<!-- Step picker modal -->
+<div class="modal-scrim" id="stepModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl p-5">
+    <h3 class="text-headline-sm mb-1">Add a step</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Pick a condition, action, or wait to add to the flow.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 max-h-[420px] overflow-y-auto">
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-outline mb-1">Conditions</div>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm" data-step="condition"><div class="font-semibold">Condition</div><div class="text-[11px] text-on-surface-variant">If order total &gt; $50</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="branch"><div class="font-semibold">Branch (yes/no)</div><div class="text-[11px] text-on-surface-variant">Split into two paths</div></button>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-outline mb-1">Actions</div>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm" data-step="email"><div class="font-semibold">Send email</div><div class="text-[11px] text-on-surface-variant">Newsletter or transactional</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="webhook"><div class="font-semibold">Send webhook</div><div class="text-[11px] text-on-surface-variant">POST to a URL</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="segment"><div class="font-semibold">Add to segment</div><div class="text-[11px] text-on-surface-variant">Customers segment</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="task"><div class="font-semibold">Create task</div><div class="text-[11px] text-on-surface-variant">Assign to a teammate</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="post"><div class="font-semibold">Publish social post</div><div class="text-[11px] text-on-surface-variant">Social publishing</div></button>
+      </div>
+      <div>
+        <div class="text-[10px] font-bold uppercase tracking-wider text-outline mb-1">Time</div>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm" data-step="wait"><div class="font-semibold">Wait / delay</div><div class="text-[11px] text-on-surface-variant">Wait N minutes / hours / days</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="until"><div class="font-semibold">Wait until time</div><div class="text-[11px] text-on-surface-variant">e.g. next Monday 9:00</div></button>
+        <button class="step-choice w-full text-left p-2.5 rounded-lg border border-surface-dim hover:border-primary text-body-sm mt-2" data-step="window"><div class="font-semibold">Send window</div><div class="text-[11px] text-on-surface-variant">Only between hours</div></button>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="stepCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Other create modal -->
+<div class="modal-scrim" id="otherCreateModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1" id="otherCreateTitle">Create</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="otherCreateSub">This opens the corresponding create surface.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="otherCreateCancel">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="otherCreateConfirm">Open create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE:"/api",
+  routes:{
+    overview:"/marketing/social", calendar:"/marketing/social/calendar", create:"/marketing/social/create",
+    queue:"/marketing/social/queue", library:"/marketing/social/library",
+    channels:"/marketing/social/channels", performance:"/marketing/social/performance",
+    oversight:"/marketing/social/oversight", promotions:"/marketing/promotions",
+    newsletter:"/marketing/newsletter", automation:"/automation"
+  },
+  endpoints:{
+    automations:"/automation/recipes",
+    recipe:id=>`/automation/recipes/${id}`,
+    pause:id=>`/automation/recipes/${id}/pause`,
+    resume:id=>`/automation/recipes/${id}/resume`,
+    test:id=>`/automation/recipes/${id}/test`,
+    runs:"/automation/runs"
+  }
+};
+const API = {
+  async request(path, options={}){
+    console.log("[API integration point]", options.method||"GET", APP_CONFIG.API_BASE+path, options.body||"");
+    return {ok:true, demo:true};
+  },
+  createRecipe:payload=>API.request(APP_CONFIG.endpoints.automations,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  saveRecipe:(id,payload)=>API.request(APP_CONFIG.endpoints.recipe(id),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  pauseRecipe:id=>API.request(APP_CONFIG.endpoints.pause(id),{method:"POST"}),
+  resumeRecipe:id=>API.request(APP_CONFIG.endpoints.resume(id),{method:"POST"}),
+  testRecipe:id=>API.request(APP_CONFIG.endpoints.test(id),{method:"POST"})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════════════════ */
+let recipes = [
+  { id:"a1", name:"Abandoned cart recovery", trigger:"Cart abandoned", triggerDesc:"Fires 1h after a customer leaves checkout with items",
+    steps:[
+      {kind:"wait", label:"Wait 1 hour"},
+      {kind:"email", label:"Send email · Cart reminder #1"},
+      {kind:"wait", label:"Wait 23 hours"},
+      {kind:"email", label:"Send email · Cart reminder #2"},
+      {kind:"condition", label:"If order not created"}
+    ],
+    runs7d:542, success:99.2, lastRun:"2026-11-02T09:14", status:"Active" },
+  { id:"a2", name:"Welcome series", trigger:"Customer created", triggerDesc:"Fires when a new customer is created",
+    steps:[
+      {kind:"email", label:"Send email · Welcome"},
+      {kind:"wait", label:"Wait 2 days"},
+      {kind:"email", label:"Send email · How to shop"},
+      {kind:"wait", label:"Wait 5 days"},
+      {kind:"email", label:"Send email · First offer"}
+    ],
+    runs7d:186, success:100, lastRun:"2026-11-02T10:02", status:"Active" },
+  { id:"a3", name:"Post-purchase review", trigger:"Order created", triggerDesc:"Fires when an order is created in any channel",
+    steps:[
+      {kind:"wait", label:"Wait 14 days"},
+      {kind:"email", label:"Send email · Review request"},
+      {kind:"condition", label:"If review not submitted"},
+      {kind:"wait", label:"Wait 7 days"},
+      {kind:"email", label:"Send email · Review reminder"}
+    ],
+    runs7d:312, success:98.1, lastRun:"2026-11-02T07:12", status:"Active" },
+  { id:"a4", name:"Invoice paid → thank you", trigger:"Invoice paid", triggerDesc:"Fires when an invoice is paid in Finance",
+    steps:[
+      {kind:"email", label:"Send email · Thank you"},
+      {kind:"segment", label:"Add to segment · Paid invoices"},
+      {kind:"webhook", label:"POST to Slack"}
+    ],
+    runs7d:88, success:100, lastRun:"2026-11-01T16:40", status:"Active" },
+  { id:"a5", name:"Win-back (paused)", trigger:"Schedule", triggerDesc:"Fires on a recurring cadence",
+    steps:[
+      {kind:"condition", label:"If no order in 60d"},
+      {kind:"email", label:"Send email · We miss you"},
+      {kind:"wait", label:"Wait 7 days"},
+      {kind:"email", label:"Send email · Final offer"}
+    ],
+    runs7d:0, success:0, lastRun:"2026-10-20T08:00", status:"Paused" },
+  { id:"a6", name:"New automation (draft)", trigger:"Order created", triggerDesc:"Fires when an order is created in any channel",
+    steps:[
+      {kind:"condition", label:"If order total > $50"}
+    ],
+    runs7d:0, success:0, lastRun:"—", status:"Draft" }
+];
+
+const RUNS = [
+  { started:"2026-11-02T09:14", recipe:"Abandoned cart recovery", subject:"Acme Corp", step:"Send email · Cart reminder #1", steps:"2 / 5", duration:"1.2s", result:"Success" },
+  { started:"2026-11-02T09:05", recipe:"Welcome series", subject:"Blue Ridge Co.", step:"Wait 2 days", steps:"2 / 5", duration:"—", result:"Pending" },
+  { started:"2026-11-02T08:42", recipe:"Post-purchase review", subject:"Northwind Labs", step:"Send email · Review request", steps:"2 / 5", duration:"0.9s", result:"Success" },
+  { started:"2026-11-02T07:12", recipe:"Invoice paid → thank you", subject:"INV-1054", step:"POST to Slack", steps:"3 / 3", duration:"0.6s", result:"Success" },
+  { started:"2026-11-02T06:58", recipe:"Abandoned cart recovery", subject:"Maple Supply", step:"Send email · Cart reminder #2", steps:"4 / 5", duration:"—", result:"Failed" },
+  { started:"2026-11-02T06:32", recipe:"Welcome series", subject:"Orion Apparel", step:"Send email · Welcome", steps:"1 / 5", duration:"1.1s", result:"Success" }
+];
+
+const statusPillMap = {
+  Active:"bg-secondary-container text-on-secondary-container",
+  Paused:"bg-qb-maroon/15 text-qb-maroon",
+  Draft:"bg-surface-container text-on-surface-variant"
+};
+const runResultPillMap = {
+  Success:"bg-secondary-container text-on-secondary-container",
+  Failed:"bg-error-container text-on-error-container",
+  Pending:"bg-tertiary/15 text-tertiary"
+};
+const TRIGGERS = [
+  { value:"Order created", source:"Commerce" },
+  { value:"Customer created", source:"CRM" },
+  { value:"Cart abandoned", source:"Commerce" },
+  { value:"Invoice paid", source:"Finance" },
+  { value:"Schedule", source:"Schedule" },
+  { value:"Form submitted", source:"Marketing" }
+];
+const STEP_KINDS = {
+  email:    { label:"Send email", cls:"action", icon:"mail" },
+  webhook:  { label:"Send webhook", cls:"action", icon:"webhook" },
+  segment:  { label:"Add to segment", cls:"action", icon:"groups" },
+  task:     { label:"Create task", cls:"action", icon:"task_alt" },
+  post:     { label:"Publish social post", cls:"action", icon:"share" },
+  condition:{ label:"Condition", cls:"condition", icon:"call_split" },
+  branch:   { label:"Branch", cls:"condition", icon:"alt_route" },
+  wait:     { label:"Wait", cls:"wait", icon:"schedule" },
+  until:    { label:"Wait until time", cls:"wait", icon:"event" },
+  window:   { label:"Send window", cls:"wait", icon:"hourglass_bottom" }
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════ */
+const filters = {
+  q:"",
+  triggers:new Set(TRIGGERS.map(t=>t.value)),
+  statuses:new Set(["Active","Paused","Draft"])
+};
+let runsFilter = "all";
+let peekId=null;
+let editing = null;
+let draftSteps = [];
+let draftTrigger = { value:"Order created", source:"Commerce" };
+let selectedStepIndex = null;
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function statusPill(s){return `<span class="px-2 py-0.5 rounded-full text-label-sm ${statusPillMap[s]||"bg-surface-container text-on-surface-variant"}">${s}</span>`}
+function runResultPill(s){return `<span class="px-2 py-0.5 rounded-full text-label-sm ${runResultPillMap[s]||"bg-surface-container text-on-surface-variant"}">${s}</span>`}
+function fmt(iso){
+  if (!iso || iso==="—") return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>toast("Navigate → "+b.dataset.nav)));
+document.querySelectorAll("[data-aview]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-aview]").forEach(x=>x.classList.toggle("active",x===b));
+  const v=b.dataset.aview;
+  document.getElementById("panel-recipes").classList.toggle("hidden-imp",v!=="recipes");
+  document.getElementById("panel-runs").classList.toggle("hidden-imp",v!=="runs");
+  if (v==="runs") renderRuns();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   RECIPES
+   ═══════════════════════════════════════════════════════════════════ */
+function filteredRecipes(){
+  return recipes.filter(r=>{
+    const q=filters.q.toLowerCase();
+    const qOK = !q || (r.name+" "+r.trigger+" "+r.steps.map(s=>s.label).join(" ")).toLowerCase().includes(q);
+    const tOK = filters.triggers.has(r.trigger);
+    const sOK = filters.statuses.has(r.status);
+    return qOK && tOK && sOK;
+  });
+}
+
+function renderRecipes(){
+  const rows = filteredRecipes();
+  const tbody = document.getElementById("recipe-tbody");
+  tbody.innerHTML = rows.map(r=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${r.id}">
+      <td class="px-3 py-2"><div class="font-medium">${esc(r.name)}</div><div class="text-[11px] text-on-surface-variant truncate max-w-[260px]">${esc(r.triggerDesc)}</div></td>
+      <td class="px-3 py-2"><span class="text-[11px] font-medium">${esc(r.trigger)}</span></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-1 flex-wrap max-w-[280px]">${r.steps.slice(0,3).map(s=>`<span class="px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-container text-on-surface-variant">${esc(s.label)}</span>`).join("")}${r.steps.length>3?`<span class="text-[10px] text-on-surface-variant">+${r.steps.length-3}</span>`:""}</div></td>
+      <td class="px-3 py-2 text-right tabular-nums">${r.runs7d.toLocaleString()}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${r.runs7d?r.success.toFixed(1)+"%":"—"}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(fmt(r.lastRun))}</td>
+      <td class="px-3 py-2">${statusPill(r.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-rowmenu="${r.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.getElementById("recipe-count").textContent = rows.length ? `1–${rows.length} of ${rows.length}` : "0 of 0";
+  document.getElementById("recipe-empty").classList.toggle("hidden-imp", rows.length>0);
+  tbody.closest("div.overflow-x-auto").classList.toggle("hidden-imp", rows.length===0);
+  document.getElementById("statActiveAuto").textContent = recipes.filter(r=>r.status==="Active").length;
+
+  tbody.querySelectorAll("[data-row]").forEach(tr=>{
+    tr.addEventListener("click",(e)=>{
+      if (e.target.closest("button") || e.target.closest("input")) return;
+      openPeek(tr.dataset.row);
+    });
+  });
+  tbody.querySelectorAll("[data-rowmenu]").forEach(btn=>btn.addEventListener("click",(e)=>{
+    e.stopPropagation(); openRowMenu(btn, btn.dataset.rowmenu);
+  }));
+
+  renderChips();
+}
+
+/* ─── Chips ─── */
+function renderChips(){
+  const chips=[];
+  if (filters.q) chips.push({k:"q", label:`Search: "${filters.q}"`});
+  if (filters.triggers.size !== TRIGGERS.length) chips.push({k:"triggers", label:`Trigger: ${[...filters.triggers].join(", ")||"none"}`});
+  if (filters.statuses.size !== 3) chips.push({k:"statuses", label:`Status: ${[...filters.statuses].join(", ")||"none"}`});
+  const wrap=document.getElementById("recipe-chips");
+  const host=document.getElementById("recipe-chip-container");
+  wrap.classList.toggle("hidden-imp", chips.length===0);
+  host.innerHTML = chips.map(c=>`
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-[11px] font-medium">
+      ${esc(c.label)}
+      <button class="w-4 h-4 rounded-full hover:bg-surface-container-high flex items-center justify-center" data-chip="${c.k}"><span class="material-symbols-outlined text-[12px]">close</span></button>
+    </span>
+  `).join("");
+  host.querySelectorAll("[data-chip]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.chip;
+    if (k==="q"){ filters.q=""; document.getElementById("recipe-search").value=""; }
+    if (k==="triggers"){ filters.triggers=new Set(TRIGGERS.map(t=>t.value)); syncTriggerPop(); }
+    if (k==="statuses"){ filters.statuses=new Set(["Active","Paused","Draft"]); syncStatusPop(); }
+    renderRecipes();
+  }));
+}
+
+/* ─── Filters ─── */
+function togglePopover(id, btn){
+  const p=document.getElementById(id);
+  ["pop-trigger","pop-status"].forEach(x=>{ if(x!==id) document.getElementById(x).classList.add("hidden-imp"); });
+  p.classList.toggle("hidden-imp");
+  if (!p.classList.contains("hidden-imp")){
+    setTimeout(()=>document.addEventListener("click",(e)=>{
+      if (!p.contains(e.target) && !btn.contains(e.target)) p.classList.add("hidden-imp");
+    },{once:true}),0);
+  }
+}
+document.getElementById("btn-trigger").addEventListener("click",e=>{e.stopPropagation();togglePopover("pop-trigger",e.currentTarget);});
+document.getElementById("btn-status").addEventListener("click",e=>{e.stopPropagation();togglePopover("pop-status",e.currentTarget);});
+function syncTriggerPop(){ document.querySelectorAll(".filter-trigger").forEach(cb=>cb.checked=filters.triggers.has(cb.value)); }
+function syncStatusPop(){ document.querySelectorAll(".filter-status").forEach(cb=>cb.checked=filters.statuses.has(cb.value)); }
+document.getElementById("trigger-apply").addEventListener("click",()=>{
+  filters.triggers=new Set([...document.querySelectorAll(".filter-trigger:checked")].map(cb=>cb.value));
+  document.getElementById("pop-trigger").classList.add("hidden-imp");
+  renderRecipes();
+});
+document.getElementById("trigger-clear").addEventListener("click",()=>{
+  filters.triggers=new Set(TRIGGERS.map(t=>t.value));
+  syncTriggerPop();
+  document.getElementById("pop-trigger").classList.add("hidden-imp");
+  renderRecipes();
+});
+document.getElementById("status-apply").addEventListener("click",()=>{
+  filters.statuses=new Set([...document.querySelectorAll(".filter-status:checked")].map(cb=>cb.value));
+  document.getElementById("pop-status").classList.add("hidden-imp");
+  renderRecipes();
+});
+document.getElementById("status-clear").addEventListener("click",()=>{
+  filters.statuses=new Set(["Active","Paused","Draft"]);
+  syncStatusPop();
+  document.getElementById("pop-status").classList.add("hidden-imp");
+  renderRecipes();
+});
+document.getElementById("recipe-search").addEventListener("input",e=>{ filters.q=e.target.value; renderRecipes(); });
+document.getElementById("recipe-clear-all").addEventListener("click",()=>{
+  filters.q=""; document.getElementById("recipe-search").value="";
+  filters.triggers=new Set(TRIGGERS.map(t=>t.value)); syncTriggerPop();
+  filters.statuses=new Set(["Active","Paused","Draft"]); syncStatusPop();
+  renderRecipes();
+});
+document.getElementById("recipe-empty-clear").addEventListener("click",()=>document.getElementById("recipe-clear-all").click());
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROW MENU
+   ═══════════════════════════════════════════════════════════════════ */
+function openRowMenu(btn, id){
+  const menu=document.getElementById("rowMenu");
+  const r=btn.getBoundingClientRect();
+  menu.style.top=(r.bottom+4)+"px";
+  menu.style.left=(r.right-220)+"px";
+  menu.innerHTML=`
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">${esc(id)}</div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="open"><span class="material-symbols-outlined text-[16px]">edit</span>Open editor</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="test"><span class="material-symbols-outlined text-[16px]">play_arrow</span>Test run</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="resume"><span class="material-symbols-outlined text-[16px]">play_circle</span>Resume</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm text-error hover:bg-error-container/40 flex items-center gap-2" data-rm="delete"><span class="material-symbols-outlined text-[16px]">delete</span>Delete</button>
+  `;
+  menu.classList.remove("hidden-imp");
+  menu.querySelectorAll(".rm").forEach(b=>b.addEventListener("click",()=>{
+    const act=b.dataset.rm; menu.classList.add("hidden-imp");
+    const r = recipes.find(x=>x.id===id); if (!r) return;
+    if (act==="open") openEditor(r);
+    else if (act==="test"){ API.testRecipe(id).then(()=>toast("Test run started for "+r.name)); }
+    else if (act==="pause"){ r.status="Paused"; API.pauseRecipe(id); renderRecipes(); toast("Paused"); }
+    else if (act==="resume"){ r.status="Active"; API.resumeRecipe(id); renderRecipes(); toast("Resumed"); }
+    else if (act==="duplicate"){
+      recipes.unshift({...r, id:"a"+Date.now(), name:r.name+" (copy)", status:"Draft", runs7d:0, success:0, lastRun:"—"});
+      renderRecipes(); toast("Duplicated");
+    }
+    else if (act==="delete"){
+      if (confirm("Delete this automation?")){ recipes=recipes.filter(x=>x.id!==id); renderRecipes(); toast("Deleted"); }
+    }
+  }));
+  setTimeout(()=>document.addEventListener("click",()=>menu.classList.add("hidden-imp"),{once:true}),0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PEEK
+   ═══════════════════════════════════════════════════════════════════ */
+function openPeek(id){
+  peekId=id;
+  const r=recipes.find(x=>x.id===id); if(!r)return;
+  document.getElementById("peek-title").textContent=r.name;
+  document.getElementById("peek-body").innerHTML=`
+    <div class="mb-3 flex items-center gap-2">${statusPill(r.status)}<span class="text-[11px] text-on-surface-variant">${esc(r.trigger)}</span></div>
+    <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Trigger</div>
+    <div class="text-body-sm mb-3">${esc(r.triggerDesc)}</div>
+    <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Flow</div>
+    <div class="space-y-1">
+      <div class="flex items-center gap-2 py-1 text-body-sm"><span class="run-step-pill">Trigger</span><span>${esc(r.trigger)}</span></div>
+      ${r.steps.map((s,i)=>`<div class="flex items-center gap-2 py-1 text-body-sm"><span class="run-step-pill ${s.kind==="condition"?"pending":s.kind==="wait"?"pending":"ok"}">${STEP_KINDS[s.kind]?.label||s.kind}</span><span>${esc(s.label)}</span></div>`).join("")}
+    </div>
+    <dl class="mt-4 pt-3 border-t border-surface-dim divide-y divide-surface-dim text-body-sm">
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Runs (7d)</dt><dd class="tabular-nums">${r.runs7d.toLocaleString()}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Success</dt><dd class="tabular-nums">${r.runs7d?r.success.toFixed(1)+"%":"—"}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Last run</dt><dd>${esc(fmt(r.lastRun))}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="open"><span class="material-symbols-outlined text-[16px]">edit</span>Open editor</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="test"><span class="material-symbols-outlined text-[16px]">play_arrow</span>Test run</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  document.querySelectorAll("#peek-body [data-peek]").forEach(b=>b.addEventListener("click",()=>{
+    const a=b.dataset.peek;
+    if (a==="open"){ const rr=r; closePeek(); openEditor(rr); }
+    else if (a==="test"){ API.testRecipe(r.id); toast("Test run started"); }
+    else if (a==="pause"){ r.status="Paused"; API.pauseRecipe(r.id); closePeek(); renderRecipes(); toast("Paused"); }
+    else if (a==="duplicate"){ recipes.unshift({...r,id:"a"+Date.now(),name:r.name+" (copy)",status:"Draft",runs7d:0,success:0,lastRun:"—"}); closePeek(); renderRecipes(); toast("Duplicated"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId=null;
+}
+document.getElementById("peek-close").addEventListener("click",closePeek);
+document.getElementById("scrim").addEventListener("click",()=>{ if(!document.getElementById("editor").classList.contains("hidden-imp")) return; closePeek(); });
+document.getElementById("peek-open-full").addEventListener("click",()=>{
+  if (!peekId) return;
+  const r=recipes.find(x=>x.id===peekId); closePeek(); if (r) openEditor(r);
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   RUNS VIEW
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-runstab]").forEach(b=>b.addEventListener("click",()=>{
+  runsFilter=b.dataset.runstab;
+  document.querySelectorAll("[data-runstab]").forEach(x=>{
+    const on=x===b;
+    x.classList.toggle("active",on);
+    x.classList.toggle("text-on-surface-variant",!on);
+  });
+  renderRuns();
+}));
+function renderRuns(){
+  const mapFilter = {success:"Success",failed:"Failed",pending:"Pending"};
+  const rows = RUNS.filter(r=>runsFilter==="all" || r.result===mapFilter[runsFilter]);
+  document.getElementById("runs-tbody").innerHTML = rows.map(r=>`
+    <tr class="hover:bg-surface-container-low">
+      <td class="px-3 py-2 tabular-nums">${esc(fmt(r.started))}</td>
+      <td class="px-3 py-2 font-medium">${esc(r.recipe)}</td>
+      <td class="px-3 py-2">${esc(r.subject)}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(r.step)}</td>
+      <td class="px-3 py-2 tabular-nums">${esc(r.steps)}</td>
+      <td class="px-3 py-2 tabular-nums">${esc(r.duration)}</td>
+      <td class="px-3 py-2">${runResultPill(r.result)}</td>
+      <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-run-open="${esc(r.recipe)}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">open_in_new</span></button></td>
+    </tr>
+  `).join("") || `<tr><td colspan="8"><div class="py-10 text-center text-body-sm text-on-surface-variant">No runs in this view.</div></td></tr>`;
+  document.querySelectorAll("[data-run-open]").forEach(b=>b.addEventListener("click",()=>{
+    const r = recipes.find(x=>x.name===b.dataset.runOpen);
+    if (r) openEditor(r);
+  }));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EDITOR (full-screen canvas)
+   ═══════════════════════════════════════════════════════════════════ */
+function openEditor(recipe){
+  editing = recipe || null;
+  draftSteps = recipe ? JSON.parse(JSON.stringify(recipe.steps)) : [];
+  draftTrigger = recipe ? { value:recipe.trigger, source: (TRIGGERS.find(t=>t.value===recipe.trigger)||{}).source||"Commerce" }
+                       : { value:"Order created", source:"Commerce" };
+  selectedStepIndex = null;
+
+  document.getElementById("editorTitle").textContent = recipe ? recipe.name : "Untitled automation";
+  document.getElementById("editorSub").textContent = recipe ? (recipe.status+" · "+recipe.trigger) : "Draft · not yet active";
+  document.getElementById("e-name").value = recipe ? recipe.name : "";
+  document.getElementById("e-desc").value = recipe ? "" : "";
+  document.getElementById("e-env").value = "live";
+  document.getElementById("e-reentry").checked = false;
+  document.getElementById("e-stopgoal").checked = true;
+  document.getElementById("e-testbefore").checked = true;
+  document.getElementById("e-notify").checked = true;
+
+  switchEditorTab("canvas");
+  renderCanvas();
+  renderEditorRuns();
+
+  document.getElementById("editor").classList.remove("hidden-imp");
+  document.body.style.overflow = "hidden";
+}
+
+function closeEditor(){
+  document.getElementById("editor").classList.add("hidden-imp");
+  document.body.style.overflow = "";
+  editing = null;
+}
+
+document.getElementById("editorClose").addEventListener("click",()=>{
+  const dirty = false; // any non-trivial state could flag this; keeping visible and simple
+  if (dirty && !confirm("Discard unsaved changes?")) return;
+  closeEditor();
+});
+
+function switchEditorTab(tab){
+  document.querySelectorAll(".editor-tab").forEach(b=>{
+    const on = b.dataset.etab===tab;
+    b.classList.toggle("active",on);
+    b.classList.toggle("text-on-surface-variant",!on);
+  });
+  ["canvas","settings","runs"].forEach(t=>{
+    document.getElementById("etab-"+t).classList.toggle("hidden-imp", t!==tab);
+  });
+}
+document.querySelectorAll(".editor-tab").forEach(b=>b.addEventListener("click",()=>switchEditorTab(b.dataset.etab)));
+
+function renderCanvas(){
+  // Trigger
+  document.getElementById("triggerLabel").textContent = draftTrigger.value;
+  document.getElementById("triggerDesc").textContent = (TRIGGERS.find(t=>t.value===draftTrigger.value)||{}).source==="Schedule" ? "Fires on a recurring cadence" : "Fires when " + draftTrigger.value.toLowerCase();
+  document.getElementById("triggerSourcePill").textContent = draftTrigger.source;
+
+  // Step chain
+  const chain = document.getElementById("stepChain");
+  chain.innerHTML = draftSteps.map((s,i)=>{
+    const meta = STEP_KINDS[s.kind]||{label:s.kind,cls:"action",icon:"bolt"};
+    const connector = `<div class="flow-connector"><button class="flow-add" data-insert-at="${i}">+</button></div>`;
+    return `
+      ${connector}
+      <div class="flow-node ${meta.cls}" data-step-node="${i}">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px] ${meta.cls==="action"?"text-qb-maroon":meta.cls==="condition"?"text-qb-blue":"text-[#98713e]"}">${meta.icon}</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-md font-semibold">${esc(s.label)}</div>
+            <div class="text-[11px] text-on-surface-variant">${meta.label}</div>
+          </div>
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-step-remove="${i}"><span class="material-symbols-outlined text-[14px] text-error">close</span></button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  chain.querySelectorAll("[data-step-node]").forEach(el=>el.addEventListener("click",(e)=>{
+    if (e.target.closest("button")) return;
+    const idx=parseInt(el.dataset.stepNode,10);
+    selectedStepIndex = idx;
+    renderInspector();
+  }));
+  chain.querySelectorAll("[data-step-remove]").forEach(el=>el.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    const idx=parseInt(el.dataset.stepRemove,10);
+    draftSteps.splice(idx,1); renderCanvas();
+  }));
+  chain.querySelectorAll("[data-insert-at]").forEach(el=>el.addEventListener("click",(e)=>{
+    e.stopPropagation();
+    openStepModal(parseInt(el.dataset.insertAt,10));
+  }));
+
+  renderInspector();
+}
+document.querySelector("[data-add-step]").addEventListener("click",()=>openStepModal(draftSteps.length));
+document.querySelector("[data-pick-trigger]").addEventListener("click",()=>openTriggerModal());
+
+/* Step picker */
+function openStepModal(insertAt){
+  window._insertStepAt = insertAt;
+  document.getElementById("stepModal").classList.add("open");
+}
+document.querySelectorAll(".step-choice").forEach(b=>b.addEventListener("click",()=>{
+  const kind = b.dataset.step;
+  const meta = STEP_KINDS[kind];
+  draftSteps.splice(window._insertStepAt ?? draftSteps.length, 0, { kind, label: meta.label });
+  document.getElementById("stepModal").classList.remove("open");
+  selectedStepIndex = (window._insertStepAt ?? draftSteps.length-1);
+  renderCanvas();
+}));
+document.getElementById("stepCancel").addEventListener("click",()=>document.getElementById("stepModal").classList.remove("open"));
+
+/* Trigger picker */
+function openTriggerModal(){
+  document.querySelectorAll(".trigger-row").forEach(r=>{
+    r.classList.toggle("selected", r.dataset.trg===draftTrigger.value);
+    const radio=r.querySelector("input[name='trg']");
+    if (radio) radio.checked = r.dataset.trg===draftTrigger.value;
+  });
+  document.getElementById("triggerModal").classList.add("open");
+}
+document.querySelectorAll(".trigger-row").forEach(r=>r.addEventListener("click",()=>{
+  document.querySelectorAll(".trigger-row").forEach(x=>x.classList.remove("selected"));
+  r.classList.add("selected");
+  r.querySelector("input[name='trg']").checked = true;
+}));
+document.getElementById("triggerCancel").addEventListener("click",()=>document.getElementById("triggerModal").classList.remove("open"));
+document.getElementById("triggerConfirm").addEventListener("click",()=>{
+  const picked = document.querySelector(".trigger-row.selected");
+  if (!picked) return;
+  const v = picked.dataset.trg;
+  const t = TRIGGERS.find(x=>x.value===v);
+  draftTrigger = { value:v, source: (t&&t.source)||"Commerce" };
+  document.getElementById("triggerModal").classList.remove("open");
+  renderCanvas();
+});
+
+/* Inspector */
+function renderInspector(){
+  const host = document.getElementById("inspector");
+  if (selectedStepIndex==null || !draftSteps[selectedStepIndex]){
+    host.innerHTML = `<div class="text-[11px] text-on-surface-variant">Select a step to edit it.</div>`;
+    return;
+  }
+  const s = draftSteps[selectedStepIndex];
+  const meta = STEP_KINDS[s.kind] || { label:s.kind };
+  host.innerHTML = `
+    <div class="text-body-md font-semibold mb-2">${esc(meta.label)}</div>
+    <div class="text-[11px] text-on-surface-variant mb-2">Step ${selectedStepIndex+1} of ${draftSteps.length}</div>
+    <div class="mb-2">
+      <label class="block text-label-sm text-on-surface-variant mb-1">Step label</label>
+      <input id="insp-label" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="${esc(s.label)}"/>
+    </div>
+    ${s.kind==="wait" ? `
+      <div class="mb-2 grid grid-cols-2 gap-2">
+        <div><label class="block text-label-sm text-on-surface-variant mb-1">Amount</label><input type="number" id="insp-wait-amt" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="1"/></div>
+        <div><label class="block text-label-sm text-on-surface-variant mb-1">Unit</label><select id="insp-wait-unit" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"><option>Minutes</option><option>Hours</option><option>Days</option></select></div>
+      </div>` : ""}
+    ${s.kind==="email" ? `
+      <div class="mb-2">
+        <label class="block text-label-sm text-on-surface-variant mb-1">Newsletter template</label>
+        <select id="insp-email" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"><option>Welcome</option><option>Cart reminder #1</option><option>Cart reminder #2</option><option>Review request</option><option>Thank you</option></select>
+      </div>` : ""}
+    ${s.kind==="condition" || s.kind==="branch" ? `
+      <div class="mb-2">
+        <label class="block text-label-sm text-on-surface-variant mb-1">Condition</label>
+        <input id="insp-cond" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="order total > $50"/>
+      </div>` : ""}
+    ${s.kind==="webhook" ? `
+      <div class="mb-2">
+        <label class="block text-label-sm text-on-surface-variant mb-1">Webhook URL</label>
+        <input id="insp-url" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="https://hooks.slack.com/..."/>
+      </div>` : ""}
+    <button id="insp-apply" class="mt-2 h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container">Apply</button>
+  `;
+  document.getElementById("insp-apply").addEventListener("click",()=>{
+    const label = document.getElementById("insp-label").value;
+    if (label) draftSteps[selectedStepIndex].label = label;
+    renderCanvas();
+    toast("Step updated");
+  });
+}
+
+/* Editor runs */
+function renderEditorRuns(){
+  const runs = RUNS.filter(r=>!editing || r.recipe===editing.name);
+  document.getElementById("editorRuns").innerHTML = runs.length ? runs.map(r=>`
+    <div class="run-row">
+      <span class="run-step-pill ${r.result==="Failed"?"failed":r.result==="Pending"?"pending":"ok"}">${esc(r.result)}</span>
+      <div class="min-w-0 flex-1">
+        <div class="text-body-sm font-medium truncate">${esc(r.step)}</div>
+        <div class="text-[11px] text-on-surface-variant">${esc(fmt(r.started))} · ${esc(r.subject)}</div>
+      </div>
+      <span class="text-[11px] text-on-surface-variant tabular-nums">${esc(r.duration)}</span>
+    </div>
+  `).join("") : `<div class="py-3 text-[11px] text-on-surface-variant">No runs yet.</div>`;
+}
+
+/* Editor actions */
+document.getElementById("editorSave").addEventListener("click",async ()=>{
+  const payload = {
+    name: document.getElementById("e-name").value || "Untitled automation",
+    description: document.getElementById("e-desc").value,
+    trigger: draftTrigger.value,
+    triggerDesc: `Fires on ${draftTrigger.value.toLowerCase()}`,
+    steps: draftSteps,
+    environment: document.getElementById("e-env").value,
+    rules: {
+      reentry: document.getElementById("e-reentry").checked,
+      stopgoal: document.getElementById("e-stopgoal").checked,
+      testbefore: document.getElementById("e-testbefore").checked,
+      notify: document.getElementById("e-notify").checked
+    }
+  };
+  if (editing){
+    await API.saveRecipe(editing.id, payload);
+    Object.assign(editing, payload, { triggerDesc: payload.triggerDesc });
+  } else {
+    const id="a"+Date.now();
+    recipes.unshift({...payload, id, runs7d:0, success:0, lastRun:"—", status:"Draft"});
+    editing = recipes[0];
+  }
+  renderRecipes();
+  toast("Automation saved");
+  closeEditor();
+});
+document.getElementById("editorActivateArrow").addEventListener("click",()=>{
+  const menu = document.createElement("div");
+  menu.className = "popover";
+  menu.style.position="fixed";
+  const r=document.getElementById("editorActivateArrow").getBoundingClientRect();
+  menu.style.top=(r.bottom+4)+"px"; menu.style.left=(r.right-260)+"px";
+  menu.innerHTML=`
+    <button class="em w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-em="activate"><span class="material-symbols-outlined text-[16px] text-primary">power</span>Save &amp; activate</button>
+    <button class="em w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-em="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Save &amp; pause</button>
+    <button class="em w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-em="draft"><span class="material-symbols-outlined text-[16px]">edit_note</span>Save as draft</button>
+  `;
+  document.body.appendChild(menu);
+  menu.querySelectorAll(".em").forEach(b=>b.addEventListener("click",async ()=>{
+    const a=b.dataset.em; menu.remove();
+    const payload = {
+      name: document.getElementById("e-name").value || "Untitled automation",
+      description: document.getElementById("e-desc").value,
+      trigger: draftTrigger.value,
+      triggerDesc: `Fires on ${draftTrigger.value.toLowerCase()}`,
+      steps: draftSteps,
+      environment: document.getElementById("e-env").value,
+      rules: {
+        reentry: document.getElementById("e-reentry").checked,
+        stopgoal: document.getElementById("e-stopgoal").checked,
+        testbefore: document.getElementById("e-testbefore").checked,
+        notify: document.getElementById("e-notify").checked
+      }
+    };
+    const newStatus = a==="activate"?"Active":a==="pause"?"Paused":"Draft";
+    if (editing){
+      await API.saveRecipe(editing.id, payload);
+      Object.assign(editing, payload, {status:newStatus});
+    } else {
+      recipes.unshift({...payload, id:"a"+Date.now(), runs7d:0, success:0, lastRun:"—", status:newStatus});
+      editing = recipes[0];
+    }
+    renderRecipes(); closeEditor(); toast("Saved · "+newStatus);
+  }));
+  setTimeout(()=>document.addEventListener("click",()=>menu.remove(),{once:true}),0);
+});
+document.getElementById("editorTest").addEventListener("click",async ()=>{
+  if (editing){
+    await API.testRecipe(editing.id);
+    toast("Test run started");
+  } else {
+    toast("Save the automation before testing");
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   NEW AUTOMATION + TEMPLATES
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelector("[data-new-automation]").addEventListener("click",()=>openEditor(null));
+document.querySelectorAll("[data-new-automation]").forEach(b=>b.addEventListener("click",()=>openEditor(null)));
+
+document.querySelectorAll("[data-template]").forEach(b=>b.addEventListener("click",()=>{
+  const t = b.dataset.template;
+  const map = {
+    welcome:   { name:"Welcome series", trigger:"Customer created", steps:[{kind:"email",label:"Send email · Welcome"},{kind:"wait",label:"Wait 2 days"},{kind:"email",label:"Send email · How to shop"}] },
+    abandoned: { name:"Abandoned cart", trigger:"Cart abandoned", steps:[{kind:"wait",label:"Wait 1 hour"},{kind:"email",label:"Send email · Cart reminder #1"},{kind:"condition",label:"If order not created"}] },
+    review:    { name:"Post-purchase review", trigger:"Order created", steps:[{kind:"wait",label:"Wait 14 days"},{kind:"email",label:"Send email · Review request"}] },
+    winback:   { name:"Win-back", trigger:"Schedule", steps:[{kind:"condition",label:"If no order in 60d"},{kind:"email",label:"Send email · We miss you"}] }
+  };
+  const tpl = map[t]; if (!tpl) return;
+  openEditor(null);
+  draftTrigger = { value:tpl.trigger, source: (TRIGGERS.find(x=>x.value===tpl.trigger)||{}).source||"Commerce" };
+  draftSteps = JSON.parse(JSON.stringify(tpl.steps));
+  document.getElementById("e-name").value = tpl.name;
+  document.getElementById("editorTitle").textContent = tpl.name;
+  document.getElementById("editorSub").textContent = "Draft · "+tpl.trigger;
+  renderCanvas();
+  toast("Template loaded: "+tpl.name);
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   OTHER / EXPORT / IMPORT
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-create]").forEach(b=>b.addEventListener("click",()=>{
+  const t=b.dataset.create;
+  document.getElementById("otherCreateTitle").textContent="Create "+t.toLowerCase();
+  document.getElementById("otherCreateSub").textContent="This opens the "+t+" create surface.";
+  document.getElementById("otherCreateConfirm").dataset.target=t;
+  document.getElementById("otherCreateModal").classList.add("open");
+}));
+document.getElementById("otherCreateCancel").addEventListener("click",()=>document.getElementById("otherCreateModal").classList.remove("open"));
+document.getElementById("otherCreateConfirm").addEventListener("click",()=>{
+  const t=document.getElementById("otherCreateConfirm").dataset.target;
+  toast("Opened "+t+" create surface");
+  document.getElementById("otherCreateModal").classList.remove("open");
+});
+document.querySelector("[data-open-create]").addEventListener("click",()=>toast("Open global create flyout"));
+document.querySelector("[data-export]").addEventListener("click",()=>toast("Exported "+filteredRecipes().length+" automations"));
+document.querySelector("[data-import]").addEventListener("click",()=>toast("Import automations — file picker"));
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════ */
+syncTriggerPop();
+syncStatusPop();
+renderRecipes();
+renderRuns();
+</script>
+</body>
+</html>

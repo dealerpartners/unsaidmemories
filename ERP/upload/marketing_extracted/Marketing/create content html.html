@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Create Content</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .drawer-narrow{width:520px;max-width:94vw}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .stepper{display:flex;align-items:center;gap:8px;margin:0 0 16px}
+  .step{display:flex;align-items:center;gap:7px;color:#8a938c;font-size:11px}
+  .step-num{width:23px;height:23px;border-radius:50%;border:1px solid #dad9dd;display:grid;place-items:center;font-size:10px;background:#fff}
+  .step.active{color:#0a6400;font-weight:600}
+  .step.active .step-num,.step.done .step-num{background:#0a6400;border-color:#0a6400;color:#fff}
+  .step-line{height:1px;background:#dad9dd;flex:1;max-width:50px}
+  .upload-zone{border:1.5px dashed #becab6;background:#f4f3f7;border-radius:11px;padding:22px;text-align:center;cursor:pointer;display:block}
+  .upload-zone:hover{border-color:#0a6400;background:#f4fbfa}
+  .upload-zone .material-symbols-outlined{font-size:27px;color:#0a6400}
+  .upload-zone strong{display:block;font-size:12px;margin:7px 0 3px}
+  .upload-zone small{color:#5a6355;font-size:10px}
+  .media-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .media-chip{font-size:10px;background:#eef5f4;color:#0a6400;border-radius:7px;padding:6px 8px;display:flex;gap:6px;align-items:center;border:1px solid #d9eae8}
+  .channel{border:1px solid #dad9dd;border-radius:10px;padding:11px;display:flex;gap:9px;align-items:center;cursor:pointer;background:#fff}
+  .channel:hover{border-color:#becab6;background:#f4fbfa}
+  .channel.selected{border-color:#0a6400;background:#f4fbfa}
+  .channel input{accent-color:#0a6400}
+  .channel-logo{width:30px;height:30px;border-radius:8px;background:#f2f4f5;display:grid;place-items:center;font-size:12px;font-weight:700;color:#53616a}
+  .channel-logo.ig{background:#f7edf4;color:#a45a87}
+  .channel-logo.fb{background:#edf3fc;color:#4b77b8}
+  .channel-logo.li{background:#edf4f8;color:#4a7b9b}
+  .channel-logo.tt{background:#eef1f2;color:#27353a}
+  .channel-logo.yt{background:#fbeeee;color:#c45c5b}
+  .channel-logo.pin{background:#f9eeee;color:#bd5558}
+  .channel strong{display:block;font-size:12px}
+  .channel small{font-size:10px;color:#5a6355}
+  .preview-shell{background:#f4f3f7;border-radius:12px;padding:15px}
+  .preview-card{background:#fff;border:1px solid #dad9dd;border-radius:12px;overflow:hidden;max-width:380px;margin:auto}
+  .preview-head{display:flex;align-items:center;gap:9px;padding:12px}
+  .preview-avatar{width:29px;height:29px;border-radius:50%;background:#e6efed;display:grid;place-items:center;color:#0a6400;font-weight:700;font-size:10px}
+  .preview-head strong{font-size:11px;display:block}
+  .preview-head small{font-size:10px;color:#5a6355}
+  .preview-media{height:200px;background:linear-gradient(135deg,#e9f1ef,#dce8e6);display:grid;place-items:center;color:#77918e}
+  .preview-media .material-symbols-outlined{font-size:42px}
+  .preview-caption{padding:12px;font-size:11px;line-height:1.55;min-height:65px;white-space:pre-wrap}
+  .preview-actions{border-top:1px solid #f0f2f3;padding:9px 12px;color:#8a959b;font-size:10px;display:flex;gap:17px}
+  .attach-badge{font-size:9px;padding:3px 7px;border-radius:20px;background:#eef5f4;color:#0a6400;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+  .attach-badge .material-symbols-outlined{font-size:12px}
+  .product-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:7px;background:#f4fbfa;border:1px solid #d9eae8;font-size:10px;color:#0a6400;font-weight:600}
+  .product-pill .material-symbols-outlined{font-size:13px}
+  .thumb-cell{width:36px;height:36px;border-radius:8px;background:#f2f4f5;display:grid;place-items:center;color:#5a6355}
+  .attach-card{border:1px solid #dad9dd;border-radius:10px;padding:12px;background:#f4f3f7}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline active" data-nav="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="performance">Performance</button>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span><span class="text-outline">/</span><span>Create</span>
+      </div>
+      <h1 class="text-headline-lg" id="composerTitle">Create content</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Build one post, tailor it to each channel, and choose when it goes live.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-save-draft>
+        <span class="material-symbols-outlined text-[16px]">save</span>Save draft
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main flex items-center gap-1" data-next-step>
+          Continue<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="continue-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── STEPPER ─── -->
+  <div class="stepper">
+    <div class="step active" id="stepMark1"><span class="step-num">1</span>Content</div>
+    <div class="step-line"></div>
+    <div class="step" id="stepMark2"><span class="step-num">2</span>Channels</div>
+    <div class="step-line"></div>
+    <div class="step" id="stepMark3"><span class="step-num">3</span>Schedule</div>
+    <div class="step-line"></div>
+    <div class="step" id="stepMark4"><span class="step-num">4</span>Review</div>
+  </div>
+
+  <!-- ─── COMPOSER ─── -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 items-start">
+
+    <!-- LEFT: active step -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+
+      <!-- Step 1: Content -->
+      <div id="composerStep1">
+        <h2 class="text-headline-sm mb-1">Build your post</h2>
+        <div class="text-[11px] text-on-surface-variant mb-4">Start with a message and add the media you want to share.</div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Internal post name</label>
+            <input id="postTitle" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="e.g. October product spotlight"/>
+          </div>
+
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Caption / post copy</label>
+            <textarea id="postCaption" class="w-full min-h-[120px] p-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary resize-y" placeholder="What would you like to share? Write your caption here..."></textarea>
+            <div class="flex items-center justify-between text-[10px] text-on-surface-variant mt-1">
+              <span><span id="charCount">0</span> characters · Platform limits may vary</span>
+              <span id="captionHint" class="hidden-imp text-error"></span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Media attachments</label>
+            <label class="upload-zone" for="mediaInput">
+              <span class="material-symbols-outlined">cloud_upload</span>
+              <strong>Drop files here or browse</strong>
+              <small>Images and video · Multiple files supported</small>
+            </label>
+            <input type="file" id="mediaInput" accept="image/*,video/*" multiple hidden/>
+            <div id="mediaList" class="media-list"></div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Destination link (optional)</label>
+              <input id="postLink" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="https://example.com"/>
+            </div>
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Hashtags</label>
+              <input id="postTags" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="#brand #updates"/>
+            </div>
+          </div>
+
+          <!-- Product-level attach -->
+          <div class="attach-card">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <strong class="text-[12px]">Attach to product / design</strong>
+                <div class="text-[11px] text-on-surface-variant">Pick a product or open Design Studio to create one.</div>
+              </div>
+              <span class="product-pill"><span class="material-symbols-outlined">extension</span>Product-level</span>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="product"><span class="material-symbols-outlined text-[14px]">checkroom</span>Product</button>
+              <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="collection"><span class="material-symbols-outlined text-[14px]">collections_bookmark</span>Collection</button>
+              <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="design"><span class="material-symbols-outlined text-[14px]">palette</span>Design Studio</button>
+            </div>
+            <div id="composerAttachResult" class="mt-2"></div>
+          </div>
+
+          <!-- Advanced: links to other creation doors -->
+          <div class="pt-3 border-t border-surface-dim">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+              <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-create-other="Newsletter"><span class="material-symbols-outlined text-[14px]">mail</span>Newsletter</button>
+              <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-create-other="Campaign"><span class="material-symbols-rounded text-[14px]">campaign</span>Campaign</button>
+              <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-create-other="Discount code"><span class="material-symbols-outlined text-[14px]">sell</span>Discount code</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Channels -->
+      <div id="composerStep2" class="hidden-imp">
+        <h2 class="text-headline-sm mb-1">Choose your channels</h2>
+        <div class="text-[11px] text-on-surface-variant mb-4">Select the connected accounts where this post should publish.</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="composerChannels"></div>
+        <div class="mt-3 p-3 bg-surface-container-low rounded-lg text-[10px] text-on-surface-variant">
+          <span class="material-symbols-outlined text-[14px] align-middle text-primary">info</span>
+          Each selected channel becomes its own publish job. You can tailor the content for each provider before publishing.
+        </div>
+        <div id="channelCustomization" class="mt-4"></div>
+      </div>
+
+      <!-- Step 3: Schedule -->
+      <div id="composerStep3" class="hidden-imp">
+        <h2 class="text-headline-sm mb-1">Choose when to publish</h2>
+        <div class="text-[11px] text-on-surface-variant mb-4">Publish now or set a date and time for each selected channel.</div>
+
+        <div class="mb-3">
+          <label class="block text-label-sm text-on-surface-variant mb-1">Publishing method</label>
+          <div class="view-toggle">
+            <button class="active" data-mode="schedule">Schedule</button>
+            <button data-mode="now">Publish now</button>
+          </div>
+        </div>
+
+        <div id="scheduleFields" class="grid grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Date</label>
+            <input type="date" id="scheduleDate" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+          </div>
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Time</label>
+            <input type="time" id="scheduleTime" value="10:00" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="block text-label-sm text-on-surface-variant mb-1">Time zone</label>
+          <select id="timezone" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+            <option value="America/Chicago">Central Time (US &amp; Canada)</option>
+            <option value="America/New_York">Eastern Time</option>
+            <option value="America/Denver">Mountain Time</option>
+            <option value="America/Los_Angeles">Pacific Time</option>
+            <option value="UTC">UTC</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Approval workflow</label>
+          <select id="approval" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+            <option value="none">No approval required</option>
+            <option value="approval">Submit for approval before publishing</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 4: Review -->
+      <div id="composerStep4" class="hidden-imp">
+        <h2 class="text-headline-sm mb-1">Review and confirm</h2>
+        <div class="text-[11px] text-on-surface-variant mb-4">Check your content, destinations, and publishing details.</div>
+        <div id="reviewSummary" class="bg-surface-container-low border border-surface-dim rounded-lg p-4 text-body-sm leading-relaxed"></div>
+        <div class="mt-3 p-3 border border-outline-variant bg-surface-container-low rounded text-[10px] text-on-surface-variant">
+          This prototype prepares the publishing request. Actual delivery requires connected provider credentials and your backend publishing workers.
+        </div>
+      </div>
+
+      <!-- Universal footer -->
+      <div class="flex items-center justify-between border-t border-surface-dim pt-4 mt-4">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="backBtn">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>Back
+        </button>
+        <span class="text-[11px] text-on-surface-variant" id="stepCounter">Step 1 of 4</span>
+        <div class="flex items-center gap-2">
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="cancelComposer">Cancel</button>
+          <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" id="bottomNextBtn" data-next-step>
+            Continue<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: live preview + attach + save grammar -->
+    <div class="flex flex-col gap-3">
+
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Live preview</h2>
+            <div class="text-[11px] text-on-surface-variant">A preview of your post content</div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-label-sm bg-surface-container text-on-surface-variant">Preview</span>
+        </div>
+        <div class="p-4">
+          <div class="preview-shell">
+            <div class="preview-card">
+              <div class="preview-head">
+                <div class="preview-avatar">U</div>
+                <div><strong id="previewAccount">Your brand</strong><small id="previewPlatform">Social channel preview</small></div>
+              </div>
+              <div class="preview-media" id="previewMedia"><span class="material-symbols-outlined">image</span></div>
+              <div class="preview-caption" id="previewCaption">Your post caption will appear here as you write.</div>
+              <div class="preview-actions"><span>♡ Like</span><span>◯ Comment</span><span>↗ Share</span></div>
+            </div>
+          </div>
+          <div class="text-[11px] text-on-surface-variant mt-3 text-center">Provider previews may vary from the final published post.</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Attached products / designs</h2>
+          <div class="text-[11px] text-on-surface-variant">Content is created against these commerce objects.</div>
+        </div>
+        <div class="p-4">
+          <div id="attachedList" class="text-body-sm text-on-surface-variant">No products or designs attached yet.</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Save grammar</h2>
+          <div class="text-[11px] text-on-surface-variant">Primary save menu options.</div>
+        </div>
+        <div class="p-4 flex flex-col gap-2">
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-between" data-save="Save and close"><span>Save and close</span><span class="text-[11px] text-on-surface-variant">⌘↵</span></button>
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-between" data-save="Save and new"><span>Save and new</span><span class="text-[11px] text-on-surface-variant">⇧↵</span></button>
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-between" data-save="Schedule and close"><span>Schedule and close</span><span class="text-[11px] text-on-surface-variant">S</span></button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<!-- Continue split menu -->
+<div id="continueMenu" class="popover hidden-imp" style="position:fixed;min-width:260px">
+  <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Continue to</div>
+  <button class="cont-menu w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-cont="channels"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">hub</span>Channels</button>
+  <button class="cont-menu w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-cont="schedule"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>Schedule</button>
+  <button class="cont-menu w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-cont="review"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">fact_check</span>Review</button>
+</div>
+
+<!-- Attach modal -->
+<div class="modal-scrim" id="attachModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1" id="attachTitle">Attach to a product</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="attachSub">Choose what this content should be attached to.</p>
+    <div id="attachBody"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="attachCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="attachConfirmBtn" disabled>Attach</button>
+    </div>
+  </div>
+</div>
+
+<!-- Other create modal -->
+<div class="modal-scrim" id="otherCreateModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1" id="otherCreateTitle">Create</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="otherCreateSub">This opens the corresponding create surface. It's here so nobody assumes what happens when you press a create action.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="otherCreateCancel">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="otherCreateConfirm">Open create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leave guard modal -->
+<div class="modal-scrim" id="leaveModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Leave without saving?</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">You have unsaved changes. Leaving will discard this draft.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="leaveStay">Keep editing</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md text-error hover:bg-error-container/40" id="leaveDiscard">Discard</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="leaveSave">Save draft</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scrim for drawer -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Design Studio drawer (opens from attach or from composer) -->
+<div class="drawer drawer-narrow" id="designDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary">palette</span>
+      <div>
+        <div class="text-headline-sm" id="designDrawerTitle">Design Studio</div>
+        <div class="text-[11px] text-on-surface-variant" id="designDrawerSub">Design from product</div>
+      </div>
+    </div>
+    <button id="designDrawerClose" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div class="flex items-center justify-between p-3 rounded-lg border border-outline-variant bg-surface-container-low">
+      <div>
+        <strong class="text-[12px]">Attached design</strong>
+        <div class="text-[11px] text-on-surface-variant" id="designDrawerTarget">None yet</div>
+      </div>
+      <span class="product-pill"><span class="material-symbols-outlined">palette</span>Design</span>
+    </div>
+    <div class="grid grid-cols-3 gap-2">
+      <button class="h-20 border border-surface-dim rounded-lg flex flex-col items-center justify-center text-[11px] hover:bg-surface-container-low"><span class="material-symbols-outlined text-[20px] text-primary">add_photo_alternate</span>Upload</button>
+      <button class="h-20 border border-surface-dim rounded-lg flex flex-col items-center justify-center text-[11px] hover:bg-surface-container-low"><span class="material-symbols-outlined text-[20px] text-primary">text_fields</span>Text</button>
+      <button class="h-20 border border-surface-dim rounded-lg flex flex-col items-center justify-center text-[11px] hover:bg-surface-container-low"><span class="material-symbols-outlined text-[20px] text-primary">category</span>Shapes</button>
+    </div>
+    <div class="border border-surface-dim rounded-lg p-4 text-center text-[11px] text-on-surface-variant">
+      Canvas preview area — drawing surface, print guides, and DPI checks live here.
+    </div>
+    <div class="flex items-center justify-between border-t border-surface-dim pt-3">
+      <div class="text-[11px] text-on-surface-variant">Preflight: <strong class="text-primary">OK</strong></div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="designSave">Save design to product</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG + API stubs
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE:"/api",
+  routes:{
+    overview:"/marketing/social", calendar:"/marketing/social/calendar", create:"/marketing/social/create",
+    queue:"/marketing/social/queue", library:"/marketing/social/library",
+    channels:"/marketing/social/channels", performance:"/marketing/social/performance"
+  },
+  endpoints:{
+    posts:"/publishing/posts", media:"/publishing/media", publish:"/publishing/publish",
+    attachProduct:id=>`/catalog/products/${id}/attach`,
+    attachCollection:id=>`/catalog/collections/${id}/attach`,
+    designStudio:id=>`/catalog/studio/${id}`,
+    newsletter:"/marketing/newsletter/create",
+    campaign:"/marketing/campaigns/create",
+    discount:"/marketing/discounts/create"
+  }
+};
+const API = {
+  async request(path, options={}){
+    const url=APP_CONFIG.API_BASE+path;
+    console.info("[API integration point]", options.method||"GET", url, options.body||"");
+    return {ok:true,demo:true,url};
+  },
+  createPost:p=>API.request(APP_CONFIG.endpoints.posts,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),
+  uploadMedia:f=>{console.info("[MEDIA UPLOAD integration point]",f);return API.request(APP_CONFIG.endpoints.media,{method:"POST"});},
+  publish:p=>API.request(APP_CONFIG.endpoints.publish,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),
+  attachProduct:id=>API.request(APP_CONFIG.endpoints.attachProduct(id),{method:"POST"}),
+  attachCollection:id=>API.request(APP_CONFIG.endpoints.attachCollection(id),{method:"POST"}),
+  openStudio:id=>API.request(APP_CONFIG.endpoints.designStudio(id),{method:"POST"})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE — composer is stateful, so navigation guards work
+   ═══════════════════════════════════════════════════════════════════ */
+let step=1, publishMode="schedule";
+let selectedChannels=["Instagram"];
+let mediaFiles=[], libraryFiles=[];
+let attachTarget={type:null,id:null,label:null};
+let composerAttach=null;             // single primary attachment (product/collection/design)
+let extraAttachments=[];             // optional list if user attaches multiple
+let dirty=false;
+let pendingNav=null;
+
+const channels=[
+  {name:"Instagram",handle:"@unsaidcompany",connected:true,kind:"ig",letter:"◎"},
+  {name:"Facebook",handle:"Unsaid Company",connected:true,kind:"fb",letter:"f"},
+  {name:"LinkedIn",handle:"Unsaid Company",connected:true,kind:"li",letter:"in"},
+  {name:"TikTok",handle:"@unsaidcompany",connected:true,kind:"tt",letter:"♪"},
+  {name:"YouTube",handle:"Unsaid Company",connected:false,kind:"yt",letter:"▶"},
+  {name:"Pinterest",handle:"Unsaid Company",connected:false,kind:"pin",letter:"p"}
+];
+
+const ATTACH_DATA = {
+  product:[
+    {id:"TEE-001",label:"Classic Tee",meta:"TEE-001 · $24.00 · Printful"},
+    {id:"TOTE-014",label:"Canvas Tote",meta:"TOTE-014 · $18.00 · Gelato"},
+    {id:"MUG-003",label:"Mug 11oz",meta:"MUG-003 · $14.00 · Printify"}
+  ],
+  collection:[
+    {id:"COL-FALL",label:"Fall 2026 Drop",meta:"12 products · Instagram + TikTok"},
+    {id:"COL-HOLIDAY",label:"Holiday Capsule",meta:"8 products · multi-channel"},
+    {id:"COL-CORE",label:"Core Essentials",meta:"22 products · evergreen"}
+  ],
+  design:[
+    {id:"DSG-001",label:"Sunburst Tee design",meta:"2 variants · 1 product"},
+    {id:"DSG-002",label:"Minimal Tote art",meta:"1 variant · 1 product"}
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function markDirty(){dirty=true;}
+function clearDirty(){dirty=false;}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV (top tabstrip) — guarded when composer has unsaved changes
+   ═══════════════════════════════════════════════════════════════════ */
+function navigate(page){
+  if(page!=="create" && dirty){
+    pendingNav=page;
+    document.getElementById("leaveModal").classList.add("open");
+    return;
+  }
+  if(page==="create"){ resetComposer(); }
+  history.replaceState(null,"",APP_CONFIG.routes[page]||"#"+page);
+  toast("Navigate → "+page);
+}
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.nav)));
+
+document.getElementById("leaveStay").addEventListener("click",()=>{
+  document.getElementById("leaveModal").classList.remove("open"); pendingNav=null;
+});
+document.getElementById("leaveDiscard").addEventListener("click",()=>{
+  document.getElementById("leaveModal").classList.remove("open");
+  clearDirty(); resetComposer();
+  if(pendingNav){ navigate(pendingNav); pendingNav=null; }
+});
+document.getElementById("leaveSave").addEventListener("click",()=>{
+  document.getElementById("leaveModal").classList.remove("open");
+  doSaveDraft();
+  if(pendingNav){ navigate(pendingNav); pendingNav=null; }
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPOSER
+   ═══════════════════════════════════════════════════════════════════ */
+function resetComposer(){
+  step=1; mediaFiles=[]; selectedChannels=["Instagram"]; composerAttach=null; extraAttachments=[];
+  document.getElementById("postTitle").value="";
+  document.getElementById("postCaption").value="";
+  document.getElementById("postLink").value="";
+  document.getElementById("postTags").value="";
+  document.getElementById("mediaList").innerHTML="";
+  document.getElementById("mediaInput").value="";
+  document.getElementById("scheduleDate").value=new Date().toISOString().slice(0,10);
+  document.getElementById("scheduleTime").value="10:00";
+  document.getElementById("approval").value="none";
+  document.getElementById("composerAttachResult").innerHTML="";
+  document.getElementById("attachedList").textContent="No products or designs attached yet.";
+  publishMode="schedule";
+  clearDirty();
+  renderComposerStep(); updatePreview(); updateAttached();
+}
+function renderComposerStep(){
+  for(let i=1;i<=4;i++){
+    document.getElementById("composerStep"+i).classList.toggle("hidden-imp",i!==step);
+    const m=document.getElementById("stepMark"+i);
+    m.classList.toggle("active",i===step);
+    m.classList.toggle("done",i<step);
+  }
+  document.getElementById("stepCounter").textContent=`Step ${step} of 4`;
+  document.getElementById("backBtn").disabled=step===1;
+  const label=step===4?(publishMode==="now"?"Publish now":"Schedule post"):"Continue";
+  const icon=step===4?"send":"arrow_forward";
+  document.getElementById("bottomNextBtn").innerHTML=label+`<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+  const topBtn=document.querySelector("[data-next-step]");
+  if(topBtn) topBtn.innerHTML=label+`<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+  if(step===2) renderComposerChannels();
+  if(step===4) renderReview();
+}
+function validateStep(){
+  if(step===1 && !document.getElementById("postCaption").value.trim()){toast("Add a caption before continuing");return false;}
+  if(step===2 && !selectedChannels.length){toast("Select at least one connected channel");return false;}
+  if(step===3 && publishMode==="schedule" && !document.getElementById("scheduleDate").value){toast("Choose a publishing date");return false;}
+  return true;
+}
+function nextStep(){
+  if(!validateStep())return;
+  if(step<4){step++;markDirty();renderComposerStep();}
+  else submitPost();
+}
+function prevStep(){ if(step>1){step--;renderComposerStep();} }
+
+document.querySelectorAll("[data-next-step]").forEach(b=>b.addEventListener("click",nextStep));
+document.getElementById("backBtn").addEventListener("click",prevStep);
+
+document.getElementById("continue-arrow").addEventListener("click",e=>{
+  e.stopPropagation();
+  const m=document.getElementById("continueMenu");
+  const r=e.currentTarget.getBoundingClientRect();
+  m.style.top=(r.bottom+4)+"px";
+  m.style.left=(r.right-260)+"px";
+  m.classList.toggle("hidden-imp");
+  setTimeout(()=>document.addEventListener("click",()=>m.classList.add("hidden-imp"),{once:true}),0);
+});
+document.querySelectorAll(".cont-menu").forEach(b=>b.addEventListener("click",()=>{
+  document.getElementById("continueMenu").classList.add("hidden-imp");
+  const v=b.dataset.cont;
+  if(v==="channels") step=2;
+  if(v==="schedule") step=3;
+  if(v==="review") step=4;
+  renderComposerStep();
+}));
+
+/* mode toggle */
+document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{
+  publishMode=b.dataset.mode;
+  document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===b));
+  document.getElementById("scheduleFields").classList.toggle("hidden-imp",publishMode==="now");
+  markDirty();
+  renderComposerStep();
+}));
+
+/* live changes */
+document.getElementById("postCaption").addEventListener("input",()=>{markDirty();updatePreview();});
+document.getElementById("postTitle").addEventListener("input",markDirty);
+document.getElementById("postLink").addEventListener("input",markDirty);
+document.getElementById("postTags").addEventListener("input",markDirty);
+document.getElementById("scheduleDate").addEventListener("change",markDirty);
+document.getElementById("scheduleTime").addEventListener("change",markDirty);
+document.getElementById("approval").addEventListener("change",markDirty);
+
+function updatePreview(){
+  const cap=(document.getElementById("postCaption")?.value||"").trim();
+  document.getElementById("previewCaption").textContent=cap||"Your post caption will appear here as you write.";
+  document.getElementById("charCount").textContent=(document.getElementById("postCaption")?.value||"").length;
+  document.getElementById("previewPlatform").textContent=selectedChannels[0]||"Social channel preview";
+  document.getElementById("previewAccount").textContent=channels.find(c=>c.name===selectedChannels[0])?.handle||"Your brand";
+}
+
+/* media */
+document.getElementById("mediaInput").addEventListener("change",e=>{
+  mediaFiles=[...mediaFiles,...e.target.files];
+  renderMediaChips(); updateMediaPreview(); API.uploadMedia(mediaFiles); markDirty();
+});
+function renderMediaChips(){
+  document.getElementById("mediaList").innerHTML=mediaFiles.map((f,i)=>`
+    <span class="media-chip">
+      <span class="material-symbols-outlined" style="font-size:14px">${f.type.startsWith("video")?"movie":"image"}</span>
+      ${escapeHtml(f.name)}
+      <button data-remove-media="${i}" style="border:0;background:none;color:inherit;padding:0">×</button>
+    </span>
+  `).join("");
+  document.querySelectorAll("[data-remove-media]").forEach(b=>b.addEventListener("click",()=>{
+    mediaFiles.splice(parseInt(b.dataset.removeMedia,10),1);
+    renderMediaChips(); updateMediaPreview(); markDirty();
+  }));
+}
+function updateMediaPreview(){
+  const el=document.getElementById("previewMedia");
+  if(mediaFiles[0] && mediaFiles[0].type.startsWith("image")){
+    const url=URL.createObjectURL(mediaFiles[0]);
+    el.innerHTML=`<img src="${url}" style="width:100%;height:200px;object-fit:cover"/>`;
+  } else if(mediaFiles[0]) el.innerHTML='<span class="material-symbols-outlined">movie</span>';
+  else el.innerHTML='<span class="material-symbols-outlined">image</span>';
+}
+
+/* channels */
+function renderComposerChannels(){
+  document.getElementById("composerChannels").innerHTML=channels.map(c=>`
+    <label class="channel ${selectedChannels.includes(c.name)?"selected":""}" style="${!c.connected?"opacity:.5":""}">
+      <input type="checkbox" ${selectedChannels.includes(c.name)?"checked":""} ${!c.connected?"disabled":""} data-channel="${c.name}"/>
+      <span class="channel-logo ${c.kind}">${c.letter}</span>
+      <span><strong>${c.name}</strong><small>${c.connected?c.handle:"Not connected"}</small></span>
+    </label>
+  `).join("");
+  document.querySelectorAll("[data-channel]").forEach(cb=>cb.addEventListener("change",()=>{
+    const n=cb.dataset.channel;
+    selectedChannels=cb.checked?[...selectedChannels,n]:selectedChannels.filter(x=>x!==n);
+    markDirty(); renderComposerChannels(); updatePreview();
+  }));
+  const custom=document.getElementById("channelCustomization");
+  custom.innerHTML=selectedChannels.length?`
+    <div class="text-[12px] font-semibold mb-2">Channel-specific caption overrides</div>
+    ${selectedChannels.map(n=>`
+      <div class="mb-3">
+        <label class="block text-label-sm text-on-surface-variant mb-1">${n} caption (optional override)</label>
+        <textarea rows="2" class="w-full min-h-[65px] p-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Leave blank to use the main caption" id="override-${n.replace(/\W/g,'')}"></textarea>
+      </div>
+    `).join("")}
+  `:"";
+}
+
+/* review + payload */
+function renderReview(){
+  const title=document.getElementById("postTitle").value||"Untitled post";
+  const date=publishMode==="now"?"Immediately":`${document.getElementById("scheduleDate").value} at ${document.getElementById("scheduleTime").value} (${document.getElementById("timezone").value})`;
+  const attachLine=composerAttach?`<br><span class="text-on-surface-variant">Attached to:</span> ${escapeHtml(composerAttach.label)} <span class="text-on-surface-variant">(${composerAttach.type} · ${composerAttach.id})</span>`:"";
+  document.getElementById("reviewSummary").innerHTML=`
+    <strong>${escapeHtml(title)}</strong>
+    <br><span class="text-on-surface-variant">Destinations:</span> ${selectedChannels.join(", ")}
+    <br><span class="text-on-surface-variant">Publishing:</span> ${date}
+    <br><span class="text-on-surface-variant">Media:</span> ${mediaFiles.length} attachment(s)${attachLine}
+    <br><span class="text-on-surface-variant">Approval:</span> ${document.getElementById("approval").value==="approval"?"Required":"Not required"}
+    <hr class="my-2 border-surface-dim"/>
+    <div style="white-space:pre-wrap">${escapeHtml(document.getElementById("postCaption").value)}</div>
+  `;
+}
+function collectPayload(){
+  const overrides={};
+  selectedChannels.forEach(n=>{
+    const el=document.getElementById("override-"+n.replace(/\W/g,''));
+    if(el && el.value.trim()) overrides[n]=el.value.trim();
+  });
+  return {
+    title:document.getElementById("postTitle").value||"Untitled post",
+    caption:document.getElementById("postCaption").value,
+    link:document.getElementById("postLink").value,
+    hashtags:document.getElementById("postTags").value,
+    channels:selectedChannels,
+    channelOverrides:overrides,
+    media:mediaFiles.map(f=>({name:f.name,type:f.type,size:f.size})),
+    attach:composerAttach,
+    extraAttachments,
+    publishMode,
+    date:publishMode==="schedule"?document.getElementById("scheduleDate").value:null,
+    time:publishMode==="schedule"?document.getElementById("scheduleTime").value:null,
+    timezone:document.getElementById("timezone").value,
+    approval:document.getElementById("approval").value
+  };
+}
+async function submitPost(){
+  const payload=collectPayload();
+  await API.createPost(payload);
+  await API.publish(payload);
+  toast(payload.publishMode==="now"?"Publish request prepared":"Schedule request prepared");
+  clearDirty();
+  // reset and show the review is now "complete" state
+  document.getElementById("reviewSummary").innerHTML=`
+    <strong class="text-secondary">Request prepared</strong>
+    <div class="text-[11px] text-on-surface-variant mt-1">
+      This prototype prepared a ${payload.publishMode==="now"?"publish":"schedule"} request for
+      ${payload.channels.length} channel(s). Connect your backend publishing workers to deliver it.
+    </div>`;
+}
+function doSaveDraft(){
+  const p=collectPayload();
+  API.createPost({...p,status:"draft"});
+  toast("Draft saved");
+  clearDirty();
+}
+
+document.querySelector("[data-save-draft]").addEventListener("click",doSaveDraft);
+document.querySelectorAll("[data-save]").forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.save;
+  if(v==="Save and close"){doSaveDraft();toast("Saved and closed");}
+  else if(v==="Save and new"){doSaveDraft();resetComposer();toast("Saved. New composer ready.");}
+  else if(v==="Schedule and close"){ if(step<3){step=3;renderComposerStep();toast("Jumped to schedule step");} else submitPost(); }
+}));
+document.getElementById("cancelComposer").addEventListener("click",()=>{
+  if(dirty){document.getElementById("leaveModal").classList.add("open");pendingNav="overview";}
+  else navigate("overview");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   ATTACH — integrated product-level
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-attach]").forEach(b=>b.addEventListener("click",()=>openAttach(b.dataset.attach)));
+
+function openAttach(type){
+  attachTarget={type,id:null,label:null};
+  const titles={product:"Attach to a product",collection:"Attach to a collection",design:"Open Design Studio"};
+  const subs={
+    product:"Choose the product this content should reference. The post becomes product-level.",
+    collection:"Choose the collection this content should feature.",
+    design:"Pick an existing design to open in Design Studio, or create a new one."
+  };
+  document.getElementById("attachTitle").textContent=titles[type];
+  document.getElementById("attachSub").textContent=subs[type];
+  const data=ATTACH_DATA[type]||[];
+  document.getElementById("attachBody").innerHTML=`
+    <div class="mb-2">
+      <label class="block text-label-sm text-on-surface-variant mb-1">Search ${type}s</label>
+      <input id="attachSearch" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="Search…"/>
+    </div>
+    <div id="attachList" class="max-h-[240px] overflow-y-auto border border-surface-dim rounded">
+      ${data.map(it=>`
+        <label class="flex items-center gap-3 px-3 py-2 border-b border-surface-dim last:border-b-0 cursor-pointer hover:bg-surface-container-low attach-item" data-label="${escapeHtml(it.label)}" data-id="${it.id}">
+          <input type="radio" name="attachpick" value="${it.id}" style="accent-color:#0a6400"/>
+          <div class="min-w-0 flex-1"><div class="text-body-sm font-medium">${escapeHtml(it.label)}</div><div class="text-[11px] text-on-surface-variant">${escapeHtml(it.meta)}</div></div>
+          <span class="product-pill"><span class="material-symbols-outlined">${type==="product"?"checkroom":type==="collection"?"collections_bookmark":"palette"}</span>${type}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+  document.getElementById("attachSearch").addEventListener("input",e=>{
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll(".attach-item").forEach(it=>{
+      it.style.display=it.textContent.toLowerCase().includes(q)?"":"none";
+    });
+  });
+  document.querySelectorAll("#attachList input[name='attachpick']").forEach(r=>r.addEventListener("change",()=>{
+    attachTarget.id=r.value;
+    attachTarget.label=r.closest(".attach-item").dataset.label;
+    document.getElementById("attachConfirmBtn").disabled=false;
+  }));
+  document.getElementById("attachConfirmBtn").disabled=true;
+  document.getElementById("attachModal").classList.add("open");
+}
+document.getElementById("attachCancel").addEventListener("click",()=>document.getElementById("attachModal").classList.remove("open"));
+document.getElementById("attachConfirmBtn").addEventListener("click",()=>{
+  if(!attachTarget.id)return;
+  const target={type:attachTarget.type,id:attachTarget.id,label:attachTarget.label};
+
+  if(target.type==="design"){
+    // For designs: open the Design Studio drawer and record the design
+    composerAttach=target;
+    document.getElementById("designDrawerTitle").textContent="Design Studio";
+    document.getElementById("designDrawerSub").textContent="Design from product";
+    document.getElementById("designDrawerTarget").textContent=target.label+" · "+target.id;
+    document.getElementById("designDrawer").classList.add("open");
+    document.getElementById("scrim").classList.add("open");
+    API.openStudio(target.id);
+    markDirty();
+    updateAttached();
+    document.getElementById("attachModal").classList.remove("open");
+    return;
+  }
+
+  if(target.type==="product") API.attachProduct(target.id);
+  else API.attachCollection(target.id);
+
+  composerAttach=target;
+  document.getElementById("composerAttachResult").innerHTML=`
+    <div class="flex items-center gap-2 px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-[11px]">
+      <span class="material-symbols-outlined text-[16px] text-primary">${target.type==="product"?"checkroom":"collections_bookmark"}</span>
+      <div><strong>Attached:</strong> ${escapeHtml(target.label)} <span class="text-on-surface-variant">(${target.type} · ${target.id})</span></div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low ml-auto" data-remove-attach>Remove</button>
+    </div>`;
+  document.querySelector("[data-remove-attach]").addEventListener("click",()=>{
+    composerAttach=null;
+    document.getElementById("composerAttachResult").innerHTML="";
+    updateAttached(); markDirty();
+  });
+  document.getElementById("attachModal").classList.remove("open");
+  markDirty(); updateAttached();
+  toast(target.type==="product"?"Product attached":"Collection attached");
+});
+
+function updateAttached(){
+  const el=document.getElementById("attachedList");
+  if(!composerAttach){
+    el.textContent="No products or designs attached yet.";
+    return;
+  }
+  el.innerHTML=`
+    <div class="flex items-center gap-2 px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-[11px]">
+      <span class="material-symbols-outlined text-[16px] text-primary">${composerAttach.type==="product"?"checkroom":composerAttach.type==="collection"?"collections_bookmark":"palette"}</span>
+      <div><strong>${escapeHtml(composerAttach.label)}</strong><div class="text-on-surface-variant">${composerAttach.type} · ${composerAttach.id}</div></div>
+      <span class="product-pill ml-auto"><span class="material-symbols-outlined">extension</span>Product-level</span>
+    </div>
+  `;
+}
+
+/* design drawer */
+document.getElementById("designDrawerClose").addEventListener("click",()=>{
+  document.getElementById("designDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+});
+document.getElementById("scrim").addEventListener("click",()=>{
+  document.getElementById("designDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+});
+document.getElementById("designSave").addEventListener("click",()=>{
+  toast("Design saved to product — publish request will include design metadata");
+  document.getElementById("designDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   OTHER CREATE (newsletter / campaign / discount) — visible
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-create-other]").forEach(b=>b.addEventListener("click",()=>{
+  const label=b.dataset.createOther;
+  document.getElementById("otherCreateTitle").textContent="Create "+label.toLowerCase();
+  document.getElementById("otherCreateSub").textContent="This opens the "+label+" create surface. It's here so nobody assumes what happens when you press a create action.";
+  document.getElementById("otherCreateModal").classList.add("open");
+  document.getElementById("otherCreateConfirm").dataset.target=label;
+}));
+document.getElementById("otherCreateCancel").addEventListener("click",()=>document.getElementById("otherCreateModal").classList.remove("open"));
+document.getElementById("otherCreateConfirm").addEventListener("click",()=>{
+  const label=document.getElementById("otherCreateConfirm").dataset.target;
+  const url = label==="Newsletter"?APP_CONFIG.endpoints.newsletter
+            : label==="Campaign"?APP_CONFIG.endpoints.campaign
+            : APP_CONFIG.endpoints.discount;
+  API.request(url,{method:"POST"});
+  toast("Opened "+label+" create surface");
+  document.getElementById("otherCreateModal").classList.remove("open");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════ */
+resetComposer();
+</script>
+</body>
+</html>

@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Social Publishing</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .bulk-bar{background:#1f2937;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:94vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .stepper{display:flex;align-items:center;gap:8px;margin:0 0 17px}
+  .step{display:flex;align-items:center;gap:7px;color:#8a938c;font-size:11px}
+  .step-num{width:23px;height:23px;border-radius:50%;border:1px solid #dad9dd;display:grid;place-items:center;font-size:10px;background:#fff}
+  .step.active{color:#0a6400;font-weight:600}
+  .step.active .step-num,.step.done .step-num{background:#0a6400;border-color:#0a6400;color:#fff}
+  .step-line{height:1px;background:#dad9dd;flex:1;max-width:50px}
+  .upload-zone{border:1.5px dashed #becab6;background:#f4f3f7;border-radius:11px;padding:22px;text-align:center;cursor:pointer}
+  .upload-zone:hover{border-color:#0a6400}
+  .upload-zone .material-symbols-outlined{font-size:27px;color:#0a6400}
+  .upload-zone strong{display:block;font-size:12px;margin:7px 0 3px}
+  .upload-zone small{color:#5a6355;font-size:10px}
+  .media-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .media-chip{font-size:10px;background:#eef5f4;color:#0a6400;border-radius:7px;padding:6px 8px;display:flex;gap:6px;align-items:center}
+  .channel{border:1px solid #dad9dd;border-radius:10px;padding:11px;display:flex;gap:9px;align-items:center;cursor:pointer;background:#fff}
+  .channel:hover{border-color:#becab6}
+  .channel.selected{border-color:#0a6400;background:#f4fbfa}
+  .channel input{accent-color:#0a6400}
+  .channel-logo{width:30px;height:30px;border-radius:8px;background:#f2f4f5;display:grid;place-items:center;font-size:12px;font-weight:700;color:#53616a}
+  .channel strong{display:block;font-size:12px}
+  .channel small{font-size:10px;color:#5a6355}
+  .preview-shell{background:#f4f3f7;border-radius:12px;padding:15px}
+  .preview-card{background:#fff;border:1px solid #dad9dd;border-radius:12px;overflow:hidden;max-width:370px;margin:auto}
+  .preview-head{display:flex;align-items:center;gap:9px;padding:12px}
+  .preview-avatar{width:29px;height:29px;border-radius:50%;background:#e6efed;display:grid;place-items:center;color:#0a6400;font-weight:700;font-size:10px}
+  .preview-head strong{font-size:11px;display:block}
+  .preview-head small{font-size:10px;color:#5a6355}
+  .preview-media{height:180px;background:linear-gradient(135deg,#e9f1ef,#dce8e6);display:grid;place-items:center;color:#77918e}
+  .preview-media .material-symbols-outlined{font-size:42px}
+  .preview-caption{padding:12px;font-size:11px;line-height:1.55;min-height:65px;white-space:pre-wrap}
+  .preview-actions{border-top:1px solid #f0f2f3;padding:9px 12px;color:#8a959b;font-size:10px;display:flex;gap:17px}
+  .calendar{min-width:680px;display:grid;grid-template-columns:repeat(7,1fr);border-left:1px solid #dad9dd;border-top:1px solid #dad9dd}
+  .day{min-height:126px;border-right:1px solid #dad9dd;border-bottom:1px solid #dad9dd;padding:9px}
+  .day-head{font-size:10px;color:#5a6355;display:flex;justify-content:space-between}
+  .day-num{font-weight:600;color:#1a1c1e}
+  .event{margin-top:8px;border-left:3px solid #0a6400;background:#edf7f6;border-radius:5px;padding:6px;font-size:9px;color:#0a6400;cursor:pointer}
+  .event.purple{border-color:#6b1e28;background:#f7edee;color:#6b1e28}
+  .event.orange{border-color:#bd8734;background:#fbf5ec;color:#98713e}
+  .attach-badge{font-size:9px;padding:3px 7px;border-radius:20px;background:#eef5f4;color:#0a6400;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+  .attach-badge .material-symbols-outlined{font-size:12px}
+  .product-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:7px;background:#f4fbfa;border:1px solid #d9eae8;font-size:10px;color:#0a6400;font-weight:600}
+  .product-pill .material-symbols-outlined{font-size:13px}
+  .provider-logo{width:36px;height:36px;border-radius:10px;background:#f2f4f5;display:grid;place-items:center;font-size:13px;font-weight:700}
+  .provider-logo.ig{background:#f7edf4;color:#a45a87}
+  .provider-logo.fb{background:#edf3fc;color:#4b77b8}
+  .provider-logo.li{background:#edf4f8;color:#4a7b9b}
+  .provider-logo.tt{background:#eef1f2;color:#27353a}
+  .provider-logo.yt{background:#fbeeee;color:#c45c5b}
+  .provider-logo.pin{background:#f9eeee;color:#bd5558}
+  .bar{height:7px;border-radius:10px;background:#edf0f1;overflow:hidden}
+  .bar span{display:block;height:100%;background:#0a6400;border-radius:10px}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP (Marketing group) ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline active" data-marktab="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-marktab="performance">Performance</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       OVERVIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-overview">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Publishing Overview</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Plan, publish, and manage your brand's social content from one place.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-nav="calendar">
+          <span class="material-symbols-outlined text-[16px]">calendar_month</span>View calendar
+        </button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-start-composer>
+          <span class="material-symbols-outlined text-[16px]">add</span>Create post
+        </button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Scheduled posts</span>
+        <div class="text-headline-lg mt-1" id="statScheduled">12</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">Across all connected channels</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Published this month</span>
+        <div class="text-headline-lg mt-1">48</div>
+        <div class="text-[11px] text-secondary mt-1">+12% from last month</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Drafts</span>
+        <div class="text-headline-lg mt-1" id="statDrafts">6</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">Ready for review or editing</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Connected channels</span>
+        <div class="text-headline-lg mt-1" id="statChannels">4</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">Across 4 social platforms</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-3">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Quick actions</h2>
+            <div class="text-[11px] text-on-surface-variant">Pick up where you left off</div>
+          </div>
+        </div>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-start-composer>
+            <span class="material-symbols-outlined text-[20px] text-primary">edit_square</span>
+            <div class="text-body-sm font-semibold mt-2">Create a post</div>
+            <div class="text-[11px] text-on-surface-variant">Start with text and media</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-nav="calendar">
+            <span class="material-symbols-outlined text-[20px] text-primary">calendar_month</span>
+            <div class="text-body-sm font-semibold mt-2">Schedule content</div>
+            <div class="text-[11px] text-on-surface-variant">Plan your publishing calendar</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-nav="library">
+            <span class="material-symbols-outlined text-[20px] text-primary">perm_media</span>
+            <div class="text-body-sm font-semibold mt-2">Upload media</div>
+            <div class="text-[11px] text-on-surface-variant">Organize images and video</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-nav="channels">
+            <span class="material-symbols-outlined text-[20px] text-primary">add_link</span>
+            <div class="text-body-sm font-semibold mt-2">Connect a channel</div>
+            <div class="text-[11px] text-on-surface-variant">Manage provider accounts</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-nav="queue">
+            <span class="material-symbols-outlined text-[20px] text-primary">outbox</span>
+            <div class="text-body-sm font-semibold mt-2">Review queue</div>
+            <div class="text-[11px] text-on-surface-variant">Check upcoming posts</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-nav="performance">
+            <span class="material-symbols-outlined text-[20px] text-primary">insights</span>
+            <div class="text-body-sm font-semibold mt-2">View performance</div>
+            <div class="text-[11px] text-on-surface-variant">See content results</div>
+          </button>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Next to publish</h2>
+            <div class="text-[11px] text-on-surface-variant">Your upcoming content</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-nav="queue">View queue</button>
+        </div>
+        <div class="p-5" id="upcomingList"></div>
+      </div>
+    </div>
+
+    <!-- Integrated product-level attach -->
+    <div class="bg-white rounded-xl border border-surface-dim mt-3">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">Attach to commerce &amp; design</h2>
+          <div class="text-[11px] text-on-surface-variant">This social post can be created from or attached to a product, collection, or design.</div>
+        </div>
+        <span class="attach-badge"><span class="material-symbols-outlined">extension</span>Integrated product</span>
+      </div>
+      <div class="p-5">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-attach="product">
+            <span class="material-symbols-outlined text-[20px] text-primary">checkroom</span>
+            <div class="text-body-sm font-semibold mt-2">Attach a product</div>
+            <div class="text-[11px] text-on-surface-variant">Link a SKU to this content</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-attach="collection">
+            <span class="material-symbols-outlined text-[20px] text-primary">collections_bookmark</span>
+            <div class="text-body-sm font-semibold mt-2">Attach a collection</div>
+            <div class="text-[11px] text-on-surface-variant">Feature a collection</div>
+          </button>
+          <button class="quick border border-surface-dim rounded-xl p-4 text-left hover:bg-surface-container-low" data-attach="design">
+            <span class="material-symbols-outlined text-[20px] text-primary">palette</span>
+            <div class="text-body-sm font-semibold mt-2">Open Design Studio</div>
+            <div class="text-[11px] text-on-surface-variant">Create a design from a product</div>
+          </button>
+        </div>
+        <div id="attachResult" class="mt-3"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CREATE CONTENT (composer, 4 steps)
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-create" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span><span class="text-outline">/</span><span>Create</span>
+        </div>
+        <h1 class="text-headline-lg">Create content</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Build one post, tailor it to each channel, and choose when it goes live.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-save-draft>Save draft</button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" id="nextBtn" data-next-step>
+          Continue<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <div class="step active" id="stepMark1"><span class="step-num">1</span> Content</div>
+      <div class="step-line"></div>
+      <div class="step" id="stepMark2"><span class="step-num">2</span> Channels</div>
+      <div class="step-line"></div>
+      <div class="step" id="stepMark3"><span class="step-num">3</span> Schedule</div>
+      <div class="step-line"></div>
+      <div class="step" id="stepMark4"><span class="step-num">4</span> Review</div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 items-start">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+        <div id="composerStep1">
+          <h2 class="text-headline-sm mb-1">Build your post</h2>
+          <div class="text-[11px] text-on-surface-variant mb-4">Start with a message and add the media you want to share.</div>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Internal post name</label>
+              <input id="postTitle" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="e.g. October product spotlight"/>
+            </div>
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Caption / post copy</label>
+              <textarea id="postCaption" class="w-full min-h-[120px] p-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary resize-y" placeholder="What would you like to share? Write your caption here..."></textarea>
+              <div class="text-[10px] text-on-surface-variant mt-1"><span id="charCount">0</span> characters · Platform limits may vary</div>
+            </div>
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Media attachments</label>
+              <label class="upload-zone block" for="mediaInput">
+                <span class="material-symbols-outlined">cloud_upload</span>
+                <strong>Drop files here or browse</strong>
+                <small>Images and video · Multiple files supported</small>
+              </label>
+              <input type="file" id="mediaInput" accept="image/*,video/*" multiple hidden/>
+              <div id="mediaList" class="media-list"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Destination link (optional)</label>
+                <input id="postLink" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="https://example.com"/>
+              </div>
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Hashtags</label>
+                <input id="postTags" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="#brand #updates"/>
+              </div>
+            </div>
+            <div class="border border-surface-dim rounded-lg p-3 bg-surface-container-low">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <strong class="text-[12px]">Attach to product / design</strong>
+                  <div class="text-[11px] text-on-surface-variant">Pick a product or open Design Studio to create one.</div>
+                </div>
+                <span class="product-pill"><span class="material-symbols-outlined">extension</span>Product-level</span>
+              </div>
+              <div class="flex items-center gap-2 mt-2">
+                <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="product"><span class="material-symbols-outlined text-[14px]">checkroom</span>Product</button>
+                <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="collection"><span class="material-symbols-outlined text-[14px]">collections_bookmark</span>Collection</button>
+                <button type="button" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-attach="design"><span class="material-symbols-outlined text-[14px]">palette</span>Design Studio</button>
+              </div>
+              <div id="composerAttachResult" class="mt-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="composerStep2" class="hidden-imp">
+          <h2 class="text-headline-sm mb-1">Choose your channels</h2>
+          <div class="text-[11px] text-on-surface-variant mb-4">Select the connected accounts where this post should publish.</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2" id="composerChannels"></div>
+          <div class="mt-3 p-3 bg-surface-container-low rounded-lg text-[10px] text-on-surface-variant">
+            <span class="material-symbols-outlined text-[14px] align-middle text-primary">info</span>
+            Each selected channel becomes its own publish job. You can tailor the content for each provider before publishing.
+          </div>
+          <div id="channelCustomization" class="mt-4"></div>
+        </div>
+
+        <div id="composerStep3" class="hidden-imp">
+          <h2 class="text-headline-sm mb-1">Choose when to publish</h2>
+          <div class="text-[11px] text-on-surface-variant mb-4">Publish now or set a date and time for each selected channel.</div>
+          <div class="mb-3">
+            <label class="block text-label-sm text-on-surface-variant mb-1">Publishing method</label>
+            <div class="view-toggle">
+              <button class="active" data-mode="schedule">Schedule</button>
+              <button data-mode="now">Publish now</button>
+            </div>
+          </div>
+          <div id="scheduleFields" class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Date</label>
+              <input type="date" id="scheduleDate" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+            </div>
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Time</label>
+              <input type="time" id="scheduleTime" value="10:00" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="block text-label-sm text-on-surface-variant mb-1">Time zone</label>
+            <select id="timezone" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+              <option value="America/Chicago">Central Time (US &amp; Canada)</option>
+              <option value="America/New_York">Eastern Time</option>
+              <option value="America/Denver">Mountain Time</option>
+              <option value="America/Los_Angeles">Pacific Time</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Approval workflow</label>
+            <select id="approval" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+              <option value="none">No approval required</option>
+              <option value="approval">Submit for approval before publishing</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="composerStep4" class="hidden-imp">
+          <h2 class="text-headline-sm mb-1">Review and confirm</h2>
+          <div class="text-[11px] text-on-surface-variant mb-4">Check your content, destinations, and publishing details.</div>
+          <div id="reviewSummary" class="bg-surface-container-low border border-surface-dim rounded-lg p-4 text-body-sm leading-relaxed"></div>
+          <div class="mt-3 p-3 border border-outline-variant bg-surface-container-low rounded text-[10px] text-on-surface-variant">
+            This prototype prepares the publishing request. Actual delivery requires connected provider credentials and your backend publishing workers.
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-surface-dim pt-4 mt-4">
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="backBtn" data-prev-step disabled>
+            <span class="material-symbols-outlined text-[16px]">arrow_back</span>Back
+          </button>
+          <span class="text-[11px] text-on-surface-variant" id="stepCounter">Step 1 of 4</span>
+          <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" id="bottomNextBtn" data-next-step>
+            Continue<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Live preview</h2>
+            <div class="text-[11px] text-on-surface-variant">A preview of your post content</div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-label-sm bg-surface-container text-on-surface-variant">Preview</span>
+        </div>
+        <div class="p-4">
+          <div class="preview-shell">
+            <div class="preview-card">
+              <div class="preview-head">
+                <div class="preview-avatar">U</div>
+                <div><strong id="previewAccount">Your brand</strong><small id="previewPlatform">Social channel preview</small></div>
+              </div>
+              <div class="preview-media" id="previewMedia"><span class="material-symbols-outlined">image</span></div>
+              <div class="preview-caption" id="previewCaption">Your post caption will appear here as you write.</div>
+              <div class="preview-actions"><span>♡ Like</span><span>◯ Comment</span><span>↗ Share</span></div>
+            </div>
+          </div>
+          <div class="text-[11px] text-on-surface-variant mt-3 text-center">Provider previews may vary from the final published post.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CALENDAR
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-calendar" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Calendar</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">See what's planned across all your connected channels.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-month="-1"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <strong id="calendarMonth" class="text-body-md min-w-[110px] text-center">October 2026</strong>
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-month="1"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-start-composer>
+          <span class="material-symbols-outlined text-[16px]">add</span>Create post
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-4 h-11 border-b border-surface-dim">
+        <div class="flex items-center gap-1">
+          <button class="h-full px-3 text-label-md tab-underline active" data-calview="month">Month</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-calview="week">Week</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-calview="list">List</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-on-surface-variant">Channel</span>
+          <select id="calChannelFilter" class="h-7 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            <option value="All">All channels</option>
+            <option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>TikTok</option>
+          </select>
+        </div>
+      </div>
+      <div class="overflow-x-auto p-4"><div class="calendar" id="calendarGrid"></div></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       QUEUE
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-queue" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Publishing queue</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Track scheduled posts, drafts, and publishing outcomes.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-start-composer>
+        <span class="material-symbols-outlined text-[16px]">add</span>Create post
+      </button>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-4 h-11 border-b border-surface-dim">
+        <div class="flex items-center gap-1" id="queueTabs">
+          <button class="h-full px-3 text-label-md tab-underline active" data-queue="all">All</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-queue="scheduled">Scheduled</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-queue="published">Published</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-queue="draft">Drafts</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-queue="failed">Failed</button>
+        </div>
+        <span class="text-[11px] text-on-surface-variant" id="queueCount">3 items</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">Content</th>
+              <th class="px-3 py-2">Channel</th>
+              <th class="px-3 py-2">Publish date</th>
+              <th class="px-3 py-2">Status</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="queueTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LIBRARY
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-library" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Content library</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Keep your approved images, videos, and reusable content organized.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-library-upload>
+          <span class="material-symbols-outlined text-[16px]">upload</span>Upload media
+        </button>
+        <input type="file" id="libraryInput" accept="image/*,video/*" multiple hidden/>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-4 h-11 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">All assets</h2>
+          <div class="text-[11px] text-on-surface-variant">Files uploaded in this browser prototype</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="librarySearch" class="h-7 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Search assets..."/>
+          <select id="libraryType" class="h-7 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            <option>All types</option><option>Images</option><option>Videos</option>
+          </select>
+        </div>
+      </div>
+      <div class="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3" id="libraryGrid">
+        <div class="col-span-full py-10 text-center text-body-sm text-on-surface-variant">No uploaded assets yet. Add images or videos to start your library.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CHANNELS
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-channels" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Connected channels</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Connect and manage the social accounts used by your publishing workspace.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" id="btn-connect-channel">
+        <span class="material-symbols-outlined text-[16px]">add_link</span>Connect channel
+      </button>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">Your social accounts</h2>
+          <div class="text-[11px] text-on-surface-variant">Connection state shown here is local demo data until OAuth is wired up.</div>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container" id="connectedCount">4 connected</span>
+      </div>
+      <div id="providerList"></div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim mt-3 p-5">
+      <h2 class="text-headline-sm">Provider integration requirements</h2>
+      <div class="text-[11px] text-on-surface-variant mt-1 mb-3">Each provider adapter must handle its own scopes, media rules, publishing endpoint, and token lifecycle.</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><strong class="text-[12px]">OAuth &amp; permissions</strong><p class="text-[11px] text-on-surface-variant">Account authorization, scopes, refresh tokens, expiration, and revocation.</p></div>
+        <div><strong class="text-[12px]">Publishing capabilities</strong><p class="text-[11px] text-on-surface-variant">Supported post types, media constraints, scheduled publishing, and API limits.</p></div>
+        <div><strong class="text-[12px]">Delivery status</strong><p class="text-[11px] text-on-surface-variant">Provider post IDs, status polling/webhooks, errors, and retries.</p></div>
+        <div><strong class="text-[12px]">Account mapping</strong><p class="text-[11px] text-on-surface-variant">Workspace, organization, social profile, and provider identity relationships.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       PERFORMANCE
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="page-performance" class="hidden-imp">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span>
+        </div>
+        <h1 class="text-headline-lg">Performance</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Understand how your published content is performing across channels.</p>
+      </div>
+      <select id="perfRange" class="h-8 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+        <option>Last 30 days</option><option>Last 7 days</option><option>This quarter</option>
+      </select>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Total reach</span>
+        <div class="text-headline-lg mt-1">128.4K</div>
+        <div class="text-[11px] text-secondary mt-1">+8.4% vs previous period</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Engagement</span>
+        <div class="text-headline-lg mt-1">6.8%</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">Across connected channels</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Link clicks</span>
+        <div class="text-headline-lg mt-1">2,416</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">Tracked post link clicks</div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Published posts</span>
+        <div class="text-headline-lg mt-1">48</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">In selected period</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Channel performance</h2>
+          <div class="text-[11px] text-on-surface-variant">Illustrative metrics — replace with provider analytics</div>
+        </div>
+        <div class="p-5" id="performanceBars"></div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Top content</h2>
+          <div class="text-[11px] text-on-surface-variant">Highest engagement this month</div>
+        </div>
+        <div class="p-5 divide-y divide-surface-dim">
+          <div class="flex items-center gap-3 py-2">
+            <div class="w-10 h-10 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center text-label-sm font-semibold">01</div>
+            <div class="min-w-0"><div class="text-body-sm font-medium truncate">Product launch announcement</div><div class="text-[11px] text-on-surface-variant">Instagram · 8.2% engagement</div></div>
+          </div>
+          <div class="flex items-center gap-3 py-2">
+            <div class="w-10 h-10 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center text-label-sm font-semibold">02</div>
+            <div class="min-w-0"><div class="text-body-sm font-medium truncate">Behind the scenes video</div><div class="text-[11px] text-on-surface-variant">TikTok · 7.9% engagement</div></div>
+          </div>
+          <div class="flex items-center gap-3 py-2">
+            <div class="w-10 h-10 rounded-lg bg-surface-container text-on-surface-variant flex items-center justify-center text-label-sm font-semibold">03</div>
+            <div class="min-w-0"><div class="text-body-sm font-medium truncate">Team spotlight</div><div class="text-[11px] text-on-surface-variant">LinkedIn · 6.4% engagement</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Scrim + attach modal -->
+<div class="scrim" id="scrim"></div>
+<div class="modal-scrim" id="attachModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1" id="attachTitle">Attach to a product</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="attachSub">Choose what this content should be attached to.</p>
+    <div id="attachBody"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="attachCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="attachConfirmBtn">Attach</button>
+    </div>
+  </div>
+</div>
+
+<!-- Connect channel modal -->
+<div class="modal-scrim" id="connectModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Connect a social channel</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Choose a provider to begin the authorization flow. OAuth must be implemented by your backend.</p>
+    <div class="mb-3">
+      <label class="block text-label-sm text-on-surface-variant mb-1">Provider</label>
+      <select id="connectProvider" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+        <option>Instagram</option><option>Facebook</option><option>LinkedIn</option><option>TikTok</option><option>YouTube</option><option>Pinterest</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="block text-label-sm text-on-surface-variant mb-1">Account label (optional)</label>
+      <input id="connectAccount" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="@yourbrand"/>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="connectCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="connectConfirm">Continue to connect</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG + API stubs
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE: "/api",
+  routes: {
+    overview: "/marketing/social", calendar: "/marketing/social/calendar", create: "/marketing/social/create",
+    library: "/marketing/social/library", queue: "/marketing/social/queue",
+    channels: "/marketing/social/channels", performance: "/marketing/social/performance"
+  },
+  endpoints: {
+    posts: "/publishing/posts", media: "/publishing/media", channels: "/publishing/channels",
+    publish: "/publishing/publish", oauthStart: p=>`/publishing/oauth/${encodeURIComponent(p.toLowerCase())}/start`,
+    attachProduct: id=>`/catalog/products/${id}/attach`, attachCollection: id=>`/catalog/collections/${id}/attach`,
+    designStudio: id=>`/catalog/studio/${id}`
+  }
+};
+const API = {
+  async request(path, options={}){
+    const url = APP_CONFIG.API_BASE + path;
+    console.info("[API integration point]", options.method||"GET", url, options.body||"");
+    return { ok:true, demo:true, url };
+  },
+  createPost: p=>API.request(APP_CONFIG.endpoints.posts,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),
+  uploadMedia: f=>{console.info("[MEDIA UPLOAD integration point]", f);return API.request(APP_CONFIG.endpoints.media,{method:"POST"});},
+  publish: p=>API.request(APP_CONFIG.endpoints.publish,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),
+  startOAuth: p=>API.request(APP_CONFIG.endpoints.oauthStart(p)),
+  attachProduct: id=>API.request(APP_CONFIG.endpoints.attachProduct(id),{method:"POST"}),
+  attachCollection: id=>API.request(APP_CONFIG.endpoints.attachCollection(id),{method:"POST"}),
+  openStudio: id=>API.request(APP_CONFIG.endpoints.designStudio(id),{method:"POST"})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════ */
+let step=1, publishMode="schedule";
+let selectedChannels=["Instagram"];
+let mediaFiles=[], libraryFiles=[];
+let queueFilter="all";
+let calendarDate=new Date(2026,9,1);
+let calendarView="month";
+let attachTarget={type:null,id:null,label:null};
+let composerAttach=null;
+let activePage="overview";
+
+let posts=[
+  {id:1,title:"October product spotlight",caption:"A closer look at what's new this month.",channels:["Instagram"],date:"2026-10-31T15:30",status:"scheduled"},
+  {id:2,title:"Behind the scenes",caption:"A little look behind the scenes.",channels:["TikTok"],date:"2026-11-01T10:00",status:"scheduled"},
+  {id:3,title:"Weekly company update",caption:"This week's updates from our team.",channels:["LinkedIn"],date:"2026-11-03T09:00",status:"scheduled"}
+];
+let channels=[
+  {name:"Instagram",handle:"@unsaidcompany",connected:true,kind:"ig",letter:"◎"},
+  {name:"Facebook",handle:"Unsaid Company",connected:true,kind:"fb",letter:"f"},
+  {name:"LinkedIn",handle:"Unsaid Company",connected:true,kind:"li",letter:"in"},
+  {name:"TikTok",handle:"@unsaidcompany",connected:true,kind:"tt",letter:"♪"},
+  {name:"YouTube",handle:"Unsaid Company",connected:false,kind:"yt",letter:"▶"},
+  {name:"Pinterest",handle:"Unsaid Company",connected:false,kind:"pin",letter:"p"}
+];
+
+const ATTACH_DATA = {
+  product:[
+    {id:"TEE-001",label:"Classic Tee",meta:"TEE-001 · $24.00"},
+    {id:"TOTE-014",label:"Canvas Tote",meta:"TOTE-014 · $18.00"},
+    {id:"MUG-003",label:"Mug 11oz",meta:"MUG-003 · $14.00"}
+  ],
+  collection:[
+    {id:"COL-FALL",label:"Fall 2026 Drop",meta:"12 products"},
+    {id:"COL-HOLIDAY",label:"Holiday Capsule",meta:"8 products"},
+    {id:"COL-CORE",label:"Core Essentials",meta:"22 products"}
+  ],
+  design:[
+    {id:"DSG-001",label:"Sunburst Tee design",meta:"2 variants · 1 product"},
+    {id:"DSG-002",label:"Minimal Tote art",meta:"1 variant · 1 product"}
+  ]
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escapeJs(s){return String(s??"").replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV (tabstrip)
+   ═══════════════════════════════════════════════════════════════════ */
+function navigate(page){
+  activePage=page;
+  document.querySelectorAll("[data-marktab]").forEach(b=>{
+    const on=b.dataset.marktab===page;
+    b.classList.toggle("active",on);
+    b.classList.toggle("text-on-surface-variant",!on);
+  });
+  ["overview","create","calendar","queue","library","channels","performance"].forEach(p=>{
+    document.getElementById("page-"+p).classList.toggle("hidden-imp",p!==page);
+  });
+  history.replaceState(null,"",APP_CONFIG.routes[page]||"#"+page);
+  if(page==="queue")renderQueue();
+  if(page==="channels")renderProviders();
+  if(page==="calendar")renderCalendar();
+  if(page==="library")renderLibrary();
+  if(page==="overview")renderUpcoming();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-marktab]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.marktab)));
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.nav)));
+
+/* ═══════════════════════════════════════════════════════════════════
+   OVERVIEW
+   ═══════════════════════════════════════════════════════════════════ */
+function renderUpcoming(){
+  const up=posts.filter(p=>p.status==="scheduled").slice(0,3);
+  document.getElementById("upcomingList").innerHTML = up.length ? up.map(p=>`
+    <div class="flex items-center gap-3 py-2 border-b border-surface-dim last:border-b-0">
+      <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">image</span></div>
+      <div class="min-w-0 flex-1"><div class="text-body-sm font-medium truncate">${escapeHtml(p.title)}</div><div class="text-[11px] text-on-surface-variant">${escapeHtml(p.date.replace("T"," · "))} · ${p.channels[0]||""}</div></div>
+      <span class="px-2 py-0.5 rounded-full text-label-sm bg-tertiary/15 text-tertiary">Scheduled</span>
+    </div>
+  `).join("") : `<div class="py-6 text-center text-body-sm text-on-surface-variant">Nothing scheduled.</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPOSER
+   ═══════════════════════════════════════════════════════════════════ */
+function startComposer(){ resetComposer(); navigate("create"); }
+document.querySelectorAll("[data-start-composer]").forEach(b=>b.addEventListener("click", startComposer));
+
+function resetComposer(){
+  step=1; mediaFiles=[]; selectedChannels=["Instagram"]; composerAttach=null;
+  document.getElementById("postTitle").value="";
+  document.getElementById("postCaption").value="";
+  document.getElementById("postLink").value="";
+  document.getElementById("postTags").value="";
+  document.getElementById("mediaList").innerHTML="";
+  document.getElementById("mediaInput").value="";
+  document.getElementById("scheduleDate").value=new Date().toISOString().slice(0,10);
+  document.getElementById("scheduleTime").value="10:00";
+  document.getElementById("approval").value="none";
+  document.getElementById("composerAttachResult").innerHTML="";
+  publishMode="schedule";
+  renderComposerStep(); updatePreview();
+}
+function renderComposerStep(){
+  for(let i=1;i<=4;i++){
+    document.getElementById("composerStep"+i).classList.toggle("hidden-imp",i!==step);
+    const m=document.getElementById("stepMark"+i);
+    m.classList.toggle("active",i===step);
+    m.classList.toggle("done",i<step);
+  }
+  document.getElementById("stepCounter").textContent=`Step ${step} of 4`;
+  document.getElementById("backBtn").disabled = step===1;
+  const label = step===4 ? (publishMode==="now"?"Publish now":"Schedule post") : "Continue";
+  const icon  = step===4 ? "send" : "arrow_forward";
+  document.getElementById("nextBtn").innerHTML = label+`<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+  document.getElementById("bottomNextBtn").innerHTML = label+`<span class="material-symbols-outlined text-[16px]">${icon}</span>`;
+  if(step===2)renderComposerChannels();
+  if(step===4)renderReview();
+}
+function validateStep(){
+  if(step===1 && !document.getElementById("postCaption").value.trim()){toast("Add a caption before continuing");return false;}
+  if(step===2 && !selectedChannels.length){toast("Select at least one connected channel");return false;}
+  if(step===3 && publishMode==="schedule" && !document.getElementById("scheduleDate").value){toast("Choose a publishing date");return false;}
+  return true;
+}
+function nextStep(){ if(!validateStep())return; if(step<4){step++;renderComposerStep();} else submitPost(); }
+function prevStep(){ if(step>1){step--;renderComposerStep();} }
+document.querySelectorAll("[data-next-step]").forEach(b=>b.addEventListener("click",nextStep));
+document.getElementById("backBtn").addEventListener("click",prevStep);
+
+document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{
+  publishMode=b.dataset.mode;
+  document.querySelectorAll("[data-mode]").forEach(x=>x.classList.toggle("active",x===b));
+  document.getElementById("scheduleFields").classList.toggle("hidden-imp",publishMode==="now");
+  renderComposerStep();
+}));
+
+function renderComposerChannels(){
+  document.getElementById("composerChannels").innerHTML = channels.map(c=>`
+    <label class="channel ${selectedChannels.includes(c.name)?"selected":""}" style="${!c.connected?"opacity:.5":""}">
+      <input type="checkbox" ${selectedChannels.includes(c.name)?"checked":""} ${!c.connected?"disabled":""} data-channel="${c.name}"/>
+      <span class="channel-logo ${c.kind}">${c.letter}</span>
+      <span><strong>${c.name}</strong><small>${c.connected?c.handle:"Not connected"}</small></span>
+    </label>
+  `).join("");
+  document.querySelectorAll("[data-channel]").forEach(cb=>cb.addEventListener("change",()=>{
+    const n=cb.dataset.channel;
+    selectedChannels = cb.checked ? [...selectedChannels,n] : selectedChannels.filter(x=>x!==n);
+    renderComposerChannels(); updatePreview();
+  }));
+  const custom=document.getElementById("channelCustomization");
+  custom.innerHTML = selectedChannels.length ? `
+    <div class="text-[12px] font-semibold mb-2">Channel-specific caption overrides</div>
+    ${selectedChannels.map(n=>`
+      <div class="mb-3">
+        <label class="block text-label-sm text-on-surface-variant mb-1">${n} caption (optional override)</label>
+        <textarea rows="2" class="w-full min-h-[65px] p-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Leave blank to use the main caption" id="override-${n.replace(/\W/g,'')}"></textarea>
+      </div>
+    `).join("")}
+  ` : "";
+}
+function updatePreview(){
+  const cap=(document.getElementById("postCaption")?.value||"").trim();
+  document.getElementById("previewCaption").textContent = cap || "Your post caption will appear here as you write.";
+  document.getElementById("charCount").textContent = (document.getElementById("postCaption")?.value||"").length;
+  document.getElementById("previewPlatform").textContent = selectedChannels[0]||"Social channel preview";
+  document.getElementById("previewAccount").textContent = channels.find(c=>c.name===selectedChannels[0])?.handle || "Your brand";
+}
+document.getElementById("postCaption").addEventListener("input",updatePreview);
+document.getElementById("mediaInput").addEventListener("change",e=>{
+  mediaFiles=[...mediaFiles,...e.target.files];
+  renderMediaChips(); updateMediaPreview(); API.uploadMedia(mediaFiles);
+});
+function renderMediaChips(){
+  document.getElementById("mediaList").innerHTML = mediaFiles.map((f,i)=>`
+    <span class="media-chip">
+      <span class="material-symbols-outlined" style="font-size:14px">${f.type.startsWith("video")?"movie":"image"}</span>
+      ${escapeHtml(f.name)}
+      <button data-remove-media="${i}" style="border:0;background:none;color:inherit;padding:0">×</button>
+    </span>
+  `).join("");
+  document.querySelectorAll("[data-remove-media]").forEach(b=>b.addEventListener("click",()=>{
+    mediaFiles.splice(parseInt(b.dataset.removeMedia,10),1);
+    renderMediaChips(); updateMediaPreview();
+  }));
+}
+function updateMediaPreview(){
+  const el=document.getElementById("previewMedia");
+  if(mediaFiles[0] && mediaFiles[0].type.startsWith("image")){
+    const url=URL.createObjectURL(mediaFiles[0]);
+    el.innerHTML=`<img src="${url}" style="width:100%;height:180px;object-fit:cover"/>`;
+  } else if(mediaFiles[0]) el.innerHTML='<span class="material-symbols-outlined">movie</span>';
+  else el.innerHTML='<span class="material-symbols-outlined">image</span>';
+}
+function renderReview(){
+  const title=document.getElementById("postTitle").value||"Untitled post";
+  const date = publishMode==="now" ? "Immediately" : `${document.getElementById("scheduleDate").value} at ${document.getElementById("scheduleTime").value} (${document.getElementById("timezone").value})`;
+  const attachLine = composerAttach ? `<br><span class="text-on-surface-variant">Attached to:</span> ${escapeHtml(composerAttach.label)}` : "";
+  document.getElementById("reviewSummary").innerHTML = `
+    <strong>${escapeHtml(title)}</strong>
+    <br><span class="text-on-surface-variant">Destinations:</span> ${selectedChannels.join(", ")}
+    <br><span class="text-on-surface-variant">Publishing:</span> ${date}
+    <br><span class="text-on-surface-variant">Media:</span> ${mediaFiles.length} attachment(s)${attachLine}
+    <br><span class="text-on-surface-variant">Approval:</span> ${document.getElementById("approval").value==="approval"?"Required":"Not required"}
+    <hr class="my-2 border-surface-dim"/>
+    <div style="white-space:pre-wrap">${escapeHtml(document.getElementById("postCaption").value)}</div>
+  `;
+}
+function collectPayload(){
+  const overrides={};
+  selectedChannels.forEach(n=>{
+    const el=document.getElementById("override-"+n.replace(/\W/g,''));
+    if(el && el.value.trim())overrides[n]=el.value.trim();
+  });
+  return {
+    title: document.getElementById("postTitle").value||"Untitled post",
+    caption: document.getElementById("postCaption").value,
+    link: document.getElementById("postLink").value,
+    hashtags: document.getElementById("postTags").value,
+    channels: selectedChannels, channelOverrides: overrides,
+    media: mediaFiles.map(f=>({name:f.name,type:f.type,size:f.size})),
+    attach: composerAttach,
+    publishMode,
+    date: publishMode==="schedule"?document.getElementById("scheduleDate").value:null,
+    time: publishMode==="schedule"?document.getElementById("scheduleTime").value:null,
+    timezone: document.getElementById("timezone").value,
+    approval: document.getElementById("approval").value
+  };
+}
+async function submitPost(){
+  const payload=collectPayload();
+  if(payload.approval==="approval"){
+    posts.unshift({id:Date.now(),title:payload.title,caption:payload.caption,channels:payload.channels,date:"Pending approval",status:"draft"});
+    toast("Saved for approval in this prototype");
+  } else {
+    await API.createPost(payload);
+    await API.publish(payload);
+    posts.unshift({
+      id:Date.now(),
+      title:payload.title,caption:payload.caption,channels:payload.channels,
+      date: payload.date?payload.date+"T"+payload.time:"Publishing now",
+      status: publishMode==="now"?"published":"scheduled"
+    });
+    toast("Post request prepared — connect backend to deliver it");
+  }
+  navigate("queue"); updateStats();
+}
+document.querySelector("[data-save-draft]").addEventListener("click",()=>{
+  const p=collectPayload();
+  posts.unshift({id:Date.now(),title:p.title,caption:p.caption,channels:p.channels,date:"—",status:"draft"});
+  API.createPost({...p,status:"draft"});
+  toast("Draft saved in this prototype");
+  updateStats(); navigate("queue");
+});
+function updateStats(){
+  document.getElementById("statScheduled").textContent = posts.filter(p=>p.status==="scheduled").length+9;
+  document.getElementById("statDrafts").textContent = posts.filter(p=>p.status==="draft").length+5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   QUEUE
+   ═══════════════════════════════════════════════════════════════════ */
+function renderQueue(){
+  const rows=posts.filter(p=>queueFilter==="all"||p.status===queueFilter);
+  document.getElementById("queueCount").textContent = rows.length+" items";
+  document.getElementById("queueTable").innerHTML = rows.length ? rows.map(p=>`
+    <tr class="hover:bg-surface-container-low">
+      <td class="px-3 py-2"><div class="text-body-sm font-medium">${escapeHtml(p.title)}</div><div class="text-[11px] text-on-surface-variant">${escapeHtml((p.caption||"").slice(0,65))}</div></td>
+      <td class="px-3 py-2">${p.channels.join(", ")}</td>
+      <td class="px-3 py-2">${escapeHtml(p.date||"—")}</td>
+      <td class="px-3 py-2">${statusPill(p.status)}</td>
+      <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-post-action="${p.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+    </tr>
+  `).join("") : `<tr><td colspan="5"><div class="py-10 text-center text-body-sm text-on-surface-variant">No posts in this view.</div></td></tr>`;
+  document.querySelectorAll("[data-post-action]").forEach(b=>b.addEventListener("click",()=>postAction(parseInt(b.dataset.postAction,10))));
+}
+function statusPill(s){
+  const map = {
+    scheduled:"bg-tertiary/15 text-tertiary",
+    published:"bg-secondary-container text-on-secondary-container",
+    draft:"bg-surface-container text-on-surface-variant",
+    failed:"bg-error-container text-on-error-container"
+  };
+  return `<span class="px-2 py-0.5 rounded-full text-label-sm ${map[s]||"bg-surface-container text-on-surface-variant"}">${s[0].toUpperCase()+s.slice(1)}</span>`;
+}
+function filterQueue(){}
+document.querySelectorAll("[data-queue]").forEach(b=>b.addEventListener("click",()=>{
+  queueFilter=b.dataset.queue;
+  document.querySelectorAll("[data-queue]").forEach(x=>{
+    const on=x===b;
+    x.classList.toggle("active",on);
+    x.classList.toggle("text-on-surface-variant",!on);
+  });
+  renderQueue();
+}));
+function postAction(id){
+  const p=posts.find(x=>x.id===id); if(!p)return;
+  if(p.status==="draft"){
+    if(confirm("Delete this draft?")){posts=posts.filter(x=>x.id!==id);renderQueue();updateStats();}
+  } else toast("Post details and retry actions connect to the publishing API");
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHANNELS
+   ═══════════════════════════════════════════════════════════════════ */
+function renderProviders(){
+  document.getElementById("providerList").innerHTML = channels.map(c=>`
+    <div class="flex items-center gap-3 px-5 py-3 border-b border-surface-dim last:border-b-0">
+      <div class="provider-logo ${c.kind}">${c.letter}</div>
+      <div class="min-w-0 flex-1"><div class="text-body-sm font-medium">${c.name}</div><div class="text-[11px] text-on-surface-variant">${c.connected?escapeHtml(c.handle):"Not connected"}</div></div>
+      <span class="px-2 py-0.5 rounded-full text-label-sm ${c.connected?"bg-secondary-container text-on-secondary-container":"bg-surface-container text-on-surface-variant"}">${c.connected?"Connected":"Not connected"}</span>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-provider-toggle="${c.name}">${c.connected?"Manage":"Connect"}</button>
+    </div>
+  `).join("");
+  document.querySelectorAll("[data-provider-toggle]").forEach(b=>b.addEventListener("click",()=>{
+    const n=b.dataset.providerToggle;
+    const c=channels.find(x=>x.name===n);
+    if(c.connected){
+      if(confirm(`Disconnect ${n}?`)){c.connected=false;renderProviders();toast(n+" disconnected in local demo state");}
+    } else openConnectModal(n);
+  }));
+  const count=channels.filter(c=>c.connected).length;
+  document.getElementById("connectedCount").textContent = count+" connected";
+  document.getElementById("statChannels").textContent = count;
+}
+function openConnectModal(prefill){
+  if(prefill) document.getElementById("connectProvider").value = prefill;
+  document.getElementById("connectModal").classList.add("open");
+}
+document.getElementById("btn-connect-channel").addEventListener("click",()=>openConnectModal());
+document.getElementById("connectCancel").addEventListener("click",()=>document.getElementById("connectModal").classList.remove("open"));
+document.getElementById("connectConfirm").addEventListener("click",()=>{
+  const p=document.getElementById("connectProvider").value;
+  API.startOAuth(p);
+  document.getElementById("connectModal").classList.remove("open");
+  toast("OAuth start endpoint ready for "+p+" — wire backend redirect");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   CALENDAR
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-month]").forEach(b=>b.addEventListener("click",()=>{
+  calendarDate.setMonth(calendarDate.getMonth()+parseInt(b.dataset.month,10));
+  renderCalendar();
+}));
+document.querySelectorAll("[data-calview]").forEach(b=>b.addEventListener("click",()=>{
+  calendarView=b.dataset.calview;
+  document.querySelectorAll("[data-calview]").forEach(x=>{
+    const on=x===b;
+    x.classList.toggle("active",on);
+    x.classList.toggle("text-on-surface-variant",!on);
+  });
+  renderCalendar();
+}));
+document.getElementById("calChannelFilter").addEventListener("change",renderCalendar);
+function renderCalendar(){
+  const y=calendarDate.getFullYear(), m=calendarDate.getMonth();
+  const first=new Date(y,m,1), start=first.getDay(), days=new Date(y,m+1,0).getDate();
+  document.getElementById("calendarMonth").textContent = calendarDate.toLocaleString("en-US",{month:"long",year:"numeric"});
+  const filter=document.getElementById("calChannelFilter").value;
+  const filtered=posts.filter(p=>filter==="All"||p.channels.includes(filter));
+
+  let cells="";
+  ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d=>cells+=`<div class="day" style="min-height:34px;background:#fafbfb"><div class="day-head">${d}</div></div>`);
+  for(let i=0;i<start;i++)cells+='<div class="day" style="background:#fafbfb"></div>';
+  for(let d=1;d<=days;d++){
+    const iso=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const events=filtered.filter(p=>(p.date||"").startsWith(iso));
+    cells+=`<div class="day">
+      <div class="day-head"><span class="day-num">${d}</span>${d===new Date().getDate()&&m===new Date().getMonth()?"Today":""}</div>
+      ${events.map((e,i)=>`<div class="event ${i%2?"purple":""}" data-ev-title="${escapeHtml(e.title)}" data-ev-status="${e.status}">${escapeHtml(e.title)}<br><span style="opacity:.75">${e.channels[0]||""}</span></div>`).join("")}
+      <button class="text-[16px] text-outline mt-1" data-add-on-day>+</button>
+    </div>`;
+  }
+  let prefix = "";
+  if(calendarView!=="month"){
+    prefix = `<div style="grid-column:1/-1;padding:22px;text-align:center;color:#5a6355">
+      <span class="material-symbols-outlined" style="font-size:28px;color:#9aabae">calendar_view_week</span>
+      <div style="margin-top:6px">${calendarView==="week"?"Week":"List"} view is ready to be wired. The Month grid is fully interactive.</div>
+    </div>`;
+  }
+  document.getElementById("calendarGrid").innerHTML = prefix + cells;
+  document.querySelectorAll("[data-ev-title]").forEach(b=>b.addEventListener("click",()=>toast(b.dataset.evTitle+" · "+b.dataset.evStatus)));
+  document.querySelectorAll("[data-add-on-day]").forEach(b=>b.addEventListener("click",startComposer));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIBRARY
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelector("[data-library-upload]").addEventListener("click",()=>document.getElementById("libraryInput").click());
+document.getElementById("libraryInput").addEventListener("change",e=>{
+  libraryFiles=[...libraryFiles,...e.target.files]; API.uploadMedia(libraryFiles); renderLibrary();
+});
+document.getElementById("librarySearch").addEventListener("input",renderLibrary);
+document.getElementById("libraryType").addEventListener("change",renderLibrary);
+function renderLibrary(){
+  const q=(document.getElementById("librarySearch").value||"").toLowerCase();
+  const type=document.getElementById("libraryType").value;
+  let files=libraryFiles.filter(f=>f.name.toLowerCase().includes(q));
+  if(type==="Images")files=files.filter(f=>f.type.startsWith("image"));
+  if(type==="Videos")files=files.filter(f=>f.type.startsWith("video"));
+  document.getElementById("libraryGrid").innerHTML = files.length ? files.map(f=>`
+    <div class="border border-surface-dim rounded-lg p-3">
+      <div class="w-full h-[105px] rounded-md bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[28px] text-on-surface-variant">${f.type.startsWith("video")?"movie":"image"}</span></div>
+      <strong class="block text-[11px] mt-2 break-words">${escapeHtml(f.name)}</strong>
+      <span class="text-[10px] text-on-surface-variant">${(f.size/1024/1024).toFixed(2)} MB</span>
+    </div>
+  `).join("") : `<div class="col-span-full py-10 text-center text-body-sm text-on-surface-variant">No matching assets. Upload media to build your library.</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PERFORMANCE
+   ═══════════════════════════════════════════════════════════════════ */
+function renderPerformance(){
+  const data=[["Instagram",82],["Facebook",64],["LinkedIn",71],["TikTok",91]];
+  document.getElementById("performanceBars").innerHTML = data.map(([n,v])=>`
+    <div class="mb-4">
+      <div class="flex justify-between text-[11px] mb-1"><strong>${n}</strong><span class="text-on-surface-variant">${v}% index</span></div>
+      <div class="bar"><span style="width:${v}%"></span></div>
+    </div>
+  `).join("");
+}
+document.getElementById("perfRange").addEventListener("change",e=>toast("Range: "+e.target.value));
+
+/* ═══════════════════════════════════════════════════════════════════
+   ATTACH (integrated product-level)
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-attach]").forEach(b=>b.addEventListener("click",()=>openAttach(b.dataset.attach)));
+function openAttach(type){
+  attachTarget={type,id:null,label:null};
+  const titles={product:"Attach to a product",collection:"Attach to a collection",design:"Open Design Studio"};
+  const subs={
+    product:"Choose the product this content should reference. The post becomes product-level.",
+    collection:"Choose the collection this content should feature.",
+    design:"Pick an existing design to open in Design Studio, or create a new one."
+  };
+  document.getElementById("attachTitle").textContent=titles[type];
+  document.getElementById("attachSub").textContent=subs[type];
+  const data=ATTACH_DATA[type]||[];
+  document.getElementById("attachBody").innerHTML=`
+    <div class="mb-2"><label class="block text-label-sm text-on-surface-variant mb-1">Search ${type}s</label><input id="attachSearch" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="Search…"/></div>
+    <div id="attachList" class="max-h-[240px] overflow-y-auto border border-surface-dim rounded">
+      ${data.map(it=>`
+        <label class="flex items-center gap-3 px-3 py-2 border-b border-surface-dim last:border-b-0 cursor-pointer hover:bg-surface-container-low attach-item" data-label="${escapeHtml(it.label)}" data-id="${it.id}">
+          <input type="radio" name="attachpick" value="${it.id}" style="accent-color:#0a6400"/>
+          <div class="min-w-0 flex-1"><div class="text-body-sm font-medium">${escapeHtml(it.label)}</div><div class="text-[11px] text-on-surface-variant">${escapeHtml(it.meta)}</div></div>
+          <span class="product-pill"><span class="material-symbols-outlined">${type==="product"?"checkroom":type==="collection"?"collections_bookmark":"palette"}</span>${type}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+  document.getElementById("attachSearch").addEventListener("input",e=>{
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll(".attach-item").forEach(it=>{
+      it.style.display = it.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+  document.querySelectorAll("#attachList input[name='attachpick']").forEach(r=>r.addEventListener("change",()=>{
+    attachTarget.id=r.value;
+    attachTarget.label=r.closest(".attach-item").dataset.label;
+    document.getElementById("attachConfirmBtn").disabled=false;
+  }));
+  document.getElementById("attachConfirmBtn").disabled=true;
+  document.getElementById("attachModal").classList.add("open");
+}
+document.getElementById("attachCancel").addEventListener("click",()=>document.getElementById("attachModal").classList.remove("open"));
+document.getElementById("attachConfirmBtn").addEventListener("click",()=>{
+  if(!attachTarget.id)return;
+  const target={type:attachTarget.type,id:attachTarget.id,label:attachTarget.label};
+  if(activePage==="create"){
+    composerAttach=target;
+    document.getElementById("composerAttachResult").innerHTML=`
+      <div class="flex items-center gap-2 px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-[11px]">
+        <span class="material-symbols-outlined text-[16px] text-primary">${target.type==="product"?"checkroom":target.type==="collection"?"collections_bookmark":"palette"}</span>
+        <div><strong>Attached:</strong> ${escapeHtml(target.label)} <span class="text-on-surface-variant">(${target.type} · ${target.id})</span></div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low ml-auto" data-remove-attach>Remove</button>
+      </div>`;
+    document.querySelector("[data-remove-attach]").addEventListener("click",()=>{
+      composerAttach=null;
+      document.getElementById("composerAttachResult").innerHTML="";
+    });
+  } else {
+    document.getElementById("attachResult").innerHTML=`
+      <div class="flex items-center gap-2 px-3 py-2 rounded border border-outline-variant bg-surface-container-low text-[11px]">
+        <span class="material-symbols-outlined text-[16px] text-primary">${target.type==="product"?"checkroom":target.type==="collection"?"collections_bookmark":"palette"}</span>
+        <div><strong>Attached:</strong> ${escapeHtml(target.label)} <span class="text-on-surface-variant">(${target.type} · ${target.id})</span></div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low ml-auto" data-remove-attach>Remove</button>
+      </div>`;
+    document.querySelector("[data-remove-attach]").addEventListener("click",()=>{
+      document.getElementById("attachResult").innerHTML="";
+    });
+  }
+  if(target.type==="design"){ toast("Design Studio route ready: "+target.id); API.openStudio(target.id); }
+  else if(target.type==="product") API.attachProduct(target.id);
+  else API.attachCollection(target.id);
+  document.getElementById("attachModal").classList.remove("open");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════ */
+renderUpcoming();
+renderCalendar();
+renderQueue();
+renderProviders();
+renderPerformance();
+updateStats();
+</script>
+</body>
+</html>

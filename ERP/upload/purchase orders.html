@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Purchase orders — Orders</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  /* Status pills */
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.draft{background:#f4f3f7;color:#5a6355}
+  .stat.confirmed{background:#e8f0fb;color:#0055a5}
+  .stat.receiving{background:#fff4dc;color:#8a5a00}
+  .stat.received{background:#8af5be;color:#00714b}
+  .stat.cancelled{background:#ffdad6;color:#93000a}
+  .stat.partial{background:#e8e8f8;color:#4a3fc4}
+  /* Avatar */
+  .po-avatar{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  /* Row menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:820px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:34px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:6px;border-bottom:1px solid #dad9dd;margin-bottom:10px}
+  /* PO line */
+  .po-line{display:grid;grid-template-columns:40px 1fr 80px 100px 100px 100px;gap:8px;padding:10px 0;border-bottom:1px solid #eeedf1;align-items:center}
+  .po-line.head{background:#f4f3f7;border-radius:4px 4px 0 0;font:700 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;padding:8px 12px;border-bottom:none}
+  .po-line input[type="number"]{width:100%;height:30px;padding:0 6px;border:1px solid #dad9dd;border-radius:4px;font-size:12px;text-align:right;font-variant-numeric:tabular-nums}
+  .po-line input[type="number"]:focus{outline:none;border-color:#0077c5}
+  /* Modal */
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">local_shipping</span>
+    <span class="text-label-md font-semibold">Orders</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Purchase orders</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-start justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Purchase orders</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Restock inventory from suppliers · receive against open POs</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-po>
+          <span class="material-symbols-outlined text-[16px]">add</span>New PO
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-new-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-restock>
+        <span class="material-symbols-outlined text-[16px]">sync</span>Restock</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-receive>
+        <span class="material-symbols-outlined text-[16px]">inventory</span>Receive items</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Open POs</div>
+      <div class="text-headline-sm mt-1 tabular-nums">3</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">$4,180 committed</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Expected this week</div>
+      <div class="text-headline-sm mt-1 tabular-nums">2</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">$1,940 in transit</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Overdue receiving</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error">1</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Printify — 3 days late</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Received (30d)</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary">$12,340</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">6 POs fulfilled</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new-po>
+      <span class="material-symbols-outlined text-[16px]">shopping_bag</span>Purchase order</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-restock>
+      <span class="material-symbols-outlined text-[16px]">sync</span>Restock suggestions</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-receive>
+      <span class="material-symbols-outlined text-[16px]">inventory</span>Receive items</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-supplier>
+      <span class="material-symbols-outlined text-[16px]">factory</span>Add supplier</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Draft">Draft</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Confirmed">Confirmed</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Receiving">Receiving</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Received">Received</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by PO #, supplier…" data-filter/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">factory</span>
+        <span class="text-on-surface-variant">Supplier:</span>
+        <select class="bg-transparent border-none text-label-sm text-on-surface focus:outline-none" data-supplier-filter>
+          <option value="">All</option>
+          <option value="Printful">Printful</option>
+          <option value="Gelato">Gelato</option>
+          <option value="Printify">Printify</option>
+        </select>
+      </label>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-po-count>—</span>
+    </div>
+
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="confirm"><span class="material-symbols-outlined text-[14px] align-middle mr-1">send</span>Send to supplier</button>
+      <button data-bulk="receive"><span class="material-symbols-outlined text-[14px] align-middle mr-1">inventory</span>Receive</button>
+      <button data-bulk="print"><span class="material-symbols-outlined text-[14px] align-middle mr-1">print</span>Print</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="cancel"><span class="material-symbols-outlined text-[14px] align-middle mr-1">block</span>Cancel POs</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">PO</th>
+          <th class="px-3 py-2">Supplier</th>
+          <th class="px-3 py-2">Items</th>
+          <th class="px-3 py-2">Ordered</th>
+          <th class="px-3 py-2">Expected</th>
+          <th class="px-3 py-2 text-right">Total</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-po-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Confirmed" data-id="PO-2201" data-supplier="Printful" data-expected="2026-11-12" data-total="1836.00">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium">PO-2201</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-blue">P</div>
+              <div class="min-w-0"><div class="font-medium truncate">Printful</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">2 lines · 120 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/03/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/12/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,836.00</td>
+          <td class="px-3 py-2"><span class="stat confirmed">Confirmed</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Receiving" data-id="PO-2198" data-supplier="Gelato" data-expected="2026-11-08" data-total="1240.00">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium">PO-2198</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-green">G</div>
+              <div class="min-w-0"><div class="font-medium truncate">Gelato</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">3 lines · 80 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/30/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/08/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,240.00</td>
+          <td class="px-3 py-2"><span class="stat receiving">Receiving</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Confirmed" data-id="PO-2195" data-supplier="Printify" data-expected="2026-10-31" data-total="640.00" data-overdue="true">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium">PO-2195</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-maroon">P</div>
+              <div class="min-w-0"><div class="font-medium truncate">Printify</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">1 line · 80 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/24/2026</td>
+          <td class="px-3 py-2"><span class="text-error font-semibold">10/31/2026</span></td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">$640.00</td>
+          <td class="px-3 py-2"><span class="stat overdue" style="background:#ffdad6;color:#93000a"><span class="material-symbols-outlined text-[10px]">warning</span>Overdue</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Draft" data-id="PO-2202" data-supplier="Printful" data-expected="2026-11-17" data-total="836.00">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium">PO-2202</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-blue">P</div>
+              <div class="min-w-0"><div class="font-medium truncate">Printful</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">2 lines · 150 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/03/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/17/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$836.00</td>
+          <td class="px-3 py-2"><span class="stat draft">Draft</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Received" data-id="PO-2189" data-supplier="Gelato" data-expected="2026-10-20" data-total="920.00">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium text-on-surface-variant">PO-2189</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-green">G</div>
+              <div class="min-w-0"><div class="font-medium truncate">Gelato</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">3 lines · 60 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/10/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/20/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$920.00</td>
+          <td class="px-3 py-2"><span class="stat received">Received</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer po-row" data-status="Received" data-id="PO-2187" data-supplier="Printful" data-expected="2026-10-15" data-total="1440.00">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check po-check"/></td>
+          <td class="px-3 py-2 font-medium text-on-surface-variant">PO-2187</td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="po-avatar bg-qb-blue">P</div>
+              <div class="min-w-0"><div class="font-medium truncate">Printful</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">4 lines · 100 units</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/01/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/15/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,440.00</td>
+          <td class="px-3 py-2"><span class="stat received">Received</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px]">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- New PO split -->
+<div class="row-menu" id="new-menu">
+  <div class="menu-header">New purchase order</div>
+  <button data-new-kind="Blank"><span class="material-symbols-outlined">edit_note</span>Blank PO</button>
+  <button data-new-kind="From restock"><span class="material-symbols-outlined">sync</span>From restock suggestions</button>
+  <button data-new-kind="From sales"><span class="material-symbols-outlined">shopping_cart</span>From open sales orders</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This PO</div>
+  <button data-action="view"><span class="material-symbols-outlined">open_in_new</span>View PO</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit</button>
+  <button data-action="duplicate"><span class="material-symbols-outlined">content_copy</span>Duplicate</button>
+  <div class="sep"></div>
+  <div class="menu-header">Fulfill</div>
+  <button data-action="send"><span class="material-symbols-outlined">send</span>Send to supplier</button>
+  <button data-action="receive"><span class="material-symbols-outlined">inventory</span>Receive items…</button>
+  <button data-action="print"><span class="material-symbols-outlined">print</span>Print PO</button>
+  <div class="sep"></div>
+  <div class="menu-header">Post</div>
+  <button data-action="problem"><span class="material-symbols-outlined">report_problem</span>Report a problem…</button>
+  <div class="sep"></div>
+  <button class="danger" data-action="cancel"><span class="material-symbols-outlined">block</span>Cancel PO</button>
+</div>
+
+<!-- ═══════════ NEW PO DRAWER ═══════════ -->
+<div class="drawer-scrim" id="po-scrim"></div>
+<div class="drawer" id="po-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">shopping_bag</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-po-title>New purchase order</div>
+        <div class="text-[11px] text-on-surface-variant" data-po-sub>Restock inventory from supplier</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-po>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+
+    <!-- Header fields -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="field-label">Supplier</label>
+        <select class="field-input" data-f-supplier>
+          <option>Printful</option><option>Gelato</option><option>Printify</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">PO number</label>
+        <input class="field-input" value="PO-2202" data-f-po/>
+      </div>
+      <div>
+        <label class="field-label">PO date</label>
+        <input class="field-input" type="date" value="2026-11-03" data-f-date/>
+      </div>
+      <div>
+        <label class="field-label">Expected delivery</label>
+        <input class="field-input" type="date" value="2026-11-17" data-f-expected/>
+      </div>
+      <div class="col-span-2">
+        <label class="field-label">Ship to</label>
+        <select class="field-input">
+          <option>Main warehouse — Charlotte, NC</option>
+          <option>Retail — Nashville, TN</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Line items -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold">Line items</div>
+        <button class="text-[11px] text-primary font-semibold hover:underline" data-add-po-line>+ Add line</button>
+      </div>
+      <div class="po-line head">
+        <span></span><span>Product</span><span class="text-right">Qty</span><span class="text-right">Unit cost</span><span class="text-right">Amount</span><span></span>
+      </div>
+      <div data-po-lines>
+        <div class="po-line">
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-teal to-qb-green"></div>
+          <div>
+            <div class="text-body-sm font-medium">Classic Tee — M / White</div>
+            <div class="text-[11px] text-on-surface-variant">TEE-001</div>
+          </div>
+          <input type="number" value="50" data-line-qty/>
+          <input type="number" value="9.12" step="0.01" data-line-rate/>
+          <span class="text-right tabular-nums font-semibold" data-line-amt>$456.00</span>
+          <button class="w-6 h-6 rounded hover:bg-error-container flex items-center justify-center" data-remove-line><span class="material-symbols-outlined text-[14px] text-on-surface-variant">close</span></button>
+        </div>
+        <div class="po-line">
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-maroon to-qb-navy"></div>
+          <div>
+            <div class="text-body-sm font-medium">Mug 11oz</div>
+            <div class="text-[11px] text-on-surface-variant">MUG-003</div>
+          </div>
+          <input type="number" value="100" data-line-qty/>
+          <input type="number" value="3.80" step="0.01" data-line-rate/>
+          <span class="text-right tabular-nums font-semibold" data-line-amt>$380.00</span>
+          <button class="w-6 h-6 rounded hover:bg-error-container flex items-center justify-center" data-remove-line><span class="material-symbols-outlined text-[14px] text-on-surface-variant">close</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="flex justify-end">
+      <div class="w-64 space-y-1 text-body-sm">
+        <div class="flex justify-between"><span class="text-on-surface-variant">Subtotal</span><span class="tabular-nums" data-po-subtotal>$836.00</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Shipping</span><span class="tabular-nums">$0.00</span></div>
+        <div class="flex justify-between"><span class="text-on-surface-variant">Tax</span><span class="tabular-nums">$0.00</span></div>
+        <div class="flex justify-between pt-2 border-t border-surface-dim font-semibold"><span>Total</span><span class="tabular-nums" data-po-total>$836.00</span></div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="border-t border-surface-dim pt-3">
+      <label class="field-label">Notes to supplier</label>
+      <textarea class="field-input" style="height:56px;padding:8px 10px;font-family:inherit" placeholder="Delivery instructions, packaging…"></textarea>
+    </div>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-po>Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-save-draft>Save draft</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-send-po>Send to supplier</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RECEIVE ITEMS DRAWER ═══════════ -->
+<div class="drawer-scrim" id="recv-scrim"></div>
+<div class="drawer" id="recv-drawer" style="width: 920px">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">inventory</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-recv-title>Receive items</div>
+        <div class="text-[11px] text-on-surface-variant" data-recv-sub>—</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-recv>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+
+    <div class="bg-qb-blue/5 border border-qb-blue/30 rounded-lg p-3 text-[11px] text-qb-blue flex items-start gap-2">
+      <span class="material-symbols-outlined text-[16px] mt-0.5">info</span>
+      <div>Enter the quantity received for each line. Quantity received is added to inventory immediately on save.</div>
+    </div>
+
+    <div>
+      <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Items to receive</div>
+      <div class="po-line head" style="grid-template-columns:40px 1fr 90px 90px 90px 90px;">
+        <span></span><span>Product</span><span class="text-right">Ordered</span><span class="text-right">Already recv'd</span><span class="text-right">Receiving now</span><span class="text-right">Remaining</span>
+      </div>
+      <div data-recv-lines>
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 border-t border-surface-dim pt-3">
+      <div>
+        <label class="field-label">Received date</label>
+        <input class="field-input" type="date" value="2026-11-03"/>
+      </div>
+      <div>
+        <label class="field-label">Received into</label>
+        <select class="field-input">
+          <option>Main warehouse</option>
+          <option>Retail — Nashville</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="field-label">Receiving notes</label>
+      <textarea class="field-input" style="height:52px;padding:8px 10px;font-family:inherit" placeholder="Damages, missing items, box count…"></textarea>
+    </div>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-recv>Cancel</button>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" data-recv-partial>Receive partial</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-recv-all>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">inventory</span>Receive all</button>
+    </div>
+  </div>
+</div>
+
+<!-- Restock modal -->
+<div class="modal-scrim" id="restock-modal">
+  <div class="w-full max-w-lg bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-primary">sync</span>
+        <h2 class="text-headline-sm">Restock suggestions</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Products below reorder point. Select to add to a new PO.</p>
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 py-2 border-b border-surface-dim">
+          <input type="checkbox" class="row-check" checked/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-maroon to-qb-navy shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Mug 11oz</div>
+            <div class="text-[11px] text-on-surface-variant">0 on hand · reorder at 20 · Printful</div>
+          </div>
+          <span class="text-[11px] text-error font-semibold">50+</span>
+        </div>
+        <div class="flex items-center gap-2 py-2 border-b border-surface-dim">
+          <input type="checkbox" class="row-check" checked/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-teal to-qb-green shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Classic Tee — M / White</div>
+            <div class="text-[11px] text-on-surface-variant">3 on hand · reorder at 15 · Printful</div>
+          </div>
+          <span class="text-[11px] text-error font-semibold">12+</span>
+        </div>
+        <div class="flex items-center gap-2 py-2">
+          <input type="checkbox" class="row-check"/>
+          <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-blue to-qb-green shrink-0"></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Canvas Tote</div>
+            <div class="text-[11px] text-on-surface-variant">18 on hand · reorder at 20 · Gelato</div>
+          </div>
+          <span class="text-[11px] text-on-surface-variant">2 below</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-restock>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-restock>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">shopping_bag</span>Create PO from selection</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* New split */
+const newMenu = document.getElementById("new-menu");
+document.querySelector("[data-new-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  newMenu.style.top = (r.bottom + 4) + "px";
+  newMenu.style.left = Math.min(r.right - 240, window.innerWidth - 260) + "px";
+  newMenu.classList.toggle("open");
+});
+document.querySelectorAll("#new-menu [data-new-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  newMenu.classList.remove("open");
+  const k = b.dataset.newKind;
+  if (k === "From restock") return document.getElementById("restock-modal").classList.add("open");
+  if (k === "From sales") return toast("Aggregating open sales orders into a PO");
+  openPO(null);
+}));
+document.querySelector("[data-new-po]").addEventListener("click", ()=>openPO(null));
+document.querySelectorAll("[data-restock]").forEach(b=>b.addEventListener("click", ()=>document.getElementById("restock-modal").classList.add("open")));
+document.querySelectorAll("[data-receive]").forEach(b=>b.addEventListener("click", ()=>openReceive(null)));
+
+/* PO drawer */
+const PO_DATA = {
+  "PO-2201": { id:"PO-2201", supplier:"Printful", date:"2026-11-03", expected:"2026-11-12", total:"1836.00", lines:[ {name:"Classic Tee — M / White", sku:"TEE-001", qty:120, rate:"9.12", amt:"1094.40"}, {name:"Canvas Tote", sku:"TOTE-014", qty:60, rate:"8.10", amt:"486.00"} ] },
+  "PO-2198": { id:"PO-2198", supplier:"Gelato", date:"2026-10-30", expected:"2026-11-08", total:"1240.00", lines:[ {name:"Hoodie — L / Black", sku:"HD-211", qty:40, rate:"18.20", amt:"728.00"}, {name:"Mug 11oz", sku:"MUG-003", qty:40, rate:"3.80", amt:"152.00"} ] },
+  "PO-2195": { id:"PO-2195", supplier:"Printify", date:"2026-10-24", expected:"2026-10-31", total:"640.00", lines:[ {name:"Mug 11oz", sku:"MUG-003", qty:80, rate:"8.00", amt:"640.00"} ] },
+  "PO-2202": { id:"PO-2202", supplier:"Printful", date:"2026-11-03", expected:"2026-11-17", total:"836.00", lines:[ {name:"Classic Tee — M / White", sku:"TEE-001", qty:50, rate:"9.12", amt:"456.00"}, {name:"Mug 11oz", sku:"MUG-003", qty:100, rate:"3.80", amt:"380.00"} ] },
+  "PO-2189": { id:"PO-2189", supplier:"Gelato", date:"2026-10-10", expected:"2026-10-20", total:"920.00", lines:[ {name:"Sticker pack", sku:"STK-09", qty:60, rate:"15.33", amt:"920.00"} ] },
+  "PO-2187": { id:"PO-2187", supplier:"Printful", date:"2026-10-01", expected:"2026-10-15", total:"1440.00", lines:[ {name:"Classic Tee", sku:"TEE-001", qty:100, rate:"14.40", amt:"1440.00"} ] }
+};
+let currentPORow = null;
+function openPO(row){
+  currentPORow = row;
+  const isNew = !row;
+  const d = isNew ? { id:"PO-2203", supplier:"Printful", date:"2026-11-03", expected:"2026-11-17", total:"0.00", lines:[] } : (PO_DATA[row.dataset.id] || {});
+  document.querySelector("[data-po-title]").textContent = isNew ? "New purchase order" : `Purchase order ${d.id}`;
+  document.querySelector("[data-po-sub]").textContent = isNew ? "Restock inventory from supplier" : `${d.supplier} · ordered ${d.date} · expected ${d.expected}`;
+  document.querySelector("[data-f-supplier]").value = d.supplier;
+  document.querySelector("[data-f-po]").value = d.id;
+  document.querySelector("[data-f-date]").value = d.date;
+  document.querySelector("[data-f-expected]").value = d.expected;
+  const lines = document.querySelector("[data-po-lines]");
+  if (d.lines.length === 0){
+    lines.innerHTML = `<div class="text-[11px] text-on-surface-variant text-center py-4">No line items yet. Click "+ Add line" to start.</div>`;
+  } else {
+    const colors = ["from-qb-teal to-qb-green","from-qb-maroon to-qb-navy","from-qb-blue to-qb-teal","from-qb-navy to-qb-maroon"];
+    lines.innerHTML = d.lines.map((l,i)=>`
+      <div class="po-line">
+        <div class="w-8 h-8 rounded bg-gradient-to-br ${colors[i%4]}"></div>
+        <div><div class="text-body-sm font-medium">${l.name}</div><div class="text-[11px] text-on-surface-variant">${l.sku}</div></div>
+        <input type="number" value="${l.qty}" data-line-qty/>
+        <input type="number" value="${l.rate}" step="0.01" data-line-rate/>
+        <span class="text-right tabular-nums font-semibold" data-line-amt>$${l.amt}</span>
+        <button class="w-6 h-6 rounded hover:bg-error-container flex items-center justify-center" data-remove-line><span class="material-symbols-outlined text-[14px] text-on-surface-variant">close</span></button>
+      </div>`).join("");
+  }
+  document.querySelector("[data-po-subtotal]").textContent = "$" + parseFloat(d.total).toLocaleString("en-US",{minimumFractionDigits:2});
+  document.querySelector("[data-po-total]").textContent = "$" + parseFloat(d.total).toLocaleString("en-US",{minimumFractionDigits:2});
+  document.getElementById("po-scrim").classList.add("open");
+  document.getElementById("po-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-po]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+}));
+document.getElementById("po-scrim").addEventListener("click", ()=>{
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+});
+document.querySelector("[data-add-po-line]").addEventListener("click", ()=>toast("Product picker — search SKU"));
+document.querySelector("[data-save-draft]").addEventListener("click", ()=>{ closePO(); toast("PO saved as draft"); });
+document.querySelector("[data-send-po]").addEventListener("click", ()=>{ closePO(); toast("PO sent to supplier"); });
+function closePO(){
+  document.getElementById("po-scrim").classList.remove("open");
+  document.getElementById("po-drawer").classList.remove("open");
+}
+
+/* Receive items drawer */
+const RECV_LINES = {
+  "PO-2201": [ {name:"Classic Tee — M / White", sku:"TEE-001", ordered:120, already:0, now:120, remain:0}, {name:"Canvas Tote", sku:"TOTE-014", ordered:60, already:0, now:60, remain:0} ],
+  "PO-2198": [ {name:"Hoodie — L / Black", sku:"HD-211", ordered:40, already:20, now:20, remain:0}, {name:"Mug 11oz", sku:"MUG-003", ordered:40, already:0, now:40, remain:0} ],
+  "PO-2195": [ {name:"Mug 11oz", sku:"MUG-003", ordered:80, already:0, now:80, remain:0} ]
+};
+function openReceive(row){
+  currentPORow = row;
+  const id = row ? row.dataset.id : "PO-2201";
+  const lines = RECV_LINES[id] || RECV_LINES["PO-2201"];
+  const totalQty = lines.reduce((s,l)=>s + (l.ordered - l.already), 0);
+  document.querySelector("[data-recv-title]").textContent = `Receive items — ${id}`;
+  document.querySelector("[data-recv-sub]").textContent = `${lines.length} lines · ${totalQty} units to receive`;
+  const body = document.querySelector("[data-recv-lines]");
+  body.innerHTML = lines.map((l,i)=>`
+    <div class="po-line" style="grid-template-columns:40px 1fr 90px 90px 90px 90px;">
+      <div class="w-8 h-8 rounded bg-gradient-to-br from-qb-teal to-qb-green"></div>
+      <div><div class="text-body-sm font-medium">${l.name}</div><div class="text-[11px] text-on-surface-variant">${l.sku}</div></div>
+      <span class="text-right tabular-nums">${l.ordered}</span>
+      <span class="text-right tabular-nums text-on-surface-variant">${l.already}</span>
+      <input type="number" class="text-right" value="${l.ordered - l.already}" data-recv-qty data-idx="${i}"/>
+      <span class="text-right tabular-nums text-on-surface-variant" data-recv-remain>0</span>
+    </div>`).join("");
+  // Wire qty → remaining
+  body.querySelectorAll("[data-recv-qty]").forEach(inp=>{
+    inp.addEventListener("input", ()=>{
+      const lineIdx = parseInt(inp.dataset.idx);
+      const l = lines[lineIdx];
+      const now = Math.max(0, parseInt(inp.value) || 0);
+      const remain = Math.max(0, (l.ordered - l.already) - now);
+      const remainCell = inp.closest(".po-line").querySelector("[data-recv-remain]");
+      remainCell.textContent = remain;
+      remainCell.className = "text-right tabular-nums " + (remain > 0 ? "text-error font-semibold" : "text-on-surface-variant");
+    });
+  });
+  document.getElementById("recv-scrim").classList.add("open");
+  document.getElementById("recv-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-recv]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("recv-scrim").classList.remove("open");
+  document.getElementById("recv-drawer").classList.remove("open");
+}));
+document.getElementById("recv-scrim").addEventListener("click", ()=>{
+  document.getElementById("recv-scrim").classList.remove("open");
+  document.getElementById("recv-drawer").classList.remove("open");
+});
+document.querySelector("[data-recv-partial]").addEventListener("click", ()=>{
+  if (currentPORow){
+    currentPORow.dataset.status = "Receiving";
+    const pill = currentPORow.querySelector(".stat");
+    pill.className = "stat receiving";
+    pill.textContent = "Receiving";
+  }
+  closeRecv();
+  toast("Partial receipt saved — inventory updated");
+});
+document.querySelector("[data-recv-all]").addEventListener("click", ()=>{
+  if (currentPORow){
+    currentPORow.dataset.status = "Received";
+    const pill = currentPORow.querySelector(".stat");
+    pill.className = "stat received";
+    pill.textContent = "Received";
+  }
+  closeRecv();
+  toast("All items received — inventory updated");
+});
+function closeRecv(){
+  document.getElementById("recv-scrim").classList.remove("open");
+  document.getElementById("recv-drawer").classList.remove("open");
+}
+
+/* Restock modal */
+document.querySelector("[data-close-restock]").addEventListener("click", ()=>document.getElementById("restock-modal").classList.remove("open"));
+document.querySelector("[data-confirm-restock]").addEventListener("click", ()=>{
+  document.getElementById("restock-modal").classList.remove("open");
+  openPO(null);
+});
+
+/* Row click + ⋯ menu */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+document.querySelectorAll(".po-row").forEach(tr=>{
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-row-menu]")) return;
+    openPO(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    currentMenuRow = tr;
+    const status = tr.dataset.status;
+    rowMenu.querySelector('[data-action="send"]').style.display = status === "Draft" ? "" : "none";
+    rowMenu.querySelector('[data-action="receive"]').style.display = (status === "Confirmed" || status === "Receiving") ? "" : "none";
+    const r = e.currentTarget.getBoundingClientRect();
+    rowMenu.style.top = (r.bottom + 4) + "px";
+    rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+    rowMenu.classList.add("open");
+  });
+});
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  const id = tr.dataset.id;
+  switch(act){
+    case "view": case "edit": openPO(tr); break;
+    case "duplicate": { const clone = tr.cloneNode(true); tr.parentNode.insertBefore(clone, tr.nextSibling); toast(`Duplicated ${id}`); break; }
+    case "send":
+      tr.dataset.status = "Confirmed";
+      const pill = tr.querySelector(".stat");
+      pill.className = "stat confirmed"; pill.textContent = "Confirmed";
+      toast(`Sent ${id} to supplier`); break;
+    case "receive": openReceive(tr); break;
+    case "print": toast(`Printing ${id}`); break;
+    case "problem": toast(`Report problem for ${id}`); break;
+    case "cancel":
+      tr.remove(); applyFilters(); toast(`${id} cancelled`); break;
+  }
+}));
+
+/* Tabs + filter */
+let currentTab = "All";
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentTab = b.dataset.viewtab;
+  applyFilters();
+}));
+document.querySelector("[data-filter]").addEventListener("input", applyFilters);
+document.querySelector("[data-supplier-filter]").addEventListener("change", applyFilters);
+function applyFilters(){
+  const q = document.querySelector("[data-filter]").value.toLowerCase();
+  const sup = document.querySelector("[data-supplier-filter]").value;
+  let shown = 0, total = 0;
+  document.querySelectorAll(".po-row").forEach(tr=>{
+    total++;
+    const tabOk = currentTab === "All" || tr.dataset.status === currentTab;
+    const qOk = !q || tr.textContent.toLowerCase().includes(q);
+    const supOk = !sup || tr.dataset.supplier === sup;
+    const vis = tabOk && qOk && supOk;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-po-count]").textContent = `${shown} of ${total}`;
+}
+
+/* Bulk */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".po-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{ if (e.target.matches(".po-check")) updateBulk(); });
+document.querySelector("[data-check-all]").addEventListener("change", e=>{
+  document.querySelectorAll(".po-check").forEach(c=>{ if (c.closest("tr").style.display !== "none") c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".po-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked = false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".po-check:checked").length;
+  if (act === "confirm"){
+    document.querySelectorAll(".po-check:checked").forEach(c=>{
+      const tr = c.closest("tr");
+      tr.dataset.status = "Confirmed";
+      const pill = tr.querySelector(".stat");
+      pill.className = "stat confirmed"; pill.textContent = "Confirmed";
+    });
+  }
+  if (act === "cancel"){
+    document.querySelectorAll(".po-check:checked").forEach(c=>{const tr = c.closest("tr"); if(tr) tr.remove();});
+    applyFilters();
+  }
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} PO${n!==1?"s":""}`);
+  document.querySelectorAll(".po-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked = false;
+  updateBulk();
+}));
+
+/* Misc */
+document.querySelector("[data-supplier]").addEventListener("click", ()=>toast("Add supplier — party drawer"));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout — filtered to Orders"));
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Exporting POs as CSV"));
+
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#new-menu") && !e.target.closest("[data-new-split]")) newMenu.classList.remove("open");
+});
+
+/* Init */
+applyFilters();
+</script>
+</body>
+</html>

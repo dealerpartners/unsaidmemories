@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sales &amp; Get Paid — Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* KPI cards */
+  .kpi-card{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px;cursor:pointer;transition:all .12s}
+  .kpi-card:hover{border-color:#0077c5;box-shadow:0 2px 12px rgba(0,119,197,.08)}
+  .kpi-label{font:600 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;display:flex;align-items:center;gap:6px}
+  .kpi-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.1}
+  .kpi-delta{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px}
+  .kpi-delta.up{color:#0a6400}
+  .kpi-delta.down{color:#ba1a1a}
+  /* Funnel visualization */
+  .funnel{display:flex;flex-direction:column;gap:0}
+  .funnel-stage{padding:14px 20px;position:relative;display:flex;align-items:center;gap:14px;color:#fff;font-weight:600}
+  .funnel-stage:first-child{border-radius:10px 10px 0 0}
+  .funnel-stage:last-child{border-radius:0 0 10px 10px}
+  .funnel-stage .stage-label{flex:1}
+  .funnel-stage .stage-val{font-variant-numeric:tabular-nums;font-size:16px}
+  .funnel-stage .stage-pct{font-size:11px;opacity:.9;margin-left:6px}
+  /* Stage bar */
+  .stage-bar{display:flex;align-items:center;gap:8px;padding:8px 0}
+  .stage-bar .lbl{width:120px;font-size:12px;color:#5a6355;text-align:right}
+  .stage-bar .track{flex:1;height:24px;background:#f4f3f7;border-radius:4px;overflow:hidden;position:relative}
+  .stage-bar .fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11px;font-weight:600}
+  /* Quick row */
+  .drill-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f4f3f7;cursor:pointer}
+  .drill-row:last-child{border-bottom:none}
+  .drill-row:hover{background:#f4f3f7;border-radius:4px;padding-left:6px;padding-right:6px;margin-left:-6px;margin-right:-6px}
+  .drill-row .avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  .drill-row .amt{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;font-size:13px}
+  /* Age chip */
+  .age{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+  .age.current{background:#e8f5e8;color:#1e5a38}
+  .age.soon{background:#fff4dc;color:#8a5a00}
+  .age.overdue{background:#ffdad6;color:#93000a}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Sales &amp; Get Paid</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Overview</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Sales &amp; Get Paid — Overview</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Payment-request funnel: Not paid / Paid / Deposited · November 2026</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-date-range>
+        <span class="material-symbols-outlined text-[16px]">calendar_today</span>Nov 2026 ▾</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- KPI strip — clickable -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="kpi-card" data-drill="not-paid">
+      <div class="kpi-label"><span class="w-2 h-2 rounded-full bg-qb-maroon"></span>Not paid</div>
+      <div class="kpi-val">$8,420.00</div>
+      <div class="kpi-delta up"><span class="material-symbols-outlined text-[13px]">trending_up</span>+12% vs last month</div>
+    </div>
+    <div class="kpi-card" data-drill="paid">
+      <div class="kpi-label"><span class="w-2 h-2 rounded-full bg-qb-blue"></span>Paid</div>
+      <div class="kpi-val">$24,180.00</div>
+      <div class="kpi-delta up"><span class="material-symbols-outlined text-[13px]">trending_up</span>+8% vs last month</div>
+    </div>
+    <div class="kpi-card" data-drill="deposited">
+      <div class="kpi-label"><span class="w-2 h-2 rounded-full bg-qb-green"></span>Deposited</div>
+      <div class="kpi-val">$22,900.00</div>
+      <div class="kpi-delta up"><span class="material-symbols-outlined text-[13px]">trending_up</span>+6% vs last month</div>
+    </div>
+    <div class="kpi-card" data-drill="days">
+      <div class="kpi-label"><span class="w-2 h-2 rounded-full bg-qb-teal"></span>Avg. days to pay</div>
+      <div class="kpi-val">14.2</div>
+      <div class="kpi-delta up"><span class="material-symbols-outlined text-[13px]">trending_down</span>−1.3 days faster</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-5 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Invoice">
+      <span class="material-symbols-outlined text-[16px]">receipt_long</span>Invoice</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Receive payment">
+      <span class="material-symbols-outlined text-[16px]">price_check</span>Receive payment</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Payment link">
+      <span class="material-symbols-outlined text-[16px]">link</span>Payment link</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Estimate">
+      <span class="material-symbols-outlined text-[16px]">request_quote</span>Estimate</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Sales receipt">
+      <span class="material-symbols-outlined text-[16px]">point_of_sale</span>Sales receipt</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Payment funnel + Attention queue -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+
+    <!-- Funnel -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Payment funnel</h2>
+        <span class="text-[11px] text-on-surface-variant">Not paid → Paid → Deposited</span>
+      </div>
+
+      <!-- Visual bars -->
+      <div class="space-y-1">
+        <div class="stage-bar">
+          <div class="lbl">Not paid</div>
+          <div class="track"><div class="fill" style="width:26%;background:#6b1e28">$8,420</div></div>
+        </div>
+        <div class="stage-bar">
+          <div class="lbl">Paid</div>
+          <div class="track"><div class="fill" style="width:74%;background:#0077c5">$24,180</div></div>
+        </div>
+        <div class="stage-bar">
+          <div class="lbl">Deposited</div>
+          <div class="track"><div class="fill" style="width:70%;background:#1e5a38">$22,900</div></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 mt-4 pt-3 border-t border-surface-dim text-[11px] text-on-surface-variant">
+        <div>Total sent: <span class="font-semibold text-on-surface">$32,600</span></div>
+        <div>Conversion to paid: <span class="font-semibold text-on-surface">74.2%</span></div>
+        <div>Paid → Deposited: <span class="font-semibold text-on-surface">94.7%</span></div>
+      </div>
+    </div>
+
+    <!-- Attention queue -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Needs attention</h2>
+        <span class="text-[11px] text-error font-semibold">3 items</span>
+      </div>
+      <div class="space-y-2">
+        <div class="drill-row" data-drill="overdue">
+          <span class="material-symbols-outlined text-[18px] text-error">warning</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">2 overdue invoices</div>
+            <div class="text-[11px] text-on-surface-variant">$2,990.00 · oldest 17 days</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="drill-row" data-drill="unsent">
+          <span class="material-symbols-outlined text-[18px] text-tertiary">drafts</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">3 unsent invoices</div>
+            <div class="text-[11px] text-on-surface-variant">Drafts waiting to send</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="drill-row" data-drill="failed">
+          <span class="material-symbols-outlined text-[18px] text-error">error</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">1 failed payment</div>
+            <div class="text-[11px] text-on-surface-variant">Acme Corp · card declined</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="drill-row" data-drill="deposits">
+          <span class="material-symbols-outlined text-[18px] text-qb-blue">account_balance</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Deposits awaiting match</div>
+            <div class="text-[11px] text-on-surface-variant">1 Stripe payout · $1,842.60</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Open invoices + Top customers -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-5">
+
+    <!-- Open invoices -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div>
+          <h2 class="text-headline-sm">Open invoices</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">3 open · $4,230.00 outstanding</p>
+        </div>
+        <button class="text-[11px] font-semibold text-primary hover:underline" data-goto="invoices">View all</button>
+      </div>
+      <div class="divide-y divide-surface-dim">
+        <div class="flex items-center gap-3 px-5 py-3 hover:bg-surface-container-low cursor-pointer" data-invoice="1002">
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Invoice 1002 · Acme Corp</div>
+            <div class="text-[11px] text-on-surface-variant">Due 12/01/2026 · 6 days</div>
+          </div>
+          <span class="age soon">Due soon</span>
+          <span class="text-body-sm font-semibold tabular-nums">$1,240.00</span>
+        </div>
+        <div class="flex items-center gap-3 px-5 py-3 hover:bg-surface-container-low cursor-pointer" data-invoice="0998">
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Invoice 0998 · Maple Supply</div>
+            <div class="text-[11px] text-on-surface-variant">Due 11/14/2026 · 12 days</div>
+          </div>
+          <span class="age current">Current</span>
+          <span class="text-body-sm font-semibold tabular-nums">$890.00</span>
+        </div>
+        <div class="flex items-center gap-3 px-5 py-3 hover:bg-surface-container-low cursor-pointer" data-invoice="0996">
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Invoice 0996 · Northwind Labs</div>
+            <div class="text-[11px] text-on-surface-variant">Due 11/01/2026 · 1 day overdue</div>
+          </div>
+          <span class="age overdue">Overdue</span>
+          <span class="text-body-sm font-semibold tabular-nums">$2,100.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top customers by revenue -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Top customers by revenue</h2>
+        <button class="text-[11px] text-primary font-semibold hover:underline" data-goto="customers">View all</button>
+      </div>
+      <div>
+        <div class="drill-row">
+          <div class="avatar bg-qb-blue">A</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Acme Corp</div>
+            <div class="text-[11px] text-on-surface-variant">4 invoices · 34% of revenue</div>
+          </div>
+          <span class="amt">$8,640</span>
+        </div>
+        <div class="drill-row">
+          <div class="avatar bg-qb-green">B</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Blue Ridge Co.</div>
+            <div class="text-[11px] text-on-surface-variant">2 invoices · 29% of revenue</div>
+          </div>
+          <span class="amt">$7,410</span>
+        </div>
+        <div class="drill-row">
+          <div class="avatar bg-qb-teal">N</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Northwind Labs</div>
+            <div class="text-[11px] text-on-surface-variant">2 invoices · 17% of revenue</div>
+          </div>
+          <span class="amt">$4,240</span>
+        </div>
+        <div class="drill-row">
+          <div class="avatar bg-qb-maroon">O</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Orion Apparel</div>
+            <div class="text-[11px] text-on-surface-variant">3 invoices · 15% of revenue</div>
+          </div>
+          <span class="amt">$3,890</span>
+        </div>
+        <div class="drill-row">
+          <div class="avatar bg-qb-navy">M</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Maple Supply</div>
+            <div class="text-[11px] text-on-surface-variant">1 invoice · 5% of revenue</div>
+          </div>
+          <span class="amt">$1,180</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom row: Recent payments + Recent sales activity -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+    <!-- Recent payments -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <h2 class="text-headline-sm">Recent payments</h2>
+        <span class="text-[11px] text-on-surface-variant">Last 7 days · $4,650.00</span>
+      </div>
+      <div class="divide-y divide-surface-dim">
+        <div class="flex items-center gap-3 px-5 py-2.5 hover:bg-surface-container-low cursor-pointer" data-payment="PMT-4410">
+          <span class="material-symbols-outlined text-[18px] text-secondary">price_check</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Blue Ridge Co. · ACH</div>
+            <div class="text-[11px] text-on-surface-variant">10/31/2026 · Invoice 1001</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums text-secondary">+$3,410.00</span>
+        </div>
+        <div class="flex items-center gap-3 px-5 py-2.5 hover:bg-surface-container-low cursor-pointer" data-payment="PMT-4388">
+          <span class="material-symbols-outlined text-[18px] text-secondary">price_check</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Northwind Labs · Card</div>
+            <div class="text-[11px] text-on-surface-variant">09/28/2026 · Card ending 4421</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums text-secondary">+$1,500.00</span>
+        </div>
+        <div class="flex items-center gap-3 px-5 py-2.5 hover:bg-surface-container-low cursor-pointer" data-payment="PMT-4381">
+          <span class="material-symbols-outlined text-[18px] text-secondary">price_check</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Orion Apparel · Payment link</div>
+            <div class="text-[11px] text-on-surface-variant">09/20/2026 · PL-7F2A</div>
+          </div>
+          <span class="text-body-sm font-semibold tabular-nums text-secondary">+$540.00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Recent sales activity</h2>
+      <div class="space-y-3 text-body-sm">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">check_circle</span>
+          <div class="min-w-0">
+            <div class="font-medium">Payment received from Blue Ridge Co.</div>
+            <div class="text-[11px] text-on-surface-variant">$3,410.00 · 10/31/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-blue mt-0.5">receipt_long</span>
+          <div class="min-w-0">
+            <div class="font-medium">Invoice 1002 sent to Acme Corp</div>
+            <div class="text-[11px] text-on-surface-variant">Marcus L. · 11/01/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">link</span>
+          <div class="min-w-0">
+            <div class="font-medium">Payment link PL-7F2A created</div>
+            <div class="text-[11px] text-on-surface-variant">Sarah A. · 10/28/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">schedule</span>
+          <div class="min-w-0">
+            <div class="font-medium">Reminder sent to Northwind Labs</div>
+            <div class="text-[11px] text-on-surface-variant">Auto · 10/28/2026</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-green mt-0.5">request_quote</span>
+          <div class="min-w-0">
+            <div class="font-medium">Estimate 0221 created for Orion</div>
+            <div class="text-[11px] text-on-surface-variant">Priya N. · 10/26/2026</div>
+          </div>
+        </div>
+      </div>
+      <button class="w-full mt-3 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low flex items-center justify-center gap-1" data-full-history>
+        <span class="material-symbols-outlined text-[14px]">history</span>View full history</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* KPI cards → drill down */
+document.querySelectorAll("[data-drill]").forEach(el=>el.addEventListener("click", ()=>{
+  toast(`Drill down → ${el.dataset.drill.replace(/-/g," ")}`);
+}));
+
+/* Create actions */
+document.querySelectorAll("[data-create]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`Create → ${b.dataset.create}`);
+}));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout — filtered to Sales & Get Paid"));
+
+/* Invoices + payments drill */
+document.querySelectorAll("[data-invoice]").forEach(el=>el.addEventListener("click", ()=>toast(`Open invoice ${el.dataset.invoice}`)));
+document.querySelectorAll("[data-payment]").forEach(el=>el.addEventListener("click", ()=>toast(`Open payment ${el.dataset.payment}`)));
+
+/* Nav links */
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click", ()=>toast(`Navigate → ${b.dataset.goto}`)));
+
+/* Utility */
+document.querySelector("[data-date-range]").addEventListener("click", ()=>toast("Date range picker"));
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Exporting overview…"));
+document.querySelector("[data-full-history]").addEventListener("click", ()=>toast("Full sales activity history — 42 entries"));
+</script>
+</body>
+</html>

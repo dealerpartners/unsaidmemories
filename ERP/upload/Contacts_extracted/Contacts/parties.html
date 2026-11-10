@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contacts — Parties</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .pill.role{background:#f4f3f7;color:#1a1c1e;border:1px solid #dad9dd}
+  .pill.role.customer{background:#e8f5e9;color:#0a6400;border-color:#b9f6ca}
+  .pill.role.vendor{background:#e3f2fd;color:#0055a5;border-color:#bbdefb}
+  .pill.role.supplier{background:#fff3e0;color:#bf5c59;border-color:#ffe0b2}
+  .pill.role.contact{background:#f3e5f5;color:#6b1e28;border-color:#e1bee7}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:680px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:6px;background:#fff;min-height:80px;resize:vertical;font-size:13px}
+  .field-textarea:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:12px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .avatar{width:40px;height:40px;border-radius:50%;background:#e6efed;color:#0a6400;display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+  .avatar.vendor{background:#e3f2fd;color:#0055a5}
+  .avatar.supplier{background:#fff3e0;color:#bf5c59}
+  .avatar.contact{background:#f3e5f5;color:#6b1e28}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+  .role-chip-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #dad9dd;border-radius:20px;background:#fff;cursor:pointer;transition:.15s}
+  .role-chip-btn:hover{border-color:#becab6;background:#f4fbfa}
+  .role-chip-btn.selected{border-color:#0a6400;background:#e8f5e9;color:#0a6400;font-weight:600}
+  .role-section{border:1px solid #dad9dd;border-radius:8px;padding:12px;background:#faf9fc;margin-top:12px}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Contacts</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">Parties</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Parties</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">One unified list for Customers, Vendors, Suppliers, and Contacts. Filter by role.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnExport">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnCustomize">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" id="btnNewParty">
+          <span class="material-symbols-outlined text-[16px]">add</span>New party
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total parties</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statTotal">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across all roles</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Customers</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="statCustomers">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Active in CRM</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Vendors &amp; Suppliers</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-qb-blue" id="statVendors">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Bills &amp; purchasing</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Outstanding balance</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error" id="statBalance">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">AR + AP combined</div>
+    </div>
+  </div>
+
+  <!-- ─── CREATE ACTIONS ROW ─── -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create-role="Customer">
+      <span class="material-symbols-outlined text-[16px]">person_add</span>Add customer
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create-role="Vendor">
+      <span class="material-symbols-outlined text-[16px]">storefront</span>Add vendor
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create-role="Supplier">
+      <span class="material-symbols-outlined text-[16px]">factory</span>Add supplier
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create-role="Contact">
+      <span class="material-symbols-outlined text-[16px]">contacts</span>Add contact
+    </button>
+  </div>
+
+  <!-- ─── LIST CARD ─── -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden mb-4">
+
+    <!-- Role Tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Customers">Customers</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Vendors">Vendors</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Suppliers">Suppliers</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Contacts">Contacts</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input id="searchInput" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name, email, phone…"/>
+      </div>
+      <div class="relative">
+        <button id="btnRoleFilter" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">badge</span>Roles
+        </button>
+        <div id="popRole" class="row-menu" style="min-width:200px">
+          <div class="menu-header">Filter by role</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Customer" checked/>Customer</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Vendor" checked/>Vendor</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Supplier" checked/>Supplier</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-role" value="Contact" checked/>Contact</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="roleClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="roleApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnSaved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+        </button>
+        <div id="popSaved" class="row-menu" style="min-width:240px">
+          <div class="menu-header">Saved views</div>
+          <div id="savedList" class="max-h-[220px] overflow-y-auto"></div>
+          <div class="sep"></div>
+          <button id="saveCurrentView" class="w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2 text-primary font-semibold">
+            <span class="material-symbols-outlined text-[16px]">bookmark_add</span>Save current view…
+          </button>
+        </div>
+      </div>
+      <button id="btnClearAll" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 hidden-imp">
+        <span class="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-b-count>—</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="email"><span class="material-symbols-outlined text-[14px] align-middle mr-1">mail</span>Email</button>
+      <button data-bulk="merge"><span class="material-symbols-outlined text-[14px] align-middle mr-1">call_merge</span>Merge</button>
+      <button data-bulk="archive"><span class="material-symbols-outlined text-[14px] align-middle mr-1">archive</span>Archive</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" id="checkAll"/></th>
+          <th class="px-3 py-2">Name</th>
+          <th class="px-3 py-2">Roles</th>
+          <th class="px-3 py-2">Contact</th>
+          <th class="px-3 py-2 text-right">Open balance</th>
+          <th class="px-3 py-2">Added</th>
+          <th class="w-10 px-2 py-2"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" id="partyTbody"></tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="hidden-imp py-12 px-6 text-center" id="partyEmpty">
+      <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+        <span class="material-symbols-outlined text-[28px] text-outline">groups</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No parties match</h3>
+      <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or add a new party.</p>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="emptyClear">Clear filters</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white" id="rowsPerPage">
+          <option>25</option><option>50</option><option>75</option><option>100</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pagePrev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span id="pageLabel">Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pageNext"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Scrim -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New party</div>
+  <button data-create-role="Customer"><span class="material-symbols-outlined">person_add</span>Customer</button>
+  <button data-create-role="Vendor"><span class="material-symbols-outlined">storefront</span>Vendor</button>
+  <button data-create-role="Supplier"><span class="material-symbols-outlined">factory</span>Supplier</button>
+  <button data-create-role="Contact"><span class="material-symbols-outlined">contacts</span>Contact</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="rowMenu">
+  <div class="menu-header">This party</div>
+  <button data-row-act="edit"><span class="material-symbols-outlined">edit</span>Edit party</button>
+  <button data-row-act="view"><span class="material-symbols-outlined">visibility</span>View details</button>
+  <button data-row-act="email"><span class="material-symbols-outlined">mail</span>Email</button>
+  <div class="sep"></div>
+  <div class="menu-header">Roles</div>
+  <button data-row-act="add-role"><span class="material-symbols-outlined">add</span>Add role…</button>
+  <div class="sep"></div>
+  <button class="danger" data-row-act="archive"><span class="material-symbols-outlined">archive</span>Archive</button>
+</div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Party</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekEdit" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Party Drawer (Create/Edit) -->
+<div class="drawer" id="partyDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">groups</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="drawerTitle">New party</div>
+        <div class="text-[11px] text-on-surface-variant" id="drawerSub">Add details and assign roles.</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="drawerClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+    <!-- Role Chips -->
+    <section>
+      <div class="section-h">Roles</div>
+      <div class="flex flex-wrap gap-2">
+        <button class="role-chip-btn" data-role-chip="Customer">
+          <span class="material-symbols-outlined text-[16px]">person</span>Customer
+        </button>
+        <button class="role-chip-btn" data-role-chip="Vendor">
+          <span class="material-symbols-outlined text-[16px]">storefront</span>Vendor
+        </button>
+        <button class="role-chip-btn" data-role-chip="Supplier">
+          <span class="material-symbols-outlined text-[16px]">factory</span>Supplier
+        </button>
+        <button class="role-chip-btn" data-role-chip="Contact">
+          <span class="material-symbols-outlined text-[16px]">contacts</span>Contact
+        </button>
+      </div>
+    </section>
+
+    <!-- Names & Contact -->
+    <section>
+      <div class="section-h">Names &amp; contact</div>
+      <div class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Company name</label>
+            <input class="field-input" id="partyName" placeholder="e.g. Acme Corp"/>
+          </div>
+          <div>
+            <label class="field-label">Display name</label>
+            <input class="field-input" id="partyDisplay" placeholder="e.g. Acme"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">First name</label>
+            <input class="field-input" id="partyFirst" placeholder="First"/>
+          </div>
+          <div>
+            <label class="field-label">Last name</label>
+            <input class="field-input" id="partyLast" placeholder="Last"/>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Email</label>
+            <input class="field-input" type="email" id="partyEmail" placeholder="name@company.com"/>
+          </div>
+          <div>
+            <label class="field-label">Phone</label>
+            <input class="field-input" type="tel" id="partyPhone" placeholder="+1 (555) 000-0000"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Address -->
+    <section>
+      <div class="section-h">Address</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Street 1</label>
+          <input class="field-input" id="partyStreet1" placeholder="Street 1"/>
+        </div>
+        <div>
+          <label class="field-label">Street 2</label>
+          <input class="field-input" id="partyStreet2" placeholder="Street 2"/>
+        </div>
+        <div>
+          <label class="field-label">City</label>
+          <input class="field-input" id="partyCity" placeholder="City"/>
+        </div>
+        <div>
+          <label class="field-label">State / Province</label>
+          <input class="field-input" id="partyState" placeholder="State"/>
+        </div>
+        <div>
+          <label class="field-label">ZIP / Postal</label>
+          <input class="field-input" id="partyZip" placeholder="ZIP"/>
+        </div>
+        <div>
+          <label class="field-label">Country</label>
+          <select class="field-input" id="partyCountry">
+            <option>United States</option><option>Canada</option><option>United Kingdom</option><option>Australia</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Role-Specific Sections (hidden by default, shown by role chips) -->
+    <div id="sectionCustomer" class="role-section hidden-imp">
+      <div class="text-label-sm font-bold text-primary mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">person</span>Customer details</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Terms</label>
+          <select class="field-input" id="custTerms"><option>Net 30</option><option>Net 15</option><option>Due on receipt</option></select>
+        </div>
+        <div>
+          <label class="field-label">Credit limit</label>
+          <input class="field-input" id="custCredit" placeholder="$0.00"/>
+        </div>
+      </div>
+      <label class="flex items-center gap-2 mt-3 text-body-sm"><input type="checkbox" id="custConsent" class="row-check"/> Marketing consent</label>
+    </div>
+
+    <div id="sectionVendor" class="role-section hidden-imp">
+      <div class="text-label-sm font-bold text-qb-blue mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">storefront</span>Vendor details</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Terms</label>
+          <select class="field-input" id="vendTerms"><option>Net 30</option><option>Net 15</option><option>Due on receipt</option></select>
+        </div>
+        <div>
+          <label class="field-label">Default expense account</label>
+          <input class="field-input" id="vendAccount" placeholder="Select account…"/>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mt-3">
+        <div>
+          <label class="field-label">Tax ID</label>
+          <input class="field-input code-mono" id="vendTaxId" placeholder="XX-XXXXXXX"/>
+        </div>
+        <div class="flex items-end">
+          <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" id="vend1099" class="row-check"/> Track for 1099</label>
+        </div>
+      </div>
+    </div>
+
+    <div id="sectionSupplier" class="role-section hidden-imp">
+      <div class="text-label-sm font-bold text-error mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">factory</span>Supplier details</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Account no.</label>
+          <input class="field-input code-mono" id="suppAccountNo" placeholder="SUP-000"/>
+        </div>
+        <div>
+          <label class="field-label">Lead time (days)</label>
+          <input class="field-input" id="suppLeadTime" placeholder="e.g. 7"/>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="field-label">Catalog / API URL</label>
+        <input class="field-input code-mono" id="suppUrl" placeholder="https://supplier.com/api"/>
+      </div>
+    </div>
+
+    <div id="sectionContact" class="role-section hidden-imp">
+      <div class="text-label-sm font-bold text-qb-maroon mb-2 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">contacts</span>Contact details</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Company</label>
+          <input class="field-input" id="contCompany" placeholder="Company name"/>
+        </div>
+        <div>
+          <label class="field-label">Title</label>
+          <input class="field-input" id="contTitle" placeholder="Job title"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <section>
+      <div class="section-h">Notes &amp; attachments</div>
+      <textarea class="field-textarea" id="partyNotes" placeholder="Add any notes about this party…"></textarea>
+      <div class="mt-2 border border-dashed border-surface-dim rounded-lg p-3 text-center cursor-pointer hover:bg-surface-container-low">
+        <div class="text-[12px] font-semibold text-primary">Attach a file</div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="drawerCancel">Cancel</button>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" id="drawerSaveNew">Save and new</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="drawerSave">Save and close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Save view modal -->
+<div class="modal-scrim" id="saveViewModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Save current view</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Name this combination of filters so you can reuse it.</p>
+    <input class="field-input mb-3" id="saveViewName" placeholder="e.g. Vendors with open bills"/>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="saveViewCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="saveViewConfirm">Save view</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){ return (n||0).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
+function initials(name){ return (name||"").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase() || "??"; }
+
+/* ─── data ─── */
+const ALL_ROLES = ["Customer", "Vendor", "Supplier", "Contact"];
+
+let PARTIES = [
+  { id:"P-1001", name:"Acme Corp", displayName:"Acme", firstName:"John", lastName:"Doe", email:"john@acme.com", phone:"+1 (555) 111-2222", roles:["Customer"], balance:1240.00, added:"2026-10-15", address:"123 Main St, Springfield, IL 62701" },
+  { id:"P-1002", name:"Blue Ridge Co.", displayName:"Blue Ridge", firstName:"Sarah", lastName:"Smith", email:"sarah@blueridge.co", phone:"+1 (555) 333-4444", roles:["Customer", "Vendor"], balance:0, added:"2026-08-02", address:"456 Ridge Rd, Asheville, NC 28801" },
+  { id:"P-1003", name:"Printful Inc.", displayName:"Printful", firstName:"Print", lastName:"Fulfillment", email:"support@printful.com", phone:"+1 (555) 000-1111", roles:["Supplier"], balance:-2880.00, added:"2026-01-10", address:"789 Print Ave, Charlotte, NC 28202" },
+  { id:"P-1004", name:"Gelato Pty Ltd", displayName:"Gelato", firstName:"Gelato", lastName:"Support", email:"help@gelato.com", phone:"+61 2 8000 0000", roles:["Supplier"], balance:-1200.00, added:"2026-03-22", address:"10 George St, Sydney NSW 2000, Australia" },
+  { id:"P-1005", name:"Jane Miller", displayName:"Jane", firstName:"Jane", lastName:"Miller", email:"jane.miller@email.com", phone:"+1 (555) 777-8888", roles:["Contact"], balance:0, added:"2026-09-01", address:"101 Elm St, Austin, TX 78701" },
+  { id:"P-1006", name:"Staples", displayName:"Staples", firstName:"Office", lastName:"Supplies", email:"billing@staples.com", phone:"+1 (800) 333-3333", roles:["Vendor"], balance:-142.50, added:"2026-05-14", address:"500 Staples Dr, Framingham, MA 01702" }
+];
+
+let SAVED_VIEWS = [
+  { id:"sv-1", name:"Customers", tab:"Customers", q:"", roles:["Customer"] },
+  { id:"sv-2", name:"Suppliers", tab:"Suppliers", q:"", roles:["Supplier"] }
+];
+
+/* ─── state ─── */
+const filters = { q:"", tab:"All", roles:new Set(ALL_ROLES) };
+let editing = null;
+let peekId = null;
+let currentDraftRoles = new Set();
+
+/* ─── filtering ─── */
+function filteredParties(){
+  return PARTIES.filter(p=>{
+    const q = filters.q.toLowerCase();
+    const qOK = !q || (p.name + " " + p.email + " " + p.phone).toLowerCase().includes(q);
+    
+    // Tab filter
+    let tabOK = true;
+    if (filters.tab !== "All") {
+      // "Customers" tab matches role "Customer", etc.
+      const targetRole = filters.tab.slice(0, -1); // remove 's'
+      tabOK = p.roles.includes(targetRole) || p.roles.includes(filters.tab);
+    }
+    
+    // Role checkbox filter
+    const roleOK = p.roles.some(r => filters.roles.has(r));
+    
+    return qOK && tabOK && roleOK;
+  });
+}
+
+/* ─── render table ─── */
+function renderTable(){
+  const rows = filteredParties();
+  const tbody = document.getElementById("partyTbody");
+  tbody.innerHTML = rows.map(p=>{
+    let avatarClass = "";
+    if (p.roles.includes("Vendor")) avatarClass = "vendor";
+    if (p.roles.includes("Supplier")) avatarClass = "supplier";
+    if (p.roles.includes("Contact")) avatarClass = "contact";
+    if (p.roles.includes("Customer") && !p.roles.includes("Vendor") && !p.roles.includes("Supplier") && !p.roles.includes("Contact")) avatarClass = "";
+
+    const rolePills = p.roles.map(r => {
+      const cls = r === "Customer" ? "customer" : r === "Vendor" ? "vendor" : r === "Supplier" ? "supplier" : "contact";
+      return `<span class="pill role ${cls}">${esc(r)}</span>`;
+    }).join("");
+
+    const balanceClass = p.balance > 0 ? "text-error" : p.balance < 0 ? "text-qb-blue" : "text-on-surface";
+
+    return `
+      <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${p.id}">
+        <td class="px-3 py-2"><input type="checkbox" class="row-check party-check" onclick="event.stopPropagation()"/></td>
+        <td class="px-3 py-2">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="avatar ${avatarClass}">${initials(p.name)}</div>
+            <div class="min-w-0">
+              <div class="font-medium truncate">${esc(p.name)}</div>
+              <div class="text-[11px] text-on-surface-variant truncate">${esc(p.address)}</div>
+            </div>
+          </div>
+        </td>
+        <td class="px-3 py-2"><div class="flex flex-wrap gap-1">${rolePills}</div></td>
+        <td class="px-3 py-2">
+          <div class="text-[12px] truncate">${esc(p.email)}</div>
+          <div class="text-[11px] text-on-surface-variant">${esc(p.phone)}</div>
+        </td>
+        <td class="px-3 py-2 text-right tabular-nums ${balanceClass}">${p.balance !== 0 ? fmt(p.balance) : "—"}</td>
+        <td class="px-3 py-2 text-[11px]">${p.added}</td>
+        <td class="px-2 py-2 text-right">
+          <button class="w-7 h-7 rounded border border-surface-dim hover:bg-surface-container flex items-center justify-center mx-auto" data-row-menu="${p.id}" title="Row actions"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  document.querySelector("[data-b-count]").textContent = `${rows.length} of ${PARTIES.length}`;
+  document.getElementById("partyEmpty").classList.toggle("hidden-imp", rows.length > 0);
+  tbody.classList.toggle("hidden-imp", rows.length === 0);
+  syncCounts();
+  syncSelectAll();
+  syncBulk();
+  syncClearAll();
+}
+
+function syncCounts(){
+  const total = PARTIES.length;
+  const customers = PARTIES.filter(p=>p.roles.includes("Customer")).length;
+  const vendors = PARTIES.filter(p=>p.roles.includes("Vendor") || p.roles.includes("Supplier")).length;
+  let bal = 0; PARTIES.forEach(p=>bal += p.balance);
+  
+  document.getElementById("statTotal").textContent = total;
+  document.getElementById("statCustomers").textContent = customers;
+  document.getElementById("statVendors").textContent = vendors;
+  document.getElementById("statBalance").textContent = fmt(bal);
+}
+
+/* ─── row click → peek ─── */
+document.getElementById("partyTbody").addEventListener("click", e=>{
+  const row = e.target.closest("[data-row]");
+  if (!row) return;
+  if (e.target.closest("button") || e.target.closest("input")) return;
+  openPeek(row.dataset.row);
+});
+
+/* ─── row ⋯ menu ─── */
+const rowMenu = document.getElementById("rowMenu");
+document.getElementById("partyTbody").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-row-menu]");
+  if (!btn) return;
+  e.stopPropagation();
+  const id = btn.dataset.rowMenu;
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+  rowMenu.dataset.target = id;
+});
+rowMenu.querySelectorAll("[data-row-act]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.rowAct;
+  const id = rowMenu.dataset.target;
+  const p = PARTIES.find(x=>x.id === id);
+  rowMenu.classList.remove("open");
+  if (!p) return;
+  switch(act){
+    case "edit": openPartyDrawer(p.id); break;
+    case "view": openPeek(p.id); break;
+    case "email": toast(`Composing email to ${p.email}`); break;
+    case "add-role": openPartyDrawer(p.id); break;
+    case "archive":
+      if (confirm(`Archive "${p.name}"?`)){
+        PARTIES = PARTIES.filter(x=>x.id !== p.id);
+        renderTable(); toast(`Archived: ${p.name}`);
+      }
+      break;
+  }
+}));
+
+/* ─── outside click ─── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#rowMenu") && !e.target.closest("[data-row-menu]")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+  if (!e.target.closest("#popRole") && !e.target.closest("#btnRoleFilter")) popRole.classList.remove("open");
+  if (!e.target.closest("#popSaved") && !e.target.closest("#btnSaved")) popSaved.classList.remove("open");
+});
+
+/* ─── tabs ─── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  filters.tab = b.dataset.viewtab;
+  renderTable();
+}));
+
+/* ─── search ─── */
+document.getElementById("searchInput").addEventListener("input", e=>{ filters.q = e.target.value; renderTable(); });
+
+/* ─── role popover ─── */
+const popRole = document.getElementById("popRole");
+document.getElementById("btnRoleFilter").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popRole.style.top = (r.bottom + 4) + "px";
+  popRole.style.left = Math.min(r.left, window.innerWidth - 220) + "px";
+  popSaved.classList.remove("open");
+  popRole.classList.toggle("open");
+});
+document.getElementById("roleApply").addEventListener("click", ()=>{
+  filters.roles = new Set([...document.querySelectorAll(".filter-role:checked")].map(cb=>cb.value));
+  popRole.classList.remove("open");
+  renderTable();
+});
+document.getElementById("roleClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-role").forEach(cb=>cb.checked = true);
+  filters.roles = new Set(ALL_ROLES);
+  popRole.classList.remove("open");
+  renderTable();
+});
+
+/* ─── saved views ─── */
+const popSaved = document.getElementById("popSaved");
+document.getElementById("btnSaved").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  popSaved.style.top = (r.bottom + 4) + "px";
+  popSaved.style.left = Math.min(r.left, window.innerWidth - 260) + "px";
+  popRole.classList.remove("open");
+  renderSavedViews();
+  popSaved.classList.toggle("open");
+});
+function renderSavedViews(){
+  document.getElementById("savedList").innerHTML = SAVED_VIEWS.map(v=>`
+    <div class="w-full px-3 py-1.5 hover:bg-surface-container-low flex items-center gap-2">
+      <button class="flex-1 text-left flex items-center gap-2" data-apply-view="${v.id}">
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">bookmark</span>
+        <span class="truncate">${esc(v.name)}</span>
+      </button>
+      <button class="w-5 h-5 rounded hover:bg-surface-container flex items-center justify-center" data-delete-view="${v.id}"><span class="material-symbols-outlined text-[14px] text-outline">close</span></button>
+    </div>
+  `).join("") || `<div class="px-3 py-2 text-[11px] text-on-surface-variant">No saved views yet.</div>`;
+  document.querySelectorAll("[data-apply-view]").forEach(b=>b.addEventListener("click", ()=>{
+    const v = SAVED_VIEWS.find(x=>x.id === b.dataset.applyView); if (!v) return;
+    filters.tab = v.tab;
+    filters.q = v.q;
+    document.getElementById("searchInput").value = v.q;
+    filters.roles = new Set(v.roles);
+    document.querySelectorAll(".filter-role").forEach(cb=>cb.checked = v.roles.includes(cb.value));
+    document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x.dataset.viewtab === v.tab));
+    popSaved.classList.remove("open");
+    renderTable();
+    toast("Applied view: " + v.name);
+  }));
+  document.querySelectorAll("[data-delete-view]").forEach(b=>b.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    SAVED_VIEWS = SAVED_VIEWS.filter(x=>x.id !== b.dataset.deleteView);
+    renderSavedViews();
+    toast("View deleted");
+  }));
+}
+document.getElementById("saveCurrentView").addEventListener("click", ()=>{
+  popSaved.classList.remove("open");
+  document.getElementById("saveViewName").value = "";
+  document.getElementById("saveViewModal").classList.add("open");
+});
+document.getElementById("saveViewCancel").addEventListener("click", ()=>document.getElementById("saveViewModal").classList.remove("open"));
+document.getElementById("saveViewConfirm").addEventListener("click", ()=>{
+  const name = document.getElementById("saveViewName").value.trim();
+  if (!name){ toast("Name is required"); return; }
+  SAVED_VIEWS.push({ id:"sv-" + Date.now(), name, tab: filters.tab, q: filters.q, roles:[...filters.roles] });
+  document.getElementById("saveViewModal").classList.remove("open");
+  toast("Saved view: " + name);
+  renderSavedViews();
+});
+
+/* ─── clear all ─── */
+function syncClearAll(){
+  const active = filters.q || filters.tab !== "All" || filters.roles.size !== ALL_ROLES.length;
+  document.getElementById("btnClearAll").classList.toggle("hidden-imp", !active);
+}
+document.getElementById("btnClearAll").addEventListener("click", ()=>{
+  filters.q = ""; document.getElementById("searchInput").value = "";
+  filters.tab = "All";
+  document.querySelectorAll("[data-viewtab]").forEach(b=>b.classList.toggle("active", b.dataset.viewtab === "All"));
+  filters.roles = new Set(ALL_ROLES);
+  document.querySelectorAll(".filter-role").forEach(cb=>cb.checked = true);
+  renderTable();
+});
+document.getElementById("emptyClear").addEventListener("click", ()=>document.getElementById("btnClearAll").click());
+
+/* ─── bulk ─── */
+function syncSelectAll(){
+  const all = document.getElementById("checkAll");
+  const rows = [...document.querySelectorAll(".party-check")].filter(cb=>cb.closest("tr").style.display !== "none");
+  const checked = rows.filter(cb=>cb.checked);
+  all.checked = rows.length > 0 && checked.length === rows.length;
+  all.indeterminate = checked.length > 0 && checked.length < rows.length;
+}
+function syncBulk(){
+  const n = [...document.querySelectorAll(".party-check")].filter(cb=>cb.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  bar.classList.toggle("show", n > 0);
+  document.querySelector("[data-bulk-count]").textContent = `${n} selected`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.classList.contains("party-check")) syncBulk();
+  if (e.target.id === "checkAll"){
+    const on = e.target.checked;
+    document.querySelectorAll(".party-check").forEach(cb=>{
+      if (cb.closest("tr").style.display !== "none") cb.checked = on;
+    });
+    syncBulk();
+  }
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".party-check").forEach(cb=>cb.checked = false);
+    document.getElementById("checkAll").checked = false;
+    syncBulk(); return;
+  }
+  const selected = [...document.querySelectorAll(".party-check:checked")].map(cb=>cb.closest("tr").dataset.row);
+  const n = selected.length;
+  if (act === "email"){ toast(`Composing bulk email to ${n} parties`); }
+  else if (act === "merge"){ toast(`Merge ${n} parties… (requires selection of 2+)`); }
+  else if (act === "archive"){
+    selected.forEach(id=>{ PARTIES = PARTIES.filter(x=>x.id !== id); });
+    toast(`Archived ${n} parties`);
+  }
+  else if (act === "delete"){
+    if (confirm(`Delete ${n} parties?`)){
+      selected.forEach(id=>{ PARTIES = PARTIES.filter(x=>x.id !== id); });
+      toast(`Deleted ${n} parties`);
+    }
+  }
+  renderTable();
+  document.querySelectorAll(".party-check").forEach(cb=>cb.checked = false);
+  document.getElementById("checkAll").checked = false;
+  syncBulk();
+}));
+
+/* ─── peek ─── */
+function openPeek(id){
+  peekId = id;
+  const p = PARTIES.find(x=>x.id === id); if (!p) return;
+  document.getElementById("peekTitle").textContent = p.name;
+  
+  const rolePills = p.roles.map(r => {
+    const cls = r === "Customer" ? "customer" : r === "Vendor" ? "vendor" : r === "Supplier" ? "supplier" : "contact";
+    return `<span class="pill role ${cls}">${esc(r)}</span>`;
+  }).join("");
+
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-4 flex items-center gap-2">${rolePills}</div>
+    <dl class="text-body-sm mb-4">
+      <div class="kv"><dt>Company</dt><dd>${esc(p.name)}</dd></div>
+      <div class="kv"><dt>Contact name</dt><dd>${esc(p.firstName + " " + p.lastName)}</dd></div>
+      <div class="kv"><dt>Email</dt><dd><a href="mailto:${esc(p.email)}" class="text-primary hover:underline">${esc(p.email)}</a></dd></div>
+      <div class="kv"><dt>Phone</dt><dd>${esc(p.phone)}</dd></div>
+      <div class="kv"><dt>Address</dt><dd class="text-right">${esc(p.address)}</dd></div>
+      <div class="kv"><dt>Open balance</dt><dd class="${p.balance > 0 ? 'text-error' : p.balance < 0 ? 'text-qb-blue' : ''}">${p.balance !== 0 ? fmt(p.balance) : '—'}</dd></div>
+      <div class="kv"><dt>Added</dt><dd>${p.added}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="edit"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="email"><span class="material-symbols-outlined text-[16px]">mail</span>Email</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    const act = b.dataset.peek;
+    if (act === "edit"){ closePeek(); openPartyDrawer(p.id); }
+    else if (act === "email"){ toast(`Composing email to ${p.email}`); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", ()=>{
+  if (document.getElementById("partyDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peekEdit").addEventListener("click", ()=>{
+  if (!peekId) return;
+  const id = peekId; closePeek(); openPartyDrawer(id);
+});
+
+/* ─── party drawer ─── */
+function openPartyDrawer(id){
+  editing = id ? PARTIES.find(p=>p.id === id) : null;
+  document.getElementById("drawerTitle").textContent = editing ? "Edit party" : "New party";
+  document.getElementById("drawerSub").textContent = editing ? editing.id : "Add details and assign roles.";
+
+  // Populate fields
+  document.getElementById("partyName").value = editing ? editing.name : "";
+  document.getElementById("partyDisplay").value = editing ? (editing.displayName || "") : "";
+  document.getElementById("partyFirst").value = editing ? (editing.firstName || "") : "";
+  document.getElementById("partyLast").value = editing ? (editing.lastName || "") : "";
+  document.getElementById("partyEmail").value = editing ? editing.email : "";
+  document.getElementById("partyPhone").value = editing ? editing.phone : "";
+  document.getElementById("partyStreet1").value = editing ? (editing.address || "") : "";
+  document.getElementById("partyStreet2").value = "";
+  document.getElementById("partyCity").value = "";
+  document.getElementById("partyState").value = "";
+  document.getElementById("partyZip").value = "";
+  document.getElementById("partyCountry").value = "United States";
+  document.getElementById("partyNotes").value = "";
+
+  // Populate roles
+  currentDraftRoles = new Set(editing ? editing.roles : []);
+  document.querySelectorAll(".role-chip-btn").forEach(b=>{
+    b.classList.toggle("selected", currentDraftRoles.has(b.dataset.roleChip));
+  });
+
+  // Show/Hide role-specific sections based on current roles
+  document.getElementById("sectionCustomer").classList.toggle("hidden-imp", !currentDraftRoles.has("Customer"));
+  document.getElementById("sectionVendor").classList.toggle("hidden-imp", !currentDraftRoles.has("Vendor"));
+  document.getElementById("sectionSupplier").classList.toggle("hidden-imp", !currentDraftRoles.has("Supplier"));
+  document.getElementById("sectionContact").classList.toggle("hidden-imp", !currentDraftRoles.has("Contact"));
+
+  document.getElementById("partyDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closePartyDrawer(){
+  document.getElementById("partyDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing = null;
+}
+document.getElementById("drawerClose").addEventListener("click", closePartyDrawer);
+document.getElementById("drawerCancel").addEventListener("click", closePartyDrawer);
+
+// Role chip toggling
+document.querySelectorAll(".role-chip-btn").forEach(b=>b.addEventListener("click", ()=>{
+  const role = b.dataset.roleChip;
+  if (currentDraftRoles.has(role)) currentDraftRoles.delete(role);
+  else currentDraftRoles.add(role);
+  
+  b.classList.toggle("selected", currentDraftRoles.has(role));
+  
+  // Show/Hide role-specific sections based on current roles
+  document.getElementById("sectionCustomer").classList.toggle("hidden-imp", !currentDraftRoles.has("Customer"));
+  document.getElementById("sectionVendor").classList.toggle("hidden-imp", !currentDraftRoles.has("Vendor"));
+  document.getElementById("sectionSupplier").classList.toggle("hidden-imp", !currentDraftRoles.has("Supplier"));
+  document.getElementById("sectionContact").classList.toggle("hidden-imp", !currentDraftRoles.has("Contact"));
+}));
+
+function collectParty(){
+  const name = document.getElementById("partyName").value.trim();
+  if (!name){ toast("Company name is required"); return null; }
+  if (currentDraftRoles.size === 0){ toast("Select at least one role"); return null; }
+
+  return {
+    id: editing ? editing.id : "P-" + String(PARTIES.length + 1001).slice(-4),
+    name: name,
+    displayName: document.getElementById("partyDisplay").value,
+    firstName: document.getElementById("partyFirst").value,
+    lastName: document.getElementById("partyLast").value,
+    email: document.getElementById("partyEmail").value,
+    phone: document.getElementById("partyPhone").value,
+    roles: [...currentDraftRoles],
+    address: document.getElementById("partyStreet1").value + (document.getElementById("partyCity").value ? ", " + document.getElementById("partyCity").value : ""),
+    balance: editing ? editing.balance : 0,
+    added: editing ? editing.added : new Date().toISOString().slice(0,10)
+  };
+}
+
+document.getElementById("drawerSave").addEventListener("click", ()=>{
+  const p = collectParty(); if (!p) return;
+  if (editing){ const idx = PARTIES.findIndex(x=>x.id === editing.id); if (idx >= 0) PARTIES[idx] = p; }
+  else PARTIES.unshift(p);
+  closePartyDrawer(); renderTable();
+  toast(editing ? "Party updated" : "Party created");
+});
+document.getElementById("drawerSaveNew").addEventListener("click", ()=>{
+  const p = collectParty(); if (!p) return;
+  if (editing){ const idx = PARTIES.findIndex(x=>x.id === editing.id); if (idx >= 0) PARTIES[idx] = p; }
+  else PARTIES.unshift(p);
+  closePartyDrawer();
+  openPartyDrawer(null);
+  renderTable();
+  toast("Saved. New party form ready.");
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.querySelectorAll("[data-create-role]").forEach(b=>b.addEventListener("click", (e)=>{
+  const role = b.dataset.createRole;
+  createMenu.classList.remove("open");
+  openPartyDrawer(null);
+  // Pre-select the role
+  currentDraftRoles = new Set([role]);
+  document.querySelectorAll(".role-chip-btn").forEach(x=>x.classList.toggle("selected", x.dataset.roleChip === role));
+  document.getElementById("sectionCustomer").classList.toggle("hidden-imp", role !== "Customer");
+  document.getElementById("sectionVendor").classList.toggle("hidden-imp", role !== "Vendor");
+  document.getElementById("sectionSupplier").classList.toggle("hidden-imp", role !== "Supplier");
+  document.getElementById("sectionContact").classList.toggle("hidden-imp", role !== "Contact");
+}));
+document.getElementById("btnNewParty").addEventListener("click", ()=>openPartyDrawer(null));
+
+/* ─── pagination & misc ─── */
+document.getElementById("rowsPerPage").addEventListener("change", ()=>toast("Rows per page updated"));
+document.getElementById("pagePrev").addEventListener("click", ()=>toast("Previous page"));
+document.getElementById("pageNext").addEventListener("click", ()=>toast("Next page"));
+document.getElementById("btnExport").addEventListener("click", ()=>toast("Exported parties CSV"));
+document.getElementById("btnCustomize").addEventListener("click", ()=>toast("Customize panel"));
+
+/* ─── boot ─── */
+renderTable();
+</script>
+</body>
+</html>

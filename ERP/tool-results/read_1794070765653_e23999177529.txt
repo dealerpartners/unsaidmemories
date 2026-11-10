@@ -1,0 +1,399 @@
+   500→**Settlement (Stripe/Shopify):** Workspace — payout lands → auto-splits into: Gross sales, Fees, Refunds, Disputes, Reserve, Net deposit → one-click **Post** creates deposit + fee expense + clears invoices/orders.
+   501→
+   502→**Lines of credit / Credit cards / Loans:** Account-style cards with balance, available, next payment pill; **Pay** (modal), **Reconcile**, **Import transactions**.
+   503→**Entities:** Legal entities/brands, each with own books; entity switcher pill in header.
+   504→**Funnel / Cash flow:** Funnel = money pipeline visual; each stage clickable into filtered lists.
+   505→
+   506→**Rides along:** Every posted document has **View journal entry** · Reports drill from any number down to transactions · Orders/payouts reconcile to deposits · Tax summary reads this ledger.
+   507→
+   508→---
+   509→
+   510→### MODULE: Business Tax
+   511→
+   512→Overview (Business tax at a glance) · Tax summary (Taxable profit estimate, Taxable income, Deductible expenses, What you could be taxed on, Income from transactions, Depreciable assets) · 1099-K detail · Payroll tax · Year-end filing.
+   513→**Create actions:** Create tax return (workspace wizard) · Download tax summary (modal → PDF).
+   514→Columns for deductible expenses: Category · Amount · % deductible · Source count (pill → filtered transactions).
+   515→**Alert pills:** Uncategorized transactions, Missing W-9, Unreconciled accounts — each opens the fix surface.
+   516→**Rides along:** Contractors → 1099 · Sales tax (needs definition) · Reconcile status gates "ready to file" · Fixed assets from Bills.
+   517→
+   518→---
+   519→
+   520→### MODULE: Marketing & Social
+   521→
+   522→**Banners & Popups**
+   523→- List columns: Name · Type · Slot/Placement · Status · Schedule · Audience (segment pill) · Views · Clicks · Conversions · ⋯
+   524→- Create: **Drawer** (Banner = Storefront slot picker; Popup = trigger, creative, audience) with live preview pane. Product/Collection/Discount pickers embedded.
+   525→
+   526→**Discount codes / Promotions**
+   527→- Columns: Code · Type (% / $ / BOGO / shipping) · Value · Window · Usage / limit · Applies to · Status · Revenue
+   528→- Create: **Drawer** (Type, value, window, eligibility, limit, stacking). Applies-to uses Item/Collection/Segment pickers.
+   529→- Right-click: Duplicate · Pause · View orders using code · Create banner · Create post · Create newsletter
+   530→
+   531→**Social Studio / Publishing**
+   532→- Calendar (month/week) · Queue · Library · Channels · Performance · Oversight
+   533→- **Create content:** Drawer/page — Channels multi-select (pills), caption (AI assist), media (from Library / Design mockups), product tags, schedule, UTM auto.
+   534→- Right-click on a post: Edit · Duplicate · Reschedule · View performance · Boost (→ Ad Center) · Delete
+   535→
+   536→**Newsletter:** Campaign builder (page): Audience (segment) → Content (blocks + product picker) → Review → Send/Schedule. List: Name · Segment · Status · Sent · Open% · Click% · Revenue.
+   537→**Automation:** Flow builder (trigger → condition → action). Triggers come from other modules: Order placed, Abandoned cart, Invoice overdue, Ticket closed, Low stock.
+   538→
+   539→**Advertising (Ad Center):** Campaigns · Ad sets · Creatives · Audiences · Pixels · Ad spend & finance · Advertisers · Workspace.
+   540→Create **Campaign** (Meta/TikTok/Google) = Wizard page: Objective → Audience (segment/pixel) → Creative (Library/Design) → Budget → Review.
+   541→**Ad spend & finance** posts as expenses to Accounting automatically (Bill/Expense with Source=Ad platform).
+   542→
+   543→**CMS / Website:** CMS pages · Content blocks · Banners · Popups — page editor with block drawer.
+   544→
+   545→**Rides along:** Product → promote · Segment → audience · Order revenue attribution back to campaign · Ad spend → Expenses · Design → creative.
+   546→
+   547→---
+   548→
+   549→### MODULE: Support
+   550→
+   551→**Entity:** Ticket
+   552→**Inbox & Tickets:** Omnichannel inbox (email, chat, social DMs, marketplace messages) with thread list + conversation + **context sidebar**.
+   553→Ticket list columns: ☐ · Ticket # · Subject · Requester (party pill) · Channel · Priority · Status · Assignee · SLA timer (alert pill) · Related (Order/Invoice/RMA pills) · Updated · ⋯
+   554→**Queues:** Attention · Customer · Seller (counts as badges). **SLA & Routing:** Queues · SLA rules · Automations. **Trust & Safety:** Knowledge base · Help center · Docs · Policies.
+   555→
+   556→**Create ticket:** Drawer — Requester picker, Subject, Channel, Priority, Related record picker (Order/Invoice/RMA/Product), Assignee, First message/macro.
+   557→**Context sidebar in a ticket (the integration payoff):** Customer peek (LTV, balance) · Recent orders (with **Refund…**, **Track shipment**, **Resend** inline) · Open invoices (**Record payment**, **Send**) · Open RMA · Notes. The agent never leaves the ticket to fix the issue.
+   558→
+   559→Right-click: Assign · Change status · Merge · Create task · Link order · Create RMA · Create credit memo · Add note · Close
+   560→
+   561→**Rides along:** Order "Report a problem" → ticket · Seller queue → Seller detail · KB article suggestions in reply composer · SLA breach → Tasks/Inbox notification.
+   562→
+   563→---
+   564→
+   565→### MODULE: Team & Contractors
+   566→
+   567→Add contractor (drawer, Party role=Contractor): Name, Email, **W-9 invite** toggle → status pills: Invited · Completed · Missing. **Pay and file 1099s** workspace.
+   568→**Time entry** (optional, later): Modal/week grid; rides to Invoice lines (billable) and Contractor payments.
+   569→Roles & permissions and Teammates live in Settings; **Invite** on Tasks and Workspace share one Invite modal.
+   570→
+   571→---
+   572→
+   573→### MODULE: Tasks / Calendar (Pinned)
+   574→
+   575→**Entity:** Task
+   576→Views: **Board · List · Calendar** · Add task · Invite
+   577→Task drawer: Title, Due, Assignee, Priority, **Related record picker (any entity)**, Description, Checklist, Attachments.
+   578→**Every record has "Add task"** in Create-from-this; the related record shows as a pill on the task and the task shows in the record's Related rail. Quick task = inline row entry (title + due only).
+   579→Columns: ☐ · Title · Related (pill) · Assignee · Due · Priority · Status · ⋯
+   580→**Rides along:** Overdue invoice → "Follow up" task · Low stock → "Reorder" task · Ticket SLA → task · Onboarding queue → review task.
+   581→
+   582→---
+   583→
+   584→### MODULE: Cap Table
+   585→
+   586→Overview · Stakeholders · Funding rounds · Option pool · SAFEs & convertibles · Dilution modeler · Liquidation waterfall · 409A & valuations · Equity events · Controls · Documents.
+   587→- **Stakeholder** = Party with role Stakeholder (Add via Party drawer + equity section).
+   588→- Create surfaces: **Funding round** (page/wizard), **Equity event** (modal: grant/exercise/transfer), **SAFE** (drawer), **Document** (upload + e-sign).
+   589→- Modelers (Dilution, Waterfall) = full-page workspaces with scenario tabs and live table.
+   590→- **Rides along:** Funding round → Bank deposit (Accounting) · Equity events → Journal entries · Documents → shared Files library · Permissions: restricted by role (Controls).
+   591→
+   592→---
+   593→
+   594→### MODULE: Reports
+   595→
+   596→Overview · Analytics (Explorer) · Dashboard reports (Operations vitals, Executive GMV & margins) · Contacts · Catalog · Orders · Finance · Marketing · Support.
+   597→**Standard report page:** Toolbar (date range with compare, filters, group by, columns) → summary tiles → table → chart toggle. Row click = **drill-down** to the underlying list pre-filtered (this is the integrated-feel rule for reports). Actions: Customize · Save view · Schedule · Export · Add to dashboard.
+   598→
+   599→---
+   600→
+   601→### MODULE: Dashboard
+   602→
+   603→Tiles: **GMV · Orders · Products · Support · Analytics**
+   604→Each tile = number + sparkline + delta + **click = filtered list**, and has 1–2 quick actions:
+   605→- GMV → Sales overview · Orders → Needs attention · Products → Low stock / Draft · Support → Attention queue · Analytics → Explorer.
+   606→Pinned: Tasks/Calendar · Favorites · Inbox/Notifications · Reports.
+   607→
+   608→---
+   609→
+   610→### MODULE: Settings
+   611→
+   612→Left nav groups exactly as built. Component pattern: **Section page → card per setting → inline edit or drawer**.
+   613→Key integrations of Settings with workflow:
+   614→| Setting | Changes what elsewhere |
+   615→|---|---|
+   616→| Roles & permissions | Create menu, right-click menus, field masking |
+   617→| Approvals & limits | Approve to Unpaid, Payment approval prompts |
+   618→| Chart of Accounts / Bank rules | Account picker, auto-categorization in Bank transactions |
+   619→| Recurring templates | "Make recurring" in Invoice/Bill |
+   620→| Fulfillment & shipping | Carrier actions (Test rates, Manage services, Disable carrier) |
+   621→| Customer hub / Vendors & suppliers | Party drawer default fields |
+   622→| Notifications | Inbox/Notifications pinned item |
+   623→
+   624→---
+   625→
+   626→## PART 3 — Create Menu → Component Map (every action from your doc)
+   627→
+   628→| Create action | Group | Surface | Opens with (envelope) | Also reachable from |
+   629→|---|---|---|---|---|
+   630→| Invoice | Customers | Document page | party / order | Order, Party, Estimate, Ticket |
+   631→| Payment link | Customers | Modal → result | party / invoice | Invoice, Order |
+   632→| Receive payment | Customers | Workspace | party | Invoice row, Bank transaction |
+   633→| Statement | Customers | Workspace | party / period | Party, Invoice list |
+   634→| Estimate | Customers | Document page | party | Party, Lead |
+   635→| Sales receipt | Customers | Document page | party / order | Order |
+   636→| Credit memo | Customers | Document page | invoice / RMA | Invoice, Return |
+   637→| Add customer | Customers | Party drawer (Customer) | — | Any Party picker |
+   638→| Expense | Vendors | Drawer | payee / bank txn | Bank transactions |
+   639→| Check | Vendors | Drawer/Document | payee | Vendor |
+   640→| Bill | Vendors | Document page (drawer first) | vendor / PO | Vendor, PO, Upload |
+   641→| Pay bills | Vendors | Workspace | selected bills | Bills list, Vendor |
+   642→| Purchase order | Vendors | Document page | supplier / item | Item, Inventory, Order |
+   643→| Vendor credit | Vendors | Document page | bill | Bill |
+   644→| Add vendor / supplier | Vendors | Party drawer (Vendor/Supplier) | — | Any Party picker |
+   645→| Add contractor | Team | Party drawer (Contractor) | — | Contractors tab |
+   646→| Time entry | Team | Modal | contractor / customer | Later |
+   647→| Task | Books | Drawer | any record | Every record |
+   648→| Bank deposit | Books | Workspace | undeposited funds | Sales, Bank txn |
+   649→| Journal entry | Books | Document page | account | Account register |
+   650→| Transfer | Books | Modal | account | Account, Bank txn |
+   651→| Reconcile | Books | Modal → Workspace | account | Account, Bank |
+   652→| Settlement | Books | Workspace | payout | Stripe/Shopify feed |
+   653→| Add product/service | Books | Item drawer | category / supplier | Any Item picker |
+   654→| Add account | Books | CoA drawer | type | Any Account picker |
+   655→| Design | Catalog | Studio | blank / collection | Product, Catalog |
+   656→| Product | Catalog | Item drawer → Studio | design | Design, Supplier feed |
+   657→| Collection | Catalog | Canvas builder | items | Studio |
+   658→| Category | Catalog | Drawer | parent | Product |
+   659→| Banner | Marketing | Drawer + preview | product / collection | Product, Promotion |
+   660→| Popup | Marketing | Drawer + preview | segment | Segment |
+   661→| Discount code | Marketing | Drawer | product / collection | Product, Campaign |
+   662→| Campaign | Marketing | Wizard page | product / design | Product, Post |
+   663→| Post | Marketing | Drawer/page | product / design | Product, Design |
+   664→| Newsletter | Marketing | Builder page | segment | Segment, Product |
+   665→| Sales order | Support & Orders | Document page | party / channel | Party, Lead |
+   666→| Return/RMA | Support & Orders | Drawer/page | order | Order, Ticket, Credit memo |
+   667→| Ticket | Support & Orders | Drawer | party / order | Every record |
+   668→| Add note | Support & Orders | Modal/inline | any record | Every record |
+   669→| Void | Support & Orders | Modal (confirm + reason) | the record | Document row only |
+   670→
+   671→**Rule:** Create menu filters by **tab context** — in Sales tab it shows Customers group first; in Catalog it shows Catalog & Marketing first. Same menu, reordered by relevance, never a different menu.
+   672→
+   673→---
+   674→
+   675→## PART 3.5 — Domain Structure & the Undefined Modules
+   676→
+   677→### A. The test: standalone module, sub-area, or setting?
+   678→
+   679→A thing earns its own **standalone module** only if it passes at least 4 of 5:
+   680→
+   681→1. Own primary entity with its own lifecycle
+   682→2. Own list view people live in
+   683→3. Own permission role (someone's job is this)
+   684→4. Used by 3+ other modules
+   685→5. Own ledger or compliance impact
+   686→
+   687→Otherwise it is a **sub-area** of a domain parent, or an **engine/setting** that other screens call.
+   688→
+   689→| Candidate | Entity | Own list | Own role | Used by | Ledger/compliance | Verdict |
+   690→|---|---|---|---|---|---|---|
+   691→| **Inventory** | Stock record + stock ledger | Yes | Warehouse/ops | Catalog, Orders, PO, Returns, Sales | Asset + COGS | **Standalone page** under Operations |
+   692→| **Payroll** | Employee, Pay run, Pay stub | Yes | Payroll admin (restricted) | Accounting, Tax, Time, Reports | Heavy | **Standalone page** under People |
+   693→| **Time** | Time entry | Weekly grid only | No | Payroll, Invoices, Tasks | Indirect | **Collapse** into People (feature, not a module) |
+   694→| **Sales tax** | Rate, jurisdiction, filing | Filings only | Finance | Invoices, Orders, Items, Parties, Reports | Liability account | **Engine in Settings** + sub-area of Business Tax |
+   695→
+   696→### B. Catalog vs Inventory vs POD (the fix)
+   697→
+   698→Catalog, Inventory and Purchasing are three layers over the same Item, not three competing modules.
+   699→
+   700→| Layer | Question it answers | Owns |
+   701→|---|---|---|
+   702→| **Catalog** | *What is this and where is it sold?* | Definition, price, variants, **designs**, blanks, supplier link, channels, publish state |
+   703→| **Inventory** | *What do I physically have?* | On hand, reserved, available, locations, cost layers, counts, transfers, adjustments, stock history |
+   704→| **Purchasing** | *How does supply arrive?* | Purchase orders, receiving, supplier cost |
+   705→
+   706→Every Item gets a **Fulfillment type**, set in the Item drawer. It decides which tabs, pills and PO behavior the item has:
+   707→
+   708→| Fulfillment type | Example | Tracks stock? | Availability comes from | PO type | Pill |
+   709→|---|---|---|---|---|---|
+   710→| **Stock** | In-house goods, wholesale | **Yes** | Inventory on-hand | **Replenishment PO** (manual or reorder-point) | `42 in stock` |
+   711→| **POD (print on demand)** | Design on a blank | No | Supplier / blank availability | **Fulfillment PO**, auto-created per order | `Made on demand` |
+   712→| **Supplier-fulfilled (dropship)** | Supplier ships direct | No | Supplier feed | **Fulfillment PO**, auto-created per order | `Ships from supplier` |
+   713→| **Digital / Service** | Download, hourly service | No | Always available | None | none |
+   714→| **Bundle** | Tee + hat set | Derived | Lowest component availability | Per component | `Bundle` |
+   715→
+   716→**Consequences**
+   717→- **Catalog owns POD completely:** Design → Product → Blank → Supplier. A POD product has no stock number, so the Inventory tab, Adjust stock and Cycle count never appear for it.
+   718→- **Inventory is only for real stock.** Its list shows only items with *Track inventory = on*.
+   719→- **Two PO types.** Replenishment PO is a manual or reorder-triggered buy for stock. Fulfillment PO is generated from an Order line and is linked to that order. Same Document Engine, different config.
+   720→- **Blanks:** if the supplier holds them, a Blank is a Catalog record with supplier availability. If *you* buy and hold blanks (in-house printing), the Blank becomes an Inventory item (raw material), which later needs a simple production/BOM step. Flag this as a future decision.
+   721→- **The stock pill on a product row** is replaced by the fulfillment pill for POD items.
+   722→
+   723→### C. Recommended domain parents
+   724→
+   725→Each parent is a nav group containing sub-areas. Each sub-area keeps its own list and Create actions.
+   726→
+   727→| Domain parent | Contains |
+   728→|---|---|
+   729→| **Finance** | Accounting · Sales · Expenses & Bills · **Business Tax** (Income tax · **Sales tax** · **Payroll tax** · 1099s) |
+   730→| **People** | **Employees** · Contractors · **Time** · **Payroll** |
+   731→| **Operations** | Orders · Fulfillment · Purchasing · **Inventory** · Returns · Shipping |
+   732→| **Commerce** (Catalog & Design) | Studio + My Catalog → Global Catalog · Channels |
+   733→| **Growth** | CRM · Marketing · Social · Ads |
+   734→| **Support** | Inbox & Tickets · Queues · SLA · Trust & Safety |
+   735→| **Reports / Settings** | Unchanged |
+   736→
+   737→Notes on the moves:
+   738→- **Contractors** are a People sub-area *and* keep a scoped view inside Expenses & Bills that pushes to People, the same pattern as section 1.9.
+   739→- **Employees** are a Party role, so they use the same Party drawer with Pay, Tax and Bank sections (masked and restricted).
+   740→- **Sales tax and Payroll tax** live under Business Tax because they are filings and liabilities, while the *engines* that feed them live elsewhere (Settings and Payroll).
+   741→
+   742→### D. Definitions for the four
+   743→
+   744→**Payroll** (People)
+   745→- Entities: Employee (Party role), Pay schedule, Pay run, Pay stub, Tax forms (W-2, 941).
+   746→- **Add employee:** Party drawer with Pay (salary/hourly, schedule), Tax (W-4, state), Bank (direct deposit), and an onboarding invite.
+   747→- **Run payroll:** Workspace. Period → hours/salary (hours pulled from Time) → review gross / deductions / taxes / net → approve → pay.
+   748→- Pay run list columns: Period · Pay date · Employees · Gross · Taxes · Net · Status pill (Draft / Approved / Paid) · ⋯
+   749→- Posts journal entries automatically (wages expense, tax liabilities, bank). Rides along into Business Tax → Payroll tax and Reports.
+   750→- **Decision to make:** build vs integrate. Payroll is compliance-heavy (filings, multi-state tax). Define the entity, surfaces and ledger posting now, and consider a provider integration behind the same screens.
+   751→
+   752→**Time** (People)
+   753→- **Time entry:** modal or weekly grid. Fields: Person, Date, Hours, Related (Customer / Task / Order), Billable toggle, Rate, Note.
+   754→- Rides along: Invoice has **Add billable time** on its line picker; Payroll pulls approved hours; Tasks can start a timer.
+   755→
+   756→**Sales tax** (Business Tax + Settings engine)
+   757→- **Engine (Settings):** Rates and jurisdictions, tax categories, nexus rules.
+   758→- **Item drawer:** Tax category field. **Party drawer:** Tax exempt toggle + certificate upload.
+   759→- **Document Engine:** per-line tax calculation and a tax summary in the totals block.
+   760→- **Business Tax → Sales tax:** liability by jurisdiction · Filing periods · **Pay sales tax** (workspace, like Pay bills) · Nexus alert pills.
+   761→- Orders from channels arrive with marketplace-collected tax flagged, so it is excluded from your liability.
+   762→
+   763→**Inventory** (Operations)
+   764→- Defined in Module: Purchasing & Inventory, now restricted to *Stock* items. Add: **Locations** (warehouses/bins) and a **Stock ledger** (every movement with source pill: PO receipt, order, adjustment, transfer, return).
+   765→
+   766→---
+   767→
+   768→## PART 3.6 — POS, Gift Cards, Banking & Cards
+   769→
+   770→### A. POS (brick-and-mortar)
+   771→
+   772→**Principle:** POS is a **channel + a device surface**, not a separate system. A store sale is a normal Order/Sales receipt with a store channel pill, so Inventory, Accounting, CRM, Returns and Support all work unchanged.
+   773→
+   774→**Entities:** Location (store) · Register · Shift (drawer session) · Sale · Tender (card, cash, gift card, split) · Receipt · Hardware (reader, receipt printer, cash drawer, scanner)
+   775→
+   776→| Surface | Type | Contents |
+   777→|---|---|---|
+   778→| **POS app** | Full-screen, touch-first, offline-capable | Product grid + search + barcode scan → cart → attach customer (Party picker, optional, with `+ Add`) → discounts → tender → receipt (print/email/SMS) |
+   779→| Open shift | Modal | Register, starting cash |
+   780→| Close shift | Modal → count sheet | Counted cash vs expected, over/short, card totals, tips, **Z report** |
+   781→| Cash in / out | Modal | Amount, reason (paid-out, petty cash) |
+   782→| Park / resume sale | Inline | Held carts per register |
+   783→| Refund / exchange | Modal | Scan or search receipt, select lines, restock toggle, refund to original tender or store credit |
+   784→| Redeem / sell gift card | Modal | See 3.6 B |
+   785→| Manager override | PIN modal | Required for discounts above threshold, voids, refunds, price override |
+   786→
+   787→**Back-office views:** Locations list (Name · Address · Registers · Open shift pill · Today's sales · Stock alerts) · Shifts list (Register · Cashier · Opened · Closed · Expected · Counted · Variance pill) · POS sales appear in Orders and Sales with a **Channel pill** `Store: Downtown`.
+   788→
+   789→**Rides along**
+   790→- **Inventory:** stock is tracked per location; sales decrement the selling location; transfers between stores and warehouse; optional buy-online-pickup-in-store.
+   791→- **POD items in store:** sold as an *order for later* (ship or pickup), never as instant stock.
+   792→- **Accounting:** Z report posts a journal entry (sales by tender, tax, tips, cash over/short, gift card liability); card settlement reconciles to payouts in Bank transactions.
+   793→- **Sales tax:** location-based rates and exemptions.
+   794→- **CRM:** attached customer gets the sale on their profile; walk-up sales stay anonymous.
+   795→- **Support:** receipt lookup creates a ticket or RMA with the sale pre-linked.
+   796→- **Permissions:** Cashier, Shift lead, Manager roles; override rules live in Settings → Approvals and limits.
+   797→- **Offline mode:** queue sales and card-present fallbacks, sync on reconnect, and define oversell conflict rules before launch.
+   798→
+   799→### B. Gift cards
+   800→
+   801→**Treat gift cards as your own ledger entity.** A gift card sale is a **liability**, not revenue; revenue is recognized when the card is redeemed.
+   802→
+   803→**Entities:** Gift card (code, initial value, balance, currency, issued to, expiry, status) · Gift card transaction (issue, redeem, reload, refund, adjust, expire)
+   804→
+   805→| Action | Surface | Notes |
+   806→|---|---|---|
+   807→| Sell gift card | Item type = Gift card (digital or physical) | Sold online, in POS, or on an invoice; card is created on payment |
+   808→| Issue manually | **Drawer** | Amount, recipient, message, delivery (email / print), expiry |
+   809→| Check balance | Popover / modal | Enter or scan code |
+   810→| Redeem | Tender at checkout (online + POS) | Supports partial redemption and split tender |
+   811→| Reload / Adjust / Disable | Modal | Reason required, logged |
+   812→| Refund to gift card | Option in Refund modal | Or to store credit |
+   813→
+   814→**List columns:** ☐ · Code (masked) · Recipient · Purchaser (pill) · Issued · Initial · Balance · Expires · Status pill (Active / Partially used / Redeemed / Expired / Disabled) · Source (Online / Store / Manual) · ⋯
+   815→**Right-click:** Open · Email card · Print · Reload · Adjust · **Create from this ▸** Ticket · Note · Disable
+   816→**Detail:** Ledger of every movement with source pill (Order #, Register, Manual).
+   817→**Accounting:** Gift card liability account; unredeemed-balance reports. Expiry, breakage and unclaimed-property rules vary by jurisdiction, so have a lawyer or accountant set the policy.
+   818→**Store credit** (from credit memos and returns) uses the same ledger with a different type.
+   819→
+   820→### C. Banking & Cards (Stripe Connect + Treasury + Issuing)
+   821→
+   822→**Model:** Merchants are Connect connected accounts. Treasury for platforms provides a financial account per merchant; Issuing provides debit cards drawn on that account. Payouts from Stripe settle into the financial account.
+   823→
+   824→**Surfaces (Finance → Banking, merchant-facing)**
+   825→
+   826→| Surface | Type | Contents |
+   827→|---|---|---|
+   828→| Financial account | Page | Balance, available, pending, recent movement |
+   829→| Move money | Modal | Transfer to / from linked bank, ACH out, payout sweep rules |
+   830→| Cards list | List | Card · Holder (Party/Team pill) · Virtual/Physical · Status · Limit · Spent this period · ⋯ |
+   831→| Issue card | **Drawer** | Holder, type, spend limit, allowed merchant categories, shipping, approval rules |
+   832→| Card transactions | Feed in Bank transactions | Auto-create **Expense** with receipt-capture prompt; match to Bill; categorize via Rules |
+   833→| Pay bills from financial account | Option in Pay bills workspace | Uses ACH details on the Vendor |
+   834→| Onboarding / KYC-KYB | Drawer or embedded component | Collect and verify business info before enabling Banking |
+   835→
+   836→**Rides along:** Card spend limits tie to **Approvals and limits** · Settlement posts payouts into the financial account · Reconcile treats the financial account as a bank · Expenses and Business tax read card spend.
+   837→
+   838→**Compliance surfaces you must design (they land in Support):** a regulated **Complaints and Disputes queue** with recordkeeping, plus disclosures and customer-service access inside the Banking UI.
+   839→
+   840→---
+   841→
+   842→## PART 3.7 — Support, Deepened
+   843→
+   844→Support is the module most likely to feel bolted on, so it is designed here as a **cross-module resolution layer**: an agent resolves the problem *from the ticket*, without leaving it.
+   845→
+   846→### A. Who Support serves (queues)
+   847→
+   848→| Queue | Requester | Examples |
+   849→|---|---|---|
+   850→| **Customer** | Buyers | Order issues, returns, payment questions, product questions |
+   851→| **Seller** | Marketplace sellers | Onboarding, payouts, listing issues, compliance |
+   852→| **Attention** | Anyone | SLA at risk, escalated, manual-push failures |
+   853→| **Disputes and Complaints** | Buyers and merchants | Payment disputes/chargebacks (links to Sales → Disputes) and regulated Banking/Card complaints |
+   854→| **Internal** (optional) | Your team | Platform bugs, requests |
+   855→
+   856→### B. Ticket model
+   857→
+   858→**Ticket type** drives fields, sidebar cards and available actions: Question · Order issue · Return · Payment / dispute · Billing · Complaint · Seller onboarding · Bug.
+   859→**Fields:** Subject · Requester (Party pill) · Type · Channel · Priority · Status (New / Open / Pending / On hold / Solved / Closed) · Assignee · Queue · Tags · **Related records** (Order, Invoice, RMA, Product, Design, Shipment, Gift card).
+   860→
+   861→### C. Ticket workspace (three panes)
+   862→
+   863→| Pane | Contents |
+   864→|---|---|
+   865→| **List** | Views: My tickets · Unassigned · Attention · SLA at risk · By queue. Columns: ☐ · Ticket # · Subject · Requester · Type pill · Channel pill · Priority · Status · Assignee · **SLA timer pill** · Related pills · Updated |
+   866→| **Conversation** | Single timeline: customer messages (email, chat, DMs, marketplace), agent replies, **internal notes**, and **system events** (order shipped, refund issued, RMA approved). Composer tabs: Reply · Internal note · Macro · **AI draft** with KB article suggestions. |
+   867→| **Context sidebar** | Cards: **Customer** (LTV, balance, segment) · **Recent orders** (inline: Refund…, Track shipment, Resend, Cancel) · **Open invoices** (Record payment, Send) · **RMA** (Approve/Decline) · **Design proof** for POD items · **Shipment tracking** · **Previous tickets** · Notes |
+   868→
+   869→**Right-click on a ticket:** Assign · Change status · Change priority · Merge · Link record · **Create from this ▸** RMA · Credit memo · Refund · Task · Vendor credit (supplier defect) · Add note · Close.
+   870→**Bulk:** Assign · Merge · Tag · Apply macro · Close.
+   871→
+   872→### D. Inbound sources and automation
+   873→
+   874→- **Sources:** email, chat, social DMs, marketplace messages (Etsy, Amazon, etc.), web forms, **Report a problem… on an order**, POS receipt lookup, Banking complaint form.
+   875→- **Automation (trigger → condition → action):** *Trigger:* ticket created, RMA created, payment failed, order delayed, SLA warning. *Action:* assign, route to queue, set priority, tag, auto-reply, create task, notify.
+   876→- **Macros** with merge fields (customer, order, tracking).
+   877→- **SLA policies:** first response and resolution targets by queue, priority and customer tier; timers pause on Pending; respects Office hours; breach raises an Alert pill and a task.
+   878→
+   879→### E. Self-service and knowledge
+   880→
+   881→- **Help center / customer portal:** order status, tracking, self-serve returns (creates an RMA), past tickets, gift card balance. This is the deflection layer.
+   882→- **Knowledge base:** articles, docs, policies; suggested in the composer and on the contact form; **Create article from ticket**; article feedback.
+   883→- **CSAT:** survey on solve; QA review sampling.
+   884→
+   885→### F. Feedback loops into the rest of the platform
+   886→
+   887→| Signal | Lands in |
+   888→|---|---|
+   889→| High issue or return rate per product | Catalog **alert pill** on the product + task |
+   890→| Supplier defect | Vendor credit / supplier claim |
+   891→| Fulfillment failures | Orders → Needs attention |
+   892→| Seller problems | Seller detail + Onboarding queue |
+   893→| Complaint volume by reason | Reports → Support (reason, first response, resolution, backlog, CSAT) |
+   894→
+   895→**Permissions:** Agent, Lead, Admin. Sensitive fields (card, bank, tax IDs) masked in conversations. Regulated complaints and disputes are retained with full audit history.
+   896→
+   897→---
+   898→

@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Social · Oversight</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .bulk-bar{background:#1f2937;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:94vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .post-thumb{width:44px;height:44px;border-radius:9px;background:linear-gradient(135deg,#e7f1ef,#d9e4e3);display:grid;place-items:center;color:#648783;flex-shrink:0}
+  .attach-badge{font-size:9px;padding:3px 7px;border-radius:20px;background:#eef5f4;color:#0a6400;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+  .attach-badge .material-symbols-outlined{font-size:12px}
+  .product-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 7px;border-radius:7px;background:#f4fbfa;border:1px solid #d9eae8;font-size:10px;color:#0a6400;font-weight:600}
+  .product-pill .material-symbols-outlined{font-size:12px}
+  .reason-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+  .reason-policy{background:#fff0ef;color:#bf5c59}
+  .reason-brand{background:#fbf5ec;color:#98713e}
+  .reason-quality{background:#f2f1f8;color:#6e6596}
+  .reason-spam{background:#eaf3fb;color:#4e7b9d}
+  .reviewer-chip{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+  .kbd{font-size:10px;padding:1px 5px;border-radius:4px;background:#f4f3f7;border:1px solid #dad9dd;color:#5a6355}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="performance">Performance</button>
+    <button class="h-9 px-3 text-label-md tab-underline active" data-nav="oversight">Oversight</button>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Marketing</span><span class="text-outline">/</span><span>Social publishing</span><span class="text-outline">/</span><span>Oversight</span>
+      </div>
+      <h1 class="text-headline-lg">Publishing oversight</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Review, approve, reject, or flag content before it publishes. Every decision is logged and reversible.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="view-toggle" id="oversight-view">
+        <button class="active" data-oview="queue">Queue</button>
+        <button data-oview="decisions">Decisions log</button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-rules>
+        <span class="material-symbols-outlined text-[16px]">rule</span>Oversight rules
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── SUMMARY STRIP ─── -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Awaiting review</span>
+      <div class="text-headline-lg mt-1" id="statAwaiting">7</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">3 flagged by rules · 4 manual</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Approved this week</span>
+      <div class="text-headline-lg mt-1">23</div>
+      <div class="text-[11px] text-secondary mt-1">+6 vs last week</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Rejected / changes</span>
+      <div class="text-headline-lg mt-1">4</div>
+      <div class="text-[11px] text-error mt-1">2 in revision</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Avg. review time</span>
+      <div class="text-headline-lg mt-1">2.1h</div>
+      <div class="text-[11px] text-secondary mt-1">−0.4h vs last week</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       QUEUE VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-queue">
+
+    <!-- Filters -->
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input id="oversight-search" class="w-full h-8 pl-7 pr-2 bg-white border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Search content, channel, author…"/>
+      </div>
+
+      <div class="relative">
+        <button id="btn-reason" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">flag</span>Reason
+          <span id="reason-count" class="text-[10px] text-on-surface-variant"></span>
+        </button>
+        <div id="pop-reason" class="popover hidden-imp absolute left-0 top-9 p-3 w-64">
+          <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by reason</div>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-reason" value="policy" checked/> Policy / compliance</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-reason" value="brand" checked/> Brand voice</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-reason" value="quality" checked/> Content quality</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-reason" value="spam" checked/> Spam / duplication</label>
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="reason-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+            <button id="reason-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative">
+        <button id="btn-channel" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">hub</span>Channel
+        </button>
+        <div id="pop-channel" class="popover hidden-imp absolute left-0 top-9 p-3 w-56">
+          <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by channel</div>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-channel" value="Instagram" checked/> Instagram</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-channel" value="Facebook" checked/> Facebook</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-channel" value="LinkedIn" checked/> LinkedIn</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-channel" value="TikTok" checked/> TikTok</label>
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="channel-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+            <button id="channel-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="btn-awaiting-only" class="h-8 px-2.5 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">schedule</span>Awaiting only
+      </button>
+
+      <span id="oversight-count" class="ml-auto text-[11px] text-on-surface-variant">1–7 of 7</span>
+    </div>
+
+    <!-- Active chips -->
+    <div id="oversight-chips" class="flex items-center gap-1.5 flex-wrap mb-2 hidden-imp">
+      <span class="text-[10px] uppercase tracking-wider font-bold text-outline">Active:</span>
+      <div id="oversight-chip-container" class="flex items-center gap-1.5 flex-wrap"></div>
+      <button id="oversight-clear-all" class="text-[11px] text-primary hover:underline font-medium ml-1">Clear all</button>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar hidden-imp px-4 py-2 flex items-center gap-3 text-body-sm mb-2 rounded" id="oversight-bulk">
+      <span class="font-semibold" id="oversight-bulk-count">0 selected</span>
+      <div class="w-px h-4 bg-white/30"></div>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Approve"><span class="material-symbols-outlined text-[15px]">check_circle</span>Approve</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Request changes"><span class="material-symbols-outlined text-[15px]">edit_note</span>Request changes</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Reject"><span class="material-symbols-outlined text-[15px]">block</span>Reject</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Assign reviewer"><span class="material-symbols-outlined text-[15px]">person_add</span>Assign reviewer</button>
+      <button class="ml-auto flex items-center gap-1 hover:underline" data-bulk="Clear"><span class="material-symbols-outlined text-[15px]">close</span>Clear</button>
+    </div>
+
+    <!-- Oversight queue table -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1180px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" id="oversight-select-all"/></th>
+              <th class="px-3 py-2">Content</th>
+              <th class="px-3 py-2">Channel</th>
+              <th class="px-3 py-2">Author</th>
+              <th class="px-3 py-2">Scheduled</th>
+              <th class="px-3 py-2">Reason</th>
+              <th class="px-3 py-2">Reviewer</th>
+              <th class="px-3 py-2">State</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="oversight-tbody"></tbody>
+        </table>
+      </div>
+      <div class="hidden-imp py-12 px-8 text-center" id="oversight-empty">
+        <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+          <span class="material-symbols-outlined text-[28px] text-outline">verified</span>
+        </div>
+        <h3 class="text-headline-sm mb-1">Nothing to review</h3>
+        <p class="text-body-sm text-on-surface-variant mb-3">No items match your filters. Clear them to see the full queue.</p>
+        <button id="oversight-empty-clear" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Clear filters</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       DECISIONS LOG VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-decisions" class="hidden-imp">
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-4 h-11 border-b border-surface-dim">
+        <div class="flex items-center gap-1">
+          <button class="h-full px-3 text-label-md tab-underline active" data-dectab="all">All decisions</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-dectab="approved">Approved</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-dectab="rejected">Rejected</button>
+          <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-dectab="changes">Changes requested</button>
+        </div>
+        <span class="text-[11px] text-on-surface-variant">Immutable audit log</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1000px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">When</th>
+              <th class="px-3 py-2">Content</th>
+              <th class="px-3 py-2">Decision</th>
+              <th class="px-3 py-2">Reviewer</th>
+              <th class="px-3 py-2">Reason</th>
+              <th class="px-3 py-2">Note</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="decisions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Scrim for peek -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">fact_check</span>
+      <span id="peek-title" class="text-headline-sm truncate">Review item</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peek-approve" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">check</span>Approve</button>
+      <button id="peek-close" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peek-body" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Decision modal (used for Approve / Request changes / Reject / Assign) -->
+<div class="modal-scrim" id="decisionModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1" id="decisionTitle">Approve content</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="decisionSub">This action is logged in the audit trail and reversible.</p>
+
+    <div id="decisionFields">
+      <div class="mb-3">
+        <label class="block text-label-sm text-on-surface-variant mb-1">Reason</label>
+        <select id="decisionReason" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+          <option value="">— Select a reason —</option>
+          <option value="policy">Policy / compliance</option>
+          <option value="brand">Brand voice</option>
+          <option value="quality">Content quality</option>
+          <option value="spam">Spam / duplication</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="block text-label-sm text-on-surface-variant mb-1">Reviewer</label>
+        <select id="decisionReviewer" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+          <option>Jordan A. (me)</option>
+          <option>Sarah A.</option>
+          <option>Marcus L.</option>
+          <option>Priya N.</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-label-sm text-on-surface-variant mb-1">Note (visible to author)</label>
+        <textarea id="decisionNote" class="w-full min-h-[80px] p-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="What should the author know?"></textarea>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="decisionCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="decisionConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Oversight rules modal -->
+<div class="modal-scrim" id="rulesModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1">Oversight rules</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Automatic review flags. Anything matching a rule is routed to the queue before publishing.</p>
+    <div class="space-y-2">
+      <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+        <span class="text-body-sm"><strong>Blocked words</strong><div class="text-[11px] text-on-surface-variant">Policy / compliance</div></span>
+        <input type="checkbox" checked/>
+      </label>
+      <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+        <span class="text-body-sm"><strong>Duplicate caption check</strong><div class="text-[11px] text-on-surface-variant">Spam / duplication</div></span>
+        <input type="checkbox" checked/>
+      </label>
+      <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+        <span class="text-body-sm"><strong>Missing media</strong><div class="text-[11px] text-on-surface-variant">Content quality</div></span>
+        <input type="checkbox" checked/>
+      </label>
+      <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+        <span class="text-body-sm"><strong>First post from new author</strong><div class="text-[11px] text-on-surface-variant">Brand voice</div></span>
+        <input type="checkbox"/>
+      </label>
+      <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+        <span class="text-body-sm"><strong>Channel not connected</strong><div class="text-[11px] text-on-surface-variant">Policy / compliance</div></span>
+        <input type="checkbox" checked/>
+      </label>
+    </div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="rulesClose">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="rulesSave">Save rules</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE:"/api",
+  routes:{
+    overview:"/marketing/social", calendar:"/marketing/social/calendar", create:"/marketing/social/create",
+    queue:"/marketing/social/queue", library:"/marketing/social/library",
+    channels:"/marketing/social/channels", performance:"/marketing/social/performance",
+    oversight:"/marketing/social/oversight"
+  },
+  endpoints:{
+    reviews:"/publishing/reviews",
+    decision:id=>`/publishing/reviews/${id}/decision`,
+    assign:id=>`/publishing/reviews/${id}/assign`,
+    rules:"/publishing/oversight/rules"
+  }
+};
+const API = {
+  async request(path, options={}){
+    console.log("[API integration point]", options.method||"GET", APP_CONFIG.API_BASE+path, options.body||"");
+    return {ok:true,demo:true};
+  },
+  decide:(id,payload)=>API.request(APP_CONFIG.endpoints.decision(id),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  assign:(id,payload)=>API.request(APP_CONFIG.endpoints.assign(id),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  saveRules:(payload)=>API.request(APP_CONFIG.endpoints.rules,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════ */
+const REASONS = ["policy","brand","quality","spam"];
+const REASON_LABEL = {policy:"Policy / compliance",brand:"Brand voice",quality:"Content quality",spam:"Spam / duplication"};
+const REASON_CHIP  = {policy:"reason-policy",brand:"reason-brand",quality:"reason-quality",spam:"reason-spam"};
+
+let items = [
+  { id:"rv-001", title:"October product spotlight", caption:"A closer look at what's new this month.", channel:"Instagram", author:"Sarah A.", scheduled:"2026-11-01T15:30", reason:"policy", reviewer:"—", state:"awaiting", flag:"blocked_word", note:"Contains 'guaranteed' — policy rule." },
+  { id:"rv-002", title:"Behind the scenes", caption:"A little look behind the scenes.", channel:"TikTok", author:"Marcus L.", scheduled:"2026-11-01T10:00", reason:"quality", reviewer:"Jordan A.", state:"awaiting", flag:"missing_media", note:"No media attached." },
+  { id:"rv-003", title:"Weekly company update", caption:"This week's updates from our team.", channel:"LinkedIn", author:"Priya N.", scheduled:"2026-11-03T09:00", reason:"brand", reviewer:"—", state:"awaiting", flag:"new_author", note:"First post from new author." },
+  { id:"rv-004", title:"Holiday capsule teaser", caption:"Something cozy is coming.", channel:"Instagram", author:"Sarah A.", scheduled:"2026-11-04T12:00", reason:"spam", reviewer:"Jordan A.", state:"awaiting", flag:"duplicate", note:"Near-duplicate caption of ORD-1052 post." },
+  { id:"rv-005", title:"Team spotlight — Dana", caption:"Meet Dana, our VP Engineering.", channel:"LinkedIn", author:"Priya N.", scheduled:"2026-11-05T09:00", reason:"brand", reviewer:"—", state:"awaiting", flag:"brand_voice", note:"Needs tone check." },
+  { id:"rv-006", title:"Canvas tote drop", caption:"New canvas totes are here.", channel:"Facebook", author:"Marcus L.", scheduled:"2026-11-06T11:00", reason:"policy", reviewer:"Sarah A.", state:"awaiting", flag:"channel_not_connected", note:"Facebook not connected for this author." },
+  { id:"rv-007", title:"Mug restock", caption:"Our 11oz mug is back.", channel:"Instagram", author:"Sarah A.", scheduled:"2026-11-07T10:00", reason:"quality", reviewer:"—", state:"awaiting", flag:"missing_media", note:"No media attached." }
+];
+
+let decisions = [
+  { when:"2026-11-01T09:12", title:"October product spotlight", decision:"approved", reviewer:"Jordan A.", reason:"brand", note:"Good to go." },
+  { when:"2026-11-01T09:20", title:"Behind the scenes", decision:"changes", reviewer:"Jordan A.", reason:"quality", note:"Add media." },
+  { when:"2026-10-31T16:40", title:"Weekly company update", decision:"approved", reviewer:"Sarah A.", reason:"brand", note:"—" },
+  { when:"2026-10-31T15:05", title:"Holiday capsule teaser", decision:"rejected", reviewer:"Jordan A.", reason:"spam", note:"Duplicate of prior post." }
+];
+
+const filters = {
+  q:"",
+  reasons:new Set(REASONS),
+  channels:new Set(["Instagram","Facebook","LinkedIn","TikTok"]),
+  awaitingOnly:false
+};
+
+let activeDecision = { action:null, ids:[] };
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(iso){ if(!iso)return "—"; const d=new Date(iso); return d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+function statePill(state){
+  const map = {
+    awaiting:"bg-tertiary/15 text-tertiary",
+    approved:"bg-secondary-container text-on-secondary-container",
+    rejected:"bg-error-container text-on-error-container",
+    changes:"bg-qb-maroon/15 text-qb-maroon"
+  };
+  const label = {awaiting:"Awaiting review",approved:"Approved",rejected:"Rejected",changes:"Changes requested"}[state];
+  return `<span class="px-2 py-0.5 rounded-full text-label-sm ${map[state]}">${label}</span>`;
+}
+function reasonChip(r){
+  return `<span class="reason-chip ${REASON_CHIP[r]||"reason-brand"}">${REASON_LABEL[r]||r}</span>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>{
+  toast("Navigate → "+b.dataset.nav);
+}));
+document.querySelectorAll("[data-oview]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-oview]").forEach(x=>x.classList.toggle("active",x===b));
+  const v=b.dataset.oview;
+  document.getElementById("panel-queue").classList.toggle("hidden-imp",v!=="queue");
+  document.getElementById("panel-decisions").classList.toggle("hidden-imp",v!=="decisions");
+  if(v==="decisions")renderDecisions();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER QUEUE
+   ═══════════════════════════════════════════════════════════════════ */
+function filteredItems(){
+  return items.filter(it=>{
+    const q=filters.q.toLowerCase();
+    const textOK = !q || (it.title+" "+it.caption+" "+it.channel+" "+it.author).toLowerCase().includes(q);
+    const reasonOK = filters.reasons.has(it.reason);
+    const channelOK = filters.channels.has(it.channel);
+    const stateOK = !filters.awaitingOnly || it.state==="awaiting";
+    return textOK && reasonOK && channelOK && stateOK;
+  });
+}
+
+function renderQueue(){
+  const rows = filteredItems();
+  const tbody = document.getElementById("oversight-tbody");
+  tbody.innerHTML = rows.map(it=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${it.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check row-select" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="post-thumb"><span class="material-symbols-outlined text-[18px]">image</span></div>
+          <div class="min-w-0">
+            <div class="font-medium truncate">${esc(it.title)}</div>
+            <div class="text-[11px] text-on-surface-variant truncate">${esc(it.caption)}</div>
+          </div>
+        </div>
+      </td>
+      <td class="px-3 py-2">${esc(it.channel)}</td>
+      <td class="px-3 py-2">${esc(it.author)}</td>
+      <td class="px-3 py-2 tabular-nums">${fmt(it.scheduled)}</td>
+      <td class="px-3 py-2">${reasonChip(it.reason)}</td>
+      <td class="px-3 py-2">${it.reviewer==="—"?'<span class="text-on-surface-variant">Unassigned</span>':`<span class="reviewer-chip"><span class="material-symbols-outlined text-[12px]">person</span>${esc(it.reviewer)}</span>`}</td>
+      <td class="px-3 py-2">${statePill(it.state)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-rowmenu="${it.id}">
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span>
+        </button>
+      </td>
+    </tr>
+  `).join("");
+
+  const countEl = document.getElementById("oversight-count");
+  countEl.textContent = rows.length ? `1–${rows.length} of ${rows.length}` : "0 of 0";
+  document.getElementById("oversight-empty").classList.toggle("hidden-imp", rows.length>0);
+  tbody.closest("div.overflow-x-auto").classList.toggle("hidden-imp", rows.length===0);
+
+  // row click → peek
+  tbody.querySelectorAll("[data-row]").forEach(tr=>{
+    tr.addEventListener("click",(e)=>{
+      if (e.target.closest("button") || e.target.closest("input")) return;
+      openPeek(tr.dataset.row);
+    });
+  });
+  // row ⋯ menu
+  tbody.querySelectorAll("[data-rowmenu]").forEach(btn=>{
+    btn.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      showRowMenu(btn, btn.dataset.rowmenu);
+    });
+  });
+
+  document.getElementById("statAwaiting").textContent = items.filter(i=>i.state==="awaiting").length;
+  renderChips();
+  syncSelectAll();
+  syncBulk();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHIPS
+   ═══════════════════════════════════════════════════════════════════ */
+function renderChips(){
+  const chips = [];
+  if (filters.q) chips.push({k:"q", label:`Search: "${filters.q}"`});
+  if (filters.reasons.size !== REASONS.length) chips.push({k:"reason", label:`Reason: ${[...filters.reasons].map(r=>REASON_LABEL[r]).join(", ") || "none"}`});
+  if (filters.channels.size !== 4) chips.push({k:"channel", label:`Channel: ${[...filters.channels].join(", ") || "none"}`});
+  if (filters.awaitingOnly) chips.push({k:"awaiting", label:"Awaiting only"});
+  const wrap = document.getElementById("oversight-chips");
+  const host = document.getElementById("oversight-chip-container");
+  wrap.classList.toggle("hidden-imp", chips.length===0);
+  host.innerHTML = chips.map(c=>`
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-[11px] font-medium">
+      ${esc(c.label)}
+      <button data-chip="${c.k}" class="w-4 h-4 rounded-full hover:bg-surface-container-high flex items-center justify-center">
+        <span class="material-symbols-outlined text-[12px]">close</span>
+      </button>
+    </span>
+  `).join("");
+  host.querySelectorAll("[data-chip]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      const k = b.dataset.chip;
+      if (k==="q"){ filters.q=""; document.getElementById("oversight-search").value=""; }
+      if (k==="reason"){ filters.reasons = new Set(REASONS); syncReasonPop(); }
+      if (k==="channel"){ filters.channels = new Set(["Instagram","Facebook","LinkedIn","TikTok"]); syncChannelPop(); }
+      if (k==="awaiting"){ filters.awaitingOnly=false; document.getElementById("btn-awaiting-only").classList.remove("border-primary","text-primary"); }
+      renderQueue();
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   BULK / SELECT
+   ═══════════════════════════════════════════════════════════════════ */
+const selectAll = document.getElementById("oversight-select-all");
+function syncSelectAll(){
+  const rows = document.querySelectorAll("#oversight-tbody .row-select");
+  const checked = document.querySelectorAll("#oversight-tbody .row-select:checked");
+  selectAll.checked = rows.length>0 && checked.length===rows.length;
+  selectAll.indeterminate = checked.length>0 && checked.length<rows.length;
+}
+function syncBulk(){
+  const n = document.querySelectorAll("#oversight-tbody .row-select:checked").length;
+  document.getElementById("oversight-bulk").classList.toggle("hidden-imp", n===0);
+  document.getElementById("oversight-bulk-count").textContent = n+" selected";
+}
+document.querySelectorAll("#oversight-tbody").forEach(t=>{
+  t.addEventListener("change",(e)=>{
+    if (e.target.classList.contains("row-select")){ syncSelectAll(); syncBulk(); }
+  });
+});
+selectAll.addEventListener("change",()=>{
+  document.querySelectorAll("#oversight-tbody .row-select").forEach(cb=>cb.checked=selectAll.checked);
+  syncBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>{
+  b.addEventListener("click",()=>{
+    const action = b.dataset.bulk;
+    if (action==="Clear"){
+      document.querySelectorAll("#oversight-tbody .row-select").forEach(cb=>cb.checked=false);
+      selectAll.checked=false; selectAll.indeterminate=false; syncBulk(); return;
+    }
+    const ids = [...document.querySelectorAll("#oversight-tbody .row-select:checked")].map(cb=>cb.closest("tr").dataset.row);
+    openDecision(action==="Approve"?"approve":action==="Request changes"?"changes":action==="Reject"?"reject":"assign", ids);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROW MENU (anchored)
+   ═══════════════════════════════════════════════════════════════════ */
+let rowMenuEl = null;
+function showRowMenu(btn, id){
+  closeRowMenu();
+  const r = btn.getBoundingClientRect();
+  rowMenuEl = document.createElement("div");
+  rowMenuEl.className = "popover";
+  rowMenuEl.style.position="fixed";
+  rowMenuEl.style.top=(r.bottom+4)+"px";
+  rowMenuEl.style.left=(r.right-240)+"px";
+  rowMenuEl.innerHTML = `
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">${id}</div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="preview"><span class="material-symbols-outlined text-[16px]">visibility</span>Preview</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="approve"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>Approve</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="changes"><span class="material-symbols-outlined text-[16px]">edit_note</span>Request changes</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2 text-error" data-rm="reject"><span class="material-symbols-outlined text-[16px]">block</span>Reject</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="assign"><span class="material-symbols-outlined text-[16px]">person_add</span>Assign reviewer</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="open"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Open full record</button>
+  `;
+  document.body.appendChild(rowMenuEl);
+  rowMenuEl.querySelectorAll(".rm").forEach(b=>b.addEventListener("click",()=>{
+    const act=b.dataset.rm;
+    closeRowMenu();
+    if (act==="preview" || act==="open") openPeek(id);
+    else if (act==="approve") openDecision("approve",[id]);
+    else if (act==="changes") openDecision("changes",[id]);
+    else if (act==="reject") openDecision("reject",[id]);
+    else if (act==="assign") openDecision("assign",[id]);
+  }));
+  setTimeout(()=>document.addEventListener("click",closeRowMenu,{once:true}),0);
+}
+function closeRowMenu(){ if (rowMenuEl){ rowMenuEl.remove(); rowMenuEl=null; } }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PEEK DRAWER
+   ═══════════════════════════════════════════════════════════════════ */
+const peek = document.getElementById("peek");
+const scrim = document.getElementById("scrim");
+let peekId = null;
+
+function openPeek(id){
+  const it = items.find(x=>x.id===id); if(!it)return;
+  peekId = id;
+  document.getElementById("peek-title").textContent = it.title;
+  document.getElementById("peek-body").innerHTML = `
+    <div class="mb-3 flex items-center gap-2">${statePill(it.state)} ${reasonChip(it.reason)}</div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3">
+      <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Flag</div>
+      <div class="text-body-sm">${esc(it.flag.replace(/_/g," "))} — ${esc(it.note)}</div>
+    </div>
+    <dl class="divide-y divide-surface-dim text-body-sm">
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Channel</dt><dd>${esc(it.channel)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Author</dt><dd>${esc(it.author)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Scheduled</dt><dd class="tabular-nums">${fmt(it.scheduled)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Reviewer</dt><dd>${esc(it.reviewer)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Reason</dt><dd>${REASON_LABEL[it.reason]}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim">
+      <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Caption</div>
+      <div class="text-body-sm whitespace-pre-wrap">${esc(it.caption)}</div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek-act="approve"><span class="material-symbols-outlined text-[16px]">check_circle</span>Approve</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek-act="changes"><span class="material-symbols-outlined text-[16px]">edit_note</span>Request changes</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md text-error hover:bg-error-container/40 flex items-center justify-center gap-1" data-peek-act="reject"><span class="material-symbols-outlined text-[16px]">block</span>Reject</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek-act="assign"><span class="material-symbols-outlined text-[16px]">person_add</span>Assign</button>
+    </div>
+  `;
+  peek.querySelectorAll("[data-peek-act]").forEach(b=>{
+    b.addEventListener("click",()=>{
+      openDecision(b.dataset.peekAct,[id]);
+    });
+  });
+  peek.classList.add("open");
+  scrim.classList.add("open");
+}
+document.getElementById("peek-close").addEventListener("click",()=>{
+  peek.classList.remove("open"); scrim.classList.remove("open"); peekId=null;
+});
+document.getElementById("peek-approve").addEventListener("click",()=>{
+  if (peekId) openDecision("approve",[peekId]);
+});
+scrim.addEventListener("click",()=>{
+  peek.classList.remove("open"); scrim.classList.remove("open"); peekId=null;
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   DECISION MODAL
+   ═══════════════════════════════════════════════════════════════════ */
+function openDecision(action, ids){
+  if (!ids || !ids.length){ toast("Select at least one item"); return; }
+  activeDecision = {action, ids};
+  const titles = {
+    approve:"Approve content",
+    changes:"Request changes",
+    reject:"Reject content",
+    assign:"Assign reviewer"
+  };
+  const subs = {
+    approve:"This approves the content and unlocks publishing for the selected items.",
+    changes:"The author will be notified and must resubmit. Existing schedule is paused.",
+    reject:"The content is rejected and removed from the schedule. Logged for audit.",
+    assign:"Reassign the reviewer. The previous reviewer will see the change in their queue."
+  };
+  document.getElementById("decisionTitle").textContent = titles[action];
+  document.getElementById("decisionSub").textContent = subs[action];
+  document.getElementById("decisionFields").classList.toggle("hidden-imp", action==="assign");
+  document.getElementById("decisionReason").value="";
+  document.getElementById("decisionNote").value="";
+  document.getElementById("decisionConfirm").textContent = titles[action].split(" ")[0];
+  document.getElementById("decisionModal").classList.add("open");
+}
+document.getElementById("decisionCancel").addEventListener("click",()=>{
+  document.getElementById("decisionModal").classList.remove("open");
+  activeDecision={action:null,ids:[]};
+});
+document.getElementById("decisionConfirm").addEventListener("click",async ()=>{
+  const action=activeDecision.action, ids=activeDecision.ids.slice();
+  const reason=document.getElementById("decisionReason").value;
+  const reviewer=document.getElementById("decisionReviewer").value;
+  const note=document.getElementById("decisionNote").value;
+
+  if (action!=="assign" && !reason){ toast("Pick a reason before confirming"); return; }
+
+  if (action==="assign"){
+    await API.assign(ids[0],{reviewer});
+    ids.forEach(id=>{ const it=items.find(x=>x.id===id); if(it) it.reviewer=reviewer; });
+    toast("Assigned to "+reviewer);
+  } else {
+    const state = action==="approve"?"approved":action==="changes"?"changes":"rejected";
+    await API.decide(ids.join(","),{decision:action,reason,reviewer,note});
+    ids.forEach(id=>{
+      const it=items.find(x=>x.id===id);
+      if (it){ it.state=state; it.reviewer=reviewer; }
+      decisions.unshift({when:new Date().toISOString(),title:(it&&it.title)||id,decision:state,reviewer,reason,note:note||"—"});
+    });
+    toast(action==="approve"?"Approved":action==="changes"?"Changes requested":"Rejected");
+  }
+  document.getElementById("decisionModal").classList.remove("open");
+  activeDecision={action:null,ids:[]};
+  renderQueue();
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   DECISIONS LOG
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-dectab]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-dectab]").forEach(x=>{
+    const on=x===b;
+    x.classList.toggle("active",on);
+    x.classList.toggle("text-on-surface-variant",!on);
+  });
+  renderDecisions(b.dataset.dectab);
+}));
+function renderDecisions(filter="all"){
+  const rows = decisions.filter(d=>filter==="all" || d.decision===filter);
+  const stateMap = {approved:"approved",rejected:"rejected",changes:"changes"};
+  document.getElementById("decisions-tbody").innerHTML = rows.map(d=>`
+    <tr class="hover:bg-surface-container-low">
+      <td class="px-3 py-2 tabular-nums">${fmt(d.when)}</td>
+      <td class="px-3 py-2 font-medium">${esc(d.title)}</td>
+      <td class="px-3 py-2">${statePill(stateMap[d.decision]||d.decision)}</td>
+      <td class="px-3 py-2">${esc(d.reviewer)}</td>
+      <td class="px-3 py-2">${reasonChip(d.reason)}</td>
+      <td class="px-3 py-2 text-[11px] text-on-surface-variant">${esc(d.note)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-revert="${esc(d.title)}">
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant">undo</span>
+        </button>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="7"><div class="py-10 text-center text-body-sm text-on-surface-variant">No decisions in this view.</div></td></tr>`;
+  document.querySelectorAll("[data-revert]").forEach(b=>b.addEventListener("click",()=>toast("Revert logged for "+b.dataset.revert)));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   FILTER POPOVERS
+   ═══════════════════════════════════════════════════════════════════ */
+function togglePop(id, btnId){
+  const p=document.getElementById(id);
+  const others=["pop-reason","pop-channel"].filter(x=>x!==id);
+  others.forEach(x=>document.getElementById(x).classList.add("hidden-imp"));
+  p.classList.toggle("hidden-imp");
+  if (!p.classList.contains("hidden-imp")){
+    setTimeout(()=>document.addEventListener("click",(e)=>{
+      if (!p.contains(e.target) && !document.getElementById(btnId).contains(e.target)) p.classList.add("hidden-imp");
+    },{once:true}),0);
+  }
+}
+document.getElementById("btn-reason").addEventListener("click",e=>{e.stopPropagation();togglePop("pop-reason","btn-reason");});
+document.getElementById("btn-channel").addEventListener("click",e=>{e.stopPropagation();togglePop("pop-channel","btn-channel");});
+
+function syncReasonPop(){
+  document.querySelectorAll(".filter-reason").forEach(cb=>cb.checked=filters.reasons.has(cb.value));
+  document.getElementById("reason-count").textContent = filters.reasons.size===REASONS.length?"":`(${filters.reasons.size})`;
+}
+function syncChannelPop(){
+  document.querySelectorAll(".filter-channel").forEach(cb=>cb.checked=filters.channels.has(cb.value));
+}
+document.getElementById("reason-apply").addEventListener("click",()=>{
+  filters.reasons = new Set([...document.querySelectorAll(".filter-reason:checked")].map(cb=>cb.value));
+  syncReasonPop();
+  document.getElementById("pop-reason").classList.add("hidden-imp");
+  renderQueue();
+});
+document.getElementById("reason-clear").addEventListener("click",()=>{
+  filters.reasons = new Set(REASONS);
+  syncReasonPop();
+  document.getElementById("pop-reason").classList.add("hidden-imp");
+  renderQueue();
+});
+document.getElementById("channel-apply").addEventListener("click",()=>{
+  filters.channels = new Set([...document.querySelectorAll(".filter-channel:checked")].map(cb=>cb.value));
+  syncChannelPop();
+  document.getElementById("pop-channel").classList.add("hidden-imp");
+  renderQueue();
+});
+document.getElementById("channel-clear").addEventListener("click",()=>{
+  filters.channels = new Set(["Instagram","Facebook","LinkedIn","TikTok"]);
+  syncChannelPop();
+  document.getElementById("pop-channel").classList.add("hidden-imp");
+  renderQueue();
+});
+document.getElementById("btn-awaiting-only").addEventListener("click",()=>{
+  filters.awaitingOnly = !filters.awaitingOnly;
+  document.getElementById("btn-awaiting-only").classList.toggle("border-primary",filters.awaitingOnly);
+  document.getElementById("btn-awaiting-only").classList.toggle("text-primary",filters.awaitingOnly);
+  renderQueue();
+});
+document.getElementById("oversight-search").addEventListener("input",e=>{
+  filters.q=e.target.value;
+  renderQueue();
+});
+document.getElementById("oversight-clear-all").addEventListener("click",()=>{
+  filters.q=""; document.getElementById("oversight-search").value="";
+  filters.reasons=new Set(REASONS);
+  filters.channels=new Set(["Instagram","Facebook","LinkedIn","TikTok"]);
+  filters.awaitingOnly=false;
+  document.getElementById("btn-awaiting-only").classList.remove("border-primary","text-primary");
+  syncReasonPop(); syncChannelPop(); renderQueue();
+});
+document.getElementById("oversight-empty-clear").addEventListener("click",()=>{
+  document.getElementById("oversight-clear-all").click();
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   EXPORT / RULES
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelector("[data-export]").addEventListener("click",()=>{
+  toast("Exported "+filteredItems().length+" oversight items");
+});
+document.querySelector("[data-rules]").addEventListener("click",()=>{
+  document.getElementById("rulesModal").classList.add("open");
+});
+document.getElementById("rulesClose").addEventListener("click",()=>document.getElementById("rulesModal").classList.remove("open"));
+document.getElementById("rulesSave").addEventListener("click",()=>{
+  API.saveRules({saved:true});
+  document.getElementById("rulesModal").classList.remove("open");
+  toast("Oversight rules saved");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════════════════════════ */
+syncReasonPop();
+syncChannelPop();
+renderQueue();
+renderDecisions();
+</script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orders — Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  /* KPI tiles */
+  .kpi-tile{background:#fff;border:1px solid #dad9dd;border-radius:10px;padding:14px;cursor:pointer;transition:all .12s}
+  .kpi-tile:hover{border-color:#0077c5;box-shadow:0 2px 12px rgba(0,119,197,.08)}
+  .kpi-label{font:600 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;display:flex;align-items:center;gap:6px}
+  .kpi-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;line-height:1.1}
+  .kpi-delta{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:3px;color:#5a6355}
+  /* Queue row */
+  .queue-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f4f3f7;cursor:pointer}
+  .queue-row:last-child{border-bottom:none}
+  .queue-row:hover{background:#f4f3f7;border-radius:4px;padding-left:6px;padding-right:6px;margin-left:-6px;margin-right:-6px}
+  .queue-row .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+  .queue-row .amt{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;font-size:13px}
+  /* Avatar */
+  .q-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  /* Status pills */
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.unfulfilled{background:#fff4dc;color:#8a5a00}
+  .stat.ready{background:#e8f0fb;color:#0055a5}
+  .stat.pickup{background:#f4e8f8;color:#6b1e8a}
+  .stat.shipped{background:#e8e8f8;color:#4a3fc4}
+  .stat.delivered{background:#8af5be;color:#00714b}
+  .stat.problem{background:#ffdad6;color:#93000a}
+  /* Funnel bars */
+  .funnel-row{display:flex;align-items:center;gap:8px;padding:8px 0}
+  .funnel-row .lbl{width:130px;font-size:12px;color:#5a6355;text-align:right}
+  .funnel-row .track{flex:1;height:24px;background:#f4f3f7;border-radius:4px;overflow:hidden}
+  .funnel-row .fill{height:100%;border-radius:4px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:11px;font-weight:600}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">local_shipping</span>
+    <span class="text-label-md font-semibold">Orders</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Overview</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Orders — Overview</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Order pipeline, fulfillment queue, and today's commitments · November 2026</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-date-range>
+        <span class="material-symbols-outlined text-[16px]">calendar_today</span>Nov 2026 ▾</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- KPI strip — clickable -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="kpi-tile" data-drill="orders">
+      <div class="kpi-label"><span class="material-symbols-outlined text-[14px] text-qb-blue">shopping_cart</span>Orders today</div>
+      <div class="kpi-val">12</div>
+      <div class="kpi-delta"><span class="material-symbols-outlined text-[13px]">trending_up</span>+3 vs yesterday</div>
+    </div>
+    <div class="kpi-tile" data-drill="unfulfilled">
+      <div class="kpi-label"><span class="material-symbols-outlined text-[14px] text-error">schedule</span>Unfulfilled</div>
+      <div class="kpi-val">8</div>
+      <div class="kpi-delta"><span class="material-symbols-outlined text-[13px] text-error">warning</span>2 past SLA</div>
+    </div>
+    <div class="kpi-tile" data-drill="shipped">
+      <div class="kpi-label"><span class="material-symbols-outlined text-[14px] text-qb-green">local_shipping</span>Shipped</div>
+      <div class="kpi-val">24</div>
+      <div class="kpi-delta">This week</div>
+    </div>
+    <div class="kpi-tile" data-drill="revenue">
+      <div class="kpi-label"><span class="material-symbols-outlined text-[14px] text-qb-teal">attach_money</span>Revenue MTD</div>
+      <div class="kpi-val">$14,820</div>
+      <div class="kpi-delta"><span class="material-symbols-outlined text-[13px] text-secondary">trending_up</span>+18% vs Oct</div>
+    </div>
+  </div>
+
+  <!-- Create actions row (§F Orders header set) -->
+  <div class="flex items-center gap-2 mb-5 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Create order">
+      <span class="material-symbols-outlined text-[16px]">add_shopping_cart</span>Create order</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Report a problem">
+      <span class="material-symbols-outlined text-[16px]">report_problem</span>Report a problem</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Create PO">
+      <span class="material-symbols-outlined text-[16px]">shopping_bag</span>Create PO</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Restock">
+      <span class="material-symbols-outlined text-[16px]">sync</span>Restock</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Batch slips">
+      <span class="material-symbols-outlined text-[16px]">receipt</span>Batch slips</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Export">
+      <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-action="Pick list">
+      <span class="material-symbols-outlined text-[16px]">checklist</span>Pick list</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Main grid -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-5">
+
+    <!-- Fulfillment pipeline -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Fulfillment pipeline</h2>
+        <span class="text-[11px] text-on-surface-variant">36 active orders</span>
+      </div>
+      <div class="space-y-1">
+        <div class="funnel-row">
+          <div class="lbl">Unfulfilled</div>
+          <div class="track"><div class="fill" style="width:22%;background:#8a5a00">8</div></div>
+        </div>
+        <div class="funnel-row">
+          <div class="lbl">Ready to ship</div>
+          <div class="track"><div class="fill" style="width:12%;background:#0077c5">4</div></div>
+        </div>
+        <div class="funnel-row">
+          <div class="lbl">Local pickup</div>
+          <div class="track"><div class="fill" style="width:6%;background:#6b1e8a">2</div></div>
+        </div>
+        <div class="funnel-row">
+          <div class="lbl">Shipped</div>
+          <div class="track"><div class="fill" style="width:33%;background:#4a3fc4">12</div></div>
+        </div>
+        <div class="funnel-row">
+          <div class="lbl">Delivered</div>
+          <div class="track"><div class="fill" style="width:28%;background:#1e5a38">10</div></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 mt-3 pt-3 border-t border-surface-dim text-[11px] text-on-surface-variant">
+        <span><span class="font-semibold text-on-surface">94%</span> on-time rate</span>
+        <span><span class="font-semibold text-on-surface">1.8d</span> avg. fulfillment time</span>
+        <span><span class="font-semibold text-on-surface">2</span> past SLA (needs attention)</span>
+      </div>
+    </div>
+
+    <!-- Needs attention queue -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-headline-sm">Needs attention</h2>
+        <span class="text-[11px] text-error font-semibold">4 items</span>
+      </div>
+      <div>
+        <div class="queue-row" data-drill="problem">
+          <span class="material-symbols-outlined text-[18px] text-error">report_problem</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">2 orders past SLA</div>
+            <div class="text-[11px] text-on-surface-variant">#1042, #1047 — waiting on Printful</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="queue-row" data-drill="problem">
+          <span class="material-symbols-outlined text-[18px] text-qb-maroon">inventory</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">1 stockout</div>
+            <div class="text-[11px] text-on-surface-variant">Mug 11oz — 0 on hand</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="queue-row" data-drill="problem">
+          <span class="material-symbols-outlined text-[18px] text-tertiary">assignment_return</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">1 return to process</div>
+            <div class="text-[11px] text-on-surface-variant">#1031 — wrong size, refund</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+        <div class="queue-row" data-drill="problem">
+          <span class="material-symbols-outlined text-[18px] text-qb-blue">mark_email_unread</span>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">1 customer question</div>
+            <div class="text-[11px] text-on-surface-variant">#1045 — "where is my order?"</div>
+          </div>
+          <span class="material-symbols-outlined text-[14px] text-outline">chevron_right</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom grid: Recent orders + Top products -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+    <!-- Recent orders -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div>
+          <h2 class="text-headline-sm">Recent orders</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">Last 24 hours</p>
+        </div>
+        <button class="text-[11px] font-semibold text-primary hover:underline" data-goto="orders">View all</button>
+      </div>
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr>
+            <th class="px-4 py-2">Order</th>
+            <th class="px-4 py-2">Customer</th>
+            <th class="px-4 py-2">Supplier</th>
+            <th class="px-4 py-2 text-right">Total</th>
+            <th class="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          <tr class="hover:bg-surface-container-low cursor-pointer" data-order="1047">
+            <td class="px-4 py-2 font-medium">#1047</td>
+            <td class="px-4 py-2">Acme Corp</td>
+            <td class="px-4 py-2 text-on-surface-variant">Printful</td>
+            <td class="px-4 py-2 text-right tabular-nums">$184.00</td>
+            <td class="px-4 py-2"><span class="stat unfulfilled">Unfulfilled</span></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low cursor-pointer" data-order="1046">
+            <td class="px-4 py-2 font-medium">#1046</td>
+            <td class="px-4 py-2">Blue Ridge Co.</td>
+            <td class="px-4 py-2 text-on-surface-variant">Gelato</td>
+            <td class="px-4 py-2 text-right tabular-nums">$92.00</td>
+            <td class="px-4 py-2"><span class="stat ready">Ready to ship</span></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low cursor-pointer" data-order="1045">
+            <td class="px-4 py-2 font-medium">#1045</td>
+            <td class="px-4 py-2">Northwind Labs</td>
+            <td class="px-4 py-2 text-on-surface-variant">Printify</td>
+            <td class="px-4 py-2 text-right tabular-nums">$246.00</td>
+            <td class="px-4 py-2"><span class="stat pickup">Local pickup</span></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low cursor-pointer" data-order="1044">
+            <td class="px-4 py-2 font-medium">#1044</td>
+            <td class="px-4 py-2">Orion Apparel</td>
+            <td class="px-4 py-2 text-on-surface-variant">Printful</td>
+            <td class="px-4 py-2 text-right tabular-nums">$128.00</td>
+            <td class="px-4 py-2"><span class="stat shipped">Shipped</span></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low cursor-pointer" data-order="1043">
+            <td class="px-4 py-2 font-medium">#1043</td>
+            <td class="px-4 py-2">Maple Supply</td>
+            <td class="px-4 py-2 text-on-surface-variant">Gelato</td>
+            <td class="px-4 py-2 text-right tabular-nums">$210.00</td>
+            <td class="px-4 py-2"><span class="stat delivered">Delivered</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top products + activity -->
+    <div class="grid grid-cols-1 gap-4">
+      <!-- Top products sold -->
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-headline-sm">Top products (30d)</h2>
+          <button class="text-[11px] text-primary font-semibold hover:underline" data-goto="products">View all</button>
+        </div>
+        <div>
+          <div class="queue-row">
+            <div class="q-avatar bg-qb-blue">T</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-body-sm font-medium truncate">Classic Tee</div>
+              <div class="text-[11px] text-on-surface-variant">84 units sold</div>
+            </div>
+            <span class="amt">$2,016</span>
+          </div>
+          <div class="queue-row">
+            <div class="q-avatar bg-qb-green">H</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-body-sm font-medium truncate">Hoodie — Heavyweight</div>
+              <div class="text-[11px] text-on-surface-variant">42 units sold</div>
+            </div>
+            <span class="amt">$2,436</span>
+          </div>
+          <div class="queue-row">
+            <div class="q-avatar bg-qb-teal">C</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-body-sm font-medium truncate">Canvas Tote</div>
+              <div class="text-[11px] text-on-surface-variant">36 units sold</div>
+            </div>
+            <span class="amt">$648</span>
+          </div>
+          <div class="queue-row">
+            <div class="q-avatar bg-qb-maroon">M</div>
+            <div class="min-w-0 flex-1">
+              <div class="text-body-sm font-medium truncate">Mug 11oz</div>
+              <div class="text-[11px] text-on-surface-variant">22 units sold · <span class="text-error">0 on hand</span></div>
+            </div>
+            <span class="amt">$308</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Recent activity</h2>
+        <div class="space-y-3 text-body-sm">
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-qb-blue mt-0.5">shopping_cart</span>
+            <div class="min-w-0">
+              <div class="font-medium">Order #1047 placed</div>
+              <div class="text-[11px] text-on-surface-variant">Acme Corp · 11/03 2:15 PM</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">local_shipping</span>
+            <div class="min-w-0">
+              <div class="font-medium">Order #1044 shipped</div>
+              <div class="text-[11px] text-on-surface-variant">USPS · tracking 9400 1X12...</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">check_circle</span>
+            <div class="min-w-0">
+              <div class="font-medium">Batch slips printed</div>
+              <div class="text-[11px] text-on-surface-variant">4 orders · 11/03 9:10 AM</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">inventory</span>
+            <div class="min-w-0">
+              <div class="font-medium">Stock alert: Mug 11oz</div>
+              <div class="text-[11px] text-on-surface-variant">Reorder point reached</div>
+            </div>
+          </div>
+        </div>
+        <button class="w-full mt-3 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low flex items-center justify-center gap-1" data-goto="activity">
+          <span class="material-symbols-outlined text-[14px]">history</span>View all activity</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* KPI drill */
+document.querySelectorAll("[data-drill]").forEach(el=>el.addEventListener("click", ()=>{
+  toast(`Drill down → ${el.dataset.drill}`);
+}));
+
+/* Create actions (§F Orders header set) */
+document.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  toast(`${b.dataset.action} — opens dedicated workspace`);
+}));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout — filtered to Orders"));
+
+/* Recent orders */
+document.querySelectorAll("[data-order]").forEach(el=>el.addEventListener("click", ()=>{
+  toast(`Open order #${el.dataset.order}`);
+}));
+
+/* Nav links */
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click", ()=>toast(`Navigate → ${b.dataset.goto}`)));
+
+/* Utility */
+document.querySelector("[data-date-range]").addEventListener("click", ()=>toast("Date range picker"));
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Exporting orders overview…"));
+</script>
+</body>
+</html>

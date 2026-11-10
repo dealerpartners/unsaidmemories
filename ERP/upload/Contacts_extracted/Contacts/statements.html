@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Statements — Customer Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  /* Status pills */
+  .st{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .st.draft{background:#f4f3f7;color:#5a6355}
+  .st.sent{background:#e8f0fb;color:#0055a5}
+  .st.viewed{background:#fff4dc;color:#8a5a00}
+  .st.paid{background:#8af5be;color:#00714b}
+  .st.overdue{background:#ffdad6;color:#93000a}
+  .st.partial{background:#e8e8f8;color:#4a3fc4}
+  /* Avatar */
+  .st-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:720px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:34px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  /* Modal */
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  /* Row menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  /* Statement doc */
+  .stmt-doc{background:#fff;border:1px solid #dad9dd;border-radius:8px;padding:24px;font-size:13px}
+  .stmt-line{display:grid;grid-template-columns:80px 1fr 100px 100px 100px;gap:8px;padding:8px 0;border-bottom:1px solid #eeedf1;align-items:center}
+  .stmt-line.head{font:700 10px Inter;letter-spacing:.06em;text-transform:uppercase;color:#5a6355;background:#f4f3f7;border-radius:4px 4px 0 0;padding:8px 12px;border-bottom:none}
+  .stmt-line:last-child{border-bottom:none}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Customer Hub</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Statements</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Statements</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Batch billing summary — send a customer their account activity for a period</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-statement>
+          <span class="material-symbols-outlined text-[16px]">add</span>New statement
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-new-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-customize>
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Sent this month</div>
+      <div class="text-headline-sm mt-1 tabular-nums">4</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">October 2026 · $12,340 total</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Awaiting payment</div>
+      <div class="text-headline-sm mt-1 tabular-nums">2</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">$3,940 outstanding</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Collected</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary">$8,400</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">68% of sent statements</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Overdue</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error">1</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">$2,100 · past 30 days</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new-statement>
+      <span class="material-symbols-outlined text-[16px]">summarize</span>Statement</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-batch-statements>
+      <span class="material-symbols-outlined text-[16px]">campaign</span>Batch send</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create-customer>
+      <span class="material-symbols-outlined text-[16px]">person_add</span>Customer</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-invoice>
+      <span class="material-symbols-outlined text-[16px]">receipt_long</span>Invoice</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Draft">Draft</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Sent">Sent</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Awaiting">Awaiting payment</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Paid">Paid</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Overdue">Overdue</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by customer, period…" data-filter/>
+      </div>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-s-count>—</span>
+    </div>
+
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="send"><span class="material-symbols-outlined text-[14px] align-middle mr-1">send</span>Send</button>
+      <button data-bulk="print"><span class="material-symbols-outlined text-[14px] align-middle mr-1">print</span>Print</button>
+      <button data-bulk="remind"><span class="material-symbols-outlined text-[14px] align-middle mr-1">notifications_active</span>Remind</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Customer</th>
+          <th class="px-3 py-2">Period</th>
+          <th class="px-3 py-2">Sent</th>
+          <th class="px-3 py-2">Due</th>
+          <th class="px-3 py-2 text-right">Balance</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-s-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Awaiting" data-id="ST-1101" data-customer="Acme Corp" data-period="Oct 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-blue">A</div>
+              <div class="min-w-0"><div class="font-medium truncate">Acme Corp</div><div class="text-[11px] text-on-surface-variant">ap@acme.com</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Oct 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/31/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">11/30/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,240.00</td>
+          <td class="px-3 py-2"><span class="st sent">Sent</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Awaiting" data-id="ST-1100" data-customer="Northwind Labs" data-period="Oct 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-teal">N</div>
+              <div class="min-w-0"><div class="font-medium truncate">Northwind Labs</div><div class="text-[11px] text-on-surface-variant">finance@northwind.io</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Oct 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/31/2026</td>
+          <td class="px-3 py-2 text-error">11/01/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">$2,100.00</td>
+          <td class="px-3 py-2"><span class="st overdue">Overdue</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Paid" data-id="ST-1099" data-customer="Blue Ridge Co." data-period="Sep 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-green">B</div>
+              <div class="min-w-0"><div class="font-medium truncate">Blue Ridge Co.</div><div class="text-[11px] text-on-surface-variant">billing@blueridge.co</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Sep 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">09/30/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/30/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="st paid">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Paid" data-id="ST-1098" data-customer="Lakeside Design" data-period="Sep 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-blue">L</div>
+              <div class="min-w-0"><div class="font-medium truncate">Lakeside Design</div><div class="text-[11px] text-on-surface-variant">hello@lakeside.design</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Sep 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">09/30/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/30/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="st paid">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Draft" data-id="ST-1102" data-customer="Maple Supply" data-period="Nov 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-maroon">M</div>
+              <div class="min-w-0"><div class="font-medium truncate">Maple Supply</div><div class="text-[11px] text-on-surface-variant">ar@maplesupply.io</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Nov 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">—</td>
+          <td class="px-3 py-2 text-on-surface-variant">12/31/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$890.00</td>
+          <td class="px-3 py-2"><span class="st draft">Draft</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer s-row" data-status="Awaiting" data-id="ST-1097" data-customer="Orion Apparel" data-period="Sep 2026">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check s-check"/></td>
+          <td class="px-3 py-2">
+            <div class="flex items-center gap-2">
+              <div class="st-avatar bg-qb-navy">O</div>
+              <div class="min-w-0"><div class="font-medium truncate">Orion Apparel</div><div class="text-[11px] text-on-surface-variant">hello@orionapparel.com</div></div>
+            </div>
+          </td>
+          <td class="px-3 py-2 text-on-surface-variant">Sep 2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">09/30/2026</td>
+          <td class="px-3 py-2 text-on-surface-variant">10/30/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,850.00</td>
+          <td class="px-3 py-2"><span class="st partial">Partial</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- New split menu -->
+<div class="row-menu" id="new-menu">
+  <div class="menu-header">New statement</div>
+  <button data-new-kind="Single customer"><span class="material-symbols-outlined">person</span>Single customer</button>
+  <button data-new-kind="Batch send"><span class="material-symbols-outlined">campaign</span>Batch send to many…</button>
+  <div class="sep"></div>
+  <button data-new-kind="From invoices"><span class="material-symbols-outlined">receipt_long</span>Generate from invoices…</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This statement</div>
+  <button data-action="view"><span class="material-symbols-outlined">open_in_new</span>Open statement</button>
+  <button data-action="edit"><span class="material-symbols-outlined">edit</span>Edit</button>
+  <button data-action="duplicate"><span class="material-symbols-outlined">content_copy</span>Duplicate for next period</button>
+  <div class="sep"></div>
+  <div class="menu-header">Send</div>
+  <button data-action="send"><span class="material-symbols-outlined">send</span>Send</button>
+  <button data-action="remind"><span class="material-symbols-outlined">notifications_active</span>Send reminder</button>
+  <button data-action="print"><span class="material-symbols-outlined">print</span>Print / download PDF</button>
+  <div class="sep"></div>
+  <div class="menu-header">Payment</div>
+  <button data-action="mark-paid"><span class="material-symbols-outlined">check_circle</span>Mark as paid</button>
+  <button data-action="receive-payment"><span class="material-symbols-outlined">price_check</span>Receive payment…</button>
+  <div class="sep"></div>
+  <button class="danger" data-action="delete"><span class="material-symbols-outlined">delete</span>Delete</button>
+</div>
+
+<!-- Statement drawer -->
+<div class="drawer-scrim" id="s-scrim"></div>
+<div class="drawer" id="s-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">summarize</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-s-title>Statement</div>
+        <div class="text-[11px] text-on-surface-variant" data-s-sub>—</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" title="Download">
+        <span class="material-symbols-outlined text-[18px]">download</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-s>
+        <span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <!-- Customer / period header -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="field-label">Customer</label>
+        <div class="relative flex items-center">
+          <input class="field-input" data-s-customer readonly/>
+          <span class="material-symbols-outlined absolute right-2 text-[16px] text-outline">expand_more</span>
+        </div>
+      </div>
+      <div>
+        <label class="field-label">Period</label>
+        <select class="field-input" data-s-period>
+          <option>Oct 2026</option>
+          <option>Sep 2026</option>
+          <option>Aug 2026</option>
+          <option>Jul 2026</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Statement date</label>
+        <input class="field-input" type="date" data-s-date/>
+      </div>
+      <div>
+        <label class="field-label">Due date</label>
+        <input class="field-input" type="date" data-s-due/>
+      </div>
+    </div>
+
+    <!-- Statement preview -->
+    <div>
+      <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Statement preview</div>
+      <div class="stmt-doc">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="font-bold text-body-md">ManageKube LLC</div>
+            <div class="text-[11px] text-on-surface-variant">ManageKube LLC · Statement</div>
+          </div>
+          <div class="text-right text-[11px] text-on-surface-variant">
+            <div data-s-period-label>Oct 2026</div>
+            <div data-s-due-label>Due 11/30/2026</div>
+          </div>
+        </div>
+        <div class="border-t border-surface-dim pt-3 mb-3">
+          <div class="text-[11px] text-on-surface-variant uppercase font-bold mb-1">Bill to</div>
+          <div class="font-medium" data-s-billto>—</div>
+        </div>
+        <div class="stmt-line head"><span>Date</span><span>Invoice / activity</span><span class="text-right">Amount</span><span class="text-right">Paid</span><span class="text-right">Balance</span></div>
+        <div data-s-lines>
+          <div class="stmt-line"><span class="text-on-surface-variant">10/15</span><span>Invoice 0998</span><span class="text-right tabular-nums">$890.00</span><span class="text-right tabular-nums">$0.00</span><span class="text-right tabular-nums">$890.00</span></div>
+          <div class="stmt-line"><span class="text-on-surface-variant">10/28</span><span>Invoice 1001</span><span class="text-right tabular-nums">$3,410.00</span><span class="text-right tabular-nums">$3,410.00</span><span class="text-right tabular-nums">$0.00</span></div>
+        </div>
+        <div class="flex justify-end pt-3 mt-3 border-t border-surface-dim">
+          <div class="w-56 space-y-1 text-[12px]">
+            <div class="flex justify-between"><span class="text-on-surface-variant">Opening balance</span><span class="tabular-nums">$0.00</span></div>
+            <div class="flex justify-between"><span class="text-on-surface-variant">Invoiced</span><span class="tabular-nums" data-s-invoiced>$4,300.00</span></div>
+            <div class="flex justify-between"><span class="text-on-surface-variant">Paid</span><span class="tabular-nums" data-s-paid>−$3,410.00</span></div>
+            <div class="flex justify-between pt-1 border-t border-surface-dim font-bold"><span>Amount due</span><span class="tabular-nums" data-s-due-amt>$890.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div>
+      <label class="field-label">Message to customer</label>
+      <textarea class="field-input" style="height:56px;padding:8px 10px;font-family:inherit" placeholder="Optional note visible to the customer">Please review the attached statement at your convenience.</textarea>
+    </div>
+
+    <!-- Delivery -->
+    <div>
+      <div class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mb-2">Delivery</div>
+      <div class="space-y-2">
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check" checked/> Email to <strong class="ml-1" data-s-email>—</strong></label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Include PDF attachment</label>
+        <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" class="row-check"/> Also print for mail</label>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-s>Cancel</button>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" data-s-print>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">print</span>Print</button>
+      <div class="split-btn flex">
+        <button class="h-8 px-3 border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" data-s-save>Save draft</button>
+        <button class="h-8 px-1.5 border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="split-btn flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" data-s-send>Send to customer</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Batch send modal -->
+<div class="modal-scrim" id="batch-modal">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="material-symbols-outlined text-[20px] text-primary">campaign</span>
+        <h2 class="text-headline-sm">Batch send statements</h2>
+      </div>
+      <p class="text-body-sm text-on-surface-variant mb-4">Send statements to all customers with an open balance for the selected period.</p>
+      <div class="space-y-3">
+        <div><label class="field-label">Period</label>
+          <select class="field-input">
+            <option>Oct 2026</option><option>Sep 2026</option><option>Nov 2026</option>
+          </select>
+        </div>
+        <div class="bg-surface-container-low rounded-lg p-3 text-[11px] text-on-surface-variant">
+          <div class="flex items-center gap-2 mb-1"><span class="material-symbols-outlined text-[14px] text-secondary">check</span>3 customers have open balances</div>
+          <div class="flex items-center gap-2 mb-1"><span class="material-symbols-outlined text-[14px] text-secondary">check</span>2 have overdue balances</div>
+          <div class="flex items-center gap-2"><span class="material-symbols-outlined text-[14px] text-tertiary">info</span>Statements will be emailed as PDFs</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 px-4 pb-4">
+      <button class="flex-1 h-9 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-cancel-batch>Cancel</button>
+      <button class="flex-1 h-9 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-confirm-batch>
+        <span class="material-symbols-outlined text-[16px] align-middle mr-1">send</span>Send to 3 customers</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* New split */
+const newMenu = document.getElementById("new-menu");
+document.querySelector("[data-new-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  newMenu.style.top = (r.bottom + 4) + "px";
+  newMenu.style.left = Math.min(r.right - 220, window.innerWidth - 240) + "px";
+  newMenu.classList.toggle("open");
+});
+document.querySelectorAll("#new-menu [data-new-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  newMenu.classList.remove("open");
+  const k = b.dataset.newKind;
+  if (k === "Batch send") return openBatchModal();
+  if (k === "From invoices") return toast("Generating from invoices — pick period");
+  openStatement(null);
+}));
+document.querySelector("[data-new-statement]").addEventListener("click", ()=>openStatement(null));
+document.querySelector("[data-batch-statements]").addEventListener("click", ()=>openBatchModal());
+document.querySelector("[data-create-customer]").addEventListener("click", ()=>toast("New customer — party drawer"));
+document.querySelector("[data-invoice]").addEventListener("click", ()=>toast("New invoice"));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout"));
+
+/* Statement data */
+const S_DATA = {
+  "ST-1101": { id:"ST-1101", customer:"Acme Corp", email:"ap@acme.com", period:"Oct 2026", date:"2026-10-31", due:"2026-11-30", invoiced:"$4,300.00", paid:"−$3,410.00", dueAmt:"$890.00", status:"Sent", lines:[ {date:"10/15", desc:"Invoice 0998", amt:"$890.00", paid:"$0.00", bal:"$890.00"}, {date:"10/28", desc:"Invoice 1001", amt:"$3,410.00", paid:"$3,410.00", bal:"$0.00"} ] },
+  "ST-1100": { id:"ST-1100", customer:"Northwind Labs", email:"finance@northwind.io", period:"Oct 2026", date:"2026-10-31", due:"2026-11-01", invoiced:"$2,100.00", paid:"$0.00", dueAmt:"$2,100.00", status:"Overdue", lines:[ {date:"10/02", desc:"Invoice 0996", amt:"$2,100.00", paid:"$0.00", bal:"$2,100.00"} ] },
+  "ST-1099": { id:"ST-1099", customer:"Blue Ridge Co.", email:"billing@blueridge.co", period:"Sep 2026", date:"2026-09-30", due:"2026-10-30", invoiced:"$3,410.00", paid:"−$3,410.00", dueAmt:"$0.00", status:"Paid", lines:[ {date:"09/28", desc:"Invoice 1001", amt:"$3,410.00", paid:"$3,410.00", bal:"$0.00"} ] },
+  "ST-1098": { id:"ST-1098", customer:"Lakeside Design", email:"hello@lakeside.design", period:"Sep 2026", date:"2026-09-30", due:"2026-10-30", invoiced:"$1,850.00", paid:"−$1,850.00", dueAmt:"$0.00", status:"Paid", lines:[ {date:"09/05", desc:"Invoice 0992", amt:"$1,850.00", paid:"$1,850.00", bal:"$0.00"} ] },
+  "ST-1102": { id:"ST-1102", customer:"Maple Supply", email:"ar@maplesupply.io", period:"Nov 2026", date:"2026-11-30", due:"2026-12-31", invoiced:"$890.00", paid:"$0.00", dueAmt:"$890.00", status:"Draft", lines:[ {date:"11/15", desc:"Invoice 0998", amt:"$890.00", paid:"$0.00", bal:"$890.00"} ] },
+  "ST-1097": { id:"ST-1097", customer:"Orion Apparel", email:"hello@orionapparel.com", period:"Sep 2026", date:"2026-09-30", due:"2026-10-30", invoiced:"$2,350.00", paid:"−$500.00", dueAmt:"$1,850.00", status:"Partial", lines:[ {date:"09/15", desc:"Invoice 0994", amt:"$540.00", paid:"$540.00", bal:"$0.00"}, {date:"09/20", desc:"Invoice 0995", amt:"$1,810.00", paid:"$0.00", bal:"$1,810.00"} ] }
+};
+let currentSRow = null;
+function openStatement(row){
+  currentSRow = row;
+  const isNew = !row;
+  const d = isNew ? { id:"ST-1103", customer:"", email:"", period:"Nov 2026", date:"2026-11-30", due:"2026-12-31", invoiced:"$0.00", paid:"$0.00", dueAmt:"$0.00", status:"Draft", lines:[] } : (S_DATA[row.dataset.id] || {});
+  document.querySelector("[data-s-title]").textContent = `Statement ${d.id}`;
+  document.querySelector("[data-s-sub]").textContent = `${d.customer || "New statement"} · ${d.period}`;
+  document.querySelector("[data-s-customer]").value = d.customer || "";
+  document.querySelector("[data-s-period]").value = d.period;
+  document.querySelector("[data-s-date]").value = d.date;
+  document.querySelector("[data-s-due]").value = d.due;
+  document.querySelector("[data-s-period-label]").textContent = d.period;
+  const dParts = d.due.split("-");
+  document.querySelector("[data-s-due-label]").textContent = `Due ${dParts[1]}/${dParts[2]}/${dParts[0]}`;
+  document.querySelector("[data-s-billto]").textContent = d.customer || "—";
+  document.querySelector("[data-s-email]").textContent = d.email || "—";
+  document.querySelector("[data-s-invoiced]").textContent = d.invoiced;
+  document.querySelector("[data-s-paid]").textContent = d.paid;
+  document.querySelector("[data-s-due-amt]").textContent = d.dueAmt;
+  const linesWrap = document.querySelector("[data-s-lines]");
+  linesWrap.innerHTML = d.lines.map(l=>`<div class="stmt-line"><span class="text-on-surface-variant">${l.date}</span><span>${l.desc}</span><span class="text-right tabular-nums">${l.amt}</span><span class="text-right tabular-nums">${l.paid}</span><span class="text-right tabular-nums">${l.bal}</span></div>`).join("");
+  document.getElementById("s-scrim").classList.add("open");
+  document.getElementById("s-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-s]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("s-scrim").classList.remove("open");
+  document.getElementById("s-drawer").classList.remove("open");
+}));
+document.getElementById("s-scrim").addEventListener("click", ()=>{
+  document.getElementById("s-scrim").classList.remove("open");
+  document.getElementById("s-drawer").classList.remove("open");
+});
+
+/* Footer actions */
+document.querySelector("[data-s-send]").addEventListener("click", ()=>{
+  toast("Statement sent to customer");
+  closeS();
+});
+document.querySelector("[data-s-save]").addEventListener("click", ()=>{
+  toast("Statement saved as draft");
+  closeS();
+});
+document.querySelector("[data-s-print]").addEventListener("click", ()=>toast("Printing statement PDF"));
+function closeS(){
+  document.getElementById("s-scrim").classList.remove("open");
+  document.getElementById("s-drawer").classList.remove("open");
+}
+
+/* Batch modal */
+function openBatchModal(){ document.getElementById("batch-modal").classList.add("open"); }
+document.querySelector("[data-cancel-batch]").addEventListener("click", ()=>{
+  document.getElementById("batch-modal").classList.remove("open");
+});
+document.querySelector("[data-confirm-batch]").addEventListener("click", ()=>{
+  document.getElementById("batch-modal").classList.remove("open");
+  toast("Statements sent to 3 customers");
+});
+
+/* Row click + row menu */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+document.querySelectorAll(".s-row").forEach(tr=>{
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-row-menu]")) return;
+    openStatement(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    currentMenuRow = tr;
+    const status = tr.dataset.status;
+    rowMenu.querySelector('[data-action="send"]').style.display = status === "Draft" ? "" : "none";
+    rowMenu.querySelector('[data-action="remind"]').style.display = (status === "Awaiting" || status === "Overdue" || status === "Partial") ? "" : "none";
+    rowMenu.querySelector('[data-action="mark-paid"]').style.display = (status === "Awaiting" || status === "Overdue" || status === "Partial") ? "" : "none";
+    rowMenu.querySelector('[data-action="receive-payment"]').style.display = (status === "Awaiting" || status === "Overdue" || status === "Partial") ? "" : "none";
+    const r = e.currentTarget.getBoundingClientRect();
+    rowMenu.style.top = (r.bottom + 4) + "px";
+    rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+    rowMenu.classList.add("open");
+  });
+});
+
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  const id = tr.dataset.id;
+  switch(act){
+    case "view": case "edit": openStatement(tr); break;
+    case "duplicate": {
+      const clone = tr.cloneNode(true);
+      tr.parentNode.insertBefore(clone, tr.nextSibling);
+      toast(`Duplicated statement ${id}`); break;
+    }
+    case "send":
+      tr.dataset.status = "Awaiting";
+      const pill = tr.querySelector(".st");
+      pill.className = "st sent";
+      pill.textContent = "Sent";
+      toast(`Sent statement ${id}`); break;
+    case "remind": toast(`Reminder sent for ${id}`); break;
+    case "print": toast(`Printing statement ${id}`); break;
+    case "mark-paid":
+      tr.dataset.status = "Paid";
+      const p2 = tr.querySelector(".st");
+      p2.className = "st paid";
+      p2.textContent = "Paid";
+      tr.querySelectorAll("td")[5].textContent = "$0.00";
+      toast(`Statement ${id} marked as paid`); break;
+    case "receive-payment": toast(`Receive payment for ${id}`); break;
+    case "delete":
+      tr.remove();
+      applyFilters();
+      toast(`Statement ${id} deleted`); break;
+  }
+}));
+
+/* Tabs + filter */
+let currentTab = "All";
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentTab = b.dataset.viewtab;
+  applyFilters();
+}));
+document.querySelector("[data-filter]").addEventListener("input", applyFilters);
+function applyFilters(){
+  const q = document.querySelector("[data-filter]").value.toLowerCase();
+  let shown = 0, total = 0;
+  document.querySelectorAll(".s-row").forEach(tr=>{
+    total++;
+    const tabOk = currentTab === "All" || tr.dataset.status === currentTab;
+    const qOk = !q || tr.textContent.toLowerCase().includes(q);
+    const vis = tabOk && qOk;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-s-count]").textContent = `${shown} of ${total}`;
+}
+
+/* Bulk */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".s-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{ if (e.target.matches(".s-check")) updateBulk(); });
+document.querySelector("[data-check-all]").addEventListener("change", e=>{
+  document.querySelectorAll(".s-check").forEach(c=>{ if (c.closest("tr").style.display !== "none") c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".s-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked = false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".s-check:checked").length;
+  if (act === "delete"){
+    document.querySelectorAll(".s-check:checked").forEach(c=>{const tr=c.closest("tr"); if(tr) tr.remove();});
+    applyFilters();
+  }
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} statement${n!==1?"s":""}`);
+  document.querySelectorAll(".s-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked = false;
+  updateBulk();
+}));
+
+/* Misc */
+document.querySelector("[data-export]").addEventListener("click", ()=>toast("Exporting statements…"));
+document.querySelector("[data-customize]").addEventListener("click", ()=>toast("Customize panel"));
+
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#new-menu") && !e.target.closest("[data-new-split]")) newMenu.classList.remove("open");
+});
+
+/* Init */
+applyFilters();
+</script>
+</body>
+</html>

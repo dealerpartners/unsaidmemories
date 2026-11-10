@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Accounting — Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .check-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #eeedf1}
+  .check-row:last-child{border-bottom:none}
+  .check-badge{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .check-badge.done{background:#108000;color:#fff}
+  .check-badge.todo{background:#eeedf1;color:#5a6355;border:1px solid #dad9dd}
+  .progress-bar{height:6px;background:#eeedf1;border-radius:3px;overflow:hidden}
+  .progress-bar > div{height:100%;background:#0a6400}
+  .inbox-row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #eeedf1;cursor:pointer}
+  .inbox-row:last-child{border-bottom:none}
+  .inbox-row:hover{background:#f4f3f7}
+  .receipt-thumb{width:32px;height:32px;border-radius:4px;background:linear-gradient(135deg,#dad9dd,#eeedf1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Accounting</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Overview</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Accounting — Overview</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Bank feed, receipts, reconcile, books. ManageKube LLC · Nov 2026</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">calendar_today</span>This month ▾</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">For review</span>
+      <div class="text-headline-lg mt-1 tabular-nums">47</div>
+      <div class="text-[11px] text-tertiary mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px]">schedule</span>Oldest 6 days ago</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Uncategorized</span>
+      <div class="text-headline-lg mt-1 tabular-nums">$2,418.90</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">12 transactions</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Bank balance</span>
+      <div class="text-headline-lg mt-1 tabular-nums">$84,210.40</div>
+      <div class="text-[11px] text-secondary mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px]">sync</span>2m ago · Chase •9910</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Reconciled</span>
+      <div class="text-headline-lg mt-1 tabular-nums">Oct 31</div>
+      <div class="text-[11px] text-secondary mt-1 flex items-center gap-1">
+        <span class="material-symbols-outlined text-[13px]">check_circle</span>Period closed</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-4 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">credit_card</span>Expense</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>Bank deposit</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">swap_horiz</span>Transfer</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">menu_book</span>Journal entry</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">fact_check</span>Reconcile</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1">
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Two-column: Setup checklist + Receipts inbox preview -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-5">
+
+    <!-- Setup checklist (§A: "Setup checklist card until company setup complete") -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-headline-sm">Set up your books</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">3 of 6 complete</p>
+        </div>
+        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary">50%</span>
+      </div>
+      <div class="progress-bar mb-3"><div style="width:50%"></div></div>
+      <div>
+        <div class="check-row">
+          <div class="check-badge done"><span class="material-symbols-outlined text-[14px]">check</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Connect bank account</div>
+            <div class="text-[11px] text-on-surface-variant">Chase •9910 linked</div>
+          </div>
+        </div>
+        <div class="check-row">
+          <div class="check-badge done"><span class="material-symbols-outlined text-[14px]">check</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Chart of accounts</div>
+            <div class="text-[11px] text-on-surface-variant">34 accounts mapped</div>
+          </div>
+        </div>
+        <div class="check-row">
+          <div class="check-badge done"><span class="material-symbols-outlined text-[14px]">check</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">First reconciliation</div>
+            <div class="text-[11px] text-on-surface-variant">October closed</div>
+          </div>
+        </div>
+        <div class="check-row">
+          <div class="check-badge todo"><span class="material-symbols-outlined text-[14px]">chevron_right</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Import receipts</div>
+            <div class="text-[11px] text-on-surface-variant">12 awaiting review</div>
+          </div>
+          <button class="h-7 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-goto="receipts">Open</button>
+        </div>
+        <div class="check-row">
+          <div class="check-badge todo"><span class="material-symbols-outlined text-[14px]">chevron_right</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Set up bank rules</div>
+            <div class="text-[11px] text-on-surface-variant">Auto-categorize repeating transactions</div>
+          </div>
+          <button class="h-7 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low" data-goto="rules">Open</button>
+        </div>
+        <div class="check-row">
+          <div class="check-badge todo"><span class="material-symbols-outlined text-[14px]">chevron_right</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium">Sales tax</div>
+            <div class="text-[11px] text-on-surface-variant">Configure tax rates</div>
+          </div>
+          <button class="h-7 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Open</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receipts inbox preview (§A intake-queue) -->
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div>
+          <h2 class="text-headline-sm">Receipts inbox</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">12 for review</p>
+        </div>
+        <button class="text-[11px] font-semibold text-primary hover:underline" data-goto="receipts">View all</button>
+      </div>
+      <div class="px-5 pb-3 flex items-center gap-2">
+        <div class="flex-1 h-7 px-2 rounded bg-surface-container-low border border-surface-dim text-[11px] text-on-surface-variant flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[13px]">mail</span>
+          receipts@managekube.unsaid.app
+          <button class="ml-auto text-primary font-semibold" data-copy-mail>Copy</button>
+        </div>
+        <button class="h-7 px-2 border border-dashed border-surface-dim rounded text-[11px] text-primary font-semibold hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">upload</span>Upload</button>
+      </div>
+      <div class="border-t border-surface-dim">
+        <div class="inbox-row">
+          <div class="receipt-thumb"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">receipt_long</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Staples · Office supplies</div>
+            <div class="text-[11px] text-on-surface-variant">10/30/2026 · $142.50 · Visa •4421</div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-tertiary/15 text-tertiary">New</span>
+        </div>
+        <div class="inbox-row">
+          <div class="receipt-thumb"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">receipt_long</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">FedEx · Shipping</div>
+            <div class="text-[11px] text-on-surface-variant">10/29/2026 · $84.20 · Bank •9910</div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-tertiary/15 text-tertiary">New</span>
+        </div>
+        <div class="inbox-row">
+          <div class="receipt-thumb"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">receipt_long</span></div>
+          <div class="min-w-0 flex-1">
+            <div class="text-body-sm font-medium truncate">Adobe · Software</div>
+            <div class="text-[11px] text-on-surface-variant">10/30/2026 · $59.99 · Visa •4421</div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-tertiary/15 text-tertiary">New</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Two-column: For review feed + Recent activity -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+    <!-- For review feed (Bank transactions preview) -->
+    <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 pt-5 pb-3">
+        <div>
+          <h2 class="text-headline-sm">For review</h2>
+          <p class="text-[11px] text-on-surface-variant mt-0.5">47 bank transactions</p>
+        </div>
+        <button class="text-[11px] font-semibold text-primary hover:underline" data-goto="bank">Open bank feed</button>
+      </div>
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr>
+            <th class="px-4 py-2">Date</th>
+            <th class="px-4 py-2">Description</th>
+            <th class="px-4 py-2 text-right">Amount</th>
+            <th class="px-4 py-2">Suggested</th>
+            <th class="px-4 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-4 py-2">10/30</td>
+            <td class="px-4 py-2 truncate">STAPLES #0412</td>
+            <td class="px-4 py-2 text-right tabular-nums text-error">−$142.50</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded bg-surface-container text-[11px]">Office supplies</span></td>
+            <td class="px-4 py-2 text-right"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Review</button></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-4 py-2">10/29</td>
+            <td class="px-4 py-2 truncate">FEDEX 001239847</td>
+            <td class="px-4 py-2 text-right tabular-nums text-error">−$84.20</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded bg-surface-container text-[11px]">Shipping</span></td>
+            <td class="px-4 py-2 text-right"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Review</button></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-4 py-2">10/28</td>
+            <td class="px-4 py-2 truncate">STRIPE PAYOUT</td>
+            <td class="px-4 py-2 text-right tabular-nums text-secondary">+$1,842.60</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded bg-surface-container text-[11px]">Stripe clearing</span></td>
+            <td class="px-4 py-2 text-right"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Review</button></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-4 py-2">10/27</td>
+            <td class="px-4 py-2 truncate">AWS EMEA CHARGES</td>
+            <td class="px-4 py-2 text-right tabular-nums text-error">−$124.88</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded bg-surface-container text-[11px]">Software</span></td>
+            <td class="px-4 py-2 text-right"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Review</button></td>
+          </tr>
+          <tr class="hover:bg-surface-container-low">
+            <td class="px-4 py-2">10/27</td>
+            <td class="px-4 py-2 truncate">ACME CORP — ACH</td>
+            <td class="px-4 py-2 text-right tabular-nums text-secondary">+$1,240.00</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded bg-surface-container text-[11px]">Invoice 1002</span></td>
+            <td class="px-4 py-2 text-right"><button class="h-6 px-2 text-[11px] font-semibold text-primary border border-surface-dim rounded hover:bg-surface-container-low">Review</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-3">Recent activity</h2>
+      <div class="space-y-3 text-body-sm">
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-secondary mt-0.5">check_circle</span>
+          <div class="min-w-0">
+            <div class="font-medium">October reconciled</div>
+            <div class="text-[11px] text-on-surface-variant">Sarah A. · 2 hours ago</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-blue mt-0.5">receipt_long</span>
+          <div class="min-w-0">
+            <div class="font-medium">Invoice 1002 sent to Acme Corp</div>
+            <div class="text-[11px] text-on-surface-variant">Marcus L. · Yesterday</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-qb-maroon mt-0.5">credit_card</span>
+          <div class="min-w-0">
+            <div class="font-medium">Staples expense created</div>
+            <div class="text-[11px] text-on-surface-variant">Auto · 10/30</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-tertiary mt-0.5">tune</span>
+          <div class="min-w-0">
+            <div class="font-medium">Rule added: Stripe payouts</div>
+            <div class="text-[11px] text-on-surface-variant">Priya N. · 10/28</div>
+          </div>
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant mt-0.5">person_add</span>
+          <div class="min-w-0">
+            <div class="font-medium">New vendor: Printful</div>
+            <div class="text-[11px] text-on-surface-variant">Auto · 10/26</div>
+          </div>
+        </div>
+      </div>
+      <button class="w-full mt-4 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low flex items-center justify-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">history</span>Audit log
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+document.querySelectorAll("[data-copy-mail]").forEach(b=>b.addEventListener("click",()=>toast("Forwarding address copied")));
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>toast(`Navigate → ${b.dataset.goto}`)));
+document.querySelectorAll(".inbox-row").forEach(r=>r.addEventListener("click",()=>toast("Open receipt review")));
+</script>
+</body>
+</html>

@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Advertising</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .bulk-bar{background:#1f2937;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:600px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:94vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .target-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+  .target-chip .material-symbols-outlined{font-size:12px}
+  .provider-logo{width:32px;height:32px;border-radius:8px;background:#f2f4f5;display:grid;place-items:center;font-size:12px;font-weight:700;color:#53616a;flex-shrink:0}
+  .provider-logo.meta{background:#edf3fc;color:#4b77b8}
+  .provider-logo.tiktok{background:#eef1f2;color:#27353a}
+  .provider-logo.google{background:#f8f0ee;color:#c45c5b}
+  .provider-logo.pin{background:#f9eeee;color:#bd5558}
+  .ad-creative{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#e7f1ef,#d9e4e3);display:grid;place-items:center;color:#648783;flex-shrink:0}
+  .bar{height:7px;border-radius:10px;background:#edf0f1;overflow:hidden}
+  .bar span{display:block;height:100%;background:#0a6400;border-radius:10px}
+  .step-line{height:1px;background:#dad9dd;flex:1;max-width:50px}
+  .status-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+  .status-active{background:#e9f5ef;color:#388064}
+  .status-paused{background:#fbf5ec;color:#98713e}
+  .status-draft{background:#f2f1f8;color:#6e6596}
+  .status-ended{background:#f1f3f4;color:#68747b}
+  .status-review{background:#eaf3fb;color:#4e7b9d}
+  .status-rejected{background:#fff0ef;color:#bf5c59}
+  .ad-set-card{border:1px solid #dad9dd;border-radius:10px;background:#fff;padding:12px}
+  .ad-set-card.selected{border-color:#0a6400;background:#f4fbfa}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP (Marketing) ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="performance">Performance</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="oversight">Oversight</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="promotions">Promotions</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="newsletter">Newsletter</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="automation">Automation</button>
+    <button class="h-9 px-3 text-label-md tab-underline active" data-nav="advertising">Advertising</button>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Marketing</span><span class="text-outline">/</span><span>Advertising</span>
+      </div>
+      <h1 class="text-headline-lg">Ad Center</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Create, target, and measure paid campaigns across connected ad networks.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="view-toggle" id="ad-view-toggle">
+        <button class="active" data-aview="overview">Overview</button>
+        <button data-aview="campaigns">Campaigns</button>
+        <button data-aview="creatives">Creatives</button>
+        <button data-aview="audiences">Audiences</button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-pixels>
+        <span class="material-symbols-outlined text-[16px]">sensors</span>Tracking pixels
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main flex items-center gap-1" data-new-ad-campaign>
+          <span class="material-symbols-outlined text-[16px]">add</span>New campaign
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="ad-create-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Spend (30d)</span>
+      <div class="text-headline-lg mt-1">$18,420</div>
+      <div class="text-[11px] text-secondary mt-1">+14% vs prior period</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">ROAS</span>
+      <div class="text-headline-lg mt-1">4.2×</div>
+      <div class="text-[11px] text-secondary mt-1">Target 3.5× · Above</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Impressions (30d)</span>
+      <div class="text-headline-lg mt-1">2.4M</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">CTR 1.8% · CPC $0.42</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Active campaigns</span>
+      <div class="text-headline-lg mt-1" id="statActiveAdCampaigns">5</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">2 paused · 1 review · 1 draft</div>
+    </div>
+  </div>
+
+  <!-- ─── CREATE ACTIONS ROW ─── -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Campaign">
+      <span class="material-symbols-outlined text-[16px]">campaign</span>Campaign
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Ad set">
+      <span class="material-symbols-outlined text-[16px]">tune</span>Ad set
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Creative">
+      <span class="material-symbols-outlined text-[16px]">perm_media</span>Creative
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Audience">
+      <span class="material-symbols-outlined text-[16px]">groups</span>Audience
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Pixel">
+      <span class="material-symbols-outlined text-[16px]">sensors</span>Pixel
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       OVERVIEW VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-overview">
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-3">
+      <!-- Spend and ROAS -->
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Spend &amp; revenue</h2>
+            <div class="text-[11px] text-on-surface-variant">Last 30 days · all networks</div>
+          </div>
+          <div class="view-toggle" id="perf-range">
+            <button class="active" data-range="30">30d</button>
+            <button data-range="7">7d</button>
+            <button data-range="90">90d</button>
+          </div>
+        </div>
+        <div class="p-5">
+          <div class="grid grid-cols-3 gap-3 mb-4">
+            <div><div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Spend</div><div class="text-headline-md mt-1 tabular-nums">$18,420</div></div>
+            <div><div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">Attributed revenue</div><div class="text-headline-md mt-1 tabular-nums">$77,364</div></div>
+            <div><div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold">ROAS</div><div class="text-headline-md mt-1 tabular-nums">4.2×</div></div>
+          </div>
+          <!-- Spend vs revenue visual -->
+          <div class="space-y-2">
+            <div>
+              <div class="flex justify-between text-[11px] mb-1"><span class="font-medium">Spend</span><span class="text-on-surface-variant tabular-nums">$18,420</span></div>
+              <div class="bar"><span style="width:24%"></span></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-[11px] mb-1"><span class="font-medium">Attributed revenue</span><span class="text-on-surface-variant tabular-nums">$77,364</span></div>
+              <div class="bar"><span style="width:100%"></span></div>
+            </div>
+          </div>
+          <div class="mt-3 pt-3 border-t border-surface-dim grid grid-cols-3 gap-3 text-[11px] text-on-surface-variant">
+            <div><div class="font-bold uppercase tracking-wider">CPC</div><div class="tabular-nums text-on-surface mt-1">$0.42</div></div>
+            <div><div class="font-bold uppercase tracking-wider">CPM</div><div class="tabular-nums text-on-surface mt-1">$7.68</div></div>
+            <div><div class="font-bold uppercase tracking-wider">Conv. rate</div><div class="tabular-nums text-on-surface mt-1">2.1%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Networks -->
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Spend by network</h2>
+          <div class="text-[11px] text-on-surface-variant">Last 30 days</div>
+        </div>
+        <div class="p-5" id="networkBars"></div>
+      </div>
+    </div>
+
+    <!-- Top performing ad sets -->
+    <div class="bg-white rounded-xl border border-surface-dim">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">Top-performing ad sets</h2>
+          <div class="text-[11px] text-on-surface-variant">Ranked by attributed revenue</div>
+        </div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" data-goto="campaigns">View all campaigns</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[900px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">Ad set</th>
+              <th class="px-3 py-2">Network</th>
+              <th class="px-3 py-2 text-right">Spend</th>
+              <th class="px-3 py-2 text-right">Revenue</th>
+              <th class="px-3 py-2 text-right">ROAS</th>
+              <th class="px-3 py-2 text-right">CTR</th>
+              <th class="px-3 py-2">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="topAdsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CAMPAIGNS VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-campaigns" class="hidden-imp">
+    <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+      <!-- View tabs -->
+      <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+        <button class="h-full px-3 text-label-md tab-underline active" data-atab="All">All</button>
+        <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-atab="Active">Active</button>
+        <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-atab="Paused">Paused</button>
+        <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-atab="In review">In review</button>
+        <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-atab="Draft">Draft</button>
+        <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-atab="Ended">Ended</button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim">
+        <div class="relative flex items-center flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+          <input id="ad-search" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter campaigns, ad sets, networks…"/>
+        </div>
+        <div class="relative">
+          <button id="btn-network" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">hub</span>Network
+          </button>
+          <div id="pop-network" class="popover hidden-imp absolute left-0 top-8 p-3 w-56">
+            <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by network</div>
+            <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Meta" checked/> Meta Ads</label>
+            <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="TikTok" checked/> TikTok Ads</label>
+            <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Google" checked/> Google Ads</label>
+            <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Pinterest" checked/> Pinterest Ads</label>
+            <div class="flex justify-end gap-2 mt-3">
+              <button id="network-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+              <button id="network-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+            </div>
+          </div>
+        </div>
+        <button id="btn-ad-date" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range
+        </button>
+        <button id="btn-ad-saved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+        </button>
+        <span class="ml-auto text-[11px] text-on-surface-variant" id="ad-count">1–5 of 5</span>
+      </div>
+
+      <!-- Active chips -->
+      <div id="ad-chips" class="px-4 py-1.5 flex items-center gap-2 flex-wrap border-b border-surface-dim hidden-imp">
+        <span class="text-[10px] uppercase tracking-wider font-bold text-outline">Active:</span>
+        <div id="ad-chip-container" class="flex items-center gap-1.5 flex-wrap"></div>
+        <button id="ad-clear-all" class="ml-auto text-[11px] text-primary hover:underline font-medium">Clear all</button>
+      </div>
+
+      <!-- Bulk bar -->
+      <div class="bulk-bar hidden-imp px-4 py-2 flex items-center gap-3 text-body-sm" id="ad-bulk">
+        <span class="font-semibold" id="ad-bulk-count">0 selected</span>
+        <div class="w-px h-4 bg-white/30"></div>
+        <button class="flex items-center gap-1 hover:underline" data-adbulk="Pause"><span class="material-symbols-outlined text-[15px]">pause_circle</span>Pause</button>
+        <button class="flex items-center gap-1 hover:underline" data-adbulk="Resume"><span class="material-symbols-outlined text-[15px]">play_circle</span>Resume</button>
+        <button class="flex items-center gap-1 hover:underline" data-adbulk="Duplicate"><span class="material-symbols-outlined text-[15px]">content_copy</span>Duplicate</button>
+        <button class="flex items-center gap-1 hover:underline" data-adbulk="Archive"><span class="material-symbols-outlined text-[15px]">archive</span>Archive</button>
+        <button class="ml-auto flex items-center gap-1 hover:underline" data-adbulk="Clear"><span class="material-symbols-outlined text-[15px]">close</span>Clear</button>
+      </div>
+
+      <!-- Campaigns table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1180px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" id="ad-select-all"/></th>
+              <th class="px-3 py-2">Campaign</th>
+              <th class="px-3 py-2">Network</th>
+              <th class="px-3 py-2">Objective</th>
+              <th class="px-3 py-2 text-right">Budget (daily)</th>
+              <th class="px-3 py-2 text-right">Spend (30d)</th>
+              <th class="px-3 py-2 text-right">ROAS</th>
+              <th class="px-3 py-2">Schedule</th>
+              <th class="px-3 py-2">Status</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="ad-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Empty state -->
+      <div class="hidden-imp py-16 px-8 text-center" id="ad-empty">
+        <div class="w-16 h-16 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-[32px] text-outline">campaign</span>
+        </div>
+        <h3 class="text-headline-sm mb-1">No campaigns match your filters</h3>
+        <p class="text-body-sm text-on-surface-variant mb-4 max-w-sm mx-auto">Clear filters or start a new ad campaign.</p>
+        <div class="flex items-center justify-center gap-2">
+          <button id="ad-empty-clear" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>Clear filters
+          </button>
+          <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new-ad-campaign>
+            <span class="material-symbols-outlined text-[16px]">add</span>New campaign
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+        <span>Rows per page:
+          <select class="border border-surface-dim rounded px-1 py-0.5 bg-white"><option>75</option><option>100</option><option>150</option></select>
+        </span>
+        <div class="flex items-center gap-2">
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-page="prev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+          <span>Page 1 of 1</span>
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-page="next"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       CREATIVES VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-creatives" class="hidden-imp">
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">Ad creatives</h2>
+          <div class="text-[11px] text-on-surface-variant">Images, videos, and copy used across ad sets.</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <input id="creative-search" class="h-7 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Search creatives…"/>
+          <select id="creative-type" class="h-7 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            <option>All types</option><option>Image</option><option>Video</option><option>Carousel</option>
+          </select>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-upload-creative>
+            <span class="material-symbols-outlined text-[14px]">upload</span>Upload
+          </button>
+        </div>
+      </div>
+      <div class="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3" id="creativesGrid"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       AUDIENCES VIEW
+       ═══════════════════════════════════════════════════════════ -->
+  <section id="panel-audiences" class="hidden-imp">
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+        <div>
+          <h2 class="text-headline-sm">Audiences</h2>
+          <div class="text-[11px] text-on-surface-variant">Reusable custom and lookalike audiences across networks.</div>
+        </div>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-create="Audience">
+          <span class="material-symbols-outlined text-[16px]">add</span>New audience
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[900px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">Audience</th>
+              <th class="px-3 py-2">Type</th>
+              <th class="px-3 py-2">Source</th>
+              <th class="px-3 py-2 text-right">Size</th>
+              <th class="px-3 py-2">Used in</th>
+              <th class="px-3 py-2">Updated</th>
+              <th class="w-8"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim" id="audiencesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Scrim -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">campaign</span>
+      <span id="peek-title" class="text-headline-sm truncate">Campaign</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peek-open-full" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">open_in_full</span>Open</button>
+      <button id="peek-close" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peek-body" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Row menu popover -->
+<div class="popover hidden-imp" id="rowMenu" style="position:fixed;min-width:220px"></div>
+
+<!-- Campaign drawer -->
+<div class="drawer" id="campaignDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-[20px] text-primary">campaign</span>
+      <div>
+        <div class="text-headline-sm" id="campaignDrawerTitle">New campaign</div>
+        <div class="text-[11px] text-on-surface-variant" id="campaignDrawerSub">Draft · not yet published</div>
+      </div>
+    </div>
+    <button id="campaignClose" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+    <!-- Basics -->
+    <section>
+      <div class="text-body-md font-semibold mb-2">Campaign basics</div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Campaign name</label>
+          <input id="cp-name" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="e.g. Fall launch — Prospecting"/>
+        </div>
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Network</label>
+          <div class="grid grid-cols-2 gap-2" id="networkGrid">
+            <button class="network-btn border border-surface-dim rounded-lg p-2.5 text-left text-body-sm hover:border-primary" data-network="Meta">
+              <div class="flex items-center gap-2"><div class="provider-logo meta">M</div><div><div class="font-semibold text-[12px]">Meta Ads</div><div class="text-[10px] text-on-surface-variant">Facebook + Instagram</div></div></div>
+            </button>
+            <button class="network-btn border border-surface-dim rounded-lg p-2.5 text-left text-body-sm hover:border-primary" data-network="TikTok">
+              <div class="flex items-center gap-2"><div class="provider-logo tiktok">T</div><div><div class="font-semibold text-[12px]">TikTok Ads</div><div class="text-[10px] text-on-surface-variant">In-feed, Spark</div></div></div>
+            </button>
+            <button class="network-btn border border-surface-dim rounded-lg p-2.5 text-left text-body-sm hover:border-primary" data-network="Google">
+              <div class="flex items-center gap-2"><div class="provider-logo google">G</div><div><div class="font-semibold text-[12px]">Google Ads</div><div class="text-[10px] text-on-surface-variant">Search, Shopping, PMax</div></div></div>
+            </button>
+            <button class="network-btn border border-surface-dim rounded-lg p-2.5 text-left text-body-sm hover:border-primary" data-network="Pinterest">
+              <div class="flex items-center gap-2"><div class="provider-logo pin">P</div><div><div class="font-semibold text-[12px]">Pinterest Ads</div><div class="text-[10px] text-on-surface-variant">Promoted Pins</div></div></div>
+            </button>
+          </div>
+        </div>
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Objective</label>
+          <select id="cp-objective" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+            <option>Conversions</option>
+            <option>Traffic</option>
+            <option>Awareness</option>
+            <option>Engagement</option>
+            <option>Lead generation</option>
+            <option>Catalog sales</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Budget & schedule -->
+    <section class="pt-4 border-t border-surface-dim">
+      <div class="text-body-md font-semibold mb-2">Budget &amp; schedule</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Budget type</label>
+          <select id="cp-budget-type" class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+            <option>Daily</option>
+            <option>Lifetime</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Amount</label>
+          <div class="flex">
+            <span class="h-9 px-2 border border-r-0 border-surface-dim rounded-l bg-surface-container-low text-body-md flex items-center">$</span>
+            <input id="cp-budget" type="number" class="flex-1 h-9 px-2.5 border border-surface-dim rounded-r text-body-md focus:outline-none focus:border-primary" value="250"/>
+          </div>
+        </div>
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">Start</label>
+          <input type="datetime-local" id="cp-start" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+        </div>
+        <div>
+          <label class="block text-label-sm text-on-surface-variant mb-1">End (optional)</label>
+          <input type="datetime-local" id="cp-end" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ad sets -->
+    <section class="pt-4 border-t border-surface-dim">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-body-md font-semibold">Ad sets</div>
+        <button id="addAdSetBtn" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">add</span>Add ad set
+        </button>
+      </div>
+      <div id="adSetsHost" class="space-y-2"></div>
+    </section>
+
+    <!-- Creative picker -->
+    <section class="pt-4 border-t border-surface-dim">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-body-md font-semibold">Creative selection</div>
+        <button id="pickCreativeBtn" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">perm_media</span>Pick creative
+        </button>
+      </div>
+      <div id="pickedCreatives" class="space-y-1"></div>
+    </section>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button id="campaignCancel" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" id="campaignSaveNew">Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" id="campaignSave">Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Creative picker modal -->
+<div class="modal-scrim" id="creativeModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <h3 class="text-headline-sm mb-1">Pick creatives</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3">Select one or more creatives from the Content Library.</p>
+    <div class="mb-2">
+      <input id="creativePickerSearch" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="Search creatives…"/>
+    </div>
+    <div id="creativePickerList" class="max-h-[320px] overflow-y-auto border border-surface-dim rounded"></div>
+    <div class="flex justify-end gap-2 mt-4">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="creativePickerCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="creativePickerConfirm">Add to campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- New ad campaign split menu -->
+<div id="newAdCampaignMenu" class="popover hidden-imp" style="position:fixed;min-width:260px">
+  <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Create</div>
+  <button class="nacm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-nacm="Campaign"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">campaign</span>Campaign</button>
+  <button class="nacm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-nacm="Ad set"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">tune</span>Ad set</button>
+  <button class="nacm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-nacm="Creative"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">perm_media</span>Creative</button>
+  <button class="nacm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-nacm="Audience"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">groups</span>Audience</button>
+</div>
+
+<!-- Pixels modal -->
+<div class="modal-scrim" id="pixelsModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-5">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="text-headline-sm">Tracking pixels</h3>
+      <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" id="pixelsClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+    <p class="text-body-sm text-on-surface-variant mb-3">Fire conversion events from your site to ad networks.</p>
+    <div class="space-y-2">
+      <div class="flex items-center justify-between p-3 rounded border border-surface-dim">
+        <div><div class="font-semibold text-body-sm">Meta Pixel</div><div class="text-[11px] text-on-surface-variant">ID 1029••••4471</div></div>
+        <span class="status-pill status-active"><span class="material-symbols-outlined text-[12px]">check</span>Installed</span>
+      </div>
+      <div class="flex items-center justify-between p-3 rounded border border-surface-dim">
+        <div><div class="font-semibold text-body-sm">TikTok Pixel</div><div class="text-[11px] text-on-surface-variant">Not installed</div></div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Install</button>
+      </div>
+      <div class="flex items-center justify-between p-3 rounded border border-surface-dim">
+        <div><div class="font-semibold text-body-sm">Google Ads tag</div><div class="text-[11px] text-on-surface-variant">AW-•••••••</div></div>
+        <span class="status-pill status-active"><span class="material-symbols-outlined text-[12px]">check</span>Installed</span>
+      </div>
+      <div class="flex items-center justify-between p-3 rounded border border-surface-dim">
+        <div><div class="font-semibold text-body-sm">Pinterest Tag</div><div class="text-[11px] text-on-surface-variant">Not installed</div></div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Install</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Other create modal -->
+<div class="modal-scrim" id="otherCreateModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1" id="otherCreateTitle">Create</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="otherCreateSub">This opens the corresponding create surface.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="otherCreateCancel">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="otherCreateConfirm">Open create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG + API
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE:"/api",
+  routes:{
+    overview:"/marketing/social", calendar:"/marketing/social/calendar", create:"/marketing/social/create",
+    queue:"/marketing/social/queue", library:"/marketing/social/library",
+    channels:"/marketing/social/channels", performance:"/marketing/social/performance",
+    oversight:"/marketing/social/oversight", promotions:"/marketing/promotions",
+    newsletter:"/marketing/newsletter", automation:"/automation", advertising:"/advertising"
+  },
+  endpoints:{
+    campaigns:"/advertising/campaigns",
+    campaign:id=>`/advertising/campaigns/${id}`,
+    pause:id=>`/advertising/campaigns/${id}/pause`,
+    resume:id=>`/advertising/campaigns/${id}/resume`,
+    audiences:"/advertising/audiences",
+    creatives:"/advertising/creatives",
+    pixels:"/advertising/pixels"
+  }
+};
+const API = {
+  async request(path, options={}){
+    console.log("[API integration point]", options.method||"GET", APP_CONFIG.API_BASE+path, options.body||"");
+    return {ok:true, demo:true};
+  },
+  createCampaign:p=>API.request(APP_CONFIG.endpoints.campaigns,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}),
+  pauseCampaign:id=>API.request(APP_CONFIG.endpoints.pause(id),{method:"POST"}),
+  resumeCampaign:id=>API.request(APP_CONFIG.endpoints.resume(id),{method:"POST"})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════════════════ */
+const NETWORKS = ["Meta","TikTok","Google","Pinterest"];
+
+let adCampaigns = [
+  { id:"ac1", name:"Fall launch — Prospecting", network:"Meta", objective:"Conversions", budget:250, spend:8620, revenue:36720, roas:4.26, ctr:2.1, schedule:"2026-10-15 → 2026-11-30", start:"2026-10-15T00:00", end:"2026-11-30T23:59", status:"Active", adSets:3, creatives:["cr-001","cr-002"] },
+  { id:"ac2", name:"TikTok creator drop", network:"TikTok", objective:"Engagement", budget:180, spend:4210, revenue:12890, roas:3.06, ctr:3.4, schedule:"2026-10-20 → 2026-11-20", start:"2026-10-20T00:00", end:"2026-11-20T23:59", status:"Active", adSets:2, creatives:["cr-003"] },
+  { id:"ac3", name:"Brand search — Non-brand", network:"Google", objective:"Traffic", budget:120, spend:2310, revenue:9280, roas:4.02, ctr:5.2, schedule:"2026-10-01 → 2026-12-31", start:"2026-10-01T00:00", end:"2026-12-31T23:59", status:"Active", adSets:1, creatives:["cr-004"] },
+  { id:"ac4", name:"Holiday capsule lookalike", network:"Meta", objective:"Conversions", budget:300, spend:3280, revenue:14840, roas:4.53, ctr:2.8, schedule:"2026-11-05 → 2026-12-24", start:"2026-11-05T00:00", end:"2026-12-24T23:59", status:"In review", adSets:2, creatives:["cr-005"] },
+  { id:"ac5", name:"Pinterest — Evergreen inspo", network:"Pinterest", objective:"Awareness", budget:80, spend:0, revenue:0, roas:0, ctr:0, schedule:"—", start:null, end:null, status:"Draft", adSets:0, creatives:[] },
+  { id:"ac6", name:"Summer clearance (ended)", network:"Meta", objective:"Conversions", budget:200, spend:12400, revenue:38210, roas:3.08, ctr:1.9, schedule:"2026-08-01 → 2026-09-15", start:"2026-08-01T00:00", end:"2026-09-15T23:59", status:"Ended", adSets:4, creatives:["cr-006","cr-007"] }
+];
+
+const CREATIVES = [
+  { id:"cr-001", name:"Fall hero — 1x1", type:"Image", dimensions:"1080x1080", usedIn:1 },
+  { id:"cr-002", name:"Fall hero — 4x5", type:"Image", dimensions:"1080x1350", usedIn:1 },
+  { id:"cr-003", name:"TikTok drop — vertical", type:"Video", dimensions:"1080x1920 · 15s", usedIn:1 },
+  { id:"cr-004", name:"Search text — brand", type:"Image", dimensions:"1200x628", usedIn:1 },
+  { id:"cr-005", name:"Holiday capsule teaser", type:"Video", dimensions:"1080x1080 · 6s", usedIn:0 },
+  { id:"cr-006", name:"Summer CTA", type:"Image", dimensions:"1080x1080", usedIn:1 },
+  { id:"cr-007", name:"Summer carousel", type:"Carousel", dimensions:"1080x1080 x3", usedIn:1 },
+  { id:"cr-008", name:"Evergreen tote", type:"Image", dimensions:"1080x1350", usedIn:0 }
+];
+
+const AUDIENCES = [
+  { id:"au1", name:"Site visitors 30d", type:"Retargeting", source:"Meta Pixel", size:"~ 12.4K", usedIn:2, updated:"2026-11-01" },
+  { id:"au2", name:"Abandoned cart 7d", type:"Retargeting", source:"Shopify + Meta", size:"~ 2.1K", usedIn:1, updated:"2026-11-02" },
+  { id:"au3", name:"Lookalike — VIPs", type:"Lookalike 2%", source:"VIP segment", size:"~ 1.8M", usedIn:1, updated:"2026-10-28" },
+  { id:"au4", name:"TikTok engagement 90d", type:"Retargeting", source:"TikTok Pixel", size:"~ 42K", usedIn:1, updated:"2026-10-30" },
+  { id:"au5", name:"New customers", type:"Custom", source:"CRM", size:"~ 312", usedIn:0, updated:"2026-10-15" }
+];
+
+const statusPillMap = {
+  Active:"status-active",
+  Paused:"status-paused",
+  Draft:"status-draft",
+  Ended:"status-ended",
+  "In review":"status-review",
+  Rejected:"status-rejected"
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════ */
+const filters = {
+  q:"",
+  tab:"All",
+  networks:new Set(NETWORKS),
+  dateFrom:null, dateTo:null
+};
+let editing = null;
+let pickedCreatives = [];
+let draftAdSets = [];
+let peekId = null;
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(iso){
+  if (!iso || iso==="—") return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+function statusPill(s){
+  return `<span class="status-pill ${statusPillMap[s]||"status-draft"}"><span class="material-symbols-outlined text-[12px]">${
+    s==="Active"?"play_arrow":s==="Paused"?"pause":s==="Draft"?"edit":s==="Ended"?"flag":s==="In review"?"schedule":"warning"
+  }</span>${s}</span>`;
+}
+function networkLogo(net){
+  const k = net==="Meta"?"meta":net==="TikTok"?"tiktok":net==="Google"?"google":"pin";
+  const l = net==="Meta"?"M":net==="TikTok"?"T":net==="Google"?"G":"P";
+  return `<div class="provider-logo ${k}">${l}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>toast("Navigate → "+b.dataset.nav)));
+
+document.querySelectorAll("[data-aview]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-aview]").forEach(x=>x.classList.toggle("active",x===b));
+  const v=b.dataset.aview;
+  ["overview","campaigns","creatives","audiences"].forEach(p=>{
+    document.getElementById("panel-"+p).classList.toggle("hidden-imp",p!==v);
+  });
+  if (v==="campaigns") renderCampaigns();
+  if (v==="creatives") renderCreatives();
+  if (v==="audiences") renderAudiences();
+  if (v==="overview") renderOverview();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   OVERVIEW
+   ═══════════════════════════════════════════════════════════════════ */
+function renderOverview(){
+  // Network bars
+  const byNet = NETWORKS.map(n=>{
+    const list = adCampaigns.filter(c=>c.network===n);
+    const spend = list.reduce((s,c)=>s+c.spend,0);
+    return {name:n, spend};
+  });
+  const max = Math.max(1, ...byNet.map(n=>n.spend));
+  document.getElementById("networkBars").innerHTML = byNet.map(n=>`
+    <div class="mb-3">
+      <div class="flex items-center gap-2 mb-1">
+        ${networkLogo(n.name)}
+        <div class="flex-1 text-body-sm font-medium">${n.name}</div>
+        <div class="text-[11px] text-on-surface-variant tabular-nums">$${n.spend.toLocaleString()}</div>
+      </div>
+      <div class="bar"><span style="width:${(n.spend/max*100).toFixed(1)}%"></span></div>
+    </div>
+  `).join("");
+
+  // Top ad sets
+  const top = [...adCampaigns].filter(c=>c.spend>0).sort((a,b)=>b.revenue-a.revenue).slice(0,5);
+  document.getElementById("topAdsTbody").innerHTML = top.map(c=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-open-campaign="${c.id}">
+      <td class="px-3 py-2 font-medium">${esc(c.name)}</td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2">${networkLogo(c.network)}<span class="text-[11px]">${c.network}</span></div></td>
+      <td class="px-3 py-2 text-right tabular-nums">$${c.spend.toLocaleString()}</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${c.revenue.toLocaleString()}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${c.roas.toFixed(2)}×</td>
+      <td class="px-3 py-2 text-right tabular-nums">${c.ctr.toFixed(1)}%</td>
+      <td class="px-3 py-2">${statusPill(c.status)}</td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("[data-open-campaign]").forEach(tr=>{
+    tr.addEventListener("click",()=>openPeek(tr.dataset.openCampaign));
+  });
+
+  document.getElementById("statActiveAdCampaigns").textContent = adCampaigns.filter(c=>c.status==="Active").length;
+}
+document.querySelectorAll("[data-range]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-range]").forEach(x=>x.classList.toggle("active",x===b));
+  toast("Range → last "+b.dataset.range+" days");
+}));
+document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelector(`[data-aview="${b.dataset.goto}"]`).click();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAMPAIGNS
+   ═══════════════════════════════════════════════════════════════════ */
+function filteredCampaigns(){
+  return adCampaigns.filter(c=>{
+    const q=filters.q.toLowerCase();
+    const qOK = !q || (c.name+" "+c.network+" "+c.objective).toLowerCase().includes(q);
+    const tabOK = filters.tab==="All" || c.status===filters.tab;
+    const netOK = filters.networks.has(c.network);
+    const dateOK = (!filters.dateFrom || (c.start && c.start>=filters.dateFrom)) && (!filters.dateTo || (c.end && c.end.slice(0,10)<=filters.dateTo));
+    return qOK && tabOK && netOK && dateOK;
+  });
+}
+
+function renderCampaigns(){
+  const rows=filteredCampaigns();
+  const tbody=document.getElementById("ad-tbody");
+  tbody.innerHTML = rows.map(c=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${c.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check row-select" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2"><div class="font-medium">${esc(c.name)}</div><div class="text-[11px] text-on-surface-variant">${c.adSets} ad set(s) · ${c.creatives.length} creative(s)</div></td>
+      <td class="px-3 py-2"><div class="flex items-center gap-2">${networkLogo(c.network)}<span class="text-[11px]">${c.network}</span></div></td>
+      <td class="px-3 py-2">${esc(c.objective)}</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${c.budget}/d</td>
+      <td class="px-3 py-2 text-right tabular-nums">$${c.spend.toLocaleString()}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${c.roas?c.roas.toFixed(2)+"×":"—"}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(c.schedule)}</td>
+      <td class="px-3 py-2">${statusPill(c.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-rowmenu="${c.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.getElementById("ad-count").textContent = rows.length ? `1–${rows.length} of ${rows.length}` : "0 of 0";
+  document.getElementById("ad-empty").classList.toggle("hidden-imp", rows.length>0);
+  tbody.closest("div.overflow-x-auto").classList.toggle("hidden-imp", rows.length===0);
+  document.getElementById("statActiveAdCampaigns").textContent = adCampaigns.filter(c=>c.status==="Active").length;
+
+  tbody.querySelectorAll("[data-row]").forEach(tr=>{
+    tr.addEventListener("click",(e)=>{
+      if (e.target.closest("button") || e.target.closest("input")) return;
+      openPeek(tr.dataset.row);
+    });
+  });
+  tbody.querySelectorAll("[data-rowmenu]").forEach(btn=>btn.addEventListener("click",(e)=>{
+    e.stopPropagation(); openRowMenu(btn, btn.dataset.rowmenu);
+  }));
+
+  syncSelectAll();
+  syncBulk();
+  renderChips();
+}
+
+function renderChips(){
+  const chips=[];
+  if (filters.q) chips.push({k:"q", label:`Search: "${filters.q}"`});
+  if (filters.tab!=="All") chips.push({k:"tab", label:`Tab: ${filters.tab}`});
+  if (filters.networks.size !== NETWORKS.length) chips.push({k:"networks", label:`Network: ${[...filters.networks].join(", ")||"none"}`});
+  if (filters.dateFrom || filters.dateTo) chips.push({k:"date", label:`Date: ${filters.dateFrom||"…"} → ${filters.dateTo||"…"}`});
+  const wrap=document.getElementById("ad-chips");
+  const host=document.getElementById("ad-chip-container");
+  wrap.classList.toggle("hidden-imp", chips.length===0);
+  host.innerHTML = chips.map(c=>`
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-[11px] font-medium">
+      ${esc(c.label)}
+      <button class="w-4 h-4 rounded-full hover:bg-surface-container-high flex items-center justify-center" data-chip="${c.k}"><span class="material-symbols-outlined text-[12px]">close</span></button>
+    </span>
+  `).join("");
+  host.querySelectorAll("[data-chip]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.chip;
+    if (k==="q"){ filters.q=""; document.getElementById("ad-search").value=""; }
+    if (k==="tab"){ filters.tab="All"; syncTabs(); }
+    if (k==="networks"){ filters.networks=new Set(NETWORKS); syncNetworkPop(); }
+    if (k==="date"){ filters.dateFrom=null; filters.dateTo=null; }
+    renderCampaigns();
+  }));
+}
+
+function syncTabs(){
+  document.querySelectorAll("[data-atab]").forEach(b=>{
+    const on=b.dataset.atab===filters.tab;
+    b.classList.toggle("active",on);
+    b.classList.toggle("text-on-surface-variant",!on);
+  });
+}
+document.querySelectorAll("[data-atab]").forEach(b=>b.addEventListener("click",()=>{
+  filters.tab=b.dataset.atab; syncTabs(); renderCampaigns();
+}));
+document.getElementById("ad-search").addEventListener("input",e=>{ filters.q=e.target.value; renderCampaigns(); });
+
+function togglePopover(id, btn){
+  const p=document.getElementById(id);
+  ["pop-network"].forEach(x=>{ if(x!==id) document.getElementById(x).classList.add("hidden-imp"); });
+  p.classList.toggle("hidden-imp");
+  if (!p.classList.contains("hidden-imp")){
+    setTimeout(()=>document.addEventListener("click",(e)=>{
+      if (!p.contains(e.target) && !btn.contains(e.target)) p.classList.add("hidden-imp");
+    },{once:true}),0);
+  }
+}
+document.getElementById("btn-network").addEventListener("click",e=>{e.stopPropagation();togglePopover("pop-network",e.currentTarget);});
+function syncNetworkPop(){ document.querySelectorAll(".filter-network").forEach(cb=>cb.checked=filters.networks.has(cb.value)); }
+document.getElementById("network-apply").addEventListener("click",()=>{
+  filters.networks=new Set([...document.querySelectorAll(".filter-network:checked")].map(cb=>cb.value));
+  document.getElementById("pop-network").classList.add("hidden-imp");
+  renderCampaigns();
+});
+document.getElementById("network-clear").addEventListener("click",()=>{
+  filters.networks=new Set(NETWORKS); syncNetworkPop();
+  document.getElementById("pop-network").classList.add("hidden-imp");
+  renderCampaigns();
+});
+document.getElementById("btn-ad-date").addEventListener("click",()=>{
+  const from=prompt("From (YYYY-MM-DD):", filters.dateFrom||"");
+  if (from===null) return;
+  const to=prompt("To (YYYY-MM-DD):", filters.dateTo||"");
+  if (to===null) return;
+  filters.dateFrom=from||null; filters.dateTo=to||null;
+  renderCampaigns();
+});
+document.getElementById("btn-ad-saved").addEventListener("click",()=>toast("Saved views"));
+document.getElementById("ad-clear-all").addEventListener("click",()=>{
+  filters.q=""; document.getElementById("ad-search").value="";
+  filters.tab="All"; syncTabs();
+  filters.networks=new Set(NETWORKS); syncNetworkPop();
+  filters.dateFrom=null; filters.dateTo=null;
+  renderCampaigns();
+});
+document.getElementById("ad-empty-clear").addEventListener("click",()=>document.getElementById("ad-clear-all").click());
+
+/* ─── Select / bulk ─── */
+const selectAll = document.getElementById("ad-select-all");
+function syncSelectAll(){
+  const rows=document.querySelectorAll("#ad-tbody .row-select");
+  const checked=document.querySelectorAll("#ad-tbody .row-select:checked");
+  selectAll.checked = rows.length>0 && checked.length===rows.length;
+  selectAll.indeterminate = checked.length>0 && checked.length<rows.length;
+}
+function syncBulk(){
+  const n=document.querySelectorAll("#ad-tbody .row-select:checked").length;
+  document.getElementById("ad-bulk").classList.toggle("hidden-imp", n===0);
+  document.getElementById("ad-bulk-count").textContent = n+" selected";
+}
+document.getElementById("ad-tbody").addEventListener("change",e=>{
+  if (e.target.classList.contains("row-select")){ syncSelectAll(); syncBulk(); }
+});
+selectAll.addEventListener("change",()=>{
+  document.querySelectorAll("#ad-tbody .row-select").forEach(cb=>cb.checked=selectAll.checked);
+  syncBulk();
+});
+document.querySelectorAll("[data-adbulk]").forEach(b=>b.addEventListener("click",()=>{
+  const action=b.dataset.adbulk;
+  if (action==="Clear"){
+    document.querySelectorAll("#ad-tbody .row-select").forEach(cb=>cb.checked=false);
+    selectAll.checked=false; selectAll.indeterminate=false; syncBulk(); return;
+  }
+  const ids=[...document.querySelectorAll("#ad-tbody .row-select:checked")].map(cb=>cb.closest("tr").dataset.row);
+  if (action==="Pause") ids.forEach(id=>{ const c=adCampaigns.find(x=>x.id===id); if(c)c.status="Paused"; API.pauseCampaign(id); });
+  if (action==="Resume") ids.forEach(id=>{ const c=adCampaigns.find(x=>x.id===id); if(c)c.status="Active"; API.resumeCampaign(id); });
+  if (action==="Duplicate") ids.forEach(id=>{
+    const c=adCampaigns.find(x=>x.id===id);
+    if (c) adCampaigns.unshift({...c,id:"ac"+Date.now()+Math.random().toString(36).slice(2,6), name:c.name+" (copy)", status:"Draft", spend:0, revenue:0, roas:0, ctr:0, schedule:"—"});
+  });
+  if (action==="Archive") ids.forEach(id=>{ const c=adCampaigns.find(x=>x.id===id); if(c)c.status="Ended"; });
+  toast(action+" · "+ids.length+" campaign(s)");
+  renderCampaigns();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROW MENU
+   ═══════════════════════════════════════════════════════════════════ */
+function openRowMenu(btn, id){
+  const menu=document.getElementById("rowMenu");
+  const r=btn.getBoundingClientRect();
+  menu.style.top=(r.bottom+4)+"px";
+  menu.style.left=(r.right-240)+"px";
+  menu.innerHTML=`
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">${esc(id)}</div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="open"><span class="material-symbols-outlined text-[16px]">edit</span>Edit campaign</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="preview"><span class="material-symbols-outlined text-[16px]">visibility</span>View details</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="resume"><span class="material-symbols-outlined text-[16px]">play_circle</span>Resume</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm text-error hover:bg-error-container/40 flex items-center gap-2" data-rm="delete"><span class="material-symbols-outlined text-[16px]">delete</span>Delete</button>
+  `;
+  menu.classList.remove("hidden-imp");
+  menu.querySelectorAll(".rm").forEach(b=>b.addEventListener("click",()=>{
+    const act=b.dataset.rm; menu.classList.add("hidden-imp");
+    const c = adCampaigns.find(x=>x.id===id); if (!c) return;
+    if (act==="open") openCampaignDrawer(id);
+    else if (act==="preview") openPeek(id);
+    else if (act==="duplicate"){ adCampaigns.unshift({...c,id:"ac"+Date.now(),name:c.name+" (copy)",status:"Draft",spend:0,revenue:0,roas:0,ctr:0,schedule:"—"}); renderCampaigns(); toast("Duplicated"); }
+    else if (act==="pause"){ c.status="Paused"; API.pauseCampaign(id); renderCampaigns(); toast("Paused"); }
+    else if (act==="resume"){ c.status="Active"; API.resumeCampaign(id); renderCampaigns(); toast("Resumed"); }
+    else if (act==="delete"){ if (confirm("Delete campaign?")){ adCampaigns=adCampaigns.filter(x=>x.id!==id); renderCampaigns(); toast("Deleted"); } }
+  }));
+  setTimeout(()=>document.addEventListener("click",()=>menu.classList.add("hidden-imp"),{once:true}),0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PEEK
+   ═══════════════════════════════════════════════════════════════════ */
+function openPeek(id){
+  peekId=id;
+  const c=adCampaigns.find(x=>x.id===id); if(!c)return;
+  document.getElementById("peek-title").textContent=c.name;
+  document.getElementById("peek-body").innerHTML=`
+    <div class="mb-3 flex items-center gap-2">${statusPill(c.status)}<div class="flex items-center gap-1 text-[11px]">${networkLogo(c.network)}${c.network}</div></div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3 grid grid-cols-3 gap-2 text-center">
+      <div><div class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Spend</div><div class="text-body-md font-semibold tabular-nums">$${c.spend.toLocaleString()}</div></div>
+      <div><div class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">Revenue</div><div class="text-body-md font-semibold tabular-nums">$${c.revenue.toLocaleString()}</div></div>
+      <div><div class="text-[10px] uppercase tracking-wider text-on-surface-variant font-bold">ROAS</div><div class="text-body-md font-semibold tabular-nums">${c.roas?c.roas.toFixed(2)+"×":"—"}</div></div>
+    </div>
+    <dl class="divide-y divide-surface-dim text-body-sm">
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Objective</dt><dd>${esc(c.objective)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Budget</dt><dd class="tabular-nums">$${c.budget}/d</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Schedule</dt><dd>${esc(c.schedule)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Ad sets</dt><dd>${c.adSets}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Creatives</dt><dd>${c.creatives.length}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">CTR</dt><dd class="tabular-nums">${c.ctr?c.ctr.toFixed(1)+"%":"—"}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="open"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="resume"><span class="material-symbols-outlined text-[16px]">play_circle</span>Resume</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  document.querySelectorAll("#peek-body [data-peek]").forEach(b=>b.addEventListener("click",()=>{
+    const a=b.dataset.peek;
+    if (a==="open"){ const cc=c; closePeek(); openCampaignDrawer(cc.id); }
+    else if (a==="duplicate"){ adCampaigns.unshift({...c,id:"ac"+Date.now(),name:c.name+" (copy)",status:"Draft",spend:0,revenue:0,roas:0,ctr:0,schedule:"—"}); closePeek(); renderCampaigns(); toast("Duplicated"); }
+    else if (a==="pause"){ c.status="Paused"; API.pauseCampaign(c.id); closePeek(); renderCampaigns(); toast("Paused"); }
+    else if (a==="resume"){ c.status="Active"; API.resumeCampaign(c.id); closePeek(); renderCampaigns(); toast("Resumed"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId=null;
+}
+document.getElementById("peek-close").addEventListener("click",closePeek);
+document.getElementById("scrim").addEventListener("click",()=>{
+  if (document.getElementById("campaignDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peek-open-full").addEventListener("click",()=>{
+  if (!peekId) return;
+  const c=adCampaigns.find(x=>x.id===peekId); closePeek();
+  if (c) openCampaignDrawer(c.id);
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   CREATIVE + AUDIENCE VIEWS
+   ═══════════════════════════════════════════════════════════════════ */
+document.getElementById("creative-search").addEventListener("input",renderCreatives);
+document.getElementById("creative-type").addEventListener("change",renderCreatives);
+function renderCreatives(){
+  const q=(document.getElementById("creative-search").value||"").toLowerCase();
+  const t=document.getElementById("creative-type").value;
+  const rows = CREATIVES.filter(c=>{
+    const qOK = !q || c.name.toLowerCase().includes(q);
+    const tOK = t==="All types" || c.type===t;
+    return qOK && tOK;
+  });
+  document.getElementById("creativesGrid").innerHTML = rows.length ? rows.map(c=>`
+    <div class="border border-surface-dim rounded-lg overflow-hidden" data-creative="${c.id}">
+      <div class="h-[110px] bg-surface-container-low flex items-center justify-center">
+        <span class="material-symbols-outlined text-[28px] text-on-surface-variant">${c.type==="Video"?"movie":c.type==="Carousel"?"view_carousel":"image"}</span>
+      </div>
+      <div class="p-2.5">
+        <div class="text-body-sm font-medium truncate">${esc(c.name)}</div>
+        <div class="text-[11px] text-on-surface-variant">${c.type} · ${c.dimensions}</div>
+        <div class="mt-2 flex items-center justify-between">
+          <span class="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">${c.usedIn} use${c.usedIn===1?"":"s"}</span>
+          <button class="h-6 px-2 border border-surface-dim rounded text-[11px] hover:bg-surface-container-low" data-edit-creative="${c.id}">Edit</button>
+        </div>
+      </div>
+    </div>
+  `).join("") : `<div class="col-span-full py-10 text-center text-body-sm text-on-surface-variant">No creatives match.</div>`;
+  document.querySelectorAll("[data-edit-creative]").forEach(b=>b.addEventListener("click",()=>toast("Edit creative "+b.dataset.editCreative)));
+}
+function renderAudiences(){
+  document.getElementById("audiencesTbody").innerHTML = AUDIENCES.map(a=>`
+    <tr class="hover:bg-surface-container-low">
+      <td class="px-3 py-2 font-medium">${esc(a.name)}</td>
+      <td class="px-3 py-2">${esc(a.type)}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(a.source)}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${esc(a.size)}</td>
+      <td class="px-3 py-2 tabular-nums">${a.usedIn}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(a.updated)}</td>
+      <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-aud-edit="${a.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+    </tr>
+  `).join("");
+  document.querySelectorAll("[data-aud-edit]").forEach(b=>b.addEventListener("click",()=>toast("Audience "+b.dataset.audEdit)));
+}
+document.querySelector("[data-upload-creative]").addEventListener("click",()=>toast("Upload creative — file picker"));
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAMPAIGN DRAWER
+   ═══════════════════════════════════════════════════════════════════ */
+function openCampaignDrawer(id){
+  editing = id ? adCampaigns.find(c=>c.id===id) : null;
+  document.getElementById("campaignDrawerTitle").textContent = editing ? "Edit campaign" : "New campaign";
+  document.getElementById("campaignDrawerSub").textContent = editing ? editing.status+" · "+editing.network : "Draft · not yet published";
+
+  document.getElementById("cp-name").value = editing ? editing.name : "";
+  document.getElementById("cp-objective").value = editing ? editing.objective : "Conversions";
+  document.getElementById("cp-budget-type").value = "Daily";
+  document.getElementById("cp-budget").value = editing ? editing.budget : 250;
+  document.getElementById("cp-start").value = editing && editing.start ? editing.start.slice(0,16) : new Date().toISOString().slice(0,16);
+  document.getElementById("cp-end").value = editing && editing.end ? editing.end.slice(0,16) : "";
+  pickedCreatives = editing ? [...editing.creatives] : [];
+  draftAdSets = editing
+    ? Array.from({length: editing.adSets}, (_,i)=>({ name:"Ad set "+(i+1), audience:"Site visitors 30d", placement:"Auto", bid:"Lowest cost" }))
+    : [];
+
+  // Network buttons
+  document.querySelectorAll(".network-btn").forEach(b=>{
+    const on = editing && b.dataset.network===editing.network;
+    b.classList.toggle("border-primary", !!on);
+    b.classList.toggle("bg-surface-container-low", !!on);
+  });
+  if (!editing) document.querySelectorAll(".network-btn").forEach(b=>b.classList.remove("border-primary","bg-surface-container-low"));
+
+  renderAdSets();
+  renderPickedCreatives();
+
+  document.getElementById("campaignDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closeCampaignDrawer(){
+  document.getElementById("campaignDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing=null;
+}
+document.getElementById("campaignClose").addEventListener("click",closeCampaignDrawer);
+document.getElementById("campaignCancel").addEventListener("click",closeCampaignDrawer);
+document.getElementById("scrim").addEventListener("click",()=>{
+  if (document.getElementById("campaignDrawer").classList.contains("open")) closeCampaignDrawer();
+});
+
+document.querySelectorAll(".network-btn").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".network-btn").forEach(x=>x.classList.remove("border-primary","bg-surface-container-low"));
+  b.classList.add("border-primary","bg-surface-container-low");
+}));
+
+function renderAdSets(){
+  document.getElementById("adSetsHost").innerHTML = draftAdSets.map((s,i)=>`
+    <div class="ad-set-card">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="text-body-sm font-semibold flex-1">${esc(s.name)}</div>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-remove-adset="${i}"><span class="material-symbols-outlined text-[14px] text-error">close</span></button>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="block text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Audience</label>
+          <select class="w-full h-8 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            ${AUDIENCES.map(a=>`<option ${a.name===s.audience?"selected":""}>${a.name}</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Placement</label>
+          <select class="w-full h-8 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            <option ${s.placement==="Auto"?"selected":""}>Auto</option>
+            <option>Feed</option>
+            <option>Stories / Reels</option>
+            <option>Search</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Bid strategy</label>
+          <select class="w-full h-8 px-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary">
+            <option>Lowest cost</option>
+            <option>Cost cap</option>
+            <option>ROAS goal</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `).join("") || `<div class="text-[11px] text-on-surface-variant">No ad sets yet. Add one to begin.</div>`;
+  document.querySelectorAll("[data-remove-adset]").forEach(b=>b.addEventListener("click",()=>{
+    draftAdSets.splice(parseInt(b.dataset.removeAdset,10),1);
+    renderAdSets();
+  }));
+}
+document.getElementById("addAdSetBtn").addEventListener("click",()=>{
+  draftAdSets.push({name:"Ad set "+(draftAdSets.length+1), audience:AUDIENCES[0].name, placement:"Auto", bid:"Lowest cost"});
+  renderAdSets();
+});
+
+function renderPickedCreatives(){
+  const host=document.getElementById("pickedCreatives");
+  if (!pickedCreatives.length){
+    host.innerHTML=`<div class="text-[11px] text-on-surface-variant">No creatives selected yet.</div>`;
+    return;
+  }
+  host.innerHTML = pickedCreatives.map(id=>{
+    const c=CREATIVES.find(x=>x.id===id); if (!c) return "";
+    return `<div class="flex items-center gap-2 px-2.5 py-1.5 rounded border border-outline-variant bg-surface-container-low text-body-sm">
+      <span class="material-symbols-outlined text-[16px] text-primary">${c.type==="Video"?"movie":c.type==="Carousel"?"view_carousel":"image"}</span>
+      <div class="min-w-0 flex-1"><div class="font-medium truncate">${esc(c.name)}</div><div class="text-[11px] text-on-surface-variant">${c.type} · ${c.dimensions}</div></div>
+      <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-remove-creative="${c.id}"><span class="material-symbols-outlined text-[14px]">close</span></button>
+    </div>`;
+  }).join("");
+  document.querySelectorAll("[data-remove-creative]").forEach(b=>b.addEventListener("click",()=>{
+    pickedCreatives = pickedCreatives.filter(x=>x!==b.dataset.removeCreative);
+    renderPickedCreatives();
+  }));
+}
+document.getElementById("pickCreativeBtn").addEventListener("click",()=>{
+  document.getElementById("creativePickerList").innerHTML = CREATIVES.map(c=>`
+    <label class="flex items-center gap-3 px-3 py-2 border-b border-surface-dim last:border-b-0 cursor-pointer hover:bg-surface-container-low creative-item" data-label="${esc(c.name)}" data-id="${c.id}">
+      <input type="checkbox" data-pick-creative="${c.id}" ${pickedCreatives.includes(c.id)?"checked":""} style="accent-color:#0a6400"/>
+      <div class="ad-creative"><span class="material-symbols-outlined text-[16px]">${c.type==="Video"?"movie":c.type==="Carousel"?"view_carousel":"image"}</span></div>
+      <div class="min-w-0 flex-1"><div class="text-body-sm font-medium">${esc(c.name)}</div><div class="text-[11px] text-on-surface-variant">${c.type} · ${c.dimensions}</div></div>
+      <span class="text-[11px] text-on-surface-variant tabular-nums">${c.usedIn} use${c.usedIn===1?"":"s"}</span>
+    </label>
+  `).join("");
+  document.getElementById("creativePickerSearch").addEventListener("input",e=>{
+    const q=e.target.value.toLowerCase();
+    document.querySelectorAll(".creative-item").forEach(it=>{
+      it.style.display = it.textContent.toLowerCase().includes(q)?"":"none";
+    });
+  });
+  document.getElementById("creativeModal").classList.add("open");
+});
+document.getElementById("creativePickerCancel").addEventListener("click",()=>document.getElementById("creativeModal").classList.remove("open"));
+document.getElementById("creativePickerConfirm").addEventListener("click",()=>{
+  pickedCreatives = [...document.querySelectorAll("[data-pick-creative]:checked")].map(cb=>cb.dataset.pickCreative);
+  renderPickedCreatives();
+  document.getElementById("creativeModal").classList.remove("open");
+});
+
+/* Save */
+function collectCampaign(){
+  const name=document.getElementById("cp-name").value.trim();
+  if (!name){ toast("Campaign name is required"); return null; }
+  const network = [...document.querySelectorAll(".network-btn")].find(b=>b.classList.contains("border-primary"))?.dataset.network || "Meta";
+  const start=document.getElementById("cp-start").value;
+  const end=document.getElementById("cp-end").value;
+  return {
+    id: editing?editing.id:"ac"+Date.now(),
+    name, network, objective:document.getElementById("cp-objective").value,
+    budget:parseInt(document.getElementById("cp-budget").value||"0",10),
+    spend: editing?editing.spend:0,
+    revenue: editing?editing.revenue:0,
+    roas: editing?editing.roas:0,
+    ctr: editing?editing.ctr:0,
+    schedule: start ? (end?`${start.slice(0,10)} → ${end.slice(0,10)}`:start.slice(0,10)+" → ongoing") : "—",
+    start, end:end||null,
+    status: editing?editing.status:"In review",
+    adSets: draftAdSets.length,
+    creatives: [...pickedCreatives]
+  };
+}
+document.getElementById("campaignSave").addEventListener("click",async ()=>{
+  const c=collectCampaign(); if(!c)return;
+  await API.createCampaign(c);
+  if (editing){ const idx=adCampaigns.findIndex(x=>x.id===editing.id); if(idx>=0)adCampaigns[idx]=c; }
+  else adCampaigns.unshift(c);
+  closeCampaignDrawer();
+  renderCampaigns(); renderOverview();
+  toast(editing?"Campaign updated":"Campaign created");
+});
+document.getElementById("campaignSaveNew").addEventListener("click",async ()=>{
+  const c=collectCampaign(); if(!c)return;
+  await API.createCampaign(c);
+  if (editing){ const idx=adCampaigns.findIndex(x=>x.id===editing.id); if(idx>=0)adCampaigns[idx]=c; }
+  else adCampaigns.unshift(c);
+  editing=null;
+  document.getElementById("campaignDrawerTitle").textContent="New campaign";
+  document.getElementById("campaignDrawerSub").textContent="Draft · not yet published";
+  document.getElementById("cp-name").value="";
+  draftAdSets=[]; pickedCreatives=[];
+  document.querySelectorAll(".network-btn").forEach(x=>x.classList.remove("border-primary","bg-surface-container-low"));
+  renderAdSets(); renderPickedCreatives();
+  renderCampaigns(); renderOverview();
+  toast("Saved. New campaign form ready.");
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   NEW CAMPAIGN SPLIT + MISC
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelector("[data-new-ad-campaign]").addEventListener("click",()=>openCampaignDrawer(null));
+document.querySelectorAll("[data-new-ad-campaign]").forEach(b=>b.addEventListener("click",()=>openCampaignDrawer(null)));
+document.getElementById("ad-create-arrow").addEventListener("click",e=>{
+  e.stopPropagation();
+  const m=document.getElementById("newAdCampaignMenu");
+  const r=e.currentTarget.getBoundingClientRect();
+  m.style.top=(r.bottom+4)+"px"; m.style.left=(r.right-260)+"px";
+  m.classList.toggle("hidden-imp");
+  setTimeout(()=>document.addEventListener("click",()=>m.classList.add("hidden-imp"),{once:true}),0);
+});
+document.querySelectorAll(".nacm").forEach(b=>b.addEventListener("click",()=>{
+  document.getElementById("newAdCampaignMenu").classList.add("hidden-imp");
+  const t=b.dataset.nacm;
+  if (t==="Campaign") openCampaignDrawer(null);
+  else {
+    document.getElementById("otherCreateTitle").textContent="Create "+t.toLowerCase();
+    document.getElementById("otherCreateSub").textContent="This opens the "+t+" create surface.";
+    document.getElementById("otherCreateConfirm").dataset.target=t;
+    document.getElementById("otherCreateModal").classList.add("open");
+  }
+}));
+
+document.querySelectorAll("[data-create]").forEach(b=>b.addEventListener("click",()=>{
+  const t=b.dataset.create;
+  if (t==="Campaign") openCampaignDrawer(null);
+  else {
+    document.getElementById("otherCreateTitle").textContent="Create "+t.toLowerCase();
+    document.getElementById("otherCreateSub").textContent="This opens the "+t+" create surface.";
+    document.getElementById("otherCreateConfirm").dataset.target=t;
+    document.getElementById("otherCreateModal").classList.add("open");
+  }
+}));
+document.getElementById("otherCreateCancel").addEventListener("click",()=>document.getElementById("otherCreateModal").classList.remove("open"));
+document.getElementById("otherCreateConfirm").addEventListener("click",()=>{
+  const t=document.getElementById("otherCreateConfirm").dataset.target;
+  toast("Opened "+t+" create surface");
+  document.getElementById("otherCreateModal").classList.remove("open");
+});
+document.querySelector("[data-open-create]").addEventListener("click",()=>toast("Open global create flyout"));
+document.querySelector("[data-export]").addEventListener("click",()=>toast("Exported "+filteredCampaigns().length+" campaigns"));
+
+/* ─── pixels ─── */
+document.querySelector("[data-pixels]").addEventListener("click",()=>document.getElementById("pixelsModal").classList.add("open"));
+document.getElementById("pixelsClose").addEventListener("click",()=>document.getElementById("pixelsModal").classList.remove("open"));
+
+/* ─── pagination ─── */
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>toast("Page "+b.dataset.page)));
+
+/* ─── boot ─── */
+syncTabs();
+syncNetworkPop();
+renderCampaigns();
+renderCreatives();
+renderAudiences();
+renderOverview();
+</script>
+</body>
+</html>

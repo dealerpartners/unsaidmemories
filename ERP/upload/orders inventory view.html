@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Inventory — Orders</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  /* Status pills */
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.in-stock{background:#8af5be;color:#00714b}
+  .stat.low-stock{background:#fff4dc;color:#8a5a00}
+  .stat.out-of-stock{background:#ffdad6;color:#93000a}
+  /* Row menu */
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+
+  /* Drawer */
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:560px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:6px;border-bottom:1px solid #dad9dd;margin-bottom:10px}
+  
+  .adj-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f4f3f7}
+  .adj-row:last-child{border-bottom:none}
+  .adj-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#f4f3f7;font-size:11px;font-weight:700;color:#5a6355}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- Context header -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">local_shipping</span>
+    <span class="text-label-md font-semibold">Orders</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Inventory</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<main class="px-6 pb-12">
+
+  <div class="flex items-center justify-between gap-4 py-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Inventory</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">On-hand stock, bin locations, and reorder points across warehouses</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-adjustment>
+          <span class="material-symbols-outlined text-[16px]">tune</span>Adjust stock
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" data-new-split>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-sync>
+        <span class="material-symbols-outlined text-[16px]">sync</span>Sync from supplier</button>
+    </div>
+  </div>
+
+  <!-- KPI strip -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total SKUs</div>
+      <div class="text-headline-sm mt-1 tabular-nums">342</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across 2 warehouses</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">In stock</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary">298</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">87% healthy</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Low stock</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-qb-maroon">32</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Below reorder point</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Out of stock</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error">12</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">3 on open orders</div>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Adjustment">
+      <span class="material-symbols-outlined text-[16px]">tune</span>Adjustment</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Transfer">
+      <span class="material-symbols-outlined text-[16px]">swap_horiz</span>Transfer</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="Cycle count">
+      <span class="material-symbols-outlined text-[16px]">inventory_2</span>Cycle count</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="PO">
+      <span class="material-symbols-outlined text-[16px]">shopping_bag</span>Reorder POs</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="In stock">In stock</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Low stock">Low stock</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Out of stock">Out of stock</button>
+    </div>
+
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by SKU, product…" data-filter/>
+      </div>
+      <label class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 bg-white">
+        <span class="material-symbols-outlined text-[14px] text-on-surface-variant">warehouse</span>
+        <span class="text-on-surface-variant">Warehouse:</span>
+        <select class="bg-transparent border-none text-label-sm text-on-surface focus:outline-none" data-filter-warehouse>
+          <option value="">All</option>
+          <option>Charlotte</option>
+          <option>Nashville</option>
+        </select>
+      </label>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-i-count>—</span>
+    </div>
+
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="reorder"><span class="material-symbols-outlined text-[14px] align-middle mr-1">shopping_bag</span>Create PO</button>
+      <button data-bulk="adjust"><span class="material-symbols-outlined text-[14px] align-middle mr-1">tune</span>Adjust</button>
+      <button data-bulk="transfer"><span class="material-symbols-outlined text-[14px] align-middle mr-1">swap_horiz</span>Transfer</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">SKU / Product</th>
+          <th class="px-3 py-2">Warehouse</th>
+          <th class="px-3 py-2">Bin</th>
+          <th class="px-3 py-2 text-right">On hand</th>
+          <th class="px-3 py-2 text-right">Committed</th>
+          <th class="px-3 py-2 text-right">Available</th>
+          <th class="px-3 py-2 text-right">Reorder pt</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-i-tbody>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer i-row" data-status="In stock" data-warehouse="Charlotte">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check i-check"/></td>
+          <td class="px-3 py-2"><div class="font-medium">Classic Tee — M / White</div><div class="text-[11px] text-on-surface-variant font-mono">TEE-001-M-WHT</div></td>
+          <td class="px-3 py-2 text-on-surface-variant">Charlotte</td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant text-[11px]">A3</td>
+          <td class="px-3 py-2 text-right tabular-nums">142</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">18</td>
+          <td class="px-3 py-2 text-right tabular-nums font-medium">124</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">20</td>
+          <td class="px-3 py-2"><span class="stat in-stock">In stock</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer i-row" data-status="Low stock" data-warehouse="Charlotte">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check i-check"/></td>
+          <td class="px-3 py-2"><div class="font-medium">Hoodie — Heavyweight — L / Black</div><div class="text-[11px] text-on-surface-variant font-mono">HD-211-L-BLK</div></td>
+          <td class="px-3 py-2 text-on-surface-variant">Charlotte</td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant text-[11px]">B1</td>
+          <td class="px-3 py-2 text-right tabular-nums">8</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">3</td>
+          <td class="px-3 py-2 text-right tabular-nums font-medium text-qb-maroon">5</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">15</td>
+          <td class="px-3 py-2"><span class="stat low-stock">Low stock</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer i-row" data-status="Out of stock" data-warehouse="Charlotte">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check i-check"/></td>
+          <td class="px-3 py-2"><div class="font-medium">Mug 11oz</div><div class="text-[11px] text-on-surface-variant font-mono">MUG-003</div></td>
+          <td class="px-3 py-2 text-on-surface-variant">Charlotte</td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant text-[11px]">D1</td>
+          <td class="px-3 py-2 text-right tabular-nums">0</td>
+          <td class="px-3 py-2 text-right tabular-nums text-error">4</td>
+          <td class="px-3 py-2 text-right tabular-nums font-medium text-error">-4</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">20</td>
+          <td class="px-3 py-2"><span class="stat out-of-stock">Out of stock</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer i-row" data-status="In stock" data-warehouse="Nashville">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check i-check"/></td>
+          <td class="px-3 py-2"><div class="font-medium">Canvas Tote</div><div class="text-[11px] text-on-surface-variant font-mono">TOTE-014</div></td>
+          <td class="px-3 py-2 text-on-surface-variant">Nashville</td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant text-[11px]">C2</td>
+          <td class="px-3 py-2 text-right tabular-nums">56</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">10</td>
+          <td class="px-3 py-2 text-right tabular-nums font-medium">46</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">20</td>
+          <td class="px-3 py-2"><span class="stat in-stock">In stock</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+        <tr class="hover:bg-surface-container-low cursor-pointer i-row" data-status="Low stock" data-warehouse="Nashville">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check i-check"/></td>
+          <td class="px-3 py-2"><div class="font-medium">Canvas Tote — Navy</div><div class="text-[11px] text-on-surface-variant font-mono">TOTE-014-NVY</div></td>
+          <td class="px-3 py-2 text-on-surface-variant">Nashville</td>
+          <td class="px-3 py-2 font-mono text-on-surface-variant text-[11px]">C2</td>
+          <td class="px-3 py-2 text-right tabular-nums">18</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">4</td>
+          <td class="px-3 py-2 text-right tabular-nums font-medium text-qb-maroon">14</td>
+          <td class="px-3 py-2 text-right tabular-nums text-on-surface-variant">20</td>
+          <td class="px-3 py-2"><span class="stat low-stock">Low stock</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- New adjustment split -->
+<div class="row-menu" id="new-menu">
+  <div class="menu-header">Adjust stock</div>
+  <button data-new-kind="Adjustment"><span class="material-symbols-outlined">tune</span>Adjustment</button>
+  <button data-new-kind="Transfer"><span class="material-symbols-outlined">swap_horiz</span>Transfer between warehouses</button>
+  <button data-new-kind="Cycle count"><span class="material-symbols-outlined">inventory_2</span>Cycle count</button>
+  <div class="sep"></div>
+  <button data-new-kind="Reorder POs"><span class="material-symbols-outlined">shopping_bag</span>Reorder POs</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="row-menu">
+  <div class="menu-header">This SKU</div>
+  <button data-action="catalog"><span class="material-symbols-outlined">open_in_new</span>View in Catalog</button>
+  <button data-action="adjust"><span class="material-symbols-outlined">tune</span>Adjust stock</button>
+  <button data-action="transfer"><span class="material-symbols-outlined">swap_horiz</span>Transfer</button>
+  <div class="sep"></div>
+  <div class="menu-header">History</div>
+  <button data-action="history"><span class="material-symbols-outlined">history</span>Stock history</button>
+  <button data-action="count"><span class="material-symbols-outlined">inventory_2</span>Start cycle count</button>
+</div>
+
+<!-- ═══════════ ADJUST STOCK DRAWER ═══════════ -->
+<div class="drawer-scrim" id="adj-scrim"></div>
+<div class="drawer" id="adj-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" data-adj-title>Adjust stock</div>
+        <div class="text-[11px] text-on-surface-variant" data-adj-sub>Update on-hand quantity</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" data-close-adj>
+      <span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-4">
+    <div class="bg-surface-container-low rounded-lg p-3 flex items-center gap-2">
+      <span class="material-symbols-outlined text-[16px] text-qb-blue">info</span>
+      <div class="text-[11px] text-on-surface-variant">Current on-hand: <strong data-adj-current>0</strong>. Enter the new quantity or a delta.</div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="field-label">Warehouse</label><select class="field-input" data-adj-warehouse><option>Charlotte</option><option>Nashville</option></select></div>
+      <div><label class="field-label">Bin location</label><input class="field-input font-mono" value="A3" data-adj-bin/></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="field-label">Adjustment type</label><select class="field-input" data-adj-type><option>Set to new total</option><option>Add</option><option>Remove</option></select></div>
+      <div><label class="field-label">Quantity</label><input class="field-input tabular-nums" type="number" value="0" data-adj-qty/></div>
+    </div>
+
+    <div><label class="field-label">Reason</label><select class="field-input" data-adj-reason><option>Received from supplier</option><option>Damaged / defective</option><option>Lost / stolen</option><option>Cycle count correction</option><option>Customer return</option><option>Other</option></select></div>
+    <div><label class="field-label">Notes</label><textarea class="field-input" style="height:60px;padding:8px 10px;font-family:inherit" placeholder="Internal notes about this adjustment"></textarea></div>
+
+    <div class="border-t border-surface-dim pt-3">
+      <div class="section-h">Recent adjustments</div>
+      <div class="space-y-1">
+        <div class="adj-row"><div class="adj-badge bg-secondary-container text-on-secondary-container">+</div><div class="flex-1 min-w-0 text-[12px]"><div class="font-medium">+50 received</div><div class="text-[11px] text-on-surface-variant">PO-2201 · 10/28</div></div><span class="text-[11px] text-on-surface-variant">142</span></div>
+        <div class="adj-row"><div class="adj-badge bg-error-container text-on-error-container">−</div><div class="flex-1 min-w-0 text-[12px]"><div class="font-medium">−2 damaged</div><div class="text-[11px] text-on-surface-variant">Cycle count · 10/24</div></div><span class="text-[11px] text-on-surface-variant">92</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" data-close-adj>Cancel</button>
+    <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-save-adj>Save adjustment</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+
+/* New split */
+const newMenu = document.getElementById("new-menu");
+document.querySelector("[data-new-split]").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  newMenu.style.top = (r.bottom + 4) + "px";
+  newMenu.style.left = Math.min(r.right - 240, window.innerWidth - 260) + "px";
+  newMenu.classList.toggle("open");
+});
+document.querySelectorAll("#new-menu [data-new-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  newMenu.classList.remove("open");
+  const k = b.dataset.newKind;
+  if (k === "Adjustment") return openAdjust(null);
+  toast(`Create → ${k}`);
+}));
+document.querySelector("[data-new-adjustment]").addEventListener("click", ()=>openAdjust(null));
+document.querySelectorAll("[data-new]").forEach(b=>b.addEventListener("click", ()=>{
+  if (b.dataset.new === "Adjustment") return openAdjust(null);
+  toast(`Create → ${b.dataset.new}`);
+}));
+document.querySelector("[data-open-create]").addEventListener("click", ()=>toast("Global Create flyout"));
+document.querySelector("[data-sync]").addEventListener("click", ()=>toast("Syncing stock from suppliers…"));
+
+/* Adjust drawer */
+const INV_DATA = {
+  "Classic Tee — M / White": { onHand: 142, bin: "A3", warehouse: "Charlotte" },
+  "Hoodie — Heavyweight — L / Black": { onHand: 8, bin: "B1", warehouse: "Charlotte" },
+  "Mug 11oz": { onHand: 0, bin: "D1", warehouse: "Charlotte" },
+  "Canvas Tote": { onHand: 56, bin: "C2", warehouse: "Nashville" },
+  "Canvas Tote — Navy": { onHand: 18, bin: "C2", warehouse: "Nashville" },
+};
+let currentInvRow = null;
+function openAdjust(row){
+  currentInvRow = row;
+  const product = row ? row.querySelector(".font-medium").textContent : "New adjustment";
+  const d = row ? (INV_DATA[product] || {onHand: 0, bin: "A1", warehouse: "Charlotte"}) : {onHand: 0, bin: "", warehouse: "Charlotte"};
+  document.querySelector("[data-adj-title]").textContent = row ? `Adjust ${product}` : "New adjustment";
+  document.querySelector("[data-adj-sub]").textContent = row ? "Update on-hand quantity" : "Select a SKU first";
+  document.querySelector("[data-adj-current]").textContent = d.onHand;
+  document.querySelector("[data-adj-warehouse]").value = d.warehouse;
+  document.querySelector("[data-adj-bin]").value = d.bin;
+  document.querySelector("[data-adj-qty]").value = 0;
+  document.getElementById("adj-scrim").classList.add("open");
+  document.getElementById("adj-drawer").classList.add("open");
+}
+document.querySelectorAll("[data-close-adj]").forEach(b=>b.addEventListener("click", ()=>{
+  document.getElementById("adj-scrim").classList.remove("open");
+  document.getElementById("adj-drawer").classList.remove("open");
+}));
+document.getElementById("adj-scrim").addEventListener("click", ()=>{
+  document.getElementById("adj-scrim").classList.remove("open");
+  document.getElementById("adj-drawer").classList.remove("open");
+});
+document.querySelector("[data-save-adj]").addEventListener("click", ()=>{
+  toast("Stock adjustment saved");
+  document.getElementById("adj-scrim").classList.remove("open");
+  document.getElementById("adj-drawer").classList.remove("open");
+});
+
+/* Row menu */
+const rowMenu = document.getElementById("row-menu");
+let currentMenuRow = null;
+document.querySelectorAll(".i-row").forEach(tr=>{
+  tr.addEventListener("click", e=>{
+    if (e.target.closest("input,button,[data-row-menu]")) return;
+    openAdjust(tr);
+  });
+  tr.querySelector("[data-row-menu]")?.addEventListener("click", e=>{
+    e.stopPropagation();
+    rowMenu.classList.remove("open");
+    currentMenuRow = tr;
+    const r = e.currentTarget.getBoundingClientRect();
+    rowMenu.style.top = (r.bottom + 4) + "px";
+    rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+    rowMenu.classList.add("open");
+  });
+});
+rowMenu.querySelectorAll("[data-action]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.action;
+  const tr = currentMenuRow;
+  rowMenu.classList.remove("open");
+  if (!tr) return;
+  const name = tr.querySelector(".font-medium").textContent;
+  switch(act){
+    case "catalog": 
+      toast(`Navigating to Catalog > ${name}...`);
+      break;
+    case "adjust": openAdjust(tr); break;
+    case "transfer": toast(`Transfer stock for ${name}`); break;
+    case "history": toast(`Viewing stock history for ${name}`); break;
+    case "count": toast(`Starting cycle count for ${name}`); break;
+  }
+}));
+
+/* Tabs + filter */
+let currentTab = "All";
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  currentTab = b.dataset.viewtab;
+  applyFilters();
+}));
+document.querySelector("[data-filter]").addEventListener("input", applyFilters);
+document.querySelector("[data-filter-warehouse]").addEventListener("change", applyFilters);
+function applyFilters(){
+  const q = document.querySelector("[data-filter]").value.toLowerCase();
+  const wh = document.querySelector("[data-filter-warehouse]").value;
+  let shown = 0, total = 0;
+  document.querySelectorAll(".i-row").forEach(tr=>{
+    total++;
+    const tabOk = currentTab === "All" || tr.dataset.status === currentTab;
+    const qOk = !q || tr.textContent.toLowerCase().includes(q);
+    const whOk = !wh || tr.dataset.warehouse === wh;
+    const vis = tabOk && qOk && whOk;
+    tr.style.display = vis ? "" : "none";
+    if (vis) shown++;
+  });
+  document.querySelector("[data-i-count]").textContent = `${shown} of ${total}`;
+}
+
+/* Bulk */
+function updateBulk(){
+  const checked = [...document.querySelectorAll(".i-check")].filter(c=>c.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  const cnt = document.querySelector("[data-bulk-count]");
+  if (checked>0){ bar.classList.add("show"); cnt.textContent = `${checked} selected`; }
+  else bar.classList.remove("show");
+}
+document.addEventListener("change", e=>{ if (e.target.matches(".i-check")) updateBulk(); });
+document.querySelector("[data-check-all]").addEventListener("change", e=>{
+  document.querySelectorAll(".i-check").forEach(c=>{ if (c.closest("tr").style.display !== "none") c.checked = e.target.checked; });
+  updateBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".i-check").forEach(c=>c.checked=false);
+    document.querySelector("[data-check-all]").checked = false;
+    updateBulk(); return;
+  }
+  const n = document.querySelectorAll(".i-check:checked").length;
+  toast(`${act.charAt(0).toUpperCase()+act.slice(1)} on ${n} SKU${n!==1?"s":""}`);
+  document.querySelectorAll(".i-check").forEach(c=>c.checked=false);
+  document.querySelector("[data-check-all]").checked = false;
+  updateBulk();
+}));
+
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#row-menu")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#new-menu") && !e.target.closest("[data-new-split]")) newMenu.classList.remove("open");
+});
+
+/* Init */
+applyFilters();
+</script>
+</body>
+</html>

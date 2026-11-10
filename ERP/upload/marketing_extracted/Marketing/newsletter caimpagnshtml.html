@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Marketing · Newsletter</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:300;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .row-check{accent-color:#0077c5}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+  .bulk-bar{background:#1f2937;color:#fff}
+  .scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:80;display:none}
+  .scrim.open{display:block}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:94vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .popover{position:absolute;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:120;min-width:240px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .target-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:6px;font-size:10px;font-weight:600;background:#f0f6f5;color:#0a6400}
+  .target-chip .material-symbols-outlined{font-size:12px}
+  .stepper{display:flex;align-items:center;gap:8px;margin:0 0 16px}
+  .step{display:flex;align-items:center;gap:7px;color:#8a938c;font-size:11px}
+  .step-num{width:23px;height:23px;border-radius:50%;border:1px solid #dad9dd;display:grid;place-items:center;font-size:10px;background:#fff}
+  .step.active{color:#0a6400;font-weight:600}
+  .step.active .step-num,.step.done .step-num{background:#0a6400;border-color:#0a6400;color:#fff}
+  .step-line{height:1px;background:#dad9dd;flex:1;max-width:50px}
+  /* campaign builder full-screen */
+  .builder{position:fixed;inset:0;background:#faf9fc;z-index:90;display:none;flex-direction:column}
+  .builder.open{display:flex}
+  .builder-main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.8fr);overflow:hidden}
+  .builder-left{overflow-y:auto;padding:24px 32px 32px}
+  .builder-right{border-left:1px solid #dad9dd;background:#f4f3f7;overflow-y:auto;padding:20px}
+  /* email preview */
+  .email-shell{background:#fff;border:1px solid #dad9dd;border-radius:12px;overflow:hidden;max-width:420px;margin:auto}
+  .email-head{padding:14px 16px;border-bottom:1px solid #f0f2f3;display:flex;align-items:center;gap:10px}
+  .email-avatar{width:32px;height:32px;border-radius:8px;background:#e6efed;display:grid;place-items:center;color:#0a6400;font-weight:700;font-size:11px}
+  .email-head strong{font-size:12px;display:block}
+  .email-head small{font-size:11px;color:#5a6355}
+  .email-hero{height:170px;background:linear-gradient(135deg,#e9f1ef,#dce8e6);display:grid;place-items:center;color:#77918e}
+  .email-hero .material-symbols-outlined{font-size:44px}
+  .email-body{padding:16px 18px;font-size:12px;line-height:1.6;white-space:pre-wrap;color:#1a1c1e}
+  .email-cta{display:inline-block;padding:8px 14px;border-radius:8px;background:#0a6400;color:#fff;font-weight:600;font-size:11px;margin-top:12px}
+  .email-foot{border-top:1px solid #f0f2f3;padding:12px 18px;font-size:10px;color:#5a6355;display:flex;justify-content:space-between;align-items:center}
+  /* recipients picker */
+  .seg-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #dad9dd;border-radius:10px;background:#fff;cursor:pointer}
+  .seg-row.selected{border-color:#0a6400;background:#f4fbfa}
+  .seg-row input{accent-color:#0a6400}
+  /* block editor */
+  .block-card{border:1px solid #dad9dd;border-radius:10px;background:#fff}
+  .block-card.dragging{opacity:.55}
+  .block-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #f0f2f3}
+  .block-grip{color:#8a938c;cursor:grab}
+  .block-body{padding:12px}
+  .block-toolbar{display:flex;align-items:center;gap:6px;margin-left:auto}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── DOMAIN TABSTRIP ─── -->
+  <div class="flex items-center gap-1 mt-4 mb-1 border-b border-surface-dim overflow-x-auto">
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="overview">Publishing Overview</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="calendar">Calendar</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="queue">Queue</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="create">Create Content</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="library">Content Library</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="channels">Connected Channels</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="performance">Performance</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="oversight">Oversight</button>
+    <button class="h-9 px-3 text-label-md tab-underline text-on-surface-variant" data-nav="promotions">Promotions</button>
+    <button class="h-9 px-3 text-label-md tab-underline active" data-nav="newsletter">Newsletter</button>
+  </div>
+
+  <!-- ─── HEADER ─── -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Marketing</span><span class="text-outline">/</span><span>Newsletter</span>
+      </div>
+      <h1 class="text-headline-lg">Newsletter campaigns</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Build, schedule, and send email campaigns. Segment recipients, design in blocks, and measure performance.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export>
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-templates>
+        <span class="material-symbols-outlined text-[16px]">dashboard_customize</span>Templates
+      </button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new-campaign>
+        <span class="material-symbols-outlined text-[16px]">add</span>New campaign
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Subscribers</span>
+      <div class="text-headline-lg mt-1">14,286</div>
+      <div class="text-[11px] text-secondary mt-1">+312 this month</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Avg. open rate (30d)</span>
+      <div class="text-headline-lg mt-1">42.8%</div>
+      <div class="text-[11px] text-secondary mt-1">+3.1 pts</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Avg. click rate (30d)</span>
+      <div class="text-headline-lg mt-1">6.4%</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">Stable</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-4">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">Drafts &amp; scheduled</span>
+      <div class="text-headline-lg mt-1" id="statActiveCampaigns">4</div>
+      <div class="text-[11px] text-on-surface-variant mt-1">2 scheduled · 2 draft</div>
+    </div>
+  </div>
+
+  <!-- ─── CREATE ACTIONS ROW ─── -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new-campaign>
+      <span class="material-symbols-outlined text-[16px]">mail</span>New campaign
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Automation">
+      <span class="material-symbols-outlined text-[16px]">bolt</span>Automation
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Segment">
+      <span class="material-symbols-outlined text-[16px]">groups</span>Segment
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-create="Template">
+      <span class="material-symbols-outlined text-[16px]">dashboard_customize</span>Template
+    </button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create>
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all
+    </button>
+  </div>
+
+  <!-- ─── CAMPAIGNS LIST ─── -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden" id="campaign-card">
+
+    <!-- View tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-ctab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-ctab="Draft">Draft</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-ctab="Scheduled">Scheduled</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-ctab="Sending">Sending</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-ctab="Sent">Sent</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-ctab="Paused">Paused</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim">
+      <div class="relative flex items-center flex-1 max-w-sm">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input id="campaign-search" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name, subject, segment…"/>
+      </div>
+
+      <div class="relative">
+        <button id="btn-c-segment" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">groups</span>Segment
+        </button>
+        <div id="pop-c-segment" class="popover hidden-imp absolute left-0 top-8 p-3 w-64">
+          <div class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Filter by segment</div>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-seg" value="All subscribers" checked/> All subscribers</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-seg" value="VIP customers" checked/> VIP customers</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-seg" value="New subscribers" checked/> New subscribers</label>
+          <label class="flex items-center gap-2 py-1 text-body-sm"><input type="checkbox" class="filter-seg" value="At-risk" checked/> At-risk</label>
+          <div class="flex justify-end gap-2 mt-3">
+            <button id="seg-clear" class="h-7 px-2 text-body-sm border border-surface-dim rounded hover:bg-surface-container-low">Clear</button>
+            <button id="seg-apply" class="h-7 px-2 text-body-sm bg-primary text-white rounded hover:bg-primary-container font-semibold">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="btn-c-date" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range
+      </button>
+      <button id="btn-c-saved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" id="campaign-count">1–5 of 5</span>
+    </div>
+
+    <!-- Active chips -->
+    <div id="campaign-chips" class="px-4 py-1.5 flex items-center gap-2 flex-wrap border-b border-surface-dim hidden-imp">
+      <span class="text-[10px] uppercase tracking-wider font-bold text-outline">Active:</span>
+      <div id="campaign-chip-container" class="flex items-center gap-1.5 flex-wrap"></div>
+      <button id="campaign-clear-all" class="ml-auto text-[11px] text-primary hover:underline font-medium">Clear all</button>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar hidden-imp px-4 py-2 flex items-center gap-3 text-body-sm" id="campaign-bulk">
+      <span class="font-semibold" id="campaign-bulk-count">0 selected</span>
+      <div class="w-px h-4 bg-white/30"></div>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Pause"><span class="material-symbols-outlined text-[15px]">pause_circle</span>Pause</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Resume"><span class="material-symbols-outlined text-[15px]">play_circle</span>Resume</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Duplicate"><span class="material-symbols-outlined text-[15px]">content_copy</span>Duplicate</button>
+      <button class="flex items-center gap-1 hover:underline" data-bulk="Archive"><span class="material-symbols-outlined text-[15px]">archive</span>Archive</button>
+      <button class="ml-auto flex items-center gap-1 hover:underline" data-bulk="Clear"><span class="material-symbols-outlined text-[15px]">close</span>Clear</button>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-body-sm min-w-[1150px]">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr>
+            <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" id="campaign-select-all"/></th>
+            <th class="px-3 py-2">Campaign</th>
+            <th class="px-3 py-2">Subject</th>
+            <th class="px-3 py-2">Segment</th>
+            <th class="px-3 py-2 text-right">Recipients</th>
+            <th class="px-3 py-2">Send</th>
+            <th class="px-3 py-2 text-right">Open</th>
+            <th class="px-3 py-2 text-right">Click</th>
+            <th class="px-3 py-2">Status</th>
+            <th class="w-8"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim" id="campaign-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Empty state -->
+    <div class="hidden-imp py-16 px-8 text-center" id="campaign-empty">
+      <div class="w-16 h-16 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-[32px] text-outline">mail</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No campaigns match your filters</h3>
+      <p class="text-body-sm text-on-surface-variant mb-4 max-w-sm mx-auto">Clear filters or start a new newsletter campaign.</p>
+      <div class="flex items-center justify-center gap-2">
+        <button id="campaign-empty-clear" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>Clear filters
+        </button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new-campaign>
+          <span class="material-symbols-outlined text-[16px]">add</span>New campaign
+        </button>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white">
+          <option>75</option><option>100</option><option>150</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-page="prev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span>Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-page="next"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Scrim -->
+<div class="scrim" id="scrim"></div>
+
+<!-- Peek drawer (row click) -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">mail</span>
+      <span id="peek-title" class="text-headline-sm truncate">Campaign</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peek-open-full" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">open_in_full</span>Open builder</button>
+      <button id="peek-close" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peek-body" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Row menu popover -->
+<div class="popover hidden-imp" id="rowMenu" style="position:fixed;min-width:220px"></div>
+
+<!-- New campaign split menu -->
+<div id="newCampaignMenu" class="popover hidden-imp" style="position:fixed;min-width:260px">
+  <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">New newsletter</div>
+  <button class="ncm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-ncm="Blank"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">edit_square</span>Blank campaign</button>
+  <button class="ncm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-ncm="Template"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">dashboard_customize</span>Start from template</button>
+  <button class="ncm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-ncm="Duplicate last"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">content_copy</span>Duplicate last sent</button>
+</div>
+
+<!-- Templates modal -->
+<div class="modal-scrim" id="templatesModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-5">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-headline-sm">Campaign templates</h3>
+      <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" id="templatesClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+    <p class="text-body-sm text-on-surface-variant mb-3">Reusable starting points. Pick a template to open the builder.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <button class="tpl-card border border-surface-dim rounded-lg overflow-hidden text-left hover:border-primary">
+        <div class="h-24 bg-surface-container-low flex items-center justify-center"><span class="material-symbols-outlined text-[28px] text-on-surface-variant">campaign</span></div>
+        <div class="p-2"><div class="text-[12px] font-semibold">Product launch</div><div class="text-[10px] text-on-surface-variant">Hero + CTA</div></div>
+      </button>
+      <button class="tpl-card border border-surface-dim rounded-lg overflow-hidden text-left hover:border-primary">
+        <div class="h-24 bg-surface-container-low flex items-center justify-center"><span class="material-symbols-outlined text-[28px] text-on-surface-variant">article</span></div>
+        <div class="p-2"><div class="text-[12px] font-semibold">Weekly digest</div><div class="text-[10px] text-on-surface-variant">Sections + links</div></div>
+      </button>
+      <button class="tpl-card border border-surface-dim rounded-lg overflow-hidden text-left hover:border-primary">
+        <div class="h-24 bg-surface-container-low flex items-center justify-center"><span class="material-symbols-outlined text-[28px] text-on-surface-variant">redeem</span></div>
+        <div class="p-2"><div class="text-[12px] font-semibold">Promo blast</div><div class="text-[10px] text-on-surface-variant">Image + code</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Other create modal -->
+<div class="modal-scrim" id="otherCreateModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1" id="otherCreateTitle">Create</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="otherCreateSub">This opens the corresponding create surface.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="otherCreateCancel">Close</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="otherCreateConfirm">Open create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CAMPAIGN BUILDER (full-screen, per §G: "list + campaign builder")
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="builder" id="builder">
+  <div class="h-14 bg-white border-b border-surface-dim flex items-center justify-between px-5 shrink-0">
+    <div class="flex items-center gap-3 min-w-0">
+      <button id="builderClose" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">arrow_back</span></button>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="builderTitle">Untitled campaign</div>
+        <div class="text-[11px] text-on-surface-variant" id="builderSub">Draft · not yet sent</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1 h-full">
+      <button class="builder-tab tab-underline active h-full px-3 text-body-md" data-btab="design">Design</button>
+      <button class="builder-tab tab-underline h-full px-3 text-body-md text-on-surface-variant" data-btab="recipients">Recipients</button>
+      <button class="builder-tab tab-underline h-full px-3 text-body-md text-on-surface-variant" data-btab="settings">Settings</button>
+      <button class="builder-tab tab-underline h-full px-3 text-body-md text-on-surface-variant" data-btab="review">Review</button>
+    </div>
+    <div class="flex items-center gap-2">
+      <button id="builderPreview" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">visibility</span>Preview
+      </button>
+      <button id="builderSendTest" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">send</span>Send test
+      </button>
+      <div class="flex">
+        <button id="builderSave" class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">save</span>Save &amp; close
+        </button>
+        <button id="builderSend" class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="builder-main">
+    <!-- LEFT: step content -->
+    <div class="builder-left">
+
+      <!-- DESIGN step -->
+      <div id="bstep-design">
+        <div class="stepper">
+          <div class="step active" id="stepMark1"><span class="step-num">1</span>Design</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark2"><span class="step-num">2</span>Recipients</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark3"><span class="step-num">3</span>Settings</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark4"><span class="step-num">4</span>Review</div>
+        </div>
+
+        <div class="space-y-4">
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-headline-sm mb-2">Message details</div>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Internal name</label>
+                <input id="b-name" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="e.g. November product drop"/>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-label-sm text-on-surface-variant mb-1">From name</label>
+                  <input id="b-from" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="Unsaid Company"/>
+                </div>
+                <div>
+                  <label class="block text-label-sm text-on-surface-variant mb-1">Reply-to</label>
+                  <input id="b-reply" type="email" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="hello@unsaid.app"/>
+                </div>
+              </div>
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Subject line</label>
+                <input id="b-subject" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="A closer look at what's new"/>
+              </div>
+              <div>
+                <label class="block text-label-sm text-on-surface-variant mb-1">Preview text</label>
+                <input id="b-preheader" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="What your subscribers see in their inbox list"/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blocks -->
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-headline-sm">Email content</div>
+              <div class="flex items-center gap-1">
+                <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-add-block="hero"><span class="material-symbols-outlined text-[14px]">image</span>Hero</button>
+                <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-add-block="text"><span class="material-symbols-outlined text-[14px]">text_fields</span>Text</button>
+                <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-add-block="cta"><span class="material-symbols-outlined text-[14px]">smart_button</span>Button</button>
+                <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" data-add-block="divider"><span class="material-symbols-outlined text-[14px]">horizontal_rule</span>Divider</button>
+              </div>
+            </div>
+            <div id="blocksHost" class="space-y-2"></div>
+            <div class="text-[10px] text-on-surface-variant mt-2">Drag to reorder. Every block is editable — hover a block to remove or move it.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECIPIENTS step -->
+      <div id="bstep-recipients" class="hidden-imp">
+        <div class="stepper">
+          <div class="step done" id="stepMark1b"><span class="step-num">1</span>Design</div>
+          <div class="step-line"></div>
+          <div class="step active" id="stepMark2b"><span class="step-num">2</span>Recipients</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark3b"><span class="step-num">3</span>Settings</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark4b"><span class="step-num">4</span>Review</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-surface-dim p-4 mb-4">
+          <div class="text-headline-sm mb-1">Who receives this?</div>
+          <div class="text-[11px] text-on-surface-variant mb-3">Segments combine with AND at the campaign level. Recipients are deduplicated before send.</div>
+          <div id="segmentList" class="space-y-2"></div>
+          <div class="flex items-center gap-2 mt-3">
+            <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnNewSegment">
+              <span class="material-symbols-outlined text-[16px]">add</span>Create segment
+            </button>
+            <span class="text-[11px] text-on-surface-variant">Or import a CSV in <span class="text-primary font-medium">Customers → Segments</span>.</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-surface-dim p-4">
+          <div class="text-headline-sm mb-2">Exclusions</div>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" id="excl-unsub" class="row-check" checked/> Exclude unsubscribed</label>
+            <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" id="excl-bounce" class="row-check" checked/> Exclude hard-bounced addresses</label>
+            <label class="flex items-center gap-2 text-body-sm"><input type="checkbox" id="excl-complaint" class="row-check" checked/> Exclude spam complainers</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS step -->
+      <div id="bstep-settings" class="hidden-imp">
+        <div class="stepper">
+          <div class="step done" id="stepMark1c"><span class="step-num">1</span>Design</div>
+          <div class="step-line"></div>
+          <div class="step done" id="stepMark2c"><span class="step-num">2</span>Recipients</div>
+          <div class="step-line"></div>
+          <div class="step active" id="stepMark3c"><span class="step-num">3</span>Settings</div>
+          <div class="step-line"></div>
+          <div class="step" id="stepMark4c"><span class="step-num">4</span>Review</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-surface-dim p-4 space-y-3">
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Send timing</label>
+            <div class="view-toggle">
+              <button class="active" data-bmode="now">Send now</button>
+              <button data-bmode="schedule">Schedule</button>
+            </div>
+          </div>
+          <div id="bScheduleFields" class="grid grid-cols-2 gap-3 hidden-imp">
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Send at</label>
+              <input type="datetime-local" id="b-send-at" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary"/>
+            </div>
+            <div>
+              <label class="block text-label-sm text-on-surface-variant mb-1">Time zone</label>
+              <select class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+                <option>Central Time (US &amp; Canada)</option>
+                <option>Eastern Time</option>
+                <option>Pacific Time</option>
+                <option>UTC</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Tracking &amp; delivery</label>
+            <label class="flex items-center gap-2 text-body-sm py-1"><input type="checkbox" class="row-check" checked/> Track opens &amp; clicks</label>
+            <label class="flex items-center gap-2 text-body-sm py-1"><input type="checkbox" class="row-check" checked/> Google Analytics UTM</label>
+            <label class="flex items-center gap-2 text-body-sm py-1"><input type="checkbox" class="row-check"/> Google Analytics event</label>
+          </div>
+          <div>
+            <label class="block text-label-sm text-on-surface-variant mb-1">Approval</label>
+            <select class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" id="b-approval">
+              <option value="none">No approval required</option>
+              <option value="approval">Submit for approval before sending</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVIEW step -->
+      <div id="bstep-review" class="hidden-imp">
+        <div class="stepper">
+          <div class="step done" id="stepMark1d"><span class="step-num">1</span>Design</div>
+          <div class="step-line"></div>
+          <div class="step done" id="stepMark2d"><span class="step-num">2</span>Recipients</div>
+          <div class="step-line"></div>
+          <div class="step done" id="stepMark3d"><span class="step-num">3</span>Settings</div>
+          <div class="step-line"></div>
+          <div class="step active" id="stepMark4d"><span class="step-num">4</span>Review</div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-surface-dim p-4">
+          <div class="text-headline-sm mb-2">Ready to send</div>
+          <div id="reviewSummary" class="bg-surface-container-low border border-surface-dim rounded-lg p-4 text-body-sm leading-relaxed"></div>
+          <div class="mt-3 p-3 border border-outline-variant bg-surface-container-low rounded text-[10px] text-on-surface-variant">
+            This prototype prepares the send request. Actual email delivery requires your backend ESP (e.g. SendGrid, Postmark, SES) and list storage.
+          </div>
+        </div>
+
+        <div class="mt-3 grid grid-cols-2 gap-3">
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-label-sm uppercase tracking-wider text-on-surface-variant font-bold mb-1">Send a test</div>
+            <input id="testEmail" type="email" class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="you@example.com"/>
+            <button id="sendTestBtn" class="mt-2 h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">send</span>Send test
+            </button>
+          </div>
+          <div class="bg-white rounded-xl border border-surface-dim p-4">
+            <div class="text-label-sm uppercase tracking-wider text-on-surface-variant font-bold mb-1">This will</div>
+            <div class="text-body-sm" id="sendImpact">—</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: live email preview -->
+    <div class="builder-right">
+      <div class="text-label-sm uppercase tracking-wider text-on-surface-variant font-bold mb-2 flex items-center justify-between">
+        <span>Live preview</span>
+        <div class="view-toggle" id="previewToggle">
+          <button class="active" data-preview="desktop">Desktop</button>
+          <button data-preview="mobile">Mobile</button>
+        </div>
+      </div>
+      <div class="email-shell" id="emailShell">
+        <div class="email-head">
+          <div class="email-avatar">U</div>
+          <div>
+            <strong id="emailFrom">Unsaid Company</strong>
+            <small id="emailSubject">Subject line</small>
+          </div>
+        </div>
+        <div class="email-hero" id="emailHero"><span class="material-symbols-outlined">image</span></div>
+        <div class="email-body" id="emailBody">Your email body will appear here as you add blocks.</div>
+        <div class="email-foot">
+          <span>You're receiving this because you opted in.</span>
+          <span class="text-primary font-semibold">Unsubscribe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   CONFIG
+   ═══════════════════════════════════════════════════════════════════ */
+const APP_CONFIG = {
+  API_BASE:"/api",
+  routes:{
+    overview:"/marketing/social", calendar:"/marketing/social/calendar", create:"/marketing/social/create",
+    queue:"/marketing/social/queue", library:"/marketing/social/library",
+    channels:"/marketing/social/channels", performance:"/marketing/social/performance",
+    oversight:"/marketing/social/oversight", promotions:"/marketing/promotions",
+    newsletter:"/marketing/newsletter"
+  },
+  endpoints:{
+    campaigns:"/marketing/newsletter/campaigns",
+    campaign:id=>`/marketing/newsletter/campaigns/${id}`,
+    sendTest:id=>`/marketing/newsletter/campaigns/${id}/test`,
+    send:id=>`/marketing/newsletter/campaigns/${id}/send`,
+    schedule:id=>`/marketing/newsletter/campaigns/${id}/schedule`,
+    segments:"/marketing/newsletter/segments",
+    templates:"/marketing/newsletter/templates"
+  }
+};
+const API = {
+  async request(path, options={}){
+    console.log("[API integration point]", options.method||"GET", APP_CONFIG.API_BASE+path, options.body||"");
+    return {ok:true, demo:true};
+  },
+  createCampaign:payload=>API.request(APP_CONFIG.endpoints.campaigns,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  saveCampaign:(id,payload)=>API.request(APP_CONFIG.endpoints.campaign(id),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  sendTest:(id,email)=>API.request(APP_CONFIG.endpoints.sendTest(id),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})}),
+  send:(id,payload)=>API.request(APP_CONFIG.endpoints.send(id),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)}),
+  schedule:(id,payload)=>API.request(APP_CONFIG.endpoints.schedule(id),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   DATA
+   ═══════════════════════════════════════════════════════════════════ */
+let campaigns = [
+  { id:"c1", name:"October product spotlight", subject:"A closer look at what's new this month", segment:"All subscribers", recipients:14286, send:"2026-10-29T15:30", open:"44.2%", click:"7.1%", status:"Sent" },
+  { id:"c2", name:"Weekly digest · W44", subject:"This week at Unsaid", segment:"All subscribers", recipients:14286, send:"2026-11-03T09:00", open:"—", click:"—", status:"Scheduled" },
+  { id:"c3", name:"Holiday teaser", subject:"Something cozy is coming", segment:"VIP customers", recipients:842, send:"2026-11-10T10:00", open:"—", click:"—", status:"Scheduled" },
+  { id:"c4", name:"Black Friday draft", subject:"Our biggest drop of the year", segment:"All subscribers", recipients:14286, send:"—", open:"—", click:"—", status:"Draft" },
+  { id:"c5", name:"New subscriber welcome", subject:"Welcome to Unsaid", segment:"New subscribers", recipients:312, send:"Automation", open:"—", click:"—", status:"Paused" }
+];
+
+const SEGMENTS = [
+  { id:"seg-all", label:"All subscribers", count:14286, desc:"Everyone who has opted in" },
+  { id:"seg-vip", label:"VIP customers", count:842, desc:"LTV > $500" },
+  { id:"seg-new", label:"New subscribers", count:312, desc:"Joined in the last 30 days" },
+  { id:"seg-risk", label:"At-risk", count:119, desc:"No opens in 90 days" }
+];
+
+const statusPillMap = {
+  Sent:"bg-secondary-container text-on-secondary-container",
+  Scheduled:"bg-tertiary/15 text-tertiary",
+  Sending:"bg-qb-blue/15 text-qb-blue",
+  Draft:"bg-surface-container text-on-surface-variant",
+  Paused:"bg-qb-maroon/15 text-qb-maroon",
+  Archived:"bg-surface-container text-on-surface-variant"
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════════ */
+const filters = {
+  q:"",
+  tab:"All",
+  segments:new Set(SEGMENTS.map(s=>s.label)),
+  dateFrom:null, dateTo:null
+};
+let peekId=null;
+let rowMenuForId=null;
+let builderCampaign=null; // current campaign object being edited
+let builderStep = "design";
+let builderBlocks = [];
+let builderSegments = [];
+let builderSendMode = "now";
+let builderIsDirty = false;
+
+/* ═══════════════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(iso){
+  if (!iso) return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+function statusPill(s){return `<span class="px-2 py-0.5 rounded-full text-label-sm ${statusPillMap[s]||"bg-surface-container text-on-surface-variant"}">${s}</span>`}
+
+/* ═══════════════════════════════════════════════════════════════════
+   NAV
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()=>toast("Navigate → "+b.dataset.nav)));
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIST RENDER
+   ═══════════════════════════════════════════════════════════════════ */
+function filteredCampaigns(){
+  return campaigns.filter(c=>{
+    const q=filters.q.toLowerCase();
+    const qOK = !q || (c.name+" "+c.subject+" "+c.segment).toLowerCase().includes(q);
+    const tabOK = filters.tab==="All" || c.status===filters.tab;
+    const segOK = filters.segments.has(c.segment);
+    const dateOK = (!filters.dateFrom || (c.send && c.send>=filters.dateFrom)) && (!filters.dateTo || (c.send && c.send.slice(0,10)<=filters.dateTo));
+    return qOK && tabOK && segOK && dateOK;
+  });
+}
+
+function renderCampaigns(){
+  const rows = filteredCampaigns();
+  const tbody = document.getElementById("campaign-tbody");
+  tbody.innerHTML = rows.map(c=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${c.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check row-select" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2 font-medium">${esc(c.name)}</td>
+      <td class="px-3 py-2 text-[11px] text-on-surface-variant truncate max-w-[240px]">${esc(c.subject)}</td>
+      <td class="px-3 py-2">${esc(c.segment)}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${c.recipients.toLocaleString()}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(fmt(c.send))}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${esc(c.open)}</td>
+      <td class="px-3 py-2 text-right tabular-nums">${esc(c.click)}</td>
+      <td class="px-3 py-2">${statusPill(c.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-rowmenu="${c.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.getElementById("campaign-count").textContent = rows.length ? `1–${rows.length} of ${rows.length}` : "0 of 0";
+  document.getElementById("campaign-empty").classList.toggle("hidden-imp", rows.length>0);
+  tbody.closest("div.overflow-x-auto").classList.toggle("hidden-imp", rows.length===0);
+  document.getElementById("statActiveCampaigns").textContent = campaigns.filter(c=>["Draft","Scheduled","Sending"].includes(c.status)).length;
+
+  tbody.querySelectorAll("[data-row]").forEach(tr=>{
+    tr.addEventListener("click",(e)=>{
+      if (e.target.closest("button") || e.target.closest("input")) return;
+      openPeek(tr.dataset.row);
+    });
+  });
+  tbody.querySelectorAll("[data-rowmenu]").forEach(btn=>{
+    btn.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      openRowMenu(btn, btn.dataset.rowmenu);
+    });
+  });
+
+  syncSelectAll();
+  syncBulk();
+  renderChips();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CHIPS
+   ═══════════════════════════════════════════════════════════════════ */
+function renderChips(){
+  const chips=[];
+  if (filters.q) chips.push({k:"q", label:`Search: "${filters.q}"`});
+  if (filters.tab!=="All") chips.push({k:"tab", label:`Tab: ${filters.tab}`});
+  if (filters.segments.size !== SEGMENTS.length) chips.push({k:"segments", label:`Segment: ${[...filters.segments].join(", ")||"none"}`});
+  if (filters.dateFrom || filters.dateTo) chips.push({k:"date", label:`Date: ${filters.dateFrom||"…"} → ${filters.dateTo||"…"}`});
+  const wrap=document.getElementById("campaign-chips");
+  const host=document.getElementById("campaign-chip-container");
+  wrap.classList.toggle("hidden-imp", chips.length===0);
+  host.innerHTML = chips.map(c=>`
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container text-[11px] font-medium">
+      ${esc(c.label)}
+      <button class="w-4 h-4 rounded-full hover:bg-surface-container-high flex items-center justify-center" data-chip="${c.k}">
+        <span class="material-symbols-outlined text-[12px]">close</span>
+      </button>
+    </span>
+  `).join("");
+  host.querySelectorAll("[data-chip]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.chip;
+    if (k==="q"){ filters.q=""; document.getElementById("campaign-search").value=""; }
+    if (k==="tab"){ filters.tab="All"; syncTabs(); }
+    if (k==="segments"){ filters.segments=new Set(SEGMENTS.map(s=>s.label)); syncSegPop(); }
+    if (k==="date"){ filters.dateFrom=null; filters.dateTo=null; }
+    renderCampaigns();
+  }));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TABS / FILTERS
+   ═══════════════════════════════════════════════════════════════════ */
+function syncTabs(){
+  document.querySelectorAll("[data-ctab]").forEach(b=>{
+    const on=b.dataset.ctab===filters.tab;
+    b.classList.toggle("active",on);
+    b.classList.toggle("text-on-surface-variant",!on);
+  });
+}
+document.querySelectorAll("[data-ctab]").forEach(b=>b.addEventListener("click",()=>{
+  filters.tab=b.dataset.ctab;
+  syncTabs();
+  renderCampaigns();
+}));
+document.getElementById("campaign-search").addEventListener("input",e=>{
+  filters.q=e.target.value;
+  renderCampaigns();
+});
+function togglePopover(id, btn){
+  const p=document.getElementById(id);
+  ["pop-c-segment"].forEach(x=>{ if (x!==id) document.getElementById(x).classList.add("hidden-imp"); });
+  p.classList.toggle("hidden-imp");
+  if (!p.classList.contains("hidden-imp")){
+    setTimeout(()=>document.addEventListener("click",(e)=>{
+      if (!p.contains(e.target) && !btn.contains(e.target)) p.classList.add("hidden-imp");
+    },{once:true}),0);
+  }
+}
+document.getElementById("btn-c-segment").addEventListener("click",e=>{e.stopPropagation();togglePopover("pop-c-segment",e.currentTarget);});
+function syncSegPop(){ document.querySelectorAll(".filter-seg").forEach(cb=>cb.checked=filters.segments.has(cb.value)); }
+document.getElementById("seg-apply").addEventListener("click",()=>{
+  filters.segments=new Set([...document.querySelectorAll(".filter-seg:checked")].map(cb=>cb.value));
+  document.getElementById("pop-c-segment").classList.add("hidden-imp");
+  renderCampaigns();
+});
+document.getElementById("seg-clear").addEventListener("click",()=>{
+  filters.segments=new Set(SEGMENTS.map(s=>s.label));
+  syncSegPop();
+  document.getElementById("pop-c-segment").classList.add("hidden-imp");
+  renderCampaigns();
+});
+document.getElementById("btn-c-date").addEventListener("click",()=>{
+  const from=prompt("From (YYYY-MM-DD):", filters.dateFrom||"");
+  if (from===null) return;
+  const to=prompt("To (YYYY-MM-DD):", filters.dateTo||"");
+  if (to===null) return;
+  filters.dateFrom=from||null;
+  filters.dateTo=to||null;
+  renderCampaigns();
+});
+document.getElementById("btn-c-saved").addEventListener("click",()=>toast("Saved views"));
+document.getElementById("campaign-clear-all").addEventListener("click",()=>{
+  filters.q=""; document.getElementById("campaign-search").value="";
+  filters.tab="All"; syncTabs();
+  filters.segments=new Set(SEGMENTS.map(s=>s.label)); syncSegPop();
+  filters.dateFrom=null; filters.dateTo=null;
+  renderCampaigns();
+});
+document.getElementById("campaign-empty-clear").addEventListener("click",()=>document.getElementById("campaign-clear-all").click());
+
+/* ═══════════════════════════════════════════════════════════════════
+   SELECT / BULK
+   ═══════════════════════════════════════════════════════════════════ */
+const selectAll = document.getElementById("campaign-select-all");
+function syncSelectAll(){
+  const rows=document.querySelectorAll("#campaign-tbody .row-select");
+  const checked=document.querySelectorAll("#campaign-tbody .row-select:checked");
+  selectAll.checked = rows.length>0 && checked.length===rows.length;
+  selectAll.indeterminate = checked.length>0 && checked.length<rows.length;
+}
+function syncBulk(){
+  const n=document.querySelectorAll("#campaign-tbody .row-select:checked").length;
+  document.getElementById("campaign-bulk").classList.toggle("hidden-imp", n===0);
+  document.getElementById("campaign-bulk-count").textContent = n+" selected";
+}
+document.getElementById("campaign-tbody").addEventListener("change",e=>{
+  if (e.target.classList.contains("row-select")){ syncSelectAll(); syncBulk(); }
+});
+selectAll.addEventListener("change",()=>{
+  document.querySelectorAll("#campaign-tbody .row-select").forEach(cb=>cb.checked=selectAll.checked);
+  syncBulk();
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click",()=>{
+  const action=b.dataset.bulk;
+  if (action==="Clear"){
+    document.querySelectorAll("#campaign-tbody .row-select").forEach(cb=>cb.checked=false);
+    selectAll.checked=false; selectAll.indeterminate=false; syncBulk(); return;
+  }
+  const ids=[...document.querySelectorAll("#campaign-tbody .row-select:checked")].map(cb=>cb.closest("tr").dataset.row);
+  if (action==="Pause") ids.forEach(id=>{ const c=campaigns.find(x=>x.id===id); if(c)c.status="Paused"; });
+  if (action==="Resume") ids.forEach(id=>{ const c=campaigns.find(x=>x.id===id); if(c)c.status="Scheduled"; });
+  if (action==="Duplicate") ids.forEach(id=>{
+    const c=campaigns.find(x=>x.id===id);
+    if (c) campaigns.unshift({...c,id:"c"+Date.now()+Math.random().toString(36).slice(2,6),name:c.name+" (copy)",status:"Draft",send:"—",open:"—",click:"—"});
+  });
+  if (action==="Archive") ids.forEach(id=>{ const c=campaigns.find(x=>x.id===id); if(c)c.status="Archived"; });
+  toast(action+" · "+ids.length+" campaign(s)");
+  renderCampaigns();
+}));
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROW MENU
+   ═══════════════════════════════════════════════════════════════════ */
+function openRowMenu(btn, id){
+  rowMenuForId=id;
+  const menu=document.getElementById("rowMenu");
+  const r=btn.getBoundingClientRect();
+  menu.style.top=(r.bottom+4)+"px";
+  menu.style.left=(r.right-240)+"px";
+  menu.innerHTML=`
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">${esc(id)}</div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="open"><span class="material-symbols-outlined text-[16px]">edit</span>Open in builder</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="preview"><span class="material-symbols-outlined text-[16px]">visibility</span>Preview</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+    <button class="rm w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2" data-rm="archive"><span class="material-symbols-outlined text-[16px]">archive</span>Archive</button>
+  `;
+  menu.classList.remove("hidden-imp");
+  menu.querySelectorAll(".rm").forEach(b=>b.addEventListener("click",()=>{
+    const act=b.dataset.rm;
+    menu.classList.add("hidden-imp");
+    const c=campaigns.find(x=>x.id===id);
+    if (!c) return;
+    if (act==="open") openBuilder(c);
+    else if (act==="preview") openPeek(id);
+    else if (act==="duplicate"){ campaigns.unshift({...c,id:"c"+Date.now(),name:c.name+" (copy)",status:"Draft",send:"—",open:"—",click:"—"}); renderCampaigns(); toast("Duplicated"); }
+    else if (act==="pause"){ c.status="Paused"; renderCampaigns(); toast("Paused"); }
+    else if (act==="archive"){ c.status="Archived"; renderCampaigns(); toast("Archived"); }
+  }));
+  setTimeout(()=>document.addEventListener("click",()=>menu.classList.add("hidden-imp"),{once:true}),0);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PEEK
+   ═══════════════════════════════════════════════════════════════════ */
+function openPeek(id){
+  peekId=id;
+  const c=campaigns.find(x=>x.id===id); if(!c)return;
+  document.getElementById("peek-title").textContent=c.name;
+  document.getElementById("peek-body").innerHTML=`
+    <div class="mb-3 flex items-center gap-2">${statusPill(c.status)}</div>
+    <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Subject</div>
+    <div class="text-body-sm mb-3">${esc(c.subject)}</div>
+    <dl class="divide-y divide-surface-dim text-body-sm">
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Segment</dt><dd>${esc(c.segment)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Recipients</dt><dd class="tabular-nums">${c.recipients.toLocaleString()}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Send</dt><dd>${esc(fmt(c.send))}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Open rate</dt><dd>${esc(c.open)}</dd></div>
+      <div class="flex justify-between py-2"><dt class="text-on-surface-variant">Click rate</dt><dd>${esc(c.click)}</dd></div>
+    </dl>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="open"><span class="material-symbols-outlined text-[16px]">edit</span>Open builder</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="pause"><span class="material-symbols-outlined text-[16px]">pause_circle</span>Pause</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md text-error hover:bg-error-container/40 flex items-center justify-center gap-1" data-peek="archive"><span class="material-symbols-outlined text-[16px]">archive</span>Archive</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  document.querySelectorAll("#peek-body [data-peek]").forEach(b=>b.addEventListener("click",()=>{
+    const a=b.dataset.peek;
+    if (a==="open"){ closePeek(); openBuilder(c); }
+    else if (a==="duplicate"){ campaigns.unshift({...c,id:"c"+Date.now(),name:c.name+" (copy)",status:"Draft",send:"—",open:"—",click:"—"}); closePeek(); renderCampaigns(); toast("Duplicated"); }
+    else if (a==="pause"){ c.status="Paused"; closePeek(); renderCampaigns(); toast("Paused"); }
+    else if (a==="archive"){ c.status="Archived"; closePeek(); renderCampaigns(); toast("Archived"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId=null;
+}
+document.getElementById("peek-close").addEventListener("click",closePeek);
+document.getElementById("scrim").addEventListener("click",()=>{
+  if (document.getElementById("builder").classList.contains("open")) return; // builder handles its own scrim
+  closePeek();
+});
+document.getElementById("peek-open-full").addEventListener("click",()=>{
+  if (!peekId) return;
+  const c=campaigns.find(x=>x.id===peekId); closePeek();
+  if (c) openBuilder(c);
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   BUILDER — full-screen, per tree
+   ═══════════════════════════════════════════════════════════════════ */
+function openBuilder(campaign){
+  builderCampaign = campaign;
+  builderStep = "design";
+  builderSendMode = "now";
+  builderIsDirty = false;
+
+  document.getElementById("builderTitle").textContent = campaign ? campaign.name : "Untitled campaign";
+  document.getElementById("builderSub").textContent = campaign ? (campaign.status+" · "+campaign.segment) : "Draft · not yet sent";
+
+  // Prefill
+  document.getElementById("b-name").value = campaign ? campaign.name : "";
+  document.getElementById("b-subject").value = campaign ? campaign.subject : "";
+  document.getElementById("b-from").value = "Unsaid Company";
+  document.getElementById("b-reply").value = "hello@unsaid.app";
+  document.getElementById("b-preheader").value = "";
+  document.getElementById("b-send-at").value = new Date(Date.now()+3600*1000).toISOString().slice(0,16);
+  document.getElementById("b-approval").value = "none";
+
+  // Blocks: start from a sensible default
+  builderBlocks = [
+    { id:"blk-hero", type:"hero", content:"Hero image" },
+    { id:"blk-text", type:"text", content:"Hi there,\n\nWe've just released our fall capsule — a small, considered collection built around the pieces you asked for.\n\nTake a look and let us know what you think." },
+    { id:"blk-cta", type:"cta", content:"Shop the drop" }
+  ];
+
+  // Segments: pick one from the campaign, default All
+  builderSegments = [campaign ? campaign.segment : "All subscribers"];
+
+  renderBuilder();
+  document.getElementById("builder").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeBuilder(){
+  document.getElementById("builder").classList.remove("open");
+  document.body.style.overflow = "";
+  builderCampaign = null;
+}
+
+document.getElementById("builderClose").addEventListener("click",()=>{
+  if (builderIsDirty && !confirm("Discard unsaved changes?")) return;
+  closeBuilder();
+});
+
+/* Tab switching */
+document.querySelectorAll("[data-btab]").forEach(b=>b.addEventListener("click",()=>{
+  builderStep = b.dataset.btab;
+  renderBuilder();
+}));
+
+/* Send mode */
+document.querySelectorAll("[data-bmode]").forEach(b=>b.addEventListener("click",()=>{
+  builderSendMode = b.dataset.bmode;
+  document.querySelectorAll("[data-bmode]").forEach(x=>x.classList.toggle("active",x===b));
+  document.getElementById("bScheduleFields").classList.toggle("hidden-imp", builderSendMode!=="schedule");
+  renderReview();
+}));
+document.querySelectorAll("[data-preview]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-preview]").forEach(x=>x.classList.toggle("active",x===b));
+  const shell=document.getElementById("emailShell");
+  shell.style.maxWidth = b.dataset.preview==="mobile" ? "320px" : "420px";
+}));
+
+function renderBuilder(){
+  // Steps
+  const steps=["design","recipients","settings","review"];
+  steps.forEach((s,i)=>{
+    const idx=i+1;
+    document.getElementById("bstep-"+s).classList.toggle("hidden-imp", s!==builderStep);
+  });
+  // Markers
+  const stepIdx = steps.indexOf(builderStep)+1;
+  ["1","2","3","4"].forEach(n=>{
+    ["","b","c","d"].forEach(suffix=>{
+      const el=document.getElementById("stepMark"+n+suffix);
+      if (el){ el.classList.toggle("active", parseInt(n,10)===stepIdx); el.classList.toggle("done", parseInt(n,10)<stepIdx); }
+    });
+  });
+  // Tabs
+  document.querySelectorAll("[data-btab]").forEach(b=>{
+    const on = b.dataset.btab===builderStep;
+    b.classList.toggle("active", on);
+    b.classList.toggle("text-on-surface-variant", !on);
+  });
+  // Step-specific rendering
+  if (builderStep==="design") renderBlocks();
+  if (builderStep==="recipients") renderSegments();
+  if (builderStep==="review") renderReview();
+  updateEmailPreview();
+}
+
+/* ─── BLOCKS ─── */
+function renderBlocks(){
+  const host=document.getElementById("blocksHost");
+  host.innerHTML = builderBlocks.map(b=>`
+    <div class="block-card" data-block="${b.id}">
+      <div class="block-head">
+        <span class="material-symbols-outlined text-[16px] block-grip">drag_indicator</span>
+        <span class="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">${b.type}</span>
+        <div class="block-toolbar">
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-block-up="${b.id}"><span class="material-symbols-outlined text-[14px]">arrow_upward</span></button>
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-block-down="${b.id}"><span class="material-symbols-outlined text-[14px]">arrow_downward</span></button>
+          <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center text-error" data-block-remove="${b.id}"><span class="material-symbols-outlined text-[14px]">close</span></button>
+        </div>
+      </div>
+      <div class="block-body">
+        ${b.type==="hero" ? `<div class="h-24 rounded bg-surface-container-low flex items-center justify-center text-on-surface-variant"><span class="material-symbols-outlined text-[28px]">image</span></div>` :
+          b.type==="divider" ? `<div class="h-px bg-surface-dim"></div>` :
+          b.type==="cta" ? `<div class="flex items-center gap-2"><input data-block-content="${b.id}" class="flex-1 h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="${esc(b.content)}"/><div class="text-[11px] text-on-surface-variant">Button text</div></div>` :
+          `<textarea data-block-content="${b.id}" class="w-full min-h-[110px] p-2.5 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Add text…">${esc(b.content)}</textarea>`
+        }
+      </div>
+    </div>
+  `).join("");
+
+  host.querySelectorAll("[data-block-content]").forEach(el=>el.addEventListener("input",()=>{
+    const b = builderBlocks.find(x=>x.id===el.dataset.blockContent);
+    if (b){ b.content = el.value; builderIsDirty = true; updateEmailPreview(); }
+  }));
+  host.querySelectorAll("[data-block-up]").forEach(b=>b.addEventListener("click",()=>moveBlock(b.dataset.blockUp,-1)));
+  host.querySelectorAll("[data-block-down]").forEach(b=>b.addEventListener("click",()=>moveBlock(b.dataset.blockDown,1)));
+  host.querySelectorAll("[data-block-remove]").forEach(b=>b.addEventListener("click",()=>{
+    builderBlocks = builderBlocks.filter(x=>x.id!==b.dataset.blockRemove);
+    renderBlocks(); updateEmailPreview();
+  }));
+  // block drag-reorder via up/down arrows is sufficient; grip is visual
+}
+function moveBlock(id, dir){
+  const idx = builderBlocks.findIndex(x=>x.id===id);
+  if (idx < 0) return;
+  const next = idx + dir;
+  if (next < 0 || next >= builderBlocks.length) return;
+  const [block] = builderBlocks.splice(idx,1);
+  builderBlocks.splice(next,0,block);
+  renderBlocks(); updateEmailPreview();
+}
+document.querySelectorAll("[data-add-block]").forEach(b=>b.addEventListener("click",()=>{
+  const t = b.dataset.addBlock;
+  const content = t==="text"?"Add your paragraph here.":t==="cta"?"Shop the drop":t==="hero"?"Hero image":"";
+  builderBlocks.push({ id:"blk-"+Date.now(), type:t, content });
+  renderBlocks(); updateEmailPreview();
+  builderIsDirty = true;
+}));
+
+/* ─── EMAIL PREVIEW ─── */
+function updateEmailPreview(){
+  document.getElementById("emailFrom").textContent = document.getElementById("b-from").value || "Unsaid Company";
+  document.getElementById("emailSubject").textContent = document.getElementById("b-subject").value || "Subject line";
+  // Build body: hero first, then blocks in order, skipping the hero (since we have a dedicated hero region)
+  const bodyParts = builderBlocks
+    .filter(b=>b.type!=="hero")
+    .map(b=>{
+      if (b.type==="cta") return `<span class="email-cta">${esc(b.content||"Button")}</span>`;
+      if (b.type==="divider") return `<div style="height:1px;background:#e7eaed;margin:10px 0"></div>`;
+      return `<div>${esc(b.content||"")}</div>`;
+    }).join("<br>");
+  document.getElementById("emailBody").innerHTML = bodyParts || "Your email body will appear here as you add blocks.";
+
+  // Hero
+  const hero = builderBlocks.find(b=>b.type==="hero");
+  const heroEl = document.getElementById("emailHero");
+  heroEl.innerHTML = hero ? `<span class="material-symbols-outlined">image</span>` : `<span class="material-symbols-outlined">image</span>`;
+}
+
+/* ─── SEGMENTS in builder ─── */
+function renderSegments(){
+  const host=document.getElementById("segmentList");
+  host.innerHTML = SEGMENTS.map(s=>{
+    const selected = builderSegments.includes(s.label);
+    return `<label class="seg-row ${selected?"selected":""}" data-seg="${s.id}">
+      <input type="checkbox" ${selected?"checked":""} data-seg-toggle="${s.label}"/>
+      <div class="min-w-0 flex-1"><div class="text-body-sm font-semibold">${esc(s.label)}</div><div class="text-[11px] text-on-surface-variant">${esc(s.desc)} · ${s.count.toLocaleString()} recipients</div></div>
+      <span class="text-[11px] text-on-surface-variant tabular-nums">${s.count.toLocaleString()}</span>
+    </label>`;
+  }).join("");
+  host.querySelectorAll("[data-seg-toggle]").forEach(cb=>cb.addEventListener("change",()=>{
+    const label=cb.dataset.segToggle;
+    if (cb.checked) builderSegments = [...new Set([...builderSegments,label])];
+    else builderSegments = builderSegments.filter(x=>x!==label);
+    builderIsDirty = true;
+    renderSegments(); renderReview();
+  }));
+}
+document.getElementById("btnNewSegment").addEventListener("click",()=>toast("Create segment — opens Customers → Segments"));
+
+/* ─── REVIEW ─── */
+function renderReview(){
+  const subject = document.getElementById("b-subject").value;
+  const from = document.getElementById("b-from").value;
+  const recipients = builderSegments.reduce((sum,label)=>{
+    const s=SEGMENTS.find(x=>x.label===label);
+    return sum + (s?s.count:0);
+  },0);
+  const sendLabel = builderSendMode==="now" ? "Immediately after confirmation" : `Scheduled · ${fmt(document.getElementById("b-send-at").value)}`;
+  const blocks = builderBlocks.filter(b=>b.type!=="hero").length;
+
+  document.getElementById("reviewSummary").innerHTML = `
+    <strong>${esc(subject||"Untitled")}</strong>
+    <br><span class="text-on-surface-variant">From:</span> ${esc(from||"—")}
+    <br><span class="text-on-surface-variant">Segments:</span> ${builderSegments.length?builderSegments.join(", "):"none selected"}
+    <br><span class="text-on-surface-variant">Estimated recipients:</span> ${recipients.toLocaleString()}
+    <br><span class="text-on-surface-variant">Timing:</span> ${sendLabel}
+    <br><span class="text-on-surface-variant">Content blocks:</span> ${blocks}
+    <br><span class="text-on-surface-variant">Approval:</span> ${document.getElementById("b-approval").value==="approval"?"Required":"Not required"}
+  `;
+  document.getElementById("sendImpact").textContent = `Send to ~${recipients.toLocaleString()} recipients. ${builderSendMode==="now"?"Delivery begins once confirmed.":"Delivery is scheduled and can be paused before it fires."}`;
+}
+
+/* Live inputs */
+["b-name","b-subject","b-from","b-reply","b-preheader"].forEach(id=>{
+  const el=document.getElementById(id);
+  if (el) el.addEventListener("input",()=>{
+    builderIsDirty=true;
+    if (id==="b-name") document.getElementById("builderTitle").textContent = el.value || "Untitled campaign";
+    if (id==="b-subject") updateEmailPreview();
+    if (id==="b-from") updateEmailPreview();
+    if (id==="b-reply") updateEmailPreview();
+  });
+});
+document.getElementById("b-send-at").addEventListener("change",()=>{builderIsDirty=true;renderReview();});
+
+/* Save / send / test */
+document.getElementById("builderSave").addEventListener("click",async ()=>{
+  const payload = collectBuilderPayload();
+  if (builderCampaign) await API.saveCampaign(builderCampaign.id, payload);
+  else await API.createCampaign(payload);
+  if (builderCampaign){
+    Object.assign(builderCampaign, payload, {status: builderCampaign.status==="Draft"?"Draft":builderCampaign.status});
+  } else {
+    campaigns.unshift({id:"c"+Date.now(),name:payload.name,subject:payload.subject,segment:payload.segment,recipients:payload.recipients,send:"—",open:"—",click:"—",status:"Draft"});
+  }
+  builderIsDirty=false;
+  renderCampaigns();
+  closeBuilder();
+  toast("Campaign saved");
+});
+document.getElementById("builderSend").addEventListener("click",()=>{
+  const payload = collectBuilderPayload();
+  builderCampaign = builderCampaign || {id:"c"+Date.now(),status:"Draft",name:payload.name,subject:payload.subject,segment:payload.segment,recipients:payload.recipients,send:"—",open:"—",click:"—"};
+  if (builderSendMode==="now"){
+    API.send(builderCampaign.id, payload).then(()=>{
+      builderCampaign.status = "Sending";
+      builderCampaign.send = new Date().toISOString();
+      builderIsDirty=false;
+      renderCampaigns();
+      closeBuilder();
+      toast("Send prepared — connect ESP to deliver");
+    });
+  } else {
+    API.schedule(builderCampaign.id, {...payload, sendAt:document.getElementById("b-send-at").value}).then(()=>{
+      builderCampaign.status = "Scheduled";
+      builderCampaign.send = document.getElementById("b-send-at").value;
+      builderIsDirty=false;
+      renderCampaigns();
+      closeBuilder();
+      toast("Scheduled");
+    });
+  }
+});
+document.getElementById("builderSendTest").addEventListener("click",()=>{
+  toast("Send test — enter an email on the Review tab");
+  builderStep="review"; renderBuilder();
+});
+document.getElementById("builderPreview").addEventListener("click",()=>{
+  toast("Preview opened in right pane — resize with Desktop/Mobile toggle");
+});
+document.getElementById("sendTestBtn").addEventListener("click",()=>{
+  const email=document.getElementById("testEmail").value;
+  if (!email){ toast("Enter an email"); return; }
+  API.sendTest(builderCampaign?builderCampaign.id:"new", email).then(()=>toast("Test sent to "+email));
+});
+
+function collectBuilderPayload(){
+  const recipients = builderSegments.reduce((sum,label)=>{
+    const s=SEGMENTS.find(x=>x.label===label);
+    return sum + (s?s.count:0);
+  },0);
+  return {
+    name: document.getElementById("b-name").value || "Untitled campaign",
+    subject: document.getElementById("b-subject").value,
+    preheader: document.getElementById("b-preheader").value,
+    fromName: document.getElementById("b-from").value,
+    replyTo: document.getElementById("b-reply").value,
+    segment: builderSegments[0] || "",
+    segments: builderSegments,
+    recipients,
+    blocks: builderBlocks,
+    sendMode: builderSendMode,
+    sendAt: builderSendMode==="schedule" ? document.getElementById("b-send-at").value : null,
+    approval: document.getElementById("b-approval").value
+  };
+}
+
+/* ─── NEW CAMPAIGN SPLIT ─── */
+document.querySelector("[data-new-campaign]").addEventListener("click",()=>openBuilder(null));
+document.querySelectorAll("[data-new-campaign]").forEach(b=>b.addEventListener("click",()=>openBuilder(null)));
+document.getElementById("newCampaignMenu").addEventListener("click",e=>{
+  const b=e.target.closest(".ncm"); if(!b) return;
+  const which=b.dataset.ncm;
+  document.getElementById("newCampaignMenu").classList.add("hidden-imp");
+  openBuilder(null);
+  if (which==="Template") setTimeout(()=>document.getElementById("templatesModal").classList.add("open"),100);
+  if (which==="Duplicate last"){
+    const last=campaigns.find(c=>c.status==="Sent");
+    if (last) openBuilder({...last,id:"c"+Date.now(),name:last.name+" (copy)",status:"Draft",send:"—",open:"—",click:"—"});
+  }
+});
+
+/* ─── Templates / other create ─── */
+document.querySelector("[data-templates]").addEventListener("click",()=>document.getElementById("templatesModal").classList.add("open"));
+document.getElementById("templatesClose").addEventListener("click",()=>document.getElementById("templatesModal").classList.remove("open"));
+document.querySelectorAll(".tpl-card").forEach(b=>b.addEventListener("click",()=>{
+  document.getElementById("templatesModal").classList.remove("open");
+  openBuilder(null);
+}));
+
+document.querySelectorAll("[data-create]").forEach(b=>b.addEventListener("click",()=>{
+  const t=b.dataset.create;
+  document.getElementById("otherCreateTitle").textContent="Create "+t.toLowerCase();
+  document.getElementById("otherCreateSub").textContent="This opens the "+t+" create surface.";
+  document.getElementById("otherCreateModal").classList.add("open");
+  document.getElementById("otherCreateConfirm").dataset.target=t;
+}));
+document.getElementById("otherCreateCancel").addEventListener("click",()=>document.getElementById("otherCreateModal").classList.remove("open"));
+document.getElementById("otherCreateConfirm").addEventListener("click",()=>{
+  const t=document.getElementById("otherCreateConfirm").dataset.target;
+  toast("Opened "+t+" create surface");
+  document.getElementById("otherCreateModal").classList.remove("open");
+});
+document.querySelector("[data-open-create]").addEventListener("click",()=>toast("Open global create flyout"));
+document.querySelector("[data-export]").addEventListener("click",()=>toast("Exported "+filteredCampaigns().length+" campaigns"));
+
+/* ─── pagination ─── */
+document.querySelectorAll("[data-page]").forEach(b=>b.addEventListener("click",()=>toast("Page "+b.dataset.page)));
+
+/* ─── boot ─── */
+syncTabs();
+syncSegPop();
+renderCampaigns();
+</script>
+</body>
+</html>

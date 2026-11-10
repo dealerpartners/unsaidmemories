@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contacts — CRM Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .pill.ok{background:#8af5be;color:#00714b}
+  .pill.warn{background:#fbf5ec;color:#98713e}
+  .pill.bad{background:#ffdad6;color:#93000a}
+  .pill.info{background:#eaf3fb;color:#4e7b9d}
+  .pill.neutral{background:#f4f3f7;color:#5a6355}
+  .pill.role{background:#f4f3f7;color:#1a1c1e;border:1px solid #dad9dd}
+  .pill.role.customer{background:#e8f5e9;color:#0a6400;border-color:#b9f6ca}
+  .pill.role.vendor{background:#e3f2fd;color:#0055a5;border-color:#bbdefb}
+  .pill.role.supplier{background:#fff3e0;color:#bf5c59;border-color:#ffe0b2}
+  .pill.role.contact{background:#f3e5f5;color:#6b1e28;border-color:#e1bee7}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .avatar{width:36px;height:36px;border-radius:50%;background:#e6efed;color:#0a6400;display:grid;place-items:center;font-weight:700;font-size:12px;flex-shrink:0}
+  .avatar.vendor{background:#e3f2fd;color:#0055a5}
+  .avatar.supplier{background:#fff3e0;color:#bf5c59}
+  .avatar.contact{background:#f3e5f5;color:#6b1e28}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+  .fin-link{display:inline-flex;align-items:center;gap:4px;color:#0077c5;font-weight:600;font-size:11px;cursor:pointer}
+  .fin-link:hover{text-decoration:underline}
+  .fin-link .material-symbols-outlined{font-size:13px}
+  .funnel-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f3}
+  .funnel-row:last-child{border-bottom:0}
+  .funnel-bar{flex:1;height:24px;background:#f0f2f3;border-radius:6px;overflow:hidden;position:relative}
+  .funnel-bar span{display:flex;align-items:center;padding:0 8px;height:100%;background:linear-gradient(90deg,#0077c5,#1f2937);color:#fff;font-size:10px;font-weight:600}
+  .activity-dot{width:28px;height:28px;border-radius:50%;background:#f0f6f5;color:#0a6400;display:grid;place-items:center;flex-shrink:0}
+  .activity-dot .material-symbols-outlined{font-size:15px}
+  .activity-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f2f3}
+  .activity-row:last-child{border-bottom:0}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Contacts</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">CRM Overview</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">CRM Overview</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Relationship health, pipeline, and the parties behind it — all from one data list.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnViewParties">
+        <span class="material-symbols-outlined text-[16px]">groups</span>Open Parties
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" id="btnViewSegments">
+        <span class="material-symbols-outlined text-[16px]">filter_list</span>Segments
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" id="btnNewParty">
+          <span class="material-symbols-outlined text-[16px]">add</span>Add party
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total parties</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="kpiTotal">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5" id="kpiTotalNote">—</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">At risk</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-error" id="kpiAtRisk">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">No contact 90d+</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Open AR</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="kpiAR">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Customer receivables</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Open AP</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-qb-blue" id="kpiAP">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Vendor/supplier payables</div>
+    </div>
+  </div>
+
+  <!-- ─── TWO COLUMN LAYOUT ─── -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-4">
+
+    <!-- LEFT: ROLE SPLIT + PIPELINE -->
+    <div class="xl:col-span-2 space-y-3">
+
+      <!-- Role split -->
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Role split</h2>
+            <div class="text-[11px] text-on-surface-variant">Every party can hold multiple roles.</div>
+          </div>
+          <button class="fin-link" id="linkPartiesFromSplit"><span class="material-symbols-outlined">open_in_new</span>Open Parties</button>
+        </div>
+        <div class="p-5 space-y-3" id="roleSplit"></div>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Pipeline</h2>
+            <div class="text-[11px] text-on-surface-variant">Customers by engagement state (from orders + reviews).</div>
+          </div>
+          <span class="pill info" id="pipelineSummary">—</span>
+        </div>
+        <div class="p-5" id="pipelineHost"></div>
+      </div>
+
+      <!-- At-risk accounts -->
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">At-risk accounts</h2>
+            <div class="text-[11px] text-on-surface-variant">Customers with open AR and no recent contact.</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="bulkRemindBtn">
+            <span class="material-symbols-outlined text-[14px]">notifications_active</span>Send reminder
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-body-sm">
+            <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+              <tr>
+                <th class="px-3 py-2">Party</th>
+                <th class="px-3 py-2">Last order</th>
+                <th class="px-3 py-2 text-right">Open AR</th>
+                <th class="px-3 py-2">Owner</th>
+                <th class="w-8"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-dim" id="atRiskTbody"></tbody>
+          </table>
+        </div>
+        <div class="hidden-imp py-8 px-6 text-center text-body-sm text-on-surface-variant" id="atRiskEmpty">No at-risk accounts.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: ACTIVITY + QUICK ACTIONS -->
+    <div class="space-y-3">
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-surface-dim">
+          <div>
+            <h2 class="text-headline-sm">Recent activity</h2>
+            <div class="text-[11px] text-on-surface-variant">Across all parties.</div>
+          </div>
+          <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="refreshActivity">
+            <span class="material-symbols-outlined text-[14px]">refresh</span>
+          </button>
+        </div>
+        <div class="p-4" id="activityHost"></div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-surface-dim">
+        <div class="px-5 py-3 border-b border-surface-dim">
+          <h2 class="text-headline-sm">Quick actions</h2>
+          <div class="text-[11px] text-on-surface-variant">Shortcuts used daily.</div>
+        </div>
+        <div class="p-4 grid grid-cols-2 gap-2" id="quickActions"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Scrim -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New party</div>
+  <button data-create-role="Customer"><span class="material-symbols-outlined">person_add</span>Customer</button>
+  <button data-create-role="Vendor"><span class="material-symbols-outlined">storefront</span>Vendor</button>
+  <button data-create-role="Supplier"><span class="material-symbols-outlined">factory</span>Supplier</button>
+  <button data-create-role="Contact"><span class="material-symbols-outlined">contacts</span>Contact</button>
+</div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Party</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekOpenParties" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">open_in_new</span>Open</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Reminder modal -->
+<div class="modal-scrim" id="reminderModal">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-5">
+    <h3 class="text-headline-sm mb-1">Send reminder</h3>
+    <p class="text-body-sm text-on-surface-variant mb-3" id="reminderBody">Send a payment reminder to the selected at-risk accounts.</p>
+    <div class="flex justify-end gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="reminderCancel">Cancel</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" id="reminderConfirm">Send</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function fmt(n){ return (n||0).toLocaleString("en-US",{style:"currency",currency:"USD"}); }
+function initials(name){ return (name||"").split(" ").map(w=>w[0]||"").join("").slice(0,2).toUpperCase() || "??"; }
+
+/* ─── shared data (same list as Contacts > Parties) ─── */
+let PARTIES = [
+  { id:"P-1001", name:"Acme Corp", displayName:"Acme", email:"john@acme.com", phone:"+1 (555) 111-2222", roles:["Customer"], balance:1240.00, added:"2026-10-15", lastOrder:"2026-11-01", owner:"Jordan A.", activity:["2026-11-02", "Email sent", "Sent invoice reminder"], lastContactDays:1 },
+  { id:"P-1002", name:"Blue Ridge Co.", displayName:"Blue Ridge", email:"sarah@blueridge.co", phone:"+1 (555) 333-4444", roles:["Customer","Vendor"], balance:0, added:"2026-08-02", lastOrder:"2026-10-28", owner:"Sarah A.", activity:["2026-10-31", "Order", "Order ORD-2026-1053 created"], lastContactDays:3 },
+  { id:"P-1003", name:"Printful Inc.", displayName:"Printful", email:"support@printful.com", phone:"+1 (555) 000-1111", roles:["Supplier"], balance:-2880.00, added:"2026-01-10", lastOrder:"—", owner:"Marcus L.", activity:["2026-11-01", "Bill", "Bill PF-9211 received"], lastContactDays:2 },
+  { id:"P-1004", name:"Gelato Pty Ltd", displayName:"Gelato", email:"help@gelato.com", phone:"+61 2 8000 0000", roles:["Supplier"], balance:-1200.00, added:"2026-03-22", lastOrder:"—", owner:"Marcus L.", activity:["2026-10-30", "Bill", "Bill GL-4402 received"], lastContactDays:4 },
+  { id:"P-1005", name:"Jane Miller", displayName:"Jane", email:"jane.miller@email.com", phone:"+1 (555) 777-8888", roles:["Contact"], balance:0, added:"2026-09-01", lastOrder:"—", owner:"Sarah A.", activity:["2026-09-05", "Note", "Added to Newsletter subscriber list"], lastContactDays:60 },
+  { id:"P-1006", name:"Staples", displayName:"Staples", email:"billing@staples.com", phone:"+1 (800) 333-3333", roles:["Vendor"], balance:-142.50, added:"2026-05-14", lastOrder:"—", owner:"Jordan A.", activity:["2026-10-20", "Payment", "Paid bill with Visa •4421"], lastContactDays:14 },
+  { id:"P-1007", name:"Maple Supply", displayName:"Maple", email:"ar@maplesupply.io", phone:"+1 (555) 774-9810", roles:["Customer"], balance:890.00, added:"2026-02-11", lastOrder:"2026-10-15", owner:"Sarah A.", activity:["2026-10-15", "Order", "Order ORD-2026-1052 created"], lastContactDays:19 },
+  { id:"P-1008", name:"Northwind Labs", displayName:"Northwind", email:"marketing@northwindlabs.io", phone:"+1 (555) 310-8844", roles:["Customer"], balance:2100.00, added:"2025-11-20", lastOrder:"2026-10-02", owner:"Jordan A.", activity:["2026-10-15", "Email sent", "Follow-up about open invoice"], lastContactDays:32 }
+];
+
+/* ─── derived KPIs and views ─── */
+function deriveMetrics(){
+  const total = PARTIES.length;
+  const atRisk = PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays >= 30).length;
+  const openAR = PARTIES.filter(p=>p.roles.includes("Customer")).reduce((s,p)=>s + Math.max(0, p.balance), 0);
+  const openAP = PARTIES.filter(p=>p.roles.includes("Vendor") || p.roles.includes("Supplier")).reduce((s,p)=>s + Math.max(0, -p.balance), 0);
+  const roleCounts = {
+    Customer: PARTIES.filter(p=>p.roles.includes("Customer")).length,
+    Vendor: PARTIES.filter(p=>p.roles.includes("Vendor")).length,
+    Supplier: PARTIES.filter(p=>p.roles.includes("Supplier")).length,
+    Contact: PARTIES.filter(p=>p.roles.includes("Contact")).length
+  };
+  const pipeline = {
+    Active: PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays <= 14).length,
+    Engaged: PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays > 14 && p.lastContactDays <= 30).length,
+    "At risk": PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays > 30).length,
+    Dormant: PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays > 90).length
+  };
+  return { total, atRisk, openAR, openAP, roleCounts, pipeline };
+}
+
+/* ─── render KPIs ─── */
+function renderKpis(){
+  const m = deriveMetrics();
+  document.getElementById("kpiTotal").textContent = m.total;
+  document.getElementById("kpiTotalNote").textContent = m.roleCounts.Customer + " customers · " + (m.roleCounts.Vendor + m.roleCounts.Supplier) + " vendors/suppliers";
+  document.getElementById("kpiAtRisk").textContent = m.atRisk;
+  document.getElementById("kpiAR").textContent = fmt(m.openAR);
+  document.getElementById("kpiAP").textContent = fmt(m.openAP);
+}
+
+/* ─── render role split ─── */
+function renderRoleSplit(){
+  const m = deriveMetrics();
+  const rows = [
+    { role:"Customer", color:"bg-primary", count:m.roleCounts.Customer },
+    { role:"Vendor", color:"bg-qb-blue", count:m.roleCounts.Vendor },
+    { role:"Supplier", color:"bg-error", count:m.roleCounts.Supplier },
+    { role:"Contact", color:"bg-qb-maroon", count:m.roleCounts.Contact }
+  ];
+  const max = Math.max(1, ...rows.map(r=>r.count));
+  document.getElementById("roleSplit").innerHTML = rows.map(r=>`
+    <div>
+      <div class="flex justify-between text-[12px] mb-1"><span class="font-medium">${r.role}</span><span class="text-on-surface-variant tabular-nums">${r.count}</span></div>
+      <div class="h-6 bg-surface-container-low rounded overflow-hidden"><div class="${r.color} h-full flex items-center px-2 text-[10px] text-white font-semibold" style="width:${(r.count/max*100).toFixed(1)}%">${r.count > 0 ? r.count : ""}</div></div>
+    </div>
+  `).join("");
+}
+
+/* ─── render pipeline ─── */
+function renderPipeline(){
+  const m = deriveMetrics();
+  const steps = [
+    { label:"Active", count:m.pipeline.Active, note:"Recent orders", color:"from-primary to-primary-container" },
+    { label:"Engaged", count:m.pipeline.Engaged, note:"Order in 14–30d", color:"from-qb-blue to-tertiary-container" },
+    { label:"At risk", count:m.pipeline["At risk"], note:"No order in 30d+", color:"from-qb-maroon to-qb-navy" },
+    { label:"Dormant", count:m.pipeline.Dormant, note:"No order in 90d+", color:"from-outline to-on-surface" }
+  ];
+  const total = Math.max(1, steps.reduce((s,x)=>s+x.count, 0));
+  document.getElementById("pipelineSummary").textContent = total + " customers";
+  document.getElementById("pipelineHost").innerHTML = steps.map(s=>`
+    <div class="funnel-row">
+      <div class="w-24 text-[12px] font-semibold">${s.label}</div>
+      <div class="funnel-bar">
+        <span style="width:${Math.max(10, s.count/total*100)}%;background:linear-gradient(90deg, var(--tw-gradient-from, #0077c5), var(--tw-gradient-to, #1f2937))">${s.count}</span>
+      </div>
+      <div class="w-32 text-right text-[11px] text-on-surface-variant">${s.note}</div>
+    </div>
+  `).join("");
+}
+
+/* ─── render at-risk table ─── */
+function renderAtRisk(){
+  const rows = PARTIES
+    .filter(p=>p.roles.includes("Customer") && p.lastContactDays >= 30 && p.balance > 0)
+    .sort((a,b)=>b.balance - a.balance);
+  const tbody = document.getElementById("atRiskTbody");
+  if (!rows.length){
+    tbody.innerHTML = "";
+    document.getElementById("atRiskEmpty").classList.remove("hidden-imp");
+    tbody.closest("table").classList.add("hidden-imp");
+    return;
+  }
+  tbody.closest("table").classList.remove("hidden-imp");
+  document.getElementById("atRiskEmpty").classList.add("hidden-imp");
+  tbody.innerHTML = rows.map(p=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${p.id}">
+      <td class="px-3 py-2">
+        <div class="flex items-center gap-2">
+          <div class="avatar">${initials(p.name)}</div>
+          <div class="min-w-0"><div class="font-medium truncate">${esc(p.name)}</div><div class="text-[11px] text-on-surface-variant truncate">${esc(p.email)}</div></div>
+        </div>
+      </td>
+      <td class="px-3 py-2 text-[11px]">${esc(p.lastOrder)}</td>
+      <td class="px-3 py-2 text-right tabular-nums text-error">${fmt(p.balance)}</td>
+      <td class="px-3 py-2 text-[11px]">${esc(p.owner)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu="${p.id}" title="Row actions"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+  tbody.querySelectorAll("[data-row]").forEach(tr=>tr.addEventListener("click", e=>{
+    if (e.target.closest("button")) return;
+    openPeek(tr.dataset.row);
+  }));
+  tbody.querySelectorAll("[data-row-menu]").forEach(b=>b.addEventListener("click", ()=>{
+    openPeek(b.dataset.rowMenu);
+  }));
+}
+
+/* ─── render recent activity ─── */
+function renderActivity(){
+  const items = [];
+  PARTIES.forEach(p=>{
+    (p.activity ? [p.activity] : []).forEach(a=>{
+      items.push({ date:a[0], type:a[1], text:a[2], party:p });
+    });
+  });
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById("activityHost").innerHTML = items.slice(0, 6).map(a=>`
+    <div class="activity-row">
+      <div class="activity-dot"><span class="material-symbols-outlined">${iconForActivity(a.type)}</span></div>
+      <div class="min-w-0 flex-1">
+        <div class="text-body-sm font-medium truncate">${esc(a.party.name)}</div>
+        <div class="text-[11px] text-on-surface-variant truncate">${esc(a.text)}</div>
+        <div class="text-[10px] text-outline mt-0.5">${esc(a.date)}</div>
+      </div>
+      <button class="fin-link" data-open-party="${a.party.id}"><span class="material-symbols-outlined">open_in_new</span>Open</button>
+    </div>
+  `).join("");
+  document.querySelectorAll("[data-open-party]").forEach(b=>b.addEventListener("click", ()=>{
+    const p = PARTIES.find(x=>x.id === b.dataset.openParty);
+    if (p) openPeek(p.id);
+  }));
+}
+function iconForActivity(t){
+  if (t === "Order") return "shopping_cart";
+  if (t === "Bill") return "receipt_long";
+  if (t === "Payment") return "payments";
+  if (t === "Email sent") return "mail";
+  if (t === "Note") return "note";
+  return "circle";
+}
+
+/* ─── quick actions ─── */
+function renderQuickActions(){
+  const actions = [
+    { label:"Add customer", icon:"person_add", role:"Customer" },
+    { label:"Add vendor", icon:"storefront", role:"Vendor" },
+    { label:"Add supplier", icon:"factory", role:"Supplier" },
+    { label:"View Parties", icon:"groups", link:"parties" },
+    { label:"Segments", icon:"filter_list", link:"segments" },
+    { label:"Send reminder", icon:"notifications_active", link:"remind" }
+  ];
+  document.getElementById("quickActions").innerHTML = actions.map(a=>`
+    <button class="border border-surface-dim rounded-lg p-3 text-left hover:bg-surface-container-low" data-quick="${a.label}" data-role="${a.role || ""}" data-link="${a.link || ""}">
+      <span class="material-symbols-outlined text-[18px] text-primary">${a.icon}</span>
+      <div class="text-[11px] font-semibold mt-1">${a.label}</div>
+    </button>
+  `).join("");
+  document.querySelectorAll("[data-quick]").forEach(b=>b.addEventListener("click", ()=>{
+    if (b.dataset.role) openCreate(b.dataset.role);
+    else if (b.dataset.link === "remind") document.getElementById("reminderModal").classList.add("open");
+    else toast("Navigate to " + b.dataset.link);
+  }));
+}
+
+/* ─── peek ─── */
+let peekId = null;
+function openPeek(id){
+  peekId = id;
+  const p = PARTIES.find(x=>x.id === id); if (!p) return;
+  document.getElementById("peekTitle").textContent = p.name;
+  const rolePills = p.roles.map(r => {
+    const cls = r === "Customer" ? "customer" : r === "Vendor" ? "vendor" : r === "Supplier" ? "supplier" : "contact";
+    return `<span class="pill role ${cls}">${esc(r)}</span>`;
+  }).join("");
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-4 flex items-center gap-2">${rolePills}</div>
+    <dl class="text-body-sm mb-4">
+      <div class="kv"><dt>Company</dt><dd>${esc(p.name)}</dd></div>
+      <div class="kv"><dt>Email</dt><dd>${esc(p.email)}</dd></div>
+      <div class="kv"><dt>Phone</dt><dd>${esc(p.phone)}</dd></div>
+      <div class="kv"><dt>Owner</dt><dd>${esc(p.owner)}</dd></div>
+      <div class="kv"><dt>Last order</dt><dd>${esc(p.lastOrder)}</dd></div>
+      <div class="kv"><dt>Open balance</dt><dd class="${p.balance > 0 ? 'text-error' : p.balance < 0 ? 'text-qb-blue' : ''}">${p.balance !== 0 ? fmt(p.balance) : '—'}</dd></div>
+      <div class="kv"><dt>Added</dt><dd>${p.added}</dd></div>
+    </dl>
+    <div class="mt-3">
+      <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Recent activity</div>
+      <div class="text-body-sm">${esc(p.activity?.[2] || "No recent activity")}</div>
+      <div class="text-[10px] text-outline">${esc(p.activity?.[0] || "")}</div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="open"><span class="material-symbols-outlined text-[16px]">open_in_new</span>Open</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="email"><span class="material-symbols-outlined text-[16px]">mail</span>Email</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    if (b.dataset.peek === "open") toast("Would navigate to party " + p.id);
+    else toast("Compose email to " + p.email);
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", closePeek);
+document.getElementById("peekOpenParties").addEventListener("click", ()=>{
+  if (peekId){ const p = PARTIES.find(x=>x.id === peekId); closePeek(); toast("Navigating to party " + p.id); }
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.querySelectorAll("#createMenu [data-create-role]").forEach(b=>b.addEventListener("click", ()=>{
+  createMenu.classList.remove("open");
+  openCreate(b.dataset.createRole);
+}));
+document.getElementById("btnNewParty").addEventListener("click", ()=>openCreate("Customer"));
+
+function openCreate(role){
+  toast(`Create party flow → role=${role}. Opens the party-stub drawer (see Contacts > Parties).`);
+}
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+});
+
+/* ─── top-level navigation buttons ─── */
+document.getElementById("btnViewParties").addEventListener("click", ()=>toast("Navigate → Contacts > Parties"));
+document.getElementById("btnViewSegments").addEventListener("click", ()=>toast("Navigate → Contacts > Segments"));
+document.getElementById("linkPartiesFromSplit").addEventListener("click", ()=>toast("Navigate → Contacts > Parties"));
+
+/* ─── reminder ─── */
+document.getElementById("bulkRemindBtn").addEventListener("click", ()=>document.getElementById("reminderModal").classList.add("open"));
+document.getElementById("reminderCancel").addEventListener("click", ()=>document.getElementById("reminderModal").classList.remove("open"));
+document.getElementById("reminderConfirm").addEventListener("click", ()=>{
+  const n = PARTIES.filter(p=>p.roles.includes("Customer") && p.lastContactDays >= 30 && p.balance > 0).length;
+  document.getElementById("reminderModal").classList.remove("open");
+  toast(`Sent reminders to ${n} at-risk accounts`);
+});
+
+/* ─── refresh activity ─── */
+document.getElementById("refreshActivity").addEventListener("click", ()=>{
+  renderActivity();
+  toast("Activity refreshed");
+});
+
+/* ─── boot ─── */
+renderKpis();
+renderRoleSplit();
+renderPipeline();
+renderAtRisk();
+renderActivity();
+renderQuickActions();
+</script>
+</body>
+</html>

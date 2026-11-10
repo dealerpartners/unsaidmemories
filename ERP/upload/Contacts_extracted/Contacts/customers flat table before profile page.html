@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer Hub — Customers</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0a6400;color:#0a6400;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:500;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:680px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .drawer.open{transform:translateX(0)}
+  .drawer-wide{width:700px}
+  .field-label{display:block;font:600 12px Inter;letter-spacing:.02em;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:4px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0a6400;box-shadow:0 0 0 2px rgba(10,100,0,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:4px;background:#fff;min-height:80px;resize:vertical;font-size:13px}
+  .field-textarea:focus{outline:none;border-color:#0a6400;box-shadow:0 0 0 2px rgba(10,100,0,.1)}
+  .section-h{font:700 13px Inter;letter-spacing:.02em;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .data-table{width:100%;text-align:left;font-size:13px;}
+  .data-table th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#5a6355;padding:10px 12px;border-bottom:1px solid #dad9dd;font-weight:600;}
+  .data-table td{padding:12px;border-bottom:1px solid #f0f2f3;}
+  .data-table tr:hover td{background:#faf9fc;}
+  .action-link{color:#0a6400;font-weight:600;font-size:12px;cursor:pointer;}
+  .action-link:hover{text-decoration:underline;}
+  .empty-state{text-align:center;padding:40px 20px;color:#5a6355;}
+  .empty-state .material-symbols-outlined{font-size:48px;color:#becab6;margin-bottom:12px;}
+  .icon-btn{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;color:#5a6355;cursor:pointer;}
+  .icon-btn:hover{background:#f4f3f7;color:#1a1c1e;}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased overflow-hidden">
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VIEW 1: CUSTOMERS LIST (Matches the first screenshot)
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="view-list" class="h-screen w-screen overflow-y-auto flex flex-col bg-white">
+  
+  <!-- Header -->
+  <div class="border-b border-surface-dim px-8 py-4 shrink-0">
+    <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold mb-2">Customer Hub / Customers</div>
+    <div class="flex items-center justify-between">
+      <h1 class="text-[28px] font-semibold text-on-surface">Customers</h1>
+      <div class="flex items-center gap-3">
+        <div class="flex">
+          <button class="h-9 px-4 bg-primary text-white text-[13px] font-semibold rounded-l hover:bg-primary-container flex items-center gap-1" id="btnNewCustomer">
+            New customer
+          </button>
+          <button class="h-9 px-2 bg-primary text-white rounded-r hover:bg-primary-container border-l border-primary-container"><span class="material-symbols-outlined text-[18px]">expand_more</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center justify-between mt-2">
+      <a href="#" class="text-[12px] text-primary hover:underline">Check out the new view with filters</a>
+      <div class="text-[11px] text-on-surface-variant flex items-center gap-1">Last updated 27 minutes ago <span class="material-symbols-outlined text-[14px] cursor-pointer hover:text-on-surface">refresh</span></div>
+    </div>
+  </div>
+
+  <!-- Summary Strip -->
+  <div class="px-8 py-4 shrink-0 bg-white">
+    <div class="bg-[#eef5fa] rounded-lg p-6 flex flex-col">
+      <div class="flex items-center justify-between text-[13px] font-medium text-on-surface mb-4">
+        <div class="flex flex-col"><span class="text-[18px] font-semibold">$0.00</span><span class="text-[11px] text-on-surface-variant">0 estimates</span></div>
+        <div class="flex flex-col"><span class="text-[18px] font-semibold">$0.00</span><span class="text-[11px] text-on-surface-variant">0 overdue invoices</span></div>
+        <div class="flex flex-col"><span class="text-[18px] font-semibold">$5.00</span><span class="text-[11px] text-on-surface-variant">1 open invoice or credit</span></div>
+        <div class="flex flex-col text-right"><span class="text-[18px] font-semibold">$0.00</span><span class="text-[11px] text-on-surface-variant">0 recently paid</span></div>
+      </div>
+      <div class="flex h-4 rounded overflow-hidden">
+        <div class="w-[15%] bg-[#00d2eb]"></div>
+        <div class="w-[15%] bg-[#d95f3b]"></div>
+        <div class="w-[55%] bg-[#bdc3c7]"></div>
+        <div class="w-[15%] bg-[#0a6400]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo Banner -->
+  <div class="px-8 shrink-0 mb-4">
+    <div class="bg-[#f4f7f9] border border-[#e0e6ea] rounded-lg p-4 flex items-center gap-4 relative">
+      <div class="w-16 h-16 bg-[#0077c5] rounded flex items-center justify-center text-white"><span class="material-symbols-outlined text-[32px]">payments</span></div>
+      <div class="flex-1">
+        <div class="text-[10px] font-bold text-[#d81b60] bg-[#fce4ec] inline-block px-2 py-0.5 rounded mb-1">FOR YOU</div>
+        <div class="text-[14px] font-semibold">See your money sooner</div>
+        <div class="text-[12px] text-on-surface-variant mt-1">Don't lose another minute waiting on checks in the mail. Let customers pay with credit and debit cards, ACH, Apple Pay®, PayPal, and Venmo.</div>
+        <div class="flex gap-4 mt-2">
+          <a href="#" class="text-[12px] text-primary hover:underline">Set it up</a>
+          <a href="#" class="text-[12px] text-primary hover:underline">See rates</a>
+        </div>
+      </div>
+      <button class="absolute top-2 right-2 text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+
+  <!-- Table Area -->
+  <div class="px-8 flex-1">
+    <div class="flex items-center justify-between mb-4">
+      <div class="relative w-64">
+        <span class="material-symbols-outlined absolute left-2 top-1.5 text-[18px] text-outline">search</span>
+        <input class="w-full h-8 pl-8 pr-2 border border-surface-dim rounded text-[13px] focus:outline-none focus:border-primary" placeholder="Search"/>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="icon-btn"><span class="material-symbols-outlined">print</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">download</span></button>
+        <button class="icon-btn"><span class="material-symbols-outlined">settings</span></button>
+      </div>
+    </div>
+
+    <table class="w-full text-left text-[13px]">
+      <thead>
+        <tr class="border-b border-surface-dim text-[11px] uppercase tracking-wider text-on-surface-variant">
+          <th class="w-8 py-2"><input type="checkbox" class="accent-primary"/></th>
+          <th class="py-2 font-semibold">Name <span class="material-symbols-outlined text-[12px] align-middle">arrow_upward</span></th>
+          <th class="py-2 font-semibold">Company name <span class="material-symbols-outlined text-[12px] align-middle">unfold_more</span></th>
+          <th class="py-2 font-semibold">Phone</th>
+          <th class="py-2 font-semibold text-right">Open balance <span class="material-symbols-outlined text-[12px] align-middle">unfold_more</span></th>
+          <th class="py-2 font-semibold text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-surface-dim hover:bg-surface-container-low cursor-pointer" onclick="showCustomerDetail()">
+          <td class="py-3"><input type="checkbox" class="accent-primary"/></td>
+          <td class="py-3 font-medium text-primary hover:underline">Sample Customer</td>
+          <td class="py-3 text-on-surface-variant">-</td>
+          <td class="py-3 text-on-surface-variant">-</td>
+          <td class="py-3 text-right tabular-nums">$5.00</td>
+          <td class="py-3 text-right">
+            <a href="#" class="text-primary hover:underline mr-2" onclick="event.stopPropagation();">Receive payment <span class="material-symbols-outlined text-[12px] align-middle">arrow_drop_down</span></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="flex items-center justify-end mt-4 gap-2 text-[12px] text-on-surface-variant">
+      <span>1-1 of 1</span>
+      <button class="w-6 h-6 flex items-center justify-center rounded bg-surface-container text-on-surface font-semibold">1</button>
+    </div>
+    <div class="text-center mt-12"><a href="#" class="text-[12px] text-primary hover:underline">Privacy</a></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     VIEW 2: CUSTOMER DETAIL (Matches the multi-tab screenshots)
+     ═══════════════════════════════════════════════════════════════════ -->
+<div id="view-detail" class="hidden-imp flex h-screen w-screen">
+
+  <!-- Left Sidebar (Recently viewed) -->
+  <aside class="w-[280px] bg-white border-r border-surface-dim flex flex-col shrink-0">
+    <div class="h-14 px-4 flex items-center justify-between border-b border-surface-dim">
+      <a href="#" class="flex items-center gap-1 text-primary font-semibold text-[13px] hover:underline" onclick="showCustomersList()">
+        <span class="material-symbols-outlined text-[16px]">arrow_back_ios</span>Customers
+      </a>
+      <div class="flex items-center gap-1 text-outline">
+        <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" id="addCustomerPlus"><span class="material-symbols-outlined text-[16px]">add</span></button>
+        <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px]">filter_list</span></button>
+      </div>
+    </div>
+    <div class="p-4">
+      <div class="relative mb-3">
+        <span class="material-symbols-outlined absolute left-2 top-1.5 text-[18px] text-outline">search</span>
+        <input class="w-full h-8 pl-8 pr-2 border border-surface-dim rounded text-[13px] focus:outline-none focus:border-primary" placeholder="Search by name or details"/>
+      </div>
+      <div class="flex items-center gap-2 text-[12px] text-on-surface-variant mb-4">
+        <button class="flex items-center gap-1 bg-surface-container px-2 py-1 rounded border border-surface-dim font-medium"><span class="material-symbols-outlined text-[14px]">history</span>Recent</button>
+        <button class="flex items-center gap-1 px-2 py-1"><span class="material-symbols-outlined text-[14px]">sort</span>Name</button>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto px-2">
+      <div class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider px-2 mb-2">Recently viewed customers</div>
+      <div class="bg-surface-container-low border border-surface-dim rounded-lg p-2 cursor-pointer">
+        <div class="font-medium text-[13px]">Sample Customer</div>
+        <div class="text-[11px] text-on-surface-variant">$5.00</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col h-full overflow-hidden bg-background">
+    
+    <!-- Top Action Bar -->
+    <header class="h-14 px-6 flex items-center justify-between bg-white border-b border-surface-dim shrink-0">
+      <div class="flex items-center gap-4">
+        <a href="#" class="flex items-center gap-1 text-primary font-semibold text-[13px] hover:underline" onclick="showCustomersList()">
+          <span class="material-symbols-outlined text-[16px]">arrow_back_ios</span>Customers
+        </a>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="flex items-center gap-1 text-[13px] text-on-surface-variant font-medium hover:underline">
+          <span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span>Give feedback
+        </button>
+        <div class="flex">
+          <button class="h-8 px-3 border border-surface-dim rounded-l bg-white text-[13px] font-semibold hover:bg-surface-container" id="btnEditCustomer">Edit</button>
+          <button class="h-8 px-1.5 border border-l-0 border-surface-dim rounded-r bg-white hover:bg-surface-container"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+        </div>
+        <div class="flex">
+          <button class="h-8 px-3 bg-primary text-white text-[13px] font-semibold rounded-l hover:bg-primary-container flex items-center gap-1" id="newTxnBtn">
+            New transaction
+          </button>
+          <button class="h-8 px-1.5 bg-primary text-white rounded-r hover:bg-primary-container border-l border-primary-container" id="newTxnArrow">
+            <span class="material-symbols-outlined text-[16px]">expand_more</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scrollable Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      
+      <!-- Customer Profile Card -->
+      <div class="bg-white border border-surface-dim rounded-xl p-6 flex gap-6 mb-4">
+        <div class="w-1/4 flex flex-col items-center justify-center text-center border-r border-surface-dim pr-6">
+          <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center text-xl font-bold text-on-surface-variant mb-3">SC</div>
+          <h1 class="text-[22px] font-semibold mb-1">Sample Customer</h1>
+          <a href="#" class="text-[12px] text-primary hover:underline mb-4">Add company name</a>
+          <div class="flex items-center gap-2">
+            <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high" title="Create note"><span class="material-symbols-outlined text-[18px]">edit_note</span></button>
+            <button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center hover:bg-surface-container-high" title="Create task" id="createTaskIcon"><span class="material-symbols-outlined text-[18px]">task_alt</span></button>
+          </div>
+        </div>
+        
+        <div class="flex-1 grid grid-cols-2 gap-6 text-[13px]">
+          <div class="space-y-4">
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Email</div>
+              <a href="#" class="text-primary hover:underline">Add email</a>
+            </div>
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Billing address</div>
+              <a href="#" class="text-primary hover:underline">Add billing address</a>
+            </div>
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Notes</div>
+              <a href="#" class="text-primary hover:underline">Add notes</a>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Phone</div>
+              <a href="#" class="text-primary hover:underline">Add phone number</a>
+            </div>
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Shipping address</div>
+              <a href="#" class="text-primary hover:underline">Add shipping address</a>
+            </div>
+            <div>
+              <div class="font-semibold text-on-surface-variant mb-1">Custom Fields</div>
+              <button class="mt-1 text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-64 shrink-0 bg-[#eef5fa] rounded-lg p-4">
+          <h3 class="font-semibold text-[14px] mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-[18px] text-primary">account_balance_wallet</span>Financial summary</h3>
+          <div class="mb-4">
+            <div class="flex items-center gap-1 text-[12px] text-on-surface-variant mb-1"><span class="w-2 h-2 rounded-full bg-yellow-400"></span>Open Balance</div>
+            <div class="text-[20px] font-semibold text-on-surface">$5.00</div>
+          </div>
+          <div>
+            <div class="flex items-center gap-1 text-[12px] text-on-surface-variant mb-1"><span class="w-2 h-2 rounded-full bg-error"></span>Overdue payment</div>
+            <div class="text-[20px] font-semibold text-on-surface">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="border-b border-surface-dim mb-4 overflow-x-auto">
+        <div class="flex items-center gap-6 min-w-max">
+          <button class="pb-3 text-[14px] tab-underline active" data-tab="transactions">Transaction List</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="activity">Activity Feed</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="statements">Statements</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="recurring">Recurring Transactions</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="details">Customer Details</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="latefees">Late Fees</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface" data-tab="notes">Notes</button>
+          <button class="pb-3 text-[14px] tab-underline text-on-surface-variant hover:text-on-surface flex items-center gap-2" data-tab="tasks">Tasks <span class="bg-[#d81b60] text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">New</span></button>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <!-- 1. Transaction List -->
+      <div id="pane-transactions" class="tab-pane">
+        <div class="flex items-center gap-3 mb-4">
+          <button class="h-8 px-3 border border-surface-dim rounded text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container">Batch actions</button>
+          
+          <div class="relative">
+            <select class="h-8 pl-3 pr-8 border border-surface-dim rounded text-[13px] bg-white appearance-none focus:outline-none focus:border-primary" id="txnTypeFilter">
+              <option>All plus deposits</option>
+              <option>All transactions</option>
+              <option>Invoices</option>
+              <option>Estimates</option>
+              <option>Change orders</option>
+              <option>Credit memos</option>
+              <option>Sales Receipts</option>
+              <option>Money received</option>
+              <option>Recently paid</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1.5 text-[16px] pointer-events-none">expand_more</span>
+          </div>
+
+          <div class="relative">
+            <select class="h-8 pl-3 pr-8 border border-surface-dim rounded text-[13px] bg-white appearance-none focus:outline-none focus:border-primary">
+              <option>All</option>
+              <option>Open</option>
+              <option>Overdue</option>
+              <option>Paid</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1.5 text-[16px] pointer-events-none">expand_more</span>
+          </div>
+
+          <div class="relative">
+            <select class="h-8 pl-3 pr-8 border border-surface-dim rounded text-[13px] bg-white appearance-none focus:outline-none focus:border-primary">
+              <option>All</option>
+              <option>This month</option>
+              <option>Last month</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1.5 text-[16px] pointer-events-none">expand_more</span>
+          </div>
+
+          <a href="#" class="text-[13px] text-primary hover:underline ml-2">View Recurring Templates</a>
+        </div>
+
+        <!-- Action icons row (Settings, Print, etc.) -->
+        <div class="flex justify-end gap-2 mb-2">
+          <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">print</span></button>
+          <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">download</span></button>
+          <button class="icon-btn"><span class="material-symbols-outlined text-[18px]">more_vert</span></button>
+          <button class="icon-btn" id="settingsGear"><span class="material-symbols-outlined text-[18px]">settings</span></button>
+        </div>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="w-8"><input type="checkbox" class="accent-primary"/></th>
+              <th>Date <span class="material-symbols-outlined text-[12px] align-middle">arrow_drop_down</span></th>
+              <th>Type</th>
+              <th>No.</th>
+              <th>Customer</th>
+              <th>Memo</th>
+              <th class="text-right">Amount</th>
+              <th>Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="accent-primary"/></td>
+              <td>11/1/26</td>
+              <td>Invoice</td>
+              <td>1001</td>
+              <td>Sample Customer</td>
+              <td class="text-on-surface-variant">-</td>
+              <td class="text-right tabular-nums">$5.00</td>
+              <td>Due in 28 days</td>
+              <td class="text-right space-x-2">
+                <a href="#" class="action-link">View/Edit</a>
+                <a href="#" class="action-link">Receive payment <span class="material-symbols-outlined text-[12px] align-middle">arrow_drop_down</span></a>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="bg-surface-container-low font-semibold">
+              <td colspan="6" class="text-right">Total</td>
+              <td class="text-right tabular-nums">$5.00</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- 2. Activity Feed -->
+      <div id="pane-activity" class="tab-pane hidden-imp">
+        <div class="bg-white border border-surface-dim rounded-xl p-8 flex items-center gap-8">
+          <div class="flex-1">
+            <h2 class="text-2xl font-semibold mb-2">Keep track of every interaction</h2>
+            <p class="text-body-md text-on-surface-variant mb-6 max-w-lg">Strengthen your connection with Sample Customer. Add a note, task, feedback survey, or contract — new activities will appear here from now on.</p>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div class="border border-surface-dim rounded-lg p-4">
+                <div class="material-symbols-outlined text-[24px] text-on-surface-variant mb-2">edit_note</div>
+                <h3 class="font-semibold text-[14px] mb-1">Create a note</h3>
+                <p class="text-[12px] text-on-surface-variant mb-4">Capture important details. Add your first note to keep customer info handy.</p>
+                <button class="w-full h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">Add note</button>
+              </div>
+              <div class="border border-surface-dim rounded-lg p-4">
+                <div class="material-symbols-outlined text-[24px] text-on-surface-variant mb-2">task_alt</div>
+                <h3 class="font-semibold text-[14px] mb-1">Assign a task</h3>
+                <p class="text-[12px] text-on-surface-variant mb-4">Stay organized. Create a task to track your work and never miss a step.</p>
+                <button class="w-full h-8 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container" id="addTaskActivity">Add task</button>
+              </div>
+            </div>
+          </div>
+          <div class="w-64 h-64 shrink-0 bg-surface-container-low rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-[80px] text-outline">support_agent</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Statements -->
+      <div id="pane-statements" class="tab-pane hidden-imp">
+        <div class="flex items-center gap-3 mb-4">
+          <button class="h-8 px-3 border border-surface-dim rounded text-[13px] font-semibold text-on-surface-variant hover:bg-surface-container">Batch actions</button>
+          <div class="relative">
+            <select class="h-8 pl-3 pr-8 border border-surface-dim rounded text-[13px] bg-white appearance-none focus:outline-none focus:border-primary">
+              <option>Last 12 months</option>
+              <option>This year</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1.5 text-[16px] pointer-events-none">expand_more</span>
+          </div>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="w-8"><input type="checkbox" class="accent-primary"/></th>
+              <th>Date</th>
+              <th>No.</th>
+              <th>Customer</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Statement Type</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" class="text-center py-8 text-on-surface-variant">No matching statements found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4. Recurring Transactions -->
+      <div id="pane-recurring" class="tab-pane hidden-imp">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-2 top-1.5 text-[18px] text-outline">search</span>
+              <input class="h-8 pl-8 pr-2 border border-surface-dim rounded text-[13px] w-64 focus:outline-none focus:border-primary" placeholder="Search by template name"/>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <a href="#" class="text-[13px] text-primary hover:underline">Manage recurring payments</a>
+            <div class="flex">
+              <button class="h-8 px-3 bg-primary text-white text-[13px] font-semibold rounded-l hover:bg-primary-container flex items-center gap-1">
+                New template
+              </button>
+              <button class="h-8 px-1.5 bg-primary text-white rounded-r hover:bg-primary-container border-l border-primary-container"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+            </div>
+          </div>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Txn Type</th>
+              <th>Interval</th>
+              <th>Previous Date</th>
+              <th>Next Date</th>
+              <th class="text-right">Amount</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="8" class="text-center py-8 text-on-surface-variant">No matching recurring transactions found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 5. Customer Details -->
+      <div id="pane-details" class="tab-pane hidden-imp">
+        <div class="grid grid-cols-2 gap-8 text-[13px]">
+          <div>
+            <h3 class="font-semibold text-[14px] mb-3">Contact info</h3>
+            <table class="w-full">
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant w-1/3">Customer</td><td class="py-2 font-medium">Sample Customer</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Email</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Cc</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Bcc</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Phone</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Mobile</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Fax</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Other</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Website</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Notes</td><td class="py-2">-</td></tr>
+            </table>
+            <h3 class="font-semibold text-[14px] mt-6 mb-3">Attachments</h3>
+            <div class="text-on-surface-variant">None</div>
+          </div>
+          <div>
+            <h3 class="font-semibold text-[14px] mb-3">Additional info</h3>
+            <table class="w-full">
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant w-1/3">Billing address</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Shipping address</td><td class="py-2"><a href="#" class="text-primary hover:underline">See all addresses</a></td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Terms</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Payment method</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Preferred delivery method</td><td class="py-2">None</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Customer language</td><td class="py-2">-</td></tr>
+              <tr class="border-b border-surface-dim"><td class="py-2 text-on-surface-variant">Tax exemption details</td><td class="py-2">-</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Late Fees -->
+      <div id="pane-latefees" class="tab-pane hidden-imp">
+        <div class="border border-surface-dim rounded-lg p-6 bg-white text-[13px]">
+          To apply late fees, you'll first need to turn them on at a company level under <a href="#" class="font-semibold underline text-on-surface">Account and Settings</a>.
+        </div>
+      </div>
+
+      <!-- 7. Notes -->
+      <div id="pane-notes" class="tab-pane hidden-imp">
+        <div class="flex items-center justify-between mb-4 border-b border-surface-dim pb-2">
+          <div class="flex items-center gap-4 text-on-surface-variant">
+            <button class="hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">star_border</span></button>
+            <button class="hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">refresh</span></button>
+          </div>
+          <button class="text-[13px] font-semibold text-primary hover:underline flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">add</span>Add note</button>
+        </div>
+        <div class="empty-state mt-12">
+          <span class="material-symbols-outlined">folder_open</span>
+          <div class="font-semibold text-[14px] text-on-surface mt-4">No notes yet</div>
+        </div>
+      </div>
+
+      <!-- 8. Tasks -->
+      <div id="pane-tasks" class="tab-pane hidden-imp">
+        <div class="flex items-center justify-between mb-4">
+          <div></div>
+          <div class="flex items-center gap-2">
+            <button class="h-8 px-3 border border-surface-dim rounded text-[13px] font-semibold hover:bg-surface-container flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">filter_list</span>Filter</button>
+            <button class="h-8 px-3 bg-primary text-white text-[13px] font-semibold rounded hover:bg-primary-container flex items-center gap-1" id="addTaskBtn"><span class="material-symbols-outlined text-[16px]">add</span>Add task</button>
+          </div>
+        </div>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Priority</th>
+              <th>Assigned To</th>
+              <th>Due Date <span class="material-symbols-outlined text-[12px] align-middle">arrow_upward</span></th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" class="text-center py-12">
+                <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#8af5be] text-[#00714b] mb-2">
+                  <span class="material-symbols-outlined text-[20px]">check</span>
+                </div>
+                <h3 class="font-semibold text-[14px] text-on-surface">You're caught up!</h3>
+                <p class="text-[12px] text-on-surface-variant mt-1">You don't have any tasks to do. Check back soon to stay on top of things.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     OVERLAYS & DRAWERS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- New Transaction Menu -->
+<div class="row-menu" id="txnMenu">
+  <div class="menu-header">New transaction</div>
+  <button data-txn="Invoice"><span class="material-symbols-outlined">receipt_long</span>Invoice</button>
+  <button data-txn="Payment"><span class="material-symbols-outlined">payments</span>Payment</button>
+  <button data-txn="Recurring payment"><span class="material-symbols-outlined">autorenew</span>Recurring payment</button>
+  <button data-txn="Estimate"><span class="material-symbols-outlined">request_quote</span>Estimate</button>
+  <button data-txn="Payment Link"><span class="material-symbols-outlined">link</span>Payment Link</button>
+  <button data-txn="Sales Receipt"><span class="material-symbols-outlined">point_of_sale</span>Sales Receipt</button>
+  <button data-txn="Credit memo"><span class="material-symbols-outlined">assignment_return</span>Credit memo</button>
+  <button data-txn="Statement"><span class="material-symbols-outlined">summarize</span>Statement</button>
+</div>
+
+<!-- Transaction Settings Menu -->
+<div class="row-menu" id="settingsMenu" style="min-width:200px">
+  <div class="menu-header">Transaction settings</div>
+  <button data-setting="columns"><span class="material-symbols-outlined">view_column</span>Customize columns</button>
+  <button data-setting="rows"><span class="material-symbols-outlined">view_list</span>Row height</button>
+  <button data-setting="sort"><span class="material-symbols-outlined">sort</span>Sort by date</button>
+  <div class="sep"></div>
+  <button data-setting="export"><span class="material-symbols-outlined">download</span>Export to CSV</button>
+</div>
+
+<!-- Add Task Drawer -->
+<div class="drawer" id="taskDrawer">
+  <div class="flex items-center justify-between px-6 h-14 border-b border-surface-dim shrink-0">
+    <h3 class="text-[16px] font-semibold">Add task</h3>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="closeTaskBtn"><span class="material-symbols-outlined text-[20px]">close</span></button>
+  </div>
+  <div class="flex-1 overflow-y-auto p-6 space-y-4">
+    <div>
+      <label class="field-label">Task name</label>
+      <input class="field-input" placeholder="e.g. Follow up on invoice" />
+    </div>
+    <div>
+      <label class="field-label">Description</label>
+      <textarea class="field-textarea" placeholder="Add details..."></textarea>
+    </div>
+    <div>
+      <label class="field-label">Assign to</label>
+      <select class="field-input"><option>Select one</option><option>Jordan A.</option><option>Sarah A.</option></select>
+    </div>
+    <div>
+      <label class="field-label">Due date</label>
+      <input class="field-input" type="date" value="2026-11-03" />
+    </div>
+    <div>
+      <label class="field-label">Priority</label>
+      <select class="field-input"><option>-</option><option>High</option><option>Medium</option><option>Low</option></select>
+    </div>
+    
+    <div class="pt-4 border-t border-surface-dim">
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="font-semibold text-[13px]">Linked records (1)</h4>
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+      </div>
+      <div class="text-[12px]"><span class="text-primary font-medium">Customer</span><br><span class="text-on-surface-variant">Customer: Sample Customer</span></div>
+    </div>
+
+    <div class="pt-4 border-t border-surface-dim">
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="font-semibold text-[13px]">Attachments (0)</h4>
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+      </div>
+      <div class="border border-dashed border-surface-dim rounded-lg p-6 text-center text-on-surface-variant">
+        <span class="material-symbols-outlined text-[28px] mb-1">upload_file</span>
+        <div class="text-[11px]">Drop files here or click to browse</div>
+      </div>
+    </div>
+  </div>
+  <div class="p-4 border-t border-surface-dim flex justify-end shrink-0">
+    <button class="h-8 px-4 bg-primary text-white rounded text-[13px] font-semibold hover:bg-primary-container" id="saveTaskBtn">Save</button>
+  </div>
+</div>
+
+<!-- Customer Edit Drawer (Matches the last screenshot exactly) -->
+<div class="drawer drawer-wide" id="customerEditDrawer" style="width: 700px;">
+  <div class="flex items-center justify-between px-6 h-14 border-b border-surface-dim shrink-0 bg-white">
+    <h3 class="text-[18px] font-medium text-on-surface">Customer</h3>
+    <div class="flex items-center gap-1 text-on-surface-variant">
+      <button class="icon-btn"><span class="material-symbols-outlined">chat_bubble_outline</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">print</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">attach_money</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">edit</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">receipt_long</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">description</span></button>
+      <button class="icon-btn"><span class="material-symbols-outlined">group_add</span></button>
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center ml-2" id="closeEditBtn"><span class="material-symbols-outlined text-[20px]">close</span></button>
+    </div>
+  </div>
+  
+  <div class="flex-1 overflow-y-auto p-6 space-y-8 bg-white">
+    
+    <!-- Name and contact -->
+    <section>
+      <div class="flex items-center justify-between mb-4 border-b border-surface-dim pb-2">
+        <h3 class="text-[15px] font-semibold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">badge</span>Name and contact</h3>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mb-4">
+        <div class="col-span-1"><label class="field-label">Title</label><input class="field-input"/></div>
+        <div class="col-span-1"><label class="field-label">First name</label><input class="field-input"/></div>
+        <div class="col-span-1"><label class="field-label">Middle name</label><input class="field-input"/></div>
+        <div class="col-span-1"><label class="field-label">Last name</label><input class="field-input"/></div>
+      </div>
+      <div class="grid grid-cols-4 gap-4 mb-4">
+        <div class="col-span-1"><label class="field-label">Suffix</label><input class="field-input"/></div>
+        <div class="col-span-2"><label class="field-label">Company name</label><input class="field-input"/></div>
+        <div class="col-span-1"><label class="field-label">Customer display name *</label><input class="field-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div><label class="field-label">Email</label><input class="field-input"/></div>
+        <div><label class="field-label">Phone number</label><input class="field-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div><label class="field-label">Cc</label><input class="field-input"/></div>
+        <div><label class="field-label">Bcc</label><input class="field-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div><label class="field-label">Mobile number</label><input class="field-input"/></div>
+        <div><label class="field-label">Fax</label><input class="field-input"/></div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div><label class="field-label">Other</label><input class="field-input"/></div>
+        <div><label class="field-label">Website</label><input class="field-input"/></div>
+      </div>
+      <div class="mb-4">
+        <label class="field-label">Name to print on checks</label>
+        <input class="field-input w-1/2"/>
+      </div>
+      <label class="flex items-center gap-2 text-[13px]"><input type="checkbox" class="accent-primary"/> Is a sub-customer</label>
+    </section>
+
+    <!-- Communication permissions -->
+    <section>
+      <div class="flex items-center justify-between mb-4 border-b border-surface-dim pb-2">
+        <h3 class="text-[15px] font-semibold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">mark_email_read</span>Communication permissions</h3>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </div>
+      <div class="text-center py-6 bg-surface-container-lowest border border-surface-dim rounded-lg">
+        <span class="material-symbols-outlined text-[32px] text-on-surface-variant mb-2">verified_user</span>
+        <div class="text-[13px] font-semibold text-on-surface mb-1">Enter an email to record customer consent.</div>
+        <div class="text-[12px] text-on-surface-variant max-w-sm mx-auto">If the customer has opted in to receive email marketing communications, acknowledge it here once you've added an email.</div>
+      </div>
+    </section>
+
+    <!-- Addresses -->
+    <section>
+      <div class="flex items-center justify-between mb-4 border-b border-surface-dim pb-2">
+        <h3 class="text-[15px] font-semibold text-on-surface flex items-center gap-2"><span class="material-symbols-outlined text-[20px]">location_on</span>Addresses</h3>
+        <span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+      </div>
+      <div class="mb-6">
+        <h4 class="text-[13px] font-semibold text-on-surface mb-3">Billing address</h4>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div><label class="field-label">Street address 1</label><input class="field-input"/></div>
+          <div><label class="field-label">Street address 2</label><input class="field-input"/></div>
+        </div>
+        <a href="#" class="text-[12px] text-primary hover:underline flex items-center gap-1 mb-4"><span class="material-symbols-outlined text-[16px]">expand_more</span>Add lines</a>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div><label class="field-label">City</label><input class="field-input"/></div>
+          <div><label class="field-label">State</label><input class="field-input"/></div>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div><label class="field-label">ZIP code</label><input class="field-input"/></div>
+          <div><label class="field-label">Country</label><input class="field-input"/></div>
+        </div>
+        <a href="#" class="text-[12px] text-primary hover:underline">Preview address</a>
+      </div>
+      <div>
+        <h4 class="text-[13px] font-semibold text-on-surface mb-3">Shipping address</h4>
+        <label class="flex items-center gap-2 text-[13px] mb-3"><input type="checkbox" class="accent-primary" checked/> Add your billing address as one of the shipping addresses</label>
+        <div class="mb-4">
+          <label class="field-label">Default shipping address</label>
+          <select class="field-input"><option>Same as billing address</option></select>
+        </div>
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-[13px] font-semibold text-on-surface">Saved addresses</h4>
+          <button class="h-8 px-3 border border-surface-dim rounded text-[12px] font-semibold hover:bg-surface-container">+ New address</button>
+        </div>
+        <div class="border border-surface-dim rounded-lg p-4 text-[13px]">
+          <strong>Same as billing address</strong> (Default shipping address)
+        </div>
+      </div>
+    </section>
+
+  </div>
+  
+  <div class="h-16 border-t border-surface-dim px-6 flex items-center justify-end shrink-0 bg-white">
+    <button class="h-9 px-6 bg-primary text-white rounded text-[13px] font-semibold hover:bg-primary-container" id="saveCustomerEdit">Save</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* Helpers */
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2000);}
+  
+  /* View Toggling */
+  function showCustomerDetail() {
+    document.getElementById('view-list').classList.add('hidden-imp');
+    document.getElementById('view-detail').classList.remove('hidden-imp');
+  }
+  function showCustomersList() {
+    document.getElementById('view-detail').classList.add('hidden-imp');
+    document.getElementById('view-list').classList.remove('hidden-imp');
+  }
+
+  /* Tabs Logic */
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('[data-tab]').forEach(t => {
+        t.classList.remove('active');
+        t.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('active');
+      btn.classList.remove('text-on-surface-variant');
+
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden-imp'));
+      const target = btn.dataset.tab;
+      document.getElementById('pane-' + target).classList.remove('hidden-imp');
+    });
+  });
+
+  /* New Transaction Split Menu */
+  const newTxnBtn = document.getElementById('newTxnBtn');
+  const newTxnArrow = document.getElementById('newTxnArrow');
+  const txnMenu = document.getElementById('txnMenu');
+
+  newTxnBtn.addEventListener('click', () => toast("Opening global create flyout..."));
+  newTxnArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const rect = newTxnArrow.getBoundingClientRect();
+    txnMenu.style.top = (rect.bottom + 4) + 'px';
+    txnMenu.style.left = Math.min(rect.right - 250, window.innerWidth - 270) + 'px';
+    txnMenu.classList.toggle('open');
+  });
+
+  document.querySelectorAll('#txnMenu [data-txn]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      txnMenu.classList.remove('open');
+      toast(`Creating ${btn.dataset.txn}...`);
+    });
+  });
+
+  /* Settings Gear Menu */
+  const settingsGear = document.getElementById('settingsGear');
+  const settingsMenu = document.getElementById('settingsMenu');
+  
+  if(settingsGear) {
+    settingsGear.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rect = settingsGear.getBoundingClientRect();
+      settingsMenu.style.top = (rect.bottom + 4) + 'px';
+      settingsMenu.style.left = Math.min(rect.right - 200, window.innerWidth - 220) + 'px';
+      settingsMenu.classList.toggle('open');
+    });
+  }
+
+  document.querySelectorAll('#settingsMenu [data-setting]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      settingsMenu.classList.remove('open');
+      toast(`Updated setting: ${btn.dataset.setting}`);
+    });
+  });
+
+  /* Task Drawer Logic */
+  const taskDrawer = document.getElementById('taskDrawer');
+  const scrim = document.getElementById('scrim');
+
+  function openTaskDrawer() {
+    taskDrawer.classList.add('open');
+    scrim.classList.add('open');
+  }
+
+  document.getElementById('addTaskBtn').addEventListener('click', openTaskDrawer);
+  document.getElementById('createTaskIcon').addEventListener('click', openTaskDrawer);
+  document.getElementById('addTaskActivity').addEventListener('click', openTaskDrawer);
+
+  document.getElementById('closeTaskBtn').addEventListener('click', closeDrawers);
+  document.getElementById('saveTaskBtn').addEventListener('click', () => {
+    closeDrawers();
+    toast("Task saved successfully");
+  });
+  
+  scrim.addEventListener('click', closeDrawers);
+  
+  /* Customer Edit Drawer */
+  const customerEditDrawer = document.getElementById('customerEditDrawer');
+  
+  document.getElementById('btnEditCustomer').addEventListener('click', () => {
+    customerEditDrawer.classList.add('open');
+    scrim.classList.add('open');
+  });
+  
+  document.getElementById('closeEditBtn').addEventListener('click', closeDrawers);
+  document.getElementById('saveCustomerEdit').addEventListener('click', () => {
+    closeDrawers();
+    toast("Customer saved successfully");
+  });
+
+  /* Add Customer Plus */
+  document.getElementById('addCustomerPlus').addEventListener('click', () => {
+    toast("Opening New Customer form...");
+  });
+  document.getElementById('btnNewCustomer').addEventListener('click', () => {
+    toast("Opening New Customer form...");
+  });
+
+  function closeDrawers() {
+    taskDrawer.classList.remove('open');
+    customerEditDrawer.classList.remove('open');
+    scrim.classList.remove('open');
+  }
+
+  /* Close menus on outside click */
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#txnMenu') && !e.target.closest('#newTxnArrow')) {
+      txnMenu.classList.remove('open');
+    }
+    if (!e.target.closest('#settingsMenu') && !e.target.closest('#settingsGear')) {
+      settingsMenu.classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

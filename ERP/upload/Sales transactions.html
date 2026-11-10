@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sales transactions — Finance › Sales & Get Paid</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- ═══════════ CONTEXT HEADER (standalone preview chrome) ═══════════ -->
+<div class="h-[52px] px-6 flex items-center justify-between bg-white border-b border-surface-dim">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-[20px] text-on-surface-variant">account_balance</span>
+    <span class="text-label-md font-semibold">Finance</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md">Sales &amp; Get Paid</span>
+    <span class="text-outline">/</span>
+    <span class="text-label-md text-primary font-semibold">Sales transactions</span>
+  </div>
+  <div class="text-label-sm text-on-surface-variant">Preview · standalone</div>
+</div>
+
+<!-- ═══════════ SALES TRANSACTIONS PAGE ═══════════ -->
+<main class="px-6 pb-12">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 py-4">
+    <div>
+      <h1 class="text-headline-lg">Sales transactions</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Invoice, Receipt, Credit, Payment — unified ledger. Default sort: Date desc.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main">
+          <span class="material-symbols-outlined text-[16px]">add</span>New transaction
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize
+      </button>
+    </div>
+  </div>
+
+  <!-- Create actions row -->
+  <div class="flex items-center gap-2 mb-3 flex-wrap">
+    <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">receipt_long</span>Invoice</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">price_check</span>Receive payment</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">point_of_sale</span>Sales receipt</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">assignment_return</span>Credit memo</button>
+    <button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-[16px]">request_quote</span>Estimate</button>
+    <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1">
+      <span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+  </div>
+
+  <!-- Table card -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- Status view tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Open">Open</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Overdue">Overdue</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Paid">Paid</button>
+    </div>
+
+    <!-- Filter bar with TYPE dropdown (QB pattern) -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter rows…"/>
+      </div>
+      <label class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px] text-on-surface-variant">category</span>
+        <span class="text-on-surface-variant">Type:</span>
+        <select class="bg-transparent border-none text-label-sm text-on-surface focus:outline-none" data-sales-type>
+          <option value="">All types</option>
+          <option value="Invoice">Invoice</option>
+          <option value="Sales receipt">Sales receipt</option>
+          <option value="Credit memo">Credit memo</option>
+          <option value="Payment">Payment</option>
+        </select>
+      </label>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+      <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-sales-count>1–10 of 10</span>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check"/></th>
+          <th class="px-3 py-2">Date</th>
+          <th class="px-3 py-2">No.</th>
+          <th class="px-3 py-2">Customer</th>
+          <th class="px-3 py-2">Type</th>
+          <th class="px-3 py-2">Due</th>
+          <th class="px-3 py-2 text-right">Amount</th>
+          <th class="px-3 py-2 text-right">Balance</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-sales-tbody>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Invoice">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">11/01/2026</td>
+          <td class="px-3 py-2 font-medium">1002</td>
+          <td class="px-3 py-2">Acme Corp</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-blue/10 text-qb-blue">Invoice</span></td>
+          <td class="px-3 py-2">12/01/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,240.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,240.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-primary/10 text-primary">Open</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Payment">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/31/2026</td>
+          <td class="px-3 py-2 font-medium">PMT-4410</td>
+          <td class="px-3 py-2">Blue Ridge Co.</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-teal/10 text-qb-teal">Payment</span></td>
+          <td class="px-3 py-2">—</td>
+          <td class="px-3 py-2 text-right tabular-nums">$3,410.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Invoice">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/28/2026</td>
+          <td class="px-3 py-2 font-medium">1001</td>
+          <td class="px-3 py-2">Blue Ridge Co.</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-blue/10 text-qb-blue">Invoice</span></td>
+          <td class="px-3 py-2">11/27/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$3,410.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Sales receipt">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/25/2026</td>
+          <td class="px-3 py-2 font-medium">SR-889</td>
+          <td class="px-3 py-2">Orion Apparel</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-green/10 text-qb-green">Sales receipt</span></td>
+          <td class="px-3 py-2">—</td>
+          <td class="px-3 py-2 text-right tabular-nums">$540.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Credit memo">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/22/2026</td>
+          <td class="px-3 py-2 font-medium">CM-204</td>
+          <td class="px-3 py-2">Maple Supply</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-maroon/10 text-qb-maroon">Credit memo</span></td>
+          <td class="px-3 py-2">—</td>
+          <td class="px-3 py-2 text-right tabular-nums">$120.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$120.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-primary/10 text-primary">Open</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Invoice">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/15/2026</td>
+          <td class="px-3 py-2 font-medium">0998</td>
+          <td class="px-3 py-2">Maple Supply</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-blue/10 text-qb-blue">Invoice</span></td>
+          <td class="px-3 py-2">11/14/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$890.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$890.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-error-container text-on-error-container">Overdue</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Invoice">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">10/02/2026</td>
+          <td class="px-3 py-2 font-medium">0996</td>
+          <td class="px-3 py-2">Northwind Labs</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-blue/10 text-qb-blue">Invoice</span></td>
+          <td class="px-3 py-2">11/01/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$2,100.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$2,100.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-primary/10 text-primary">Open</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Payment">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">09/28/2026</td>
+          <td class="px-3 py-2 font-medium">PMT-4388</td>
+          <td class="px-3 py-2">Northwind Labs</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-teal/10 text-qb-teal">Payment</span></td>
+          <td class="px-3 py-2">—</td>
+          <td class="px-3 py-2 text-right tabular-nums">$1,500.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Invoice">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">09/20/2026</td>
+          <td class="px-3 py-2 font-medium">0994</td>
+          <td class="px-3 py-2">Orion Apparel</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-blue/10 text-qb-blue">Invoice</span></td>
+          <td class="px-3 py-2">10/20/2026</td>
+          <td class="px-3 py-2 text-right tabular-nums">$540.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+        <tr class="hover:bg-surface-container-low cursor-pointer sales-row" data-type="Sales receipt">
+          <td class="px-3 py-2"><input type="checkbox" class="row-check"/></td>
+          <td class="px-3 py-2">09/12/2026</td>
+          <td class="px-3 py-2 font-medium">SR-871</td>
+          <td class="px-3 py-2">Acme Corp</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-qb-green/10 text-qb-green">Sales receipt</span></td>
+          <td class="px-3 py-2">—</td>
+          <td class="px-3 py-2 text-right tabular-nums">$210.00</td>
+          <td class="px-3 py-2 text-right tabular-nums">$0.00</td>
+          <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-label-sm bg-secondary-container text-on-secondary-container">Paid</span></td>
+          <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+function applySalesFilters(){
+  const tbody=document.querySelector("[data-sales-tbody]");if(!tbody)return;
+  const typeVal=document.querySelector("[data-sales-type]")?.value||"";
+  const statusVal=document.querySelector("[data-viewtab].active")?.dataset.viewtab||"All";
+  let shown=0,total=0;
+  tbody.querySelectorAll("tr.sales-row").forEach(tr=>{
+    total++;
+    const matchType=!typeVal||tr.dataset.type===typeVal;
+    const matchStatus=statusVal==="All"||tr.textContent.includes(statusVal);
+    const vis=matchType&&matchStatus;
+    tr.style.display=vis?"":"none";
+    if(vis)shown++;
+  });
+  const c=document.querySelector("[data-sales-count]");if(c)c.textContent=`1–${shown} of ${total}`;
+}
+document.querySelector("[data-sales-type]").addEventListener("change",applySalesFilters);
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active",x===b));
+  applySalesFilters();
+}));
+document.querySelectorAll(".sales-row").forEach(tr=>tr.addEventListener("click",()=>toast("Row click → peek drawer (wired in shell)")));
+document.querySelectorAll("[data-row-menu]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();toast("Row actions menu");}));
+</script>
+</body>
+</html>

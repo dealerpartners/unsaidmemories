@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Unsaid — Global Shell</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:92vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:92vw;background:#fff;z-index:79;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .flyout-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);backdrop-filter:blur(4px);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto}
+  .flyout-scrim.open{display:flex}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .split-btn{border-radius:4px}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .view-toggle{display:inline-flex;background:#f4f3f7;border:1px solid #dad9dd;border-radius:6px;padding:2px;gap:2px}
+  .view-toggle button{padding:3px 9px;font:600 10px Inter;letter-spacing:.02em;color:#5a6355;border-radius:4px}
+  .view-toggle button.active{background:#0077c5;color:#fff}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="fixed top-0 left-0 right-0 z-50 flex flex-col bg-white border-b border-surface-dim">
+  <div class="h-[52px] px-6 flex items-center justify-between border-b border-surface-dim">
+    <div class="flex items-center gap-3">
+      <button id="btn-allapps" class="w-8 h-8 flex items-center justify-center rounded hover:bg-surface-container" title="All apps (⌘K)">
+        <span class="material-symbols-outlined text-[20px]">apps</span>
+      </button>
+      <button class="flex items-center gap-1 px-2 py-1 rounded bg-surface-container-low hover:bg-surface-container text-label-md">
+        <span>Unsaid</span>
+        <span class="material-symbols-outlined text-[16px] text-on-surface-variant">arrow_drop_down</span>
+      </button>
+    </div>
+    <div class="flex-1 max-w-[520px] mx-6">
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined absolute left-3 text-[18px] text-outline">search</span>
+        <input class="w-full h-8 pl-9 pr-9 bg-surface-container-low border border-surface-dim rounded text-body-sm placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Search transactions, contacts, reports, ⌘K" type="search"/>
+        <span class="absolute right-2 text-label-sm text-outline border border-surface-dim px-1 rounded bg-white">⌘K</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="flex items-center gap-1 px-3 h-8 rounded bg-tertiary text-white text-label-sm hover:bg-tertiary-container">
+        <span class="material-symbols-outlined text-[16px]">auto_awesome</span>Kinnect AI
+      </button>
+      <button id="btn-create" class="flex items-center gap-1 px-3 h-8 rounded bg-primary text-white text-label-sm hover:bg-primary-container">
+        <span class="material-symbols-outlined text-[16px]">add</span>Create
+      </button>
+      <span class="hidden xl:inline text-label-sm text-on-surface-variant">Sun, Nov 1, 2026</span>
+      <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-label-sm">SA</div>
+    </div>
+  </div>
+  <div class="h-[40px] px-2 flex items-center gap-1 bg-surface-container-low overflow-x-auto">
+    <nav id="tabstrip" class="flex items-center gap-1 h-full"></nav>
+  </div>
+</header>
+
+<!-- ═══════════ MAIN RAIL ═══════════ -->
+<aside class="fixed left-0 top-[92px] bottom-0 w-[64px] bg-white border-r border-surface-dim flex flex-col justify-between items-center py-2 z-40">
+  <div class="flex flex-col items-center gap-1 w-full px-1">
+    <button id="rail-create" class="w-10 h-10 flex items-center justify-center rounded bg-primary text-white hover:bg-primary-container" title="Create">
+      <span class="material-symbols-outlined text-[20px]">add</span>
+    </button>
+    <button data-rail="favorites" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Favorites">
+      <span class="material-symbols-outlined text-[19px]">star</span>
+    </button>
+    <button data-rail="home" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Home">
+      <span class="material-symbols-outlined text-[19px]">home</span>
+    </button>
+    <button data-rail="feed" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Feed">
+      <span class="material-symbols-outlined text-[19px]">dynamic_feed</span>
+    </button>
+    <button data-rail="reports" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Reports">
+      <span class="material-symbols-outlined text-[19px]">bar_chart</span>
+    </button>
+    <button data-rail="allapps" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="All apps">
+      <span class="material-symbols-outlined text-[19px]">apps</span>
+    </button>
+    <div class="w-6 h-px bg-surface-dim my-1"></div>
+    <span class="text-[8px] text-outline uppercase tracking-wider font-bold mb-1">Pinned</span>
+    <div id="rail-pinned" class="flex flex-col items-center gap-1 w-full"></div>
+    <div class="w-6 h-px bg-surface-dim my-1"></div>
+    <button data-rail="customize" class="rail-btn w-10 h-10 flex flex-col items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Customize">
+      <span class="material-symbols-outlined text-[19px]">tune</span>
+    </button>
+  </div>
+  <div class="flex flex-col items-center gap-1 w-full px-1 border-t border-surface-dim pt-1">
+    <button data-util="inbox" class="relative w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Inbox">
+      <span class="material-symbols-outlined text-[19px]">mail</span>
+      <span class="absolute top-1 right-1 w-4 h-4 bg-error text-white rounded-full text-[10px] font-semibold flex items-center justify-center">4</span>
+    </button>
+    <button data-util="settings" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Settings">
+      <span class="material-symbols-outlined text-[19px]">settings</span>
+    </button>
+    <button data-util="help" class="w-10 h-10 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container" title="Help">
+      <span class="material-symbols-outlined text-[19px]">help</span>
+    </button>
+    <button data-util="profile" class="w-8 h-8 rounded-full bg-primary text-white text-label-sm flex items-center justify-center my-1" title="Profile">SA</button>
+  </div>
+</aside>
+
+<!-- ═══════════ SIDE RAIL ═══════════ -->
+<aside class="fixed left-[64px] top-[92px] bottom-0 w-[264px] bg-white border-r border-surface-dim flex flex-col z-30">
+  <div class="flex items-center justify-between px-3 py-2 border-b border-surface-dim">
+    <div class="flex items-center gap-2 min-w-0">
+      <button id="gear-btn" class="w-7 h-7 rounded hover:bg-surface-container-low flex items-center justify-center text-on-surface-variant" title="Gear menu">
+        <span class="material-symbols-outlined text-[18px]">settings</span>
+      </button>
+      <span id="siderail-title" class="text-label-sm text-on-surface uppercase tracking-wider font-bold truncate">Finance</span>
+    </div>
+    <div class="view-toggle" id="view-toggle">
+      <button data-view="business" class="active">Business</button>
+      <button data-view="accountant">Accountant</button>
+    </div>
+  </div>
+
+  <div id="gear-menu" class="hidden-imp absolute left-2 top-[48px] w-60 bg-white border border-surface-dim rounded-lg shadow-xl z-50 py-1">
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Your company</div>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">apartment</span>Account &amp; settings</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">manage_accounts</span>Manage users</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">account_balance</span>Chart of accounts</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Lists</div>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">list</span>All lists</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">inventory_2</span>Products &amp; services</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">tune</span>Custom fields</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Tools</div>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">swap_horiz</span>Reclassify transactions</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">fact_check</span>Reconcile</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">history</span>Audit log</button>
+    <div class="border-t border-surface-dim my-1"></div>
+    <div class="px-3 py-1 text-[10px] text-outline uppercase tracking-wider font-bold">Profile</div>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">new_releases</span>What's new</button>
+    <button class="gear-item w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">chat</span>Feedback</button>
+  </div>
+
+  <div class="px-3 py-2 border-b border-surface-dim">
+    <div class="relative flex items-center">
+      <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+      <input id="side-filter" class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm placeholder:text-outline focus:outline-none focus:border-primary" placeholder="Filter…" type="text"/>
+    </div>
+  </div>
+
+  <div class="flex-1 min-h-0 overflow-y-auto">
+    <nav id="siderail"></nav>
+  </div>
+
+  <div class="border-t border-surface-dim p-2 bg-surface-container-low flex flex-col gap-1.5">
+    <div class="grid grid-cols-2 gap-1.5">
+      <button class="h-7 border border-surface-dim bg-white text-label-sm rounded hover:bg-surface-container-low flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[14px]">add_box</span>Workspace</button>
+      <button class="h-7 border border-surface-dim bg-white text-label-sm rounded hover:bg-surface-container-low flex items-center justify-center gap-1"><span class="material-symbols-outlined text-[14px]">download</span>Export</button>
+    </div>
+    <div class="flex items-center justify-between text-[10px] text-on-surface-variant px-0.5">
+      <span><span class="inline-block w-1.5 h-1.5 rounded-full bg-primary mr-1"></span>Sync: 2s ago</span>
+      <span>v3.8.4</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════ CONTENT ═══════════ -->
+<div class="pl-[328px]">
+  <main id="screen" class="pt-[92px] min-h-screen bg-background"></main>
+</div>
+
+<!-- ═══════════ PEEK DRAWER (row click) ═══════════ -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">receipt_long</span>
+      <span id="peek-title" class="text-headline-sm truncate">Invoice #1002</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peek-open-full" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">open_in_full</span>Open full</button>
+      <button id="peek-close" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peek-body" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- ═══════════ RECORD DRAWER (full form) ═══════════ -->
+<div class="drawer-scrim" id="record-scrim"></div>
+<div class="drawer" id="record-drawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2">
+      <span id="rec-icon" class="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+      <div>
+        <div id="rec-title" class="text-headline-sm">Invoice</div>
+        <div id="rec-sub" class="text-[11px] text-on-surface-variant">New record</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" title="Maximize"><span class="material-symbols-outlined text-[18px]">open_in_full</span></button>
+      <button id="rec-close" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="rec-body" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button id="rec-cancel" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main">Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main">Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DOCUMENT ENGINE (full page) ═══════════ -->
+<div id="doc-engine" class="hidden-imp fixed inset-0 bg-white z-[90] flex flex-col">
+  <div class="h-14 bg-white border-b border-surface-dim flex items-center justify-between px-5 shrink-0">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-outline">history</span>
+      <span id="doc-title" class="text-headline-sm">Invoice 1002</span>
+    </div>
+    <div class="flex items-center gap-5 h-full">
+      <button class="doc-tab tab-underline active h-full text-body-md" data-doctab="edit">Edit</button>
+      <button class="doc-tab tab-underline h-full text-body-md text-on-surface-variant" data-doctab="email">Email view</button>
+      <button class="doc-tab tab-underline h-full text-body-md text-on-surface-variant" data-doctab="payor">Payor view</button>
+      <button class="doc-tab tab-underline h-full text-body-md text-on-surface-variant" data-doctab="pdf">PDF view</button>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="flex items-center gap-1 text-body-md font-semibold text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">settings</span>Manage</button>
+      <button class="flex items-center gap-1 text-body-md font-semibold text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[18px]">chat</span>Feedback</button>
+      <button id="doc-close" class="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined">close</span></button>
+    </div>
+  </div>
+  <div class="flex-1 overflow-y-auto bg-background flex justify-center py-8">
+    <div class="doc-panel w-full max-w-4xl bg-white shadow-sm border border-surface-dim rounded-md" data-docpanel="edit">
+      <div class="p-8 pb-4 border-b border-surface-dim">
+        <h1 class="text-3xl font-bold text-primary mb-6">INVOICE</h1>
+        <div class="flex justify-between items-start">
+          <div class="w-1/2">
+            <div class="relative flex items-center w-64 mb-4">
+              <input class="w-full h-10 px-3 bg-white border border-surface-dim rounded focus:outline-none focus:border-primary text-body-md" placeholder="Add customer" type="text"/>
+              <span class="material-symbols-outlined absolute right-3 text-outline text-[18px]">expand_more</span>
+            </div>
+            <div class="h-4 w-48 bg-surface-container rounded mb-2"></div>
+            <div class="h-4 w-32 bg-surface-container rounded"></div>
+          </div>
+          <div class="w-1/2 flex flex-col items-end gap-3 text-body-md">
+            <div class="flex items-center gap-4 w-64"><span class="text-on-surface-variant w-20 text-right">Invoice no.</span><input class="flex-1 h-8 px-2 border border-surface-dim rounded text-right focus:outline-none focus:border-primary" value="1002"/></div>
+            <div class="flex items-center gap-4 w-64"><span class="text-on-surface-variant w-20 text-right">Terms</span><input class="flex-1 h-8 px-2 border border-surface-dim rounded text-right focus:outline-none focus:border-primary" value="Net 30"/></div>
+            <div class="flex items-center gap-4 w-64"><span class="text-on-surface-variant w-20 text-right">Invoice date</span><input class="flex-1 h-8 px-2 border border-surface-dim rounded text-right focus:outline-none focus:border-primary" value="11/01/2026"/></div>
+            <div class="flex items-center gap-4 w-64"><span class="text-on-surface-variant w-20 text-right">Due date</span><input class="flex-1 h-8 px-2 border border-surface-dim rounded text-right focus:outline-none focus:border-primary" value="12/01/2026"/></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-8">
+        <div class="font-semibold text-body-md mb-2">Product or service</div>
+        <table class="w-full text-left text-body-md mb-4">
+          <thead class="border-b border-surface-dim text-on-surface-variant font-semibold">
+            <tr><th class="py-2 w-10">#</th><th class="py-2">Product/service</th><th class="py-2">Description</th><th class="py-2 text-right w-16">Qty</th><th class="py-2 text-right w-24">Rate</th><th class="py-2 text-right w-24">Amount</th></tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-surface-dim">
+              <td class="py-2 text-on-surface-variant">1</td>
+              <td class="py-2"><input class="w-full h-8 bg-transparent border-b border-transparent focus:border-primary focus:outline-none" type="text"/></td>
+              <td class="py-2"><input class="w-full h-8 bg-transparent border-b border-transparent focus:border-primary focus:outline-none" type="text"/></td>
+              <td class="py-2"><input class="w-full h-8 text-right bg-transparent border-b border-transparent focus:border-primary focus:outline-none" type="text"/></td>
+              <td class="py-2"><input class="w-full h-8 text-right bg-transparent border-b border-transparent focus:border-primary focus:outline-none" type="text"/></td>
+              <td class="py-2 text-right text-on-surface-variant">0.00</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="flex gap-2 mb-8">
+          <button class="px-3 py-1 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Add lines</button>
+          <button class="px-3 py-1 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Clear all lines</button>
+        </div>
+        <div class="flex justify-between items-start">
+          <div class="w-1/2 pr-8 space-y-4">
+            <div>
+              <h3 class="font-semibold text-body-md mb-1">Customer payment options</h3>
+              <p class="text-[11px] text-on-surface-variant mb-2">Activate online card or bank transfer payments. <a href="#" class="text-primary hover:underline">Activate payments</a></p>
+              <textarea class="w-full h-20 p-2 border border-surface-dim rounded focus:outline-none focus:border-primary text-body-md" placeholder="Tell your customer how you want to get paid."></textarea>
+            </div>
+            <div>
+              <h3 class="font-semibold text-body-md mb-1">Note to customer</h3>
+              <textarea class="w-full h-16 p-2 border border-surface-dim rounded focus:outline-none focus:border-primary text-body-md" placeholder="Thank you for your business."></textarea>
+            </div>
+            <div>
+              <h3 class="font-semibold text-body-md mb-1">Attachments</h3>
+              <div class="border-2 border-dashed border-surface-dim rounded-lg p-4 text-center cursor-pointer hover:bg-surface-container-low">
+                <span class="text-primary text-body-md font-semibold">Add attachment</span>
+                <p class="text-[11px] text-on-surface-variant mt-1">Max file size: 20 MB</p>
+              </div>
+            </div>
+          </div>
+          <div class="w-1/2 flex flex-col gap-2 text-body-md">
+            <div class="flex justify-between py-1"><span class="text-on-surface-variant">Subtotal</span><span>$0.00</span></div>
+            <div class="flex justify-between py-1"><span class="text-on-surface-variant">Invoice total</span><span>$0.00</span></div>
+            <div class="flex justify-end"><a href="#" class="text-primary text-[11px] hover:underline">+ Charge a deposit</a></div>
+            <div class="flex justify-end"><a href="#" class="text-primary text-[11px] hover:underline">Edit totals</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-panel hidden-imp w-full max-w-2xl bg-white shadow-sm border border-surface-dim rounded-md p-8 text-center" data-docpanel="email">
+      <div class="bg-surface-container-low p-8 rounded-t-lg mb-6">
+        <h2 class="text-2xl font-bold mb-1">Your invoice is ready!</h2>
+        <p class="text-body-md text-on-surface-variant mb-4">Total $0.00</p>
+        <p class="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Balance Due</p>
+        <p class="text-4xl font-semibold">$0.00</p>
+      </div>
+      <p class="text-body-md mb-6">The email message you write will go here</p>
+      <button class="px-8 py-2 bg-primary text-white rounded-full font-semibold text-body-md mb-8 hover:bg-primary-container">View details</button>
+      <div class="border-t border-surface-dim pt-6 text-left">
+        <h3 class="font-bold text-body-md mb-2">Unsaid</h3>
+        <p class="text-[11px] text-primary mb-1">besttimemke@gmail.com</p>
+        <p class="text-[11px] text-primary">+1 (901) 210-3145</p>
+      </div>
+    </div>
+    <div class="doc-panel hidden-imp w-full max-w-4xl bg-white shadow-sm border border-surface-dim rounded-md" data-docpanel="payor">
+      <div class="p-8 flex gap-8">
+        <div class="w-2/3 space-y-4">
+          <div class="border border-surface-dim rounded-lg p-6 text-center bg-background">
+            <p class="text-[11px] text-on-surface-variant uppercase mb-1">Balance Due</p>
+            <p class="text-4xl font-semibold mb-2">$0.00</p>
+            <p class="text-[10px] text-on-surface-variant">© 2026 Intuit Inc. All rights reserved.</p>
+          </div>
+          <div class="border border-surface-dim rounded-lg p-6">
+            <h3 class="font-bold text-lg mb-1">Unsaid</h3>
+            <div class="grid grid-cols-2 gap-2 text-body-md">
+              <span class="text-on-surface-variant">Invoice</span><span class="text-right">1002</span>
+              <span class="text-on-surface-variant">Due date</span><span class="text-right">December 1, 2026</span>
+              <span class="text-on-surface-variant">Invoice amount</span><span class="text-right">$0.00</span>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+              <button class="px-4 py-1.5 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">View Invoice</button>
+              <button class="p-1.5 border border-surface-dim rounded hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">download</span></button>
+              <button class="p-1.5 border border-surface-dim rounded hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">print</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="w-1/3 border-l border-surface-dim pl-8">
+          <h3 class="font-bold text-body-md mb-4">Payment options</h3>
+          <div class="space-y-3 text-body-md">
+            <div class="flex justify-between items-center"><span>Invoice total</span><div class="w-8 h-4 bg-primary rounded-full relative"><div class="absolute right-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div></div></div>
+            <div class="flex justify-between items-center"><span>Deposit</span><div class="w-8 h-4 bg-surface-container-high rounded-full relative"><div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div></div></div>
+            <div class="flex justify-between items-center"><span>Discount</span><div class="w-8 h-4 bg-surface-container-high rounded-full relative"><div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-panel hidden-imp w-full max-w-3xl bg-white shadow-sm border border-surface-dim rounded-md p-8" data-docpanel="pdf">
+      <div class="flex justify-between items-start mb-12">
+        <div><h1 class="text-2xl font-bold text-primary mb-1">INVOICE</h1><p class="text-body-md font-semibold">Unsaid</p></div>
+        <div class="text-right text-body-md text-on-surface-variant"><p>besttimemke@gmail.com</p><p>+1 (901) 210-3145</p></div>
+      </div>
+      <div class="bg-surface-container-low p-6 mb-8">
+        <h3 class="font-bold text-body-md mb-2">Invoice details</h3>
+        <div class="grid grid-cols-2 gap-2 text-body-md text-on-surface-variant">
+          <span>Invoice no.: 1002</span><span>Terms: Net 30</span>
+          <span>Invoice date: 11/01/2026</span><span>Due date: 12/01/2026</span>
+        </div>
+      </div>
+      <table class="w-full text-left text-body-md mb-8">
+        <thead class="border-b-2 border-surface-dim font-semibold">
+          <tr><th class="py-2">#</th><th class="py-2">Product or service</th><th class="py-2">Description</th><th class="py-2 text-right">Qty</th><th class="py-2 text-right">Rate</th><th class="py-2 text-right">Amount</th></tr>
+        </thead>
+        <tbody><tr class="border-b border-surface-dim"><td class="py-4">1</td><td></td><td></td><td></td><td></td><td></td></tr></tbody>
+      </table>
+      <div class="flex justify-end">
+        <div class="w-1/3">
+          <div class="flex justify-between py-1 text-body-md font-semibold border-t border-surface-dim"><span>Total</span><span>$0.00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="h-16 bg-white border-t border-surface-dim flex items-center justify-between px-5 shrink-0">
+    <button id="doc-cancel" class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low">Cancel</button>
+    <div class="flex items-center gap-3">
+      <button class="text-body-md font-semibold hover:underline">Print or download</button>
+      <button class="text-body-md font-semibold text-on-surface-variant hover:text-on-surface">Make recurring</button>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main">Save</button>
+        <button class="h-8 px-1.5 border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex split-btn">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main">Review and send</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CREATE FLYOUT (§B1) ═══════════ -->
+<div class="flyout-scrim" id="flyout-create">
+  <div class="w-full max-w-[1180px] bg-white rounded-xl shadow-2xl flex flex-col my-3 md:my-5 overflow-hidden">
+    <div class="h-1 w-full bg-gradient-to-r from-primary via-primary-container to-secondary"></div>
+    <div class="px-6 pt-5 pb-3">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-primary-container text-white flex items-center justify-center"><span class="material-symbols-outlined text-[24px]">add_box</span></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-headline-lg font-bold">Create New</span>
+              <span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm text-[11px] font-semibold">P1 Universal Factory</span>
+            </div>
+            <p class="text-body-sm text-on-surface-variant mt-0.5">Grouped by counterparty — CREATE_REGISTRY §B1.</p>
+          </div>
+        </div>
+        <button class="flyout-close w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container"><span class="material-symbols-outlined text-[18px]">close</span></button>
+      </div>
+      <div class="relative flex items-center w-full mt-3">
+        <span class="material-symbols-outlined absolute left-3 text-[20px] text-primary">search</span>
+        <input id="create-search" class="w-full h-11 pl-11 pr-20 rounded-lg bg-surface-container-low text-body-md placeholder:text-on-surface-variant focus:outline-none focus:bg-white shadow-inner" placeholder="Search creates… (invoice, bill, customer, vendor, product, banner)" type="text"/>
+        <kbd class="absolute right-3 text-label-sm text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded">ESC</kbd>
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-surface-container-low grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3 max-h-[560px] overflow-y-auto" id="create-grid"></div>
+    <div class="px-6 py-3 bg-surface-container flex items-center justify-between">
+      <div class="flex items-center gap-2 text-on-surface-variant">
+        <span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+        <span class="text-label-sm text-on-surface">Save grammar: <strong class="text-primary">Save</strong> • <strong class="text-primary">Save &amp; New</strong> • <strong class="text-primary">Save &amp; Close</strong></span>
+      </div>
+      <span class="text-label-sm text-on-surface-variant">Universal footer applies to every create</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   DOMAIN MODEL — doc §G. Groups each start with Overview.
+   Every entry is a SCREEN, not a route.
+   ═══════════════════════════════════════════════════════════════════ */
+const DOMAINS = {
+  dashboard: { label:"Dashboard", icon:"dashboard",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"ops", label:"Operations Vitals", type:"overview" },
+        { id:"exec", label:"Executive GMV & Margins", type:"overview" },
+      ]},
+      { name:"Analytics", icon:"bar_chart", bg:"bg-qb-teal", screens:[
+        { id:"analytics", label:"Analytics", type:"overview" },
+        { id:"explorer", label:"Explorer", type:"list" },
+      ]},
+      { name:"Queues", icon:"notifications", bg:"bg-qb-maroon", screens:[
+        { id:"attention", label:"Attention Queue", type:"list" },
+      ]},
+    ]},
+  marketing: { label:"Marketing", icon:"campaign",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"social", label:"Publishing Overview", type:"overview" },
+      ]},
+      { name:"Social publishing", icon:"share", bg:"bg-qb-teal", screens:[
+        { id:"social-calendar", label:"Calendar", type:"list" },
+        { id:"social-queue", label:"Queue", type:"list" },
+      ]},
+      { name:"Promotions", icon:"sell", bg:"bg-qb-green", screens:[
+        { id:"promotions", label:"Discounts & Promo Rules", type:"list" },
+        { id:"newsletter", label:"Newsletter", type:"list" },
+      ]},
+    ]},
+  catalog: { label:"Catalog", icon:"inventory_2",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"catalog-overview", label:"Catalog Overview", type:"overview" },
+      ]},
+      { name:"Design Studio", icon:"palette", bg:"bg-qb-maroon", screens:[
+        { id:"studio", label:"Konva Studio", type:"wizard" },
+      ]},
+      { name:"Products and listings", icon:"checkroom", bg:"bg-qb-green", screens:[
+        { id:"products", label:"Products & services", type:"list" },
+        { id:"bundles", label:"Bundles", type:"list" },
+      ]},
+      { name:"Suppliers", icon:"factory", bg:"bg-qb-teal", screens:[
+        { id:"suppliers", label:"Suppliers", type:"list" },
+      ]},
+    ]},
+  orders: { label:"Orders", icon:"local_shipping",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"orders-overview", label:"Orders Overview", type:"overview" },
+      ]},
+      { name:"Order management", icon:"assignment", bg:"bg-qb-teal", screens:[
+        { id:"orders", label:"Orders", type:"list" },
+      ]},
+      { name:"Purchasing", icon:"shopping_bag", bg:"bg-qb-maroon", screens:[
+        { id:"purchase-orders", label:"Purchase orders", type:"list" },
+      ]},
+      { name:"Fulfillment", icon:"inventory", bg:"bg-qb-green", screens:[
+        { id:"fulfillment", label:"Fulfillment Queue", type:"list" },
+        { id:"shipping", label:"Batch slips & labels", type:"list" },
+      ]},
+      { name:"Returns", icon:"assignment_return", bg:"bg-error", screens:[
+        { id:"returns", label:"Returns & Claims", type:"list" },
+      ]},
+    ]},
+  finance: { label:"Finance", icon:"account_balance",
+    groups:[
+      { name:"Accounting", icon:"play_arrow", bg:"bg-qb-navy", screens:[
+        { id:"accounting", label:"Overview", type:"overview" },
+        { id:"bank", label:"Bank transactions", type:"list" },
+        { id:"receipts", label:"Receipts", type:"list" },
+        { id:"reconcile", label:"Reconcile", type:"wizard" },
+        { id:"rules", label:"Rules", type:"list" },
+        { id:"coa", label:"Chart of accounts", type:"list" },
+        { id:"reports", label:"Reports", type:"list" },
+      ]},
+      { name:"Business Tax", icon:"description", bg:"bg-qb-maroon", screens:[
+        { id:"tax-overview", label:"Overview", type:"overview" },
+        { id:"tax-summary", label:"Tax summary", type:"list" },
+        { id:"tax-filing", label:"Year-end and filing", type:"list" },
+      ]},
+      { name:"Expenses & Bills", icon:"receipt", bg:"bg-qb-green", screens:[
+        { id:"bills-overview", label:"Overview", type:"overview" },
+        { id:"expenses", label:"Expense transactions", type:"list" },
+        { id:"vendors", label:"Vendors", type:"list" },
+        { id:"bills", label:"Bills", type:"list" },
+        { id:"bill-payments", label:"Bill payments", type:"list" },
+      ]},
+      { name:"Sales & Get Paid", icon:"attach_money", bg:"bg-qb-teal", screens:[
+        { id:"sales-overview", label:"Overview", type:"overview" },
+        { id:"sales-transactions", label:"Sales transactions", type:"list" },
+        { id:"invoices", label:"Invoices", type:"list" },
+        { id:"payment-links", label:"Payment links", type:"list" },
+        { id:"products", label:"Products & services", type:"list" },
+      ]},
+      { name:"Customer Hub", icon:"groups", bg:"bg-primary", screens:[
+        { id:"customer-overview", label:"Overview", type:"overview" },
+        { id:"customers", label:"Customers", type:"list" },
+        { id:"estimates", label:"Estimates", type:"list" },
+        { id:"statements", label:"Statements", type:"list" },
+      ]},
+      { name:"Cap Table", icon:"pie_chart", bg:"bg-qb-navy", screens:[
+        { id:"cap-overview", label:"Overview", type:"overview" },
+        { id:"cap-table", label:"Cap Table", type:"list" },
+        { id:"cap-holders", label:"Stakeholders", type:"list" },
+        { id:"cap-rounds", label:"Funding Rounds", type:"list" },
+        { id:"cap-options", label:"Option Pool", type:"list" },
+        { id:"cap-safes", label:"SAFEs & Convertibles", type:"list" },
+        { id:"cap-dilution", label:"Dilution Modeler", type:"wizard" },
+        { id:"cap-waterfall", label:"Liquidation Waterfall", type:"wizard" },
+        { id:"cap-409a", label:"409A & Valuations", type:"list" },
+        { id:"cap-documents", label:"Documents", type:"list" },
+        { id:"cap-equity-events", label:"Equity Events", type:"list" },
+      ]},
+    ]},
+  contacts: { label:"Contacts", icon:"groups",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"crm-overview", label:"CRM Overview", type:"overview" },
+      ]},
+      { name:"Parties", icon:"people", bg:"bg-qb-teal", screens:[
+        { id:"customers", label:"Customers", type:"list" },
+        { id:"sellers", label:"Sellers", type:"list" },
+      ]},
+      { name:"CRM tools", icon:"hub", bg:"bg-qb-green", screens:[
+        { id:"leads", label:"Leads", type:"list" },
+        { id:"segments", label:"Segments", type:"list" },
+      ]},
+    ]},
+  support: { label:"Support", icon:"support_agent",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"support-overview", label:"Support Overview", type:"overview" },
+      ]},
+      { name:"Inbox & tickets", icon:"inbox", bg:"bg-qb-teal", screens:[
+        { id:"messages", label:"Omnichannel Inbox", type:"list" },
+        { id:"tickets", label:"Tickets", type:"list" },
+      ]},
+      { name:"SLA & routing", icon:"route", bg:"bg-qb-maroon", screens:[
+        { id:"queues", label:"Queues", type:"list" },
+        { id:"sla", label:"SLA rules", type:"list" },
+      ]},
+      { name:"Trust & Safety", icon:"shield", bg:"bg-qb-green", screens:[
+        { id:"trust", label:"Trust & Safety", type:"list" },
+      ]},
+    ]},
+  settings: { label:"Settings", icon:"settings",
+    groups:[
+      { name:"Overview", icon:"play_circle", bg:"bg-qb-navy", screens:[
+        { id:"settings-overview", label:"Overview", type:"overview" },
+      ]},
+      { name:"Staff & roles", icon:"badge", bg:"bg-qb-teal", screens:[
+        { id:"users", label:"Users", type:"list" },
+        { id:"roles", label:"Roles", type:"list" },
+      ]},
+      { name:"Integrations", icon:"extension", bg:"bg-qb-green", screens:[
+        { id:"integrations", label:"Integrations catalog", type:"list" },
+      ]},
+      { name:"System", icon:"dns", bg:"bg-qb-maroon", screens:[
+        { id:"system", label:"System", type:"list" },
+        { id:"audit", label:"Audit", type:"list" },
+      ]},
+    ]},
+};
+
+const PINNED = ["dashboard","marketing","catalog","orders","finance","contacts","support","settings"];
+
+let activeDomain = "finance";
+let activeScreen = "invoices";
+const openGroups = {};
+PINNED.forEach(k => openGroups[k] = new Set([DOMAINS[k].groups[0].name]));
+openGroups.finance = new Set(["Sales & Get Paid","Expenses & Bills","Business Tax","Cap Table"]);
+
+function screensOf(d){ return d.groups.flatMap(g => g.screens.map(s => ({...s, group:g.name}))); }
+function findScreen(domainId, screenId){ return screensOf(DOMAINS[domainId]).find(s => s.id === screenId) || screensOf(DOMAINS[domainId])[0]; }
+function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove("show"),1800); }
+
+/* ═══════════ RAIL ═══════════ */
+function renderRailPinned(){
+  const c = document.getElementById("rail-pinned");
+  c.innerHTML = PINNED.map(k => {
+    const d = DOMAINS[k]; const active = k === activeDomain;
+    return `<button data-pinned="${k}" class="w-10 h-10 flex items-center justify-center rounded ${active?"bg-surface-container-high text-primary":"text-on-surface-variant hover:bg-surface-container"}" title="${d.label}">
+      <span class="material-symbols-outlined text-[19px]">${d.icon}</span></button>`;
+  }).join("");
+  c.querySelectorAll("[data-pinned]").forEach(b => b.onclick = () => {
+    activeDomain = b.dataset.pinned;
+    activeScreen = screensOf(DOMAINS[activeDomain])[0].id;
+    openGroups[activeDomain] = new Set([DOMAINS[activeDomain].groups[0].name]);
+    renderAll();
+  });
+}
+
+/* ═══════════ TABSTRIP ═══════════ */
+function renderTabs(){
+  const n = document.getElementById("tabstrip");
+  n.innerHTML = PINNED.map(k => {
+    const active = k === activeDomain;
+    return `<a href="#" data-tab="${k}" class="h-[32px] px-3 inline-flex items-center rounded-t text-label-md whitespace-nowrap ${active?"bg-white text-on-surface border-b-2 border-primary":"bg-surface-container-high text-on-surface-variant hover:bg-white"}">${DOMAINS[k].label}</a>`;
+  }).join("");
+  n.querySelectorAll("[data-tab]").forEach(a => a.onclick = e => {
+    e.preventDefault();
+    activeDomain = a.dataset.tab;
+    activeScreen = screensOf(DOMAINS[activeDomain])[0].id;
+    openGroups[activeDomain] = new Set([DOMAINS[activeDomain].groups[0].name]);
+    renderAll();
+  });
+}
+
+/* ═══════════ SIDE RAIL ═══════════ */
+function renderSideRail(){
+  const d = DOMAINS[activeDomain];
+  document.getElementById("siderail-title").textContent = d.label;
+  const nav = document.getElementById("siderail");
+  const q = (document.getElementById("side-filter").value || "").toLowerCase();
+
+  if (!openGroups[activeDomain]) openGroups[activeDomain] = new Set();
+  const activeGroup = findScreen(activeDomain, activeScreen).group;
+  openGroups[activeDomain].add(activeGroup);
+
+  nav.innerHTML = d.groups.map(g => {
+    const isOpen = openGroups[activeDomain].has(g.name) || (q && g.screens.some(s => s.label.toLowerCase().includes(q)));
+    const vis = g.screens.filter(s => !q || s.label.toLowerCase().includes(q));
+    if (q && vis.length === 0) return "";
+    const hasOverview = g.screens[0].type === "overview";
+    return `<div class="border-b border-surface-dim last:border-b-0">
+      <button data-group="${g.name}" class="w-full flex items-center justify-between px-3 py-2.5 hover:bg-surface-container-low">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-6 h-6 rounded-full ${g.bg} flex items-center justify-center text-white shrink-0">
+            <span class="material-symbols-outlined text-[13px]">${g.icon}</span>
+          </div>
+          <span class="text-label-md text-[13px] font-semibold truncate">${g.name}</span>
+        </div>
+        <div class="flex items-center gap-1 shrink-0">
+          <span class="text-[9px] text-on-surface-variant bg-surface-container px-1.5 py-0.5 rounded-full font-semibold">${g.screens.length}</span>
+          <span class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform ${isOpen?'rotate-180':''}">expand_more</span>
+        </div>
+      </button>
+      ${isOpen ? `<div class="pb-1.5">${vis.map(s => {
+        const active = s.id === activeScreen;
+        const isOv = s.type === "overview";
+        return `<button data-screen="${s.id}" class="w-[calc(100%-16px)] mx-2 px-2.5 py-1.5 rounded text-body-sm flex items-center justify-between gap-2 ${active?"bg-qb-blue text-white font-medium":isOv?"text-on-surface font-medium hover:bg-surface-container-low":"text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low"}">
+          <span class="truncate flex items-center gap-1.5">${isOv?`<span class="material-symbols-outlined text-[13px]">play_circle</span>`:""}${s.label}</span></button>`;
+      }).join("")}</div>` : ""}
+    </div>`;
+  }).join("");
+
+  nav.querySelectorAll("[data-group]").forEach(b => b.onclick = () => {
+    const g = b.dataset.group;
+    if (openGroups[activeDomain].has(g)) openGroups[activeDomain].delete(g);
+    else openGroups[activeDomain].add(g);
+    renderSideRail();
+  });
+  nav.querySelectorAll("[data-screen]").forEach(b => b.onclick = () => {
+    activeScreen = b.dataset.screen; renderAll();
+  });
+}
+
+/* ═══════════ SCREENS ═══════════ */
+const DEMO_ROWS = {
+  invoices: [
+    { no:"1002", date:"11/01/2026", party:"Acme Corp", due:"12/01/2026", amount:"$1,240.00", balance:"$1,240.00", status:"Open" },
+    { no:"1001", date:"10/28/2026", party:"Blue Ridge Co.", due:"11/27/2026", amount:"$3,410.00", balance:"$0.00", status:"Paid" },
+    { no:"0998", date:"10/15/2026", party:"Maple Supply", due:"11/14/2026", amount:"$890.00", balance:"$890.00", status:"Overdue" },
+    { no:"0996", date:"10/02/2026", party:"Northwind Labs", due:"11/01/2026", amount:"$2,100.00", balance:"$2,100.00", status:"Open" },
+    { no:"0994", date:"09/20/2026", party:"Orion Apparel", due:"10/20/2026", amount:"$540.00", balance:"$0.00", status:"Paid" },
+  ],
+  bills: [
+    { vendor:"Printful", billno:"PF-9211", due:"11/10/2026", amount:"$2,880.00", status:"For review" },
+    { vendor:"Gelato", billno:"GL-4402", due:"11/15/2026", amount:"$1,200.00", status:"Unpaid" },
+    { vendor:"Printify", billno:"PR-3388", due:"10/30/2026", amount:"$640.00", status:"Paid" },
+  ],
+  expenses: [
+    { date:"10/30/2026", payee:"Adobe", category:"Software", paid:"Visa •4421", amount:"$59.99", receipt:"✓" },
+    { date:"10/29/2026", payee:"FedEx", category:"Shipping", paid:"Bank •9910", amount:"$84.20", receipt:"✓" },
+    { date:"10/28/2026", payee:"Staples", category:"Office", paid:"Visa •4421", amount:"$142.50", receipt:"—" },
+  ],
+  customers: [
+    { name:"Acme Corp", email:"ap@acme.com", orders:12, ltv:"$18,240", balance:"$1,240", last:"11/01/2026", consent:"Yes" },
+    { name:"Blue Ridge Co.", email:"billing@blueridge.co", orders:5, ltv:"$9,810", balance:"$0", last:"10/28/2026", consent:"Yes" },
+    { name:"Maple Supply", email:"ar@maplesupply.io", orders:2, ltv:"$1,780", balance:"$890", last:"10/15/2026", consent:"No" },
+  ],
+  vendors: [
+    { name:"Printful", role:"Supplier", open:"$2,880", ytd:"$42,100", tax:"1099 —", sla:"99.1%" },
+    { name:"Gelato", role:"Supplier", open:"$1,200", ytd:"$18,400", tax:"1099 —", sla:"98.4%" },
+    { name:"Printify", role:"Supplier", open:"$0", ytd:"$31,900", tax:"1099 —", sla:"99.6%" },
+  ],
+  products: [
+    { name:"Classic Tee", sku:"TEE-001", supplier:"Printful", price:"$24.00", margin:"62%", status:"Published" },
+    { name:"Canvas Tote", sku:"TOTE-014", supplier:"Gelato", price:"$18.00", margin:"55%", status:"Published" },
+    { name:"Mug 11oz", sku:"MUG-003", supplier:"Printify", price:"$14.00", margin:"48%", status:"Draft" },
+  ],
+};
+
+function statusPill(s){
+  const map = {
+    "Open": "bg-primary/10 text-primary",
+    "Paid": "bg-secondary-container text-on-secondary-container",
+    "Overdue": "bg-error-container text-on-error-container",
+    "For review": "bg-tertiary/15 text-tertiary",
+    "Unpaid": "bg-error-container text-on-error-container",
+    "Draft": "bg-surface-container text-on-surface-variant",
+    "Published": "bg-secondary-container text-on-secondary-container",
+    "Active": "bg-secondary-container text-on-secondary-container",
+    "Common": "bg-qb-blue/15 text-qb-blue",
+    "Preferred (Seed)": "bg-qb-green/15 text-qb-green",
+    "Options": "bg-qb-maroon/15 text-qb-maroon",
+    "SAFE": "bg-qb-teal/15 text-qb-teal",
+    "Closed": "bg-secondary-container text-on-secondary-container",
+    "In progress": "bg-tertiary/15 text-tertiary",
+    "Outstanding": "bg-tertiary/15 text-tertiary",
+    "Converted": "bg-surface-container text-on-surface-variant",
+    "Current": "bg-secondary-container text-on-secondary-container",
+    "Superseded": "bg-surface-container text-on-surface-variant",
+    "Signed": "bg-secondary-container text-on-secondary-container",
+    "Fully vested": "bg-secondary-container text-on-secondary-container",
+    "Exercised": "bg-qb-blue/15 text-qb-blue",
+  };
+  return `<span class="px-2 py-0.5 rounded-full text-label-sm ${map[s] || "bg-surface-container text-on-surface-variant"}">${s}</span>`;
+}
+
+function emptyState(title, steps, primary){
+  return `<div class="py-16 px-8 text-center">
+    <div class="w-16 h-16 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-4">
+      <span class="material-symbols-outlined text-[32px] text-outline">inbox</span>
+    </div>
+    <h3 class="text-headline-sm mb-1">${title}</h3>
+    <p class="text-body-sm text-on-surface-variant mb-4 max-w-sm mx-auto">${steps}</p>
+    <div class="flex items-center justify-center gap-2">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-import><span class="material-symbols-outlined text-[16px]">upload</span>Import</button>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new="${primary}"><span class="material-symbols-outlined text-[16px]">add</span>${primary}</button>
+    </div>
+  </div>`;
+}
+
+function listScreen(cfg){
+  const rows = DEMO_ROWS[cfg.key] || [];
+  const tabs = cfg.tabs || ["All"];
+  const cols = cfg.cols;
+  const hasData = rows.length > 0;
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>${DOMAINS[activeDomain].label}</span><span class="text-outline">/</span>
+          <span>${findScreen(activeDomain, activeScreen).group}</span>
+        </div>
+        <h1 class="text-headline-lg">${cfg.title}</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">${cfg.subtitle}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex split-btn">
+          <button class="h-8 px-3 bg-primary text-white rounded-l text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-new="${cfg.newLabel}"><span class="material-symbols-outlined text-[16px]">add</span>New transaction</button>
+          <button class="h-8 px-1.5 bg-primary text-white split-btn-arrow hover:bg-primary-container"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+        </div>
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-export><span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-customize><span class="material-symbols-outlined text-[16px]">tune</span>Customize</button>
+      </div>
+    </div>
+
+    ${cfg.createActionsRow ? `<div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+      ${cfg.createActionsRow.map(([l,i]) => `<button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="${l}"><span class="material-symbols-outlined text-[16px]">${i}</span>${l}</button>`).join("")}
+      <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create><span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+    </div>` : ""}
+
+    <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+      <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+        ${tabs.map((t, i) => `<button class="h-full px-3 text-label-md tab-underline ${i===0?"active":"text-on-surface-variant"}" data-viewtab="${t}">${t}</button>`).join("")}
+      </div>
+      <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim">
+        <div class="relative flex items-center flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+          <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter rows…"/>
+        </div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span>Date range</button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views</button>
+        <span class="ml-auto text-[11px] text-on-surface-variant">1–${rows.length} of ${rows.length}</span>
+      </div>
+
+      ${hasData ? `<table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr>
+            <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check"/></th>
+            ${cols.map(c => `<th class="px-3 py-2 ${c.right?"text-right":""}">${c.label}</th>`).join("")}
+            <th class="w-8"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${rows.map((r, i) => `<tr class="hover:bg-surface-container-low cursor-pointer row-click" data-row='${JSON.stringify(r).replace(/'/g,"&apos;")}' data-family="${cfg.family}">
+            <td class="px-3 py-2"><input type="checkbox" class="row-check" onclick="event.stopPropagation()"/></td>
+            ${cols.map(c => `<td class="px-3 py-2 ${c.right?"text-right":""}">${renderCell(c.key, r[c.key])}</td>`).join("")}
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions menu')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>` : emptyState(cfg.emptyTitle || `No ${cfg.title.toLowerCase()} yet`, cfg.emptySteps || "Create your first record or import from a CSV.", cfg.newLabel)}
+    </div>
+  </div>`;
+}
+
+function renderCell(key, val){
+  if (key === "status") return statusPill(val);
+  return val;
+}
+
+function overviewScreen(cfg){
+  return `<div class="px-6 pb-12">
+    <div class="py-4">
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>${DOMAINS[activeDomain].label}</span><span class="text-outline">/</span>
+        <span>${findScreen(activeDomain, activeScreen).group}</span>
+      </div>
+      <h1 class="text-headline-lg">${cfg.title}</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">${cfg.subtitle}</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+      ${(cfg.kpis || []).map(k => `<div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">${k.label}</span>
+        <div class="text-headline-lg mt-1">${k.value}</div>
+        <div class="text-[11px] ${k.delta?.startsWith("+")?"text-secondary":"text-error"} mt-1">${k.delta || ""}</div>
+      </div>`).join("")}
+    </div>
+
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+      ${(cfg.actions || []).map(([l,i]) => `<button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-new="${l}"><span class="material-symbols-outlined text-[16px]">${i}</span>${l}</button>`).join("")}
+      <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create><span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+    </div>
+
+    <div class="bg-white rounded-xl border border-surface-dim p-5">
+      <h2 class="text-headline-sm mb-2">${cfg.panelTitle || "Business at a glance"}</h2>
+      <p class="text-body-sm text-on-surface-variant">${cfg.panelText || "Insight cards and suggestions live here. Setup checklist card until company setup is complete."}</p>
+    </div>
+  </div>`;
+}
+
+const SCREEN_DEFS = {
+  invoices: () => listScreen({
+    key:"invoices", title:"Invoices", subtitle:"All invoices across customers.", family:"document", newLabel:"Invoice",
+    tabs:["All","Open","Overdue","Paid"],
+    cols:[
+      {key:"no",label:"No."},{key:"date",label:"Date"},{key:"party",label:"Customer"},
+      {key:"due",label:"Due"},{key:"amount",label:"Amount",right:true},
+      {key:"balance",label:"Balance",right:true},{key:"status",label:"Status"}
+    ],
+    createActionsRow:[["Invoice","receipt_long"],["Receive payment","price_check"],["Estimate","request_quote"],["Customer","person_add"]]
+  }),
+  bills: () => listScreen({
+    key:"bills", title:"Bills", subtitle:"Vendor bills — For review / Unpaid / Paid.", family:"document", newLabel:"Bill",
+    tabs:["For review","Unpaid","Paid","All"],
+    cols:[
+      {key:"vendor",label:"Vendor"},{key:"billno",label:"Bill no."},{key:"due",label:"Due"},
+      {key:"amount",label:"Amount",right:true},{key:"status",label:"Status"}
+    ]
+  }),
+  expenses: () => listScreen({
+    key:"expenses", title:"Expense transactions", subtitle:"Bills, expenses, checks, credits.", family:"document", newLabel:"Expense",
+    tabs:["All","Bills","Expenses","Checks","Credits"],
+    cols:[
+      {key:"date",label:"Date"},{key:"payee",label:"Payee"},{key:"category",label:"Category"},
+      {key:"paid",label:"Paid from"},{key:"amount",label:"Amount",right:true},{key:"receipt",label:"Receipt"}
+    ]
+  }),
+  customers: () => listScreen({
+    key:"customers", title:"Customers", subtitle:"Party list — role=Customer.", family:"party", newLabel:"Customer",
+    tabs:["All","Active","New","Recurring","Inactive","Needs follow-up"],
+    cols:[
+      {key:"name",label:"Name"},{key:"email",label:"Email"},{key:"orders",label:"Orders",right:true},
+      {key:"ltv",label:"LTV",right:true},{key:"balance",label:"Balance",right:true},
+      {key:"last",label:"Last order"},{key:"consent",label:"Marketing consent"}
+    ],
+    createActionsRow:[["Customer","person_add"],["Vendor","domain_add"],["Supplier","local_shipping"],["Contractor","engineering"]]
+  }),
+  vendors: () => listScreen({
+    key:"vendors", title:"Vendors", subtitle:"Party list — role=Vendor.", family:"party", newLabel:"Vendor",
+    tabs:["All","Suppliers","Contractors","1099"],
+    cols:[
+      {key:"name",label:"Name"},{key:"role",label:"Role"},{key:"open",label:"Open bills",right:true},
+      {key:"ytd",label:"YTD paid",right:true},{key:"tax",label:"1099"},{key:"sla",label:"SLA",right:true}
+    ]
+  }),
+  products: () => listScreen({
+    key:"products", title:"Products & services", subtitle:"Same list as Catalog > Products.", family:"catalog", newLabel:"Product",
+    tabs:["All","Published","Draft","Archived"],
+    cols:[
+      {key:"name",label:"Name"},{key:"sku",label:"SKU"},{key:"supplier",label:"Supplier"},
+      {key:"price",label:"Price",right:true},{key:"margin",label:"Margin",right:true},{key:"status",label:"Status"}
+    ]
+  }),
+  sales_overview: () => overviewScreen({
+    title:"Sales & Get Paid — Overview", subtitle:"Payment-request funnel: Not paid / Paid / Deposited.",
+    kpis:[
+      {label:"Not paid", value:"$8,420", delta:"+12%"},
+      {label:"Paid", value:"$24,180", delta:"+8%"},
+      {label:"Deposited", value:"$22,900", delta:"+6%"},
+      {label:"Avg. days to pay", value:"14.2", delta:"−1.3"}
+    ],
+    actions:[["Invoice","receipt_long"],["Receive payment","price_check"],["Payment link","link"],["Estimate","request_quote"]],
+    panelTitle:"Payment funnel", panelText:"Not paid → Paid → Deposited breakdown appears here as a funnel visualization."
+  }),
+  expenses_overview: () => overviewScreen({
+    title:"Expenses & Bills — Overview", subtitle:"Bills, expense transactions, vendors, bill payments.",
+    kpis:[
+      {label:"Bills due", value:"$4,080", delta:"3 bills"},
+      {label:"Expenses MTD", value:"$1,840", delta:"+4%"},
+      {label:"Vendors", value:"42", delta:""},
+      {label:"1099 pending", value:"6", delta:""}
+    ],
+    actions:[["Bill","description"],["Expense","credit_card"],["Pay bills","account_balance_wallet"],["Vendor","domain_add"]],
+    panelTitle:"Receipts inbox", panelText:"Drop, upload, or snap a receipt. Forwarding address: receipts@unsaid.unsaid.app."
+  }),
+  tax_overview: () => overviewScreen({
+    title:"Business Tax — Overview", subtitle:"Tax deadlines, taxable profit estimate, create actions.",
+    kpis:[
+      {label:"Est. taxable profit", value:"$18,240", delta:""},
+      {label:"Next deadline", value:"Jan 15, 2027", delta:"Q4 estimated"},
+      {label:"Sales tax payable", value:"$1,880", delta:""},
+      {label:"Mapped accounts", value:"31 / 34", delta:""}
+    ],
+    actions:[["Tax summary","description"],["File","upload_file"]],
+    panelTitle:"Map accounts task", panelText:"Map income/expense accounts to tax categories before filing."
+  }),
+  customers_overview: () => overviewScreen({
+    title:"Customer Hub — Overview", subtitle:"Customers, estimates, statements.",
+    kpis:[
+      {label:"Total customers", value:"184", delta:"+9"},
+      {label:"Active", value:"142", delta:""},
+      {label:"At risk", value:"11", delta:""},
+      {label:"Outstanding balance", value:"$8,420", delta:""}
+    ],
+    actions:[["Customer","person_add"],["Estimate","request_quote"],["Statement","summarize"]],
+    panelTitle:"Top customers by LTV", panelText:"Ranked list of customers by lifetime value."
+  }),
+};
+
+/* Fallback screen for anything not specifically defined */
+function genericList(title, subtitle){
+  return listScreen({
+    key:"__empty", title, subtitle, family:"generic", newLabel:"Create",
+    cols:[{key:"name",label:"Name"}], tabs:["All"],
+    emptyTitle:`No ${title.toLowerCase()} yet`,
+    emptySteps:"Import from a file or create your first record to get started."
+  });
+}
+
+function renderScreen(){
+  const s = findScreen(activeDomain, activeScreen);
+  const root = document.getElementById("screen");
+  const def = SCREEN_DEFS[s.id];
+  if (def) { root.innerHTML = def(); }
+  else if (s.type === "overview") { root.innerHTML = overviewScreen({ title:s.label, subtitle:"Overview screen.", kpis:[], actions:[] }); }
+  else { root.innerHTML = genericList(s.label, "List screen — view tabs, filter bar, bulk bar, row menu, right peek drawer."); }
+  wireScreen();
+}
+
+function wireScreen(){
+  document.querySelectorAll("[data-new]").forEach(b => b.onclick = () => handleCreate(b.dataset.new));
+  document.querySelectorAll("[data-open-create]").forEach(b => b.onclick = () => openFlyout("flyout-create"));
+  document.querySelectorAll("[data-customize]").forEach(b => b.onclick = () => toast("Customize panel — Data / Visual tabs"));
+  document.querySelectorAll("[data-export]").forEach(b => b.onclick = () => toast("Exported"));
+  document.querySelectorAll("[data-import]").forEach(b => b.onclick = () => toast("Import dialog"));
+  document.querySelectorAll("[data-viewtab]").forEach(b => b.onclick = () => {
+    document.querySelectorAll("[data-viewtab]").forEach(x => x.classList.toggle("active", x === b));
+  });
+  document.querySelectorAll(".row-click").forEach(tr => tr.onclick = () => openPeek(tr.dataset.row, tr.dataset.family));
+}
+
+/* ═══════════ PEEK DRAWER ═══════════ */
+function openPeek(rowJson, family){
+  const row = JSON.parse(rowJson);
+  document.getElementById("peek-title").textContent = row.no ? `Invoice #${row.no}` : (row.name || row.vendor || row.payee || row.holder || "Record");
+  const body = document.getElementById("peek-body");
+  const fields = Object.entries(row).filter(([k]) => k !== "status");
+  body.innerHTML = `
+    <div class="mb-4 flex items-center gap-2">${row.status ? statusPill(row.status) : ""}</div>
+    <dl class="divide-y divide-surface-dim">
+      ${fields.map(([k, v]) => `<div class="flex justify-between py-2">
+        <dt class="text-on-surface-variant capitalize">${k}</dt>
+        <dd class="text-on-surface font-medium">${v}</dd>
+      </div>`).join("")}
+    </dl>
+    <div class="mt-5 pt-4 border-t border-surface-dim">
+      <h3 class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Activity</h3>
+      <div class="space-y-2 text-body-sm text-on-surface-variant">
+        <div class="flex gap-2"><span class="material-symbols-outlined text-[14px]">check_circle</span>Created by SA</div>
+        <div class="flex gap-2"><span class="material-symbols-outlined text-[14px]">mail</span>Emailed to customer</div>
+        <div class="flex gap-2"><span class="material-symbols-outlined text-[14px]">visibility</span>Viewed 3 times</div>
+      </div>
+    </div>
+    <div class="mt-5 pt-4 border-t border-surface-dim">
+      <h3 class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Notes &amp; tasks</h3>
+      <textarea class="w-full h-16 p-2 border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Add a note…"></textarea>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+}
+document.getElementById("peek-close").onclick = () => document.getElementById("peek").classList.remove("open");
+document.getElementById("peek-open-full").onclick = () => {
+  document.getElementById("peek").classList.remove("open");
+  openDocEngine();
+};
+
+/* ═══════════ RECORD DRAWER ═══════════ */
+const DRAWER_FIELDS = {
+  Invoice: [
+    { label:"Customer", type:"text", placeholder:"Add customer" },
+    { label:"Invoice no.", type:"text", value:"1003" },
+    { label:"Terms", type:"text", value:"Net 30" },
+    { label:"Invoice date", type:"date", value:"2026-11-01" },
+    { label:"Due date", type:"date", value:"2026-12-01" },
+  ],
+  Customer: [
+    { label:"Company name", type:"text" },
+    { label:"Display name", type:"text" },
+    { label:"First name", type:"text" }, { label:"Last name", type:"text" },
+    { label:"Email", type:"email" }, { label:"Phone", type:"tel" },
+  ],
+  Vendor: [
+    { label:"Company name", type:"text" },
+    { label:"Email", type:"email" },
+    { label:"Terms", type:"text", value:"Net 30" },
+    { label:"Default expense account", type:"text" },
+  ],
+  Product: [
+    { label:"Name", type:"text" },
+    { label:"Type", type:"text", value:"Product" },
+    { label:"SKU", type:"text" },
+    { label:"Sales price", type:"number" },
+  ],
+};
+
+function openRecordDrawer(kind){
+  const fields = DRAWER_FIELDS[kind] || [{ label:"Name", type:"text" }];
+  document.getElementById("rec-icon").textContent = kind === "Customer" || kind === "Vendor" ? "person" : kind === "Product" ? "checkroom" : "receipt_long";
+  document.getElementById("rec-title").textContent = kind;
+  document.getElementById("rec-sub").textContent = kind === "Invoice" ? "Document engine available on Open full" : "New record";
+  const body = document.getElementById("rec-body");
+  body.innerHTML = `
+    <div class="flex items-center gap-2">
+      <span class="text-label-sm px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">Save grammar</span>
+      <span class="text-body-sm text-on-surface-variant">Save · Save and new · Save and close</span>
+    </div>
+    ${fields.map(f => `<div>
+      <label class="block text-label-sm text-on-surface-variant mb-1">${f.label}</label>
+      <input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" type="${f.type}" placeholder="${f.placeholder || ""}" value="${f.value || ""}"/>
+    </div>`).join("")}
+    <div class="pt-3 border-t border-surface-dim">
+      <h3 class="text-label-sm font-bold uppercase tracking-wider text-on-surface-variant mb-2">Notes and attachments</h3>
+      <textarea class="w-full h-20 p-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" placeholder="Add a note…"></textarea>
+    </div>
+  `;
+  document.getElementById("record-drawer").classList.add("open");
+  document.getElementById("record-scrim").classList.add("open");
+}
+function closeRecordDrawer(){
+  document.getElementById("record-drawer").classList.remove("open");
+  document.getElementById("record-scrim").classList.remove("open");
+}
+document.getElementById("rec-close").onclick = closeRecordDrawer;
+document.getElementById("rec-cancel").onclick = closeRecordDrawer;
+document.getElementById("record-scrim").onclick = closeRecordDrawer;
+
+/* ═══════════ DOCUMENT ENGINE ═══════════ */
+function openDocEngine(){
+  document.getElementById("doc-engine").classList.remove("hidden-imp");
+  document.body.style.overflow = "hidden";
+  switchDocTab("edit");
+}
+function closeDocEngine(){
+  document.getElementById("doc-engine").classList.add("hidden-imp");
+  document.body.style.overflow = "";
+}
+function switchDocTab(t){
+  document.querySelectorAll(".doc-panel").forEach(p => p.classList.add("hidden-imp"));
+  document.querySelector(`.doc-panel[data-docpanel="${t}"]`)?.classList.remove("hidden-imp");
+  document.querySelectorAll(".doc-tab").forEach(b => {
+    const on = b.dataset.doctab === t;
+    b.classList.toggle("active", on);
+    b.classList.toggle("text-on-surface-variant", !on);
+  });
+}
+document.getElementById("doc-close").onclick = closeDocEngine;
+document.getElementById("doc-cancel").onclick = closeDocEngine;
+document.querySelectorAll(".doc-tab").forEach(b => b.onclick = () => switchDocTab(b.dataset.doctab));
+
+/* ═══════════ CREATE FLYOUT — §B1 counterparty columns ═══════════ */
+const CREATE_REGISTRY = [
+  { title:"Customers", dot:"bg-primary", items:[
+    { label:"Invoice", desc:"Document engine — Edit/Email/Payor/PDF", icon:"receipt_long" },
+    { label:"Payment link", desc:"Amount, description, share link/QR", icon:"link" },
+    { label:"Receive payment", desc:"Apply to open invoices", icon:"price_check" },
+    { label:"Statement", desc:"Batch billing summary", icon:"summarize" },
+    { label:"Estimate", desc:"Convert to Invoice", icon:"request_quote" },
+    { label:"Sales receipt", desc:"Instant settlement", icon:"point_of_sale" },
+    { label:"Credit memo", desc:"RMA / reduction", icon:"assignment_return" },
+    { label:"Add customer", desc:"Party drawer, role=Customer", icon:"person_add" },
+  ]},
+  { title:"Vendors & Suppliers", dot:"bg-secondary", items:[
+    { label:"Expense", desc:"Payee, date, paid-from, category", icon:"credit_card" },
+    { label:"Check", desc:"Print later option", icon:"payments" },
+    { label:"Bill", desc:"Capture panel, Tags toggle", icon:"description" },
+    { label:"Pay bills", desc:"Payment workspace", icon:"account_balance_wallet" },
+    { label:"Purchase order", desc:"Blank/SKU lines", icon:"shopping_bag" },
+    { label:"Vendor credit", desc:"Supplier refund", icon:"savings" },
+    { label:"Add vendor", desc:"Party drawer, role=Vendor", icon:"domain_add" },
+    { label:"Add supplier", desc:"Party drawer, role=Supplier", icon:"factory" },
+  ]},
+  { title:"Team", dot:"bg-tertiary", items:[
+    { label:"Add contractor", desc:"Name, email, W-9 invite", icon:"engineering" },
+    { label:"Time entry", desc:"Optional, later", icon:"schedule" },
+  ]},
+  { title:"Other (books)", dot:"bg-qb-navy", items:[
+    { label:"Task", desc:"Quick to-do", icon:"task" },
+    { label:"Bank deposit", desc:"Combine funds", icon:"account_balance" },
+    { label:"Journal entry", desc:"Double-entry debit/credit", icon:"menu_book" },
+    { label:"Transfer", desc:"Inter-account treasury", icon:"swap_horiz" },
+    { label:"Reconcile", desc:"Setup + tie-out", icon:"fact_check" },
+    { label:"Settlement", desc:"Stripe/Shopify split", icon:"assured_workload" },
+    { label:"Add product/service", desc:"Drawer w/ Sales/Purchasing/Accounting", icon:"checkroom" },
+    { label:"Add account", desc:"CoA drawer", icon:"account_tree" },
+  ]},
+  { title:"Catalog & Marketing", dot:"bg-primary-container", items:[
+    { label:"Design", desc:"Konva studio", icon:"palette" },
+    { label:"Product", desc:"Open Studio from drawer", icon:"checkroom" },
+    { label:"Collection", desc:"Canvas builder", icon:"collections_bookmark" },
+    { label:"Category", desc:"Record drawer", icon:"category" },
+    { label:"Banner", desc:"Storefront slot", icon:"view_carousel" },
+    { label:"Popup", desc:"Creative popup", icon:"open_in_new" },
+    { label:"Discount code", desc:"Type, value, window", icon:"sell" },
+    { label:"Campaign", desc:"Meta/TikTok/Google Ads", icon:"campaign" },
+    { label:"Post", desc:"Multi-channel content", icon:"share" },
+    { label:"Newsletter", desc:"Campaign builder", icon:"mail" },
+  ]},
+  { title:"Support & Orders", dot:"bg-error", items:[
+    { label:"Sales order", desc:"Order document", icon:"shopping_cart_checkout" },
+    { label:"Return/RMA", desc:"Return authorization", icon:"assignment_return" },
+    { label:"Ticket", desc:"Support ticket", icon:"confirmation_number" },
+    { label:"Add note", desc:"Quick note", icon:"note_add" },
+    { label:"Void", desc:"Void a transaction", icon:"block" },
+  ]},
+];
+
+function buildCreateGrid(){
+  const grid = document.getElementById("create-grid");
+  grid.innerHTML = CREATE_REGISTRY.map(cat => `
+    <div class="flex flex-col gap-2 bg-white p-3 rounded-lg shadow-sm">
+      <div class="flex items-center justify-between pb-1 border-b border-surface-container">
+        <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full ${cat.dot}"></span>
+          <span class="text-[11px] font-bold uppercase tracking-wider">${cat.title}</span></div>
+        <span class="text-[10px] text-on-surface-variant font-medium">${cat.items.length}</span>
+      </div>
+      <nav class="flex flex-col gap-0.5">
+        ${cat.items.map(it => `<button data-create-item="${it.label}" class="create-item flex flex-col px-2 py-1.5 rounded hover:bg-primary hover:text-white text-left w-full">
+          <span class="text-body-md font-medium flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary item-icon">${it.icon}</span>${it.label}</span>
+          <span class="text-[11px] text-on-surface-variant item-desc mt-0.5 truncate">${it.desc}</span>
+        </button>`).join("")}
+      </nav>
+    </div>
+  `).join("");
+  grid.querySelectorAll("[data-create-item]").forEach(b => b.onclick = () => handleCreate(b.dataset.createItem));
+}
+
+/* ═══════════ CREATE HANDLER ═══════════ */
+function handleCreate(label){
+  closeFlyouts();
+  if (label === "Invoice" || label === "Estimate" || label === "Sales receipt" || label === "Credit memo" || label === "Statement") {
+    openDocEngine();
+  } else if (DRAWER_FIELDS[label]) {
+    openRecordDrawer(label);
+  } else if (label === "Customer" || label === "Vendor" || label === "Supplier" || label === "Add customer" || label === "Add vendor" || label === "Add supplier") {
+    openRecordDrawer(label.includes("Customer") ? "Customer" : label.includes("Supplier") ? "Vendor" : "Vendor");
+  } else if (label === "Product" || label === "Add product/service") {
+    openRecordDrawer("Product");
+  } else {
+    toast(`Create → ${label}`);
+  }
+}
+
+/* ═══════════ FLYOUT CONTROL ═══════════ */
+function openFlyout(id){
+  document.querySelectorAll(".flyout-scrim").forEach(s => s.classList.remove("open"));
+  document.getElementById(id).classList.add("open");
+  document.body.style.overflow = "hidden";
+  if (id === "flyout-create") setTimeout(() => document.getElementById("create-search").focus(), 60);
+}
+function closeFlyouts(){
+  document.querySelectorAll(".flyout-scrim").forEach(s => s.classList.remove("open"));
+  if (!document.getElementById("doc-engine").classList.contains("hidden-imp") ||
+      document.getElementById("record-drawer").classList.contains("open") ||
+      document.getElementById("peek").classList.contains("open")) {
+    return;
+  }
+  document.body.style.overflow = "";
+}
+document.querySelectorAll(".flyout-close").forEach(b => b.onclick = closeFlyouts);
+document.querySelectorAll(".flyout-scrim").forEach(s => {
+  s.onclick = e => { if (e.target === s) closeFlyouts(); };
+});
+
+/* ═══════════ GEAR + VIEW TOGGLE ═══════════ */
+document.getElementById("gear-btn").onclick = e => {
+  e.stopPropagation();
+  const m = document.getElementById("gear-menu");
+  m.classList.toggle("hidden-imp");
+};
+document.addEventListener("click", e => {
+  const m = document.getElementById("gear-menu");
+  if (!m.classList.contains("hidden-imp") && !m.contains(e.target) && e.target.closest("#gear-btn") === null) {
+    m.classList.add("hidden-imp");
+  }
+});
+document.querySelectorAll("#view-toggle button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#view-toggle button").forEach(x => x.classList.toggle("active", x === b));
+  toast(`Switched to ${b.dataset.view} view`);
+});
+
+/* ═══════════ KEYBOARD ═══════════ */
+window.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    closeFlyouts(); closeDocEngine(); closeRecordDrawer();
+    document.getElementById("peek").classList.remove("open");
+    document.getElementById("gear-menu").classList.add("hidden-imp");
+  }
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); openFlyout("flyout-create"); }
+});
+
+/* ═══════════ WIRING ═══════════ */
+document.getElementById("btn-create").onclick = () => openFlyout("flyout-create");
+document.getElementById("rail-create").onclick = () => openFlyout("flyout-create");
+document.getElementById("btn-allapps").onclick = () => openFlyout("flyout-create");
+document.querySelectorAll("[data-rail]").forEach(b => b.onclick = () => {
+  const id = b.dataset.rail;
+  if (id === "allapps" || id === "customize") openFlyout("flyout-create");
+  else if (id === "reports") { activeDomain = "finance"; activeScreen = "reports"; renderAll(); }
+  else if (id === "home") { activeDomain = "dashboard"; activeScreen = "ops"; renderAll(); }
+  else toast(`Rail → ${id}`);
+});
+document.querySelectorAll("[data-util]").forEach(b => b.onclick = () => {
+  const id = b.dataset.util;
+  if (id === "settings") { activeDomain = "settings"; activeScreen = "settings-overview"; renderAll(); closeFlyouts(); }
+  else toast(`Utility → ${id}`);
+});
+document.getElementById("side-filter").addEventListener("input", renderSideRail);
+document.getElementById("create-search").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase().trim();
+  document.querySelectorAll("#create-grid .create-item").forEach(item => {
+    item.style.display = (!q || item.textContent.toLowerCase().includes(q)) ? "" : "none";
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   CAP TABLE — Finance domain, real-world components
+   Screens: Overview, Cap Table, Stakeholders, Funding Rounds,
+   Option Pool, SAFEs & Convertibles, Dilution Modeler,
+   Liquidation Waterfall, 409A & Valuations, Documents, Equity Events
+   ═══════════════════════════════════════════════════════════════════ */
+
+const CAP = {
+  company: { name:"Unsaid", entity:"Delaware C-Corp", authorized:12000000, issued:8420000, parValue:0.0001 },
+  asOf: "2026-11-01",
+  holders: [
+    { name:"Sarah Ahmed", role:"Founder / CEO", type:"Common", shares:3200000, pct:"38.01%", options:0, safe:0, invested:"$0", fds:3200000, fdsPct:"38.01%" },
+    { name:"Marcus Lee", role:"Co-founder / CTO", type:"Common", shares:2100000, pct:"24.94%", options:0, safe:0, invested:"$0", fds:2100000, fdsPct:"24.94%" },
+    { name:"Priya Nair", role:"Founder / COO", type:"Common", shares:900000, pct:"10.69%", options:0, safe:0, invested:"$0", fds:900000, fdsPct:"10.69%" },
+    { name:"Northwind Ventures", role:"Lead Investor", type:"Preferred (Seed)", shares:1200000, pct:"14.25%", options:0, safe:0, invested:"$1,200,000", fds:1200000, fdsPct:"14.25%" },
+    { name:"Blue Ridge Capital", role:"Investor", type:"Preferred (Seed)", shares:400000, pct:"4.75%", options:0, safe:0, invested:"$400,000", fds:400000, fdsPct:"4.75%" },
+    { name:"Orion Angels SPV", role:"Investor", type:"Preferred (Seed)", shares:120000, pct:"1.43%", options:0, safe:0, invested:"$120,000", fds:120000, fdsPct:"1.43%" },
+    { name:"Employee Option Pool", role:"Pool (reserved)", type:"Options", shares:0, pct:"0.00%", options:600000, safe:0, invested:"$0", fds:600000, fdsPct:"7.13%" },
+    { name:"SAFE — Acme Strategic", role:"Convertible", type:"SAFE", shares:0, pct:"0.00%", options:0, safe:150000, invested:"$150,000", fds:150000, fdsPct:"1.78%" },
+  ],
+  rounds: [
+    { name:"Friends & Family", date:"2024-03-15", type:"SAFE", amount:"$250,000", preMoney:"$3,000,000", postMoney:"$3,250,000", pricePerShare:"$0.50", sharesIssued:"—", lead:"—", status:"Closed" },
+    { name:"Seed", date:"2025-06-01", type:"Preferred", amount:"$1,720,000", preMoney:"$8,000,000", postMoney:"$9,720,000", pricePerShare:"$1.00", sharesIssued:"1,720,000", lead:"Northwind Ventures", status:"Closed" },
+    { name:"Series A", date:"2026-09-30", type:"Preferred", amount:"$6,000,000", preMoney:"$24,000,000", postMoney:"$30,000,000", pricePerShare:"$3.00", sharesIssued:"2,000,000", lead:"TBD", status:"In progress" },
+  ],
+  optionPool: {
+    total: 600000, granted: 412000, exercised: 180000, available: 188000, unvested: 232000,
+    grants: [
+      { holder:"Dana Whitfield", role:"VP Engineering", grantDate:"2025-02-01", shares:120000, strike:"$0.50", vested:"45,000", unvested:"75,000", vesting:"4yr / 1yr cliff", type:"ISO", status:"Active" },
+      { holder:"Raj Patel", role:"Head of Sales", grantDate:"2025-08-15", shares:80000, strike:"$1.00", vested:"20,000", unvested:"60,000", vesting:"4yr / 1yr cliff", type:"ISO", status:"Active" },
+      { holder:"Elena Sokolov", role:"Staff Designer", grantDate:"2025-11-01", shares:60000, strike:"$1.00", vested:"7,500", unvested:"52,500", vesting:"4yr / 1yr cliff", type:"NSO", status:"Active" },
+      { holder:"Tom Becker", role:"Advisor", grantDate:"2024-09-01", shares:25000, strike:"$0.50", vested:"25,000", unvested:"0", vesting:"2yr / 6mo cliff", type:"NSO", status:"Fully vested" },
+      { holder:"Former — J. Kim", role:"Ex-Contractor", grantDate:"2024-05-01", shares:5000, strike:"$0.50", vested:"5,000", unvested:"0", vesting:"—", type:"NSO", status:"Exercised" },
+    ],
+  },
+  safes: [
+    { holder:"Acme Strategic", date:"2026-01-20", amount:"$150,000", valuationCap:"$10,000,000", discount:"20%", mfn:"Yes", proRata:"Yes", status:"Outstanding" },
+    { holder:"Maple Angels", date:"2026-03-10", amount:"$100,000", valuationCap:"$12,000,000", discount:"—", mfn:"No", proRata:"No", status:"Outstanding" },
+    { holder:"Friends & Family SAFE", date:"2024-03-15", amount:"$250,000", valuationCap:"$4,000,000", discount:"15%", mfn:"No", proRata:"No", status:"Converted" },
+  ],
+  valuations: [
+    { date:"2026-09-15", type:"409A", value:"$18,000,000", provider:"Armanino LLP", pricePerShare:"$2.20", status:"Current" },
+    { date:"2025-05-20", type:"409A", value:"$7,500,000", provider:"Armanino LLP", pricePerShare:"$0.92", status:"Superseded" },
+    { date:"2024-02-01", type:"409A", value:"$3,000,000", provider:"Carta", pricePerShare:"$0.40", status:"Superseded" },
+  ],
+  documents: [
+    { name:"Restated Certificate of Incorporation", category:"Charter", date:"2025-06-01", size:"412 KB", status:"Signed" },
+    { name:"Seed Preferred Stock Purchase Agreement", category:"Financing", date:"2025-06-01", size:"1.2 MB", status:"Signed" },
+    { name:"Investors' Rights Agreement", category:"Financing", date:"2025-06-01", size:"318 KB", status:"Signed" },
+    { name:"Voting Agreement", category:"Financing", date:"2025-06-01", size:"204 KB", status:"Signed" },
+    { name:"2025 Equity Incentive Plan", category:"Plan", date:"2025-01-15", size:"560 KB", status:"Signed" },
+    { name:"Bylaws", category:"Charter", date:"2024-01-10", size:"188 KB", status:"Signed" },
+  ],
+  events: [
+    { date:"2026-09-30", event:"Series A authorized", holder:"All", shares:"2,000,000", price:"$3.00", delta:"+2,000,000", note:"Board approved" },
+    { date:"2026-06-01", event:"Option grant", holder:"Elena Sokolov", shares:"60,000", price:"$1.00", delta:"+60,000", note:"New hire" },
+    { date:"2026-01-20", event:"SAFE issued", holder:"Acme Strategic", shares:"—", price:"—", delta:"—", note:"$150K cap $10M" },
+    { date:"2025-11-01", event:"Option exercise", holder:"Tom Becker", shares:"25,000", price:"$0.50", delta:"+25,000 common", note:"Cashless" },
+    { date:"2025-06-01", event:"Seed round close", holder:"All", shares:"1,720,000", price:"$1.00", delta:"+1,720,000", note:"$1.72M raised" },
+  ],
+};
+
+function capOverview(){
+  const totalFds = CAP.holders.reduce((s,h)=>s+h.fds,0);
+  return `<div class="px-6 pb-12">
+    <div class="py-4">
+      <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+        <span>Finance</span><span class="text-outline">/</span><span>Cap Table</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-headline-lg">Cap Table — Overview</h1>
+          <p class="text-body-sm text-on-surface-variant mt-0.5">${CAP.company.name} · ${CAP.company.entity} · As of ${CAP.asOf}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-cap-export><span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+          <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-share><span class="material-symbols-outlined text-[16px]">share</span>Share</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
+      ${[
+        {label:"Fully diluted shares", value: totalFds.toLocaleString(), delta:`of ${CAP.company.authorized.toLocaleString()} authorized`},
+        {label:"Post-money valuation", value:"$30,000,000", delta:"Series A · Sep 2026"},
+        {label:"Total raised", value:"$7,970,000", delta:"3 rounds"},
+        {label:"Option pool available", value:CAP.optionPool.available.toLocaleString(), delta:`${CAP.optionPool.granted.toLocaleString()} granted`},
+      ].map(k=>`<div class="bg-white rounded-xl border border-surface-dim p-4">
+        <span class="text-label-sm text-on-surface-variant uppercase tracking-wider">${k.label}</span>
+        <div class="text-headline-lg mt-1">${k.value}</div>
+        <div class="text-[11px] text-on-surface-variant mt-1">${k.delta}</div>
+      </div>`).join("")}
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-5">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-headline-sm">Ownership breakdown</h2>
+          <span class="text-[11px] text-on-surface-variant">Fully diluted · ${totalFds.toLocaleString()} shares</span>
+        </div>
+        <div class="space-y-2">
+          ${CAP.holders.map(h=>{
+            const pct = (h.fds / totalFds * 100);
+            const color = h.type==="Common"?"bg-qb-blue":h.type==="Preferred (Seed)"?"bg-qb-green":h.type==="Options"?"bg-qb-maroon":"bg-qb-teal";
+            return `<div class="flex items-center gap-3">
+              <span class="w-40 text-body-sm truncate">${h.name}</span>
+              <div class="flex-1 h-5 bg-surface-container-low rounded overflow-hidden">
+                <div class="${color} h-full" style="width:${pct.toFixed(1)}%"></div>
+              </div>
+              <span class="w-16 text-right text-body-sm font-medium tabular-nums">${pct.toFixed(1)}%</span>
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="flex items-center gap-4 mt-4 pt-3 border-t border-surface-dim text-[11px] text-on-surface-variant">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-qb-blue"></span>Common</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-qb-green"></span>Preferred</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-qb-maroon"></span>Options</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-qb-teal"></span>SAFE</span>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Round history</h2>
+        <div class="space-y-3">
+          ${CAP.rounds.map(r=>`<div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[16px] text-primary mt-0.5">${r.status==="Closed"?"check_circle":"pending"}</span>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-body-sm font-medium truncate">${r.name}</span>
+                <span class="text-body-sm font-semibold tabular-nums">${r.amount}</span>
+              </div>
+              <div class="text-[11px] text-on-surface-variant">${r.date} · ${r.type} · ${r.lead}</div>
+            </div>
+          </div>`).join("")}
+        </div>
+        <button class="w-full mt-3 h-8 border border-surface-dim rounded text-body-sm hover:bg-surface-container-low" data-cap-goto="cap-rounds">View all rounds</button>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2 mb-3 flex-wrap">
+      <span class="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+      ${[["Share issuance","add_card"],["Option grant","workspace_premium"],["SAFE","description"],["Round","trending_up"],["Stakeholder","person_add"]].map(([l,i])=>`<button class="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" data-cap-create="${l}"><span class="material-symbols-outlined text-[16px]">${i}</span>${l}</button>`).join("")}
+      <button class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-label-sm flex items-center gap-1" data-open-create><span class="material-symbols-outlined text-[16px]">apps</span>Show all</button>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-3">
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-2">Recent equity events</h2>
+        <div class="divide-y divide-surface-dim">
+          ${CAP.events.slice(0,5).map(e=>`<div class="flex items-center justify-between py-2 text-body-sm">
+            <div class="min-w-0">
+              <div class="font-medium truncate">${e.event}</div>
+              <div class="text-[11px] text-on-surface-variant">${e.date} · ${e.holder}</div>
+            </div>
+            <span class="text-body-sm font-medium tabular-nums text-primary">${e.delta}</span>
+          </div>`).join("")}
+        </div>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-2">Compliance & reminders</h2>
+        <div class="space-y-2 text-body-sm">
+          <div class="flex items-center gap-2 p-2 rounded bg-error-container/40"><span class="material-symbols-outlined text-[16px] text-error">warning</span><span>409A expires in 47 days — refresh before next grant.</span></div>
+          <div class="flex items-center gap-2 p-2 rounded bg-surface-container-low"><span class="material-symbols-outlined text-[16px] text-tertiary">info</span><span>Series A board consent pending for 2 grants.</span></div>
+          <div class="flex items-center gap-2 p-2 rounded bg-surface-container-low"><span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span><span>Annual Delaware franchise tax filed 2026-03-01.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function capTableScreen(){
+  const totalFds = CAP.holders.reduce((s,h)=>s+h.fds,0);
+  const totalShares = CAP.holders.reduce((s,h)=>s+h.shares,0);
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1">
+          <span>Finance</span><span class="text-outline">/</span><span>Cap Table</span>
+        </div>
+        <h1 class="text-headline-lg">Cap Table</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">${CAP.company.name} · As of ${CAP.asOf} · ${CAP.company.entity}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="view-toggle" id="cap-view-toggle">
+          <button data-capview="summary" class="active">Summary</button>
+          <button data-capview="detailed">Detailed</button>
+          <button data-capview="fds">Fully diluted</button>
+        </div>
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-cap-export><span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-share><span class="material-symbols-outlined text-[16px]">share</span>Share</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 xl:grid-cols-5 gap-3 mb-5">
+      ${[
+        ["Authorized", CAP.company.authorized.toLocaleString()],
+        ["Issued", CAP.company.issued.toLocaleString()],
+        ["Outstanding", totalShares.toLocaleString()],
+        ["Fully diluted", totalFds.toLocaleString()],
+        ["Par value", "$"+CAP.company.parValue.toFixed(4)],
+      ].map(([l,v])=>`<div class="bg-white rounded-xl border border-surface-dim p-3">
+        <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">${l}</span>
+        <div class="text-headline-sm mt-1 tabular-nums">${v}</div>
+      </div>`).join("")}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+      <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+        ${["All","Common","Preferred","Options","SAFE/Convertible"].map((t,i)=>`<button class="h-full px-3 text-label-md tab-underline ${i===0?"active":"text-on-surface-variant"}" data-captab="${t}">${t}</button>`).join("")}
+      </div>
+      <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim">
+        <div class="relative flex items-center flex-1 max-w-sm">
+          <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+          <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter stakeholders…" data-cap-filter/>
+        </div>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">filter_list</span>Filter</button>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span>As-of date</button>
+        <span class="ml-auto text-[11px] text-on-surface-variant">${CAP.holders.length} stakeholders</span>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-body-sm min-w-[1100px]">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr>
+              <th class="px-3 py-2">#</th>
+              <th class="px-3 py-2">Stakeholder</th>
+              <th class="px-3 py-2">Security</th>
+              <th class="px-3 py-2 text-right">Shares</th>
+              <th class="px-3 py-2 text-right">Ownership</th>
+              <th class="px-3 py-2 text-right">Options</th>
+              <th class="px-3 py-2 text-right">SAFE ($)</th>
+              <th class="px-3 py-2 text-right">Invested</th>
+              <th class="px-3 py-2 text-right">Fully diluted</th>
+              <th class="px-3 py-2 text-right">FD %</th>
+              <th class="px-3 py-2"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim">
+            ${CAP.holders.map((h,i)=>{
+              const pct = h.shares/totalShares*100;
+              return `<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(h).replace(/'/g,"&apos;")}'>
+                <td class="px-3 py-2 text-on-surface-variant">${i+1}</td>
+                <td class="px-3 py-2">
+                  <div class="font-medium">${h.name}</div>
+                  <div class="text-[11px] text-on-surface-variant">${h.role}</div>
+                </td>
+                <td class="px-3 py-2">${statusPill(h.type)}</td>
+                <td class="px-3 py-2 text-right tabular-nums">${h.shares.toLocaleString()}</td>
+                <td class="px-3 py-2 text-right tabular-nums">${pct.toFixed(2)}%</td>
+                <td class="px-3 py-2 text-right tabular-nums">${h.options.toLocaleString()}</td>
+                <td class="px-3 py-2 text-right tabular-nums">${h.safe?("$"+h.safe.toLocaleString()):"—"}</td>
+                <td class="px-3 py-2 text-right tabular-nums">${h.invested}</td>
+                <td class="px-3 py-2 text-right tabular-nums font-medium">${h.fds.toLocaleString()}</td>
+                <td class="px-3 py-2 text-right tabular-nums font-semibold">${h.fdsPct}</td>
+                <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions menu')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+          <tfoot class="bg-surface-container-low font-semibold">
+            <tr>
+              <td class="px-3 py-2" colspan="3">Totals</td>
+              <td class="px-3 py-2 text-right tabular-nums">${totalShares.toLocaleString()}</td>
+              <td class="px-3 py-2 text-right tabular-nums">100.00%</td>
+              <td class="px-3 py-2 text-right tabular-nums">${CAP.optionPool.granted.toLocaleString()}</td>
+              <td class="px-3 py-2 text-right tabular-nums">$250,000</td>
+              <td class="px-3 py-2 text-right tabular-nums">$1,870,000</td>
+              <td class="px-3 py-2 text-right tabular-nums">${totalFds.toLocaleString()}</td>
+              <td class="px-3 py-2 text-right tabular-nums">100.00%</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function capHoldersScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">Stakeholders</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Founders, investors, option holders, SAFE holders.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-cap-export><span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="Stakeholder"><span class="material-symbols-outlined text-[16px]">person_add</span>Add stakeholder</button>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Name</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Security</th><th class="px-3 py-2 text-right">Shares</th><th class="px-3 py-2 text-right">Invested</th><th class="px-3 py-2 text-right">FD %</th><th class="px-3 py-2">Status</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${CAP.holders.map(h=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(h).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2 font-medium">${h.name}</td>
+            <td class="px-3 py-2">${h.role}</td>
+            <td class="px-3 py-2">${statusPill(h.type)}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${h.shares.toLocaleString()}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${h.invested}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${h.fdsPct}</td>
+            <td class="px-3 py-2">${statusPill("Active")}</td>
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function capRoundsScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">Funding Rounds</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">SAFE, Seed, Series A — pre/post money, price per share, shares issued.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="Round"><span class="material-symbols-outlined text-[16px]">trending_up</span>New round</button>
+    </div>
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-3 mb-5">
+      ${CAP.rounds.map(r=>`<div class="bg-white rounded-xl border border-surface-dim p-4">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-headline-sm">${r.name}</h3>
+          ${statusPill(r.status)}
+        </div>
+        <div class="text-2xl font-semibold tabular-nums mb-2">${r.amount}</div>
+        <dl class="text-body-sm divide-y divide-surface-dim">
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Date</dt><dd>${r.date}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Type</dt><dd>${r.type}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Pre-money</dt><dd class="tabular-nums">${r.preMoney}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Post-money</dt><dd class="tabular-nums">${r.postMoney}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Price/share</dt><dd class="tabular-nums">${r.pricePerShare}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Shares issued</dt><dd class="tabular-nums">${r.sharesIssued}</dd></div>
+          <div class="flex justify-between py-1"><dt class="text-on-surface-variant">Lead</dt><dd>${r.lead}</dd></div>
+        </dl>
+      </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function capOptionsScreen(){
+  const p = CAP.optionPool;
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">Option Pool</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Grant, vest, exercise, cancel. ISO / NSO.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-cap-export><span class="material-symbols-outlined text-[16px]">download</span>Export</button>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="Option grant"><span class="material-symbols-outlined text-[16px]">workspace_premium</span>New grant</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 xl:grid-cols-5 gap-3 mb-5">
+      ${[
+        ["Pool total", p.total.toLocaleString()],
+        ["Granted", p.granted.toLocaleString()],
+        ["Exercised", p.exercised.toLocaleString()],
+        ["Available", p.available.toLocaleString()],
+        ["Unvested", p.unvested.toLocaleString()],
+      ].map(([l,v])=>`<div class="bg-white rounded-xl border border-surface-dim p-3">
+        <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">${l}</span>
+        <div class="text-headline-sm mt-1 tabular-nums">${v}</div>
+      </div>`).join("")}
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Holder</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Grant date</th><th class="px-3 py-2 text-right">Shares</th><th class="px-3 py-2 text-right">Strike</th><th class="px-3 py-2 text-right">Vested</th><th class="px-3 py-2 text-right">Unvested</th><th class="px-3 py-2">Vesting</th><th class="px-3 py-2">Type</th><th class="px-3 py-2">Status</th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${p.grants.map(g=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(g).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2 font-medium">${g.holder}</td>
+            <td class="px-3 py-2">${g.role}</td>
+            <td class="px-3 py-2">${g.grantDate}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${g.shares.toLocaleString()}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${g.strike}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${g.vested}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${g.unvested}</td>
+            <td class="px-3 py-2 text-[11px]">${g.vesting}</td>
+            <td class="px-3 py-2">${g.type}</td>
+            <td class="px-3 py-2">${statusPill(g.status)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function capSafesScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">SAFEs & Convertibles</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Valuation cap, discount, MFN, pro-rata. Convert on financing.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="SAFE"><span class="material-symbols-outlined text-[16px]">description</span>New SAFE</button>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Holder</th><th class="px-3 py-2">Date</th><th class="px-3 py-2 text-right">Amount</th><th class="px-3 py-2 text-right">Valuation cap</th><th class="px-3 py-2">Discount</th><th class="px-3 py-2">MFN</th><th class="px-3 py-2">Pro-rata</th><th class="px-3 py-2">Status</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${CAP.safes.map(s=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(s).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2 font-medium">${s.holder}</td>
+            <td class="px-3 py-2">${s.date}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${s.amount}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${s.valuationCap}</td>
+            <td class="px-3 py-2">${s.discount}</td>
+            <td class="px-3 py-2">${s.mfn}</td>
+            <td class="px-3 py-2">${s.proRata}</td>
+            <td class="px-3 py-2">${statusPill(s.status)}</td>
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function capDilutionScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center gap-2 text-label-sm text-on-surface-variant py-4 mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+    <h1 class="text-headline-lg mb-1">Dilution Modeler</h1>
+    <p class="text-body-sm text-on-surface-variant mb-5">Model new rounds, option pool increases, SAFE conversions, and price-per-share effects.</p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Model a new round</h2>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Round name</label><input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="Series A Extension"/></div>
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Amount raised</label><input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="$3,000,000"/></div>
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Pre-money valuation</label><input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="$30,000,000"/></div>
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Option pool top-up</label><input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="250,000 shares"/></div>
+        </div>
+        <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container mb-5" data-cap-run-model>Run model</button>
+        <h3 class="text-body-md font-semibold mb-2">Before / after ownership</h3>
+        <table class="w-full text-left text-body-sm">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr><th class="px-3 py-2">Holder</th><th class="px-3 py-2 text-right">Before</th><th class="px-3 py-2 text-right">After</th><th class="px-3 py-2 text-right">Δ</th></tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim">
+            ${CAP.holders.map(h=>{
+              const after = (h.fds / (CAP.holders.reduce((s,x)=>s+x.fds,0) + 1000000 + 250000) * 100).toFixed(2);
+              const delta = (after - parseFloat(h.fdsPct)).toFixed(2);
+              return `<tr><td class="px-3 py-2">${h.name}</td><td class="px-3 py-2 text-right tabular-nums">${h.fdsPct}</td><td class="px-3 py-2 text-right tabular-nums">${after}%</td><td class="px-3 py-2 text-right tabular-nums ${parseFloat(delta)<0?"text-error":"text-secondary"}">${parseFloat(delta)>0?"+":""}${delta}%</td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Conversion preview</h2>
+        <div class="space-y-2 text-body-sm">
+          <div class="flex justify-between"><span class="text-on-surface-variant">New price/share</span><span class="font-medium tabular-nums">$3.00</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">New shares issued</span><span class="font-medium tabular-nums">1,000,000</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">SAFE conversion</span><span class="font-medium tabular-nums">125,000</span></div>
+          <div class="flex justify-between"><span class="text-on-surface-variant">Pool top-up</span><span class="font-medium tabular-nums">250,000</span></div>
+          <div class="flex justify-between border-t border-surface-dim pt-2 mt-2"><span class="font-semibold">Post-money</span><span class="font-semibold tabular-nums">$33,000,000</span></div>
+        </div>
+        <div class="mt-4 p-3 rounded bg-surface-container-low text-[11px] text-on-surface-variant">
+          <span class="material-symbols-outlined text-[14px] align-middle mr-1">info</span>
+          SAFE conversions apply cap and discount, whichever yields more shares. MFN holders get the best terms from later SAFEs.
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function capWaterfallScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center gap-2 text-label-sm text-on-surface-variant py-4 mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+    <h1 class="text-headline-lg mb-1">Liquidation Waterfall</h1>
+    <p class="text-body-sm text-on-surface-variant mb-5">1x non-participating preferred. Choose a liquidity event and see proceeds allocation.</p>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div class="bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Liquidity event</h2>
+        <div class="space-y-3 text-body-sm">
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Event type</label>
+            <select class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+              <option>M&A — sale of company</option><option>IPO</option><option>Secondary tender</option><option>Dissolution</option>
+            </select></div>
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Gross proceeds</label>
+            <input class="w-full h-9 px-2.5 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary" value="$45,000,000"/></div>
+          <div><label class="block text-label-sm text-on-surface-variant mb-1">Preferred stack</label>
+            <select class="w-full h-9 px-2 border border-surface-dim rounded text-body-md focus:outline-none focus:border-primary">
+              <option>1x non-participating (Seed)</option><option>1x participating</option><option>2x non-participating</option>
+            </select></div>
+          <button class="w-full h-8 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" data-cap-run-waterfall>Calculate waterfall</button>
+        </div>
+        <div class="mt-4 p-3 rounded bg-surface-container-low text-[11px] text-on-surface-variant">
+          <span class="material-symbols-outlined text-[14px] align-middle mr-1">info</span>
+          Preferred holders choose between preference or converting to common — whichever returns more.
+        </div>
+      </div>
+      <div class="xl:col-span-2 bg-white rounded-xl border border-surface-dim p-5">
+        <h2 class="text-headline-sm mb-3">Proceeds allocation</h2>
+        <table class="w-full text-left text-body-sm">
+          <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+            <tr><th class="px-3 py-2">Holder</th><th class="px-3 py-2">Class</th><th class="px-3 py-2 text-right">Preference</th><th class="px-3 py-2 text-right">Proceeds</th><th class="px-3 py-2 text-right">%</th></tr>
+          </thead>
+          <tbody class="divide-y divide-surface-dim">
+            ${CAP.holders.map(h=>{
+              const pref = h.type==="Preferred (Seed)" ? (h.invested==="$0"?"—":h.invested) : "—";
+              const proceeds = h.type==="Preferred (Seed)" ? h.invested : (h.shares * 3).toLocaleString("en-US",{style:"currency",currency:"USD"});
+              return `<tr><td class="px-3 py-2">${h.name}</td><td class="px-3 py-2">${h.type}</td><td class="px-3 py-2 text-right tabular-nums">${pref}</td><td class="px-3 py-2 text-right tabular-nums">${proceeds}</td><td class="px-3 py-2 text-right tabular-nums">${(parseFloat(h.fdsPct)/100*100).toFixed(2)}%</td></tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+function capValuationsScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">409A & Valuations</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Refresh cadence, provider, price per share, status.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="409A"><span class="material-symbols-outlined text-[16px]">gavel</span>New valuation</button>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Date</th><th class="px-3 py-2">Type</th><th class="px-3 py-2 text-right">Value</th><th class="px-3 py-2">Provider</th><th class="px-3 py-2 text-right">Price/share</th><th class="px-3 py-2">Status</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${CAP.valuations.map(v=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(v).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2">${v.date}</td><td class="px-3 py-2">${v.type}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${v.value}</td><td class="px-3 py-2">${v.provider}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${v.pricePerShare}</td>
+            <td class="px-3 py-2">${statusPill(v.status)}</td>
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function capDocumentsScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">Documents</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Charter, financing docs, plan, bylaws — signed originals.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="Document"><span class="material-symbols-outlined text-[16px]">upload</span>Upload</button>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Name</th><th class="px-3 py-2">Category</th><th class="px-3 py-2">Date</th><th class="px-3 py-2 text-right">Size</th><th class="px-3 py-2">Status</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${CAP.documents.map(d=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(d).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2 font-medium flex items-center gap-2"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">description</span>${d.name}</td>
+            <td class="px-3 py-2">${d.category}</td><td class="px-3 py-2">${d.date}</td>
+            <td class="px-3 py-2 text-right">${d.size}</td><td class="px-3 py-2">${statusPill(d.status)}</td>
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Download')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">download</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function capEquityEventsScreen(){
+  return `<div class="px-6 pb-12">
+    <div class="flex items-center justify-between gap-4 py-4">
+      <div>
+        <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mb-1"><span>Finance</span><span class="text-outline">/</span><span>Cap Table</span></div>
+        <h1 class="text-headline-lg">Equity Events</h1>
+        <p class="text-body-sm text-on-surface-variant mt-0.5">Immutable ledger — grants, exercises, conversions, issuances, cancellations.</p>
+      </div>
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center gap-1" data-cap-create="Equity event"><span class="material-symbols-outlined text-[16px]">post_add</span>Record event</button>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim overflow-hidden">
+      <table class="w-full text-left text-body-sm">
+        <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+          <tr><th class="px-3 py-2">Date</th><th class="px-3 py-2">Event</th><th class="px-3 py-2">Holder</th><th class="px-3 py-2 text-right">Shares</th><th class="px-3 py-2 text-right">Price</th><th class="px-3 py-2">Delta</th><th class="px-3 py-2">Note</th><th></th></tr>
+        </thead>
+        <tbody class="divide-y divide-surface-dim">
+          ${CAP.events.map(e=>`<tr class="hover:bg-surface-container-low cursor-pointer" data-cap-row='${JSON.stringify(e).replace(/'/g,"&apos;")}'>
+            <td class="px-3 py-2">${e.date}</td><td class="px-3 py-2 font-medium">${e.event}</td>
+            <td class="px-3 py-2">${e.holder}</td><td class="px-3 py-2 text-right tabular-nums">${e.shares}</td>
+            <td class="px-3 py-2 text-right tabular-nums">${e.price}</td>
+            <td class="px-3 py-2 text-[11px] font-medium ${e.delta.startsWith("+")?"text-secondary":"text-on-surface-variant"}">${e.delta}</td>
+            <td class="px-3 py-2 text-[11px] text-on-surface-variant">${e.note}</td>
+            <td class="px-2 py-2 text-right"><button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onclick="event.stopPropagation();toast('Row actions')"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+/* — register Cap Table screens in SCREEN_DEFS — */
+SCREEN_DEFS["cap-overview"] = capOverview;
+SCREEN_DEFS["cap-table"] = capTableScreen;
+SCREEN_DEFS["cap-holders"] = capHoldersScreen;
+SCREEN_DEFS["cap-rounds"] = capRoundsScreen;
+SCREEN_DEFS["cap-options"] = capOptionsScreen;
+SCREEN_DEFS["cap-safes"] = capSafesScreen;
+SCREEN_DEFS["cap-dilution"] = capDilutionScreen;
+SCREEN_DEFS["cap-waterfall"] = capWaterfallScreen;
+SCREEN_DEFS["cap-409a"] = capValuationsScreen;
+SCREEN_DEFS["cap-documents"] = capDocumentsScreen;
+SCREEN_DEFS["cap-equity-events"] = capEquityEventsScreen;
+
+/* — Cap Table view toggle + row click + create buttons + event actions — */
+document.addEventListener("click", e => {
+  const vt = e.target.closest("[data-capview]");
+  if (vt) {
+    document.querySelectorAll("[data-capview]").forEach(x => x.classList.toggle("active", x === vt));
+    toast(`Cap Table view → ${vt.dataset.capview}`);
+    return;
+  }
+  const row = e.target.closest("[data-cap-row]");
+  if (row && !e.target.closest("button")) {
+    openPeek(row.dataset.capRow, "cap");
+    return;
+  }
+  const cb = e.target.closest("[data-cap-create]");
+  if (cb) {
+    const label = cb.dataset.capCreate;
+    if (label === "Share issuance" || label === "Option grant") {
+      openRecordDrawer(label === "Share issuance" ? "Invoice" : "Product");
+    } else {
+      toast(`Cap Table → Create ${label}`);
+    }
+    return;
+  }
+  const go = e.target.closest("[data-cap-goto]");
+  if (go) { activeScreen = go.dataset.capGoto; renderAll(); return; }
+  if (e.target.closest("[data-cap-export]")) { toast("Cap Table exported"); return; }
+  if (e.target.closest("[data-cap-share]")) { toast("Share link copied"); return; }
+  if (e.target.closest("[data-cap-run-model]")) { toast("Dilution model recalculated"); return; }
+  if (e.target.closest("[data-cap-run-waterfall]")) { toast("Waterfall recalculated"); return; }
+});
+
+/* — Cap Table filter tabs — */
+document.addEventListener("input", e => {
+  if (e.target.matches("[data-cap-filter]")) {
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll("[data-cap-row]").forEach(r => {
+      r.style.display = (!q || r.textContent.toLowerCase().includes(q)) ? "" : "none";
+    });
+  }
+});
+
+/* ═══════════ BOOT ═══════════ */
+function renderAll(){
+  renderRailPinned();
+  renderTabs();
+  renderSideRail();
+  renderScreen();
+}
+buildCreateGrid();
+renderAll();
+</script>
+</body>
+</html>

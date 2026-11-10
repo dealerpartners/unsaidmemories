@@ -1,0 +1,467 @@
+    55→    55→const SEED_PARTIES: Party[] = [
+    56→    56→  { id: 'P-1001', name: 'Acme Corp', displayName: 'Acme', firstName: 'John', lastName: 'Doe', email: 'john@acme.com', phone: '+1 (555) 111-2222', roles: ['Customer'], balance: 1240.00, address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701', country: 'United States', terms: 'Net 30', creditLimit: 5000, taxId: '', taxExempt: false, track1099: false, notes: '', tags: ['VIP'], added: '2026-10-15', lastActivity: '2026-11-02', owner: 'Jordan A.', segmentIds: [] },
+    57→    57→  { id: 'P-1002', name: 'Blue Ridge Co.', displayName: 'Blue Ridge', firstName: 'Sarah', lastName: 'Smith', email: 'sarah@blueridge.co', phone: '+1 (555) 333-4444', roles: ['Customer', 'Vendor'], balance: 0, address: '456 Ridge Rd', city: 'Asheville', state: 'NC', zip: '28801', country: 'United States', terms: 'Net 15', creditLimit: 3000, taxId: '', taxExempt: false, track1099: false, notes: '', tags: [], added: '2026-08-02', lastActivity: '2026-10-31', owner: 'Sarah A.', segmentIds: [] },
+    58→    58→  { id: 'P-1003', name: 'Printful Inc.', displayName: 'Printful', firstName: 'Print', lastName: 'Fulfillment', email: 'support@printful.com', phone: '+1 (555) 000-1111', roles: ['Supplier'], balance: -2880.00, address: '789 Print Ave', city: 'Charlotte', state: 'NC', zip: '28202', country: 'United States', terms: 'Net 30', creditLimit: 0, taxId: '12-3456789', taxExempt: false, track1099: false, notes: 'POD supplier', tags: ['POD'], added: '2026-01-10', lastActivity: '2026-11-01', owner: 'Marcus L.', segmentIds: [], supplierLeadTime: 3, supplierAccountNo: 'SUP-001', supplierUrl: 'https://api.printful.com' },
+    59→    59→  { id: 'P-1004', name: 'Gelato Pty Ltd', displayName: 'Gelato', firstName: 'Gelato', lastName: 'Support', email: 'help@gelato.com', phone: '+61 2 8000 0000', roles: ['Supplier'], balance: -1200.00, address: '10 George St', city: 'Sydney', state: 'NSW', zip: '2000', country: 'Australia', terms: 'Net 30', creditLimit: 0, taxId: '', taxExempt: false, track1099: false, notes: 'Global POD', tags: ['POD'], added: '2026-03-22', lastActivity: '2026-10-30', owner: 'Marcus L.', segmentIds: [], supplierLeadTime: 5, supplierAccountNo: 'SUP-002', supplierUrl: 'https://api.gelato.com' },
+    60→    60→  { id: 'P-1005', name: 'Jane Miller', displayName: 'Jane', firstName: 'Jane', lastName: 'Miller', email: 'jane.miller@email.com', phone: '+1 (555) 777-8888', roles: ['Lead'], balance: 0, address: '101 Elm St', city: 'Austin', state: 'TX', zip: '78701', country: 'United States', terms: '', creditLimit: 0, taxId: '', taxExempt: false, track1099: false, notes: '', tags: [], added: '2026-09-01', lastActivity: '2026-09-05', owner: 'Sarah A.', segmentIds: [], leadSource: 'Website', leadStatus: 'Contacted', leadValue: 5000 },
+    61→    61→  { id: 'P-1006', name: 'Staples', displayName: 'Staples', firstName: 'Office', lastName: 'Supplies', email: 'billing@staples.com', phone: '+1 (800) 333-3333', roles: ['Vendor'], balance: -142.50, address: '500 Staples Dr', city: 'Framingham', state: 'MA', zip: '01702', country: 'United States', terms: 'Net 30', creditLimit: 0, taxId: '04-1234567', taxExempt: false, track1099: true, notes: '', tags: [], added: '2026-05-14', lastActivity: '2026-10-20', owner: 'Jordan A.', segmentIds: [], vendorDefaultAccount: 'Office Supplies' },
+    62→    62→  { id: 'P-1007', name: 'Maple Supply', displayName: 'Maple', firstName: 'Maple', lastName: 'Co', email: 'ar@maplesupply.io', phone: '+1 (555) 774-9810', roles: ['Customer', 'Supplier'], balance: 890.00, address: '200 Maple Ln', city: 'Portland', state: 'OR', zip: '97201', country: 'United States', terms: 'Net 30', creditLimit: 2000, taxId: '', taxExempt: false, track1099: false, notes: '', tags: [], added: '2026-02-11', lastActivity: '2026-10-15', owner: 'Sarah A.', segmentIds: [], supplierLeadTime: 7, supplierAccountNo: 'SUP-003' },
+    63→    63→  { id: 'P-1008', name: 'Northwind Labs', displayName: 'Northwind', firstName: 'North', lastName: 'Wind', email: 'marketing@northwindlabs.io', phone: '+1 (555) 310-8844', roles: ['Customer'], balance: 2100.00, address: '300 Wind St', city: 'Seattle', state: 'WA', zip: '98101', country: 'United States', terms: 'Net 30', creditLimit: 10000, taxId: '', taxExempt: false, track1099: false, notes: '', tags: ['Enterprise'], added: '2025-11-20', lastActivity: '2026-10-15', owner: 'Jordan A.', segmentIds: [] },
+    64→    64→  { id: 'P-1009', name: 'Apex Manufacturing', displayName: 'Apex', firstName: 'Apex', lastName: 'Mfg', email: 'orders@apexmfg.com', phone: '+1 (555) 220-3344', roles: ['Vendor', 'Supplier'], balance: -540.00, address: '400 Apex Dr', city: 'Detroit', state: 'MI', zip: '48201', country: 'United States', terms: 'Net 30', creditLimit: 0, taxId: '38-9876543', taxExempt: false, track1099: true, notes: '', tags: [], added: '2026-04-03', lastActivity: '2026-10-25', owner: 'Marcus L.', segmentIds: [], supplierLeadTime: 14, supplierAccountNo: 'SUP-004' },
+    65→    65→  { id: 'P-1010', name: 'Riverside Design Studio', displayName: 'Riverside', firstName: 'River', lastName: 'Side', email: 'hello@riverside.design', phone: '+1 (555) 661-7788', roles: ['Lead'], balance: 0, address: '55 River Rd', city: 'Denver', state: 'CO', zip: '80202', country: 'United States', terms: '', creditLimit: 0, taxId: '', taxExempt: false, track1099: false, notes: '', tags: [], added: '2026-10-28', lastActivity: '2026-10-28', owner: 'Sarah A.', segmentIds: [], leadSource: 'Referral', leadStatus: 'New', leadValue: 8500 },
+    66→    66→  { id: 'P-1011', name: 'Summit Apparel', displayName: 'Summit', firstName: 'Summit', lastName: 'Apparel', email: 'sales@summitapparel.com', phone: '+1 (555) 445-9911', roles: ['Lead'], balance: 0, address: '88 Summit Blvd', city: 'Salt Lake City', state: 'UT', zip: '84101', country: 'United States', terms: '', creditLimit: 0, taxId: '', taxExempt: false, track1099: false, notes: '', tags: [], added: '2026-11-01', lastActivity: '2026-11-01', owner: 'Jordan A.', segmentIds: [], leadSource: 'Event', leadStatus: 'New', leadValue: 12000 },
+    67→    67→];
+    68→    68→
+    69→    69→/* ═══════════════════════════════════════════════════════════════
+    70→    70→   ENTITY 2: ITEM (§1.1)
+    71→    71→   Anything sellable/buyable. Product, Service, Blank, Bundle.
+    72→    72→   ═══════════════════════════════════════════════════════════════ */
+    73→    73→
+    74→    74→export type ItemType = 'Product' | 'Service' | 'Blank' | 'Bundle' | 'Design-linked';
+    75→    75→export type FulfillmentType = 'Stock' | 'POD' | 'Supplier-fulfilled' | 'Digital';
+    76→    76→
+    77→    77→export interface Item {
+    78→    78→  id: string;
+    79→    79→  name: string;
+    80→    80→  sku: string;
+    81→    81→  type: ItemType;
+    82→    82→  category: string;
+    83→    83→  status: 'Draft' | 'Published' | 'Archived';
+    84→    84→  price: number;
+    85→    85→  cost: number;
+    86→    86→  description: string;
+    87→    87→  incomeAccount: string;
+    88→    88→  expenseAccount: string;
+    89→    89→  taxable: boolean;
+    90→    90→  trackInventory: boolean;
+    91→    91→  fulfillmentType: FulfillmentType;
+    92→    92→  stockOnHand: number;
+    93→    93→  reorderPoint: number;
+    94→    94→  supplierId: string | null;
+    95→    95→  designId: string | null;
+    96→    96→  channels: string[];
+    97→    97→  image: string;
+    98→    98→  tags: string[];
+    99→    99→  updated: string;
+   100→   100→}
+   101→   101→
+   102→   102→const SEED_ITEMS: Item[] = [
+   103→   103→  { id: 'ITM-001', name: 'Classic Tee — White', sku: 'TEE-001-WHT', type: 'Product', category: 'Apparel > T-Shirts', status: 'Published', price: 24.99, cost: 8.50, description: '100% cotton crew neck tee', incomeAccount: '4000 Product Sales', expenseAccount: '5000 COGS', taxable: true, trackInventory: true, fulfillmentType: 'Stock', stockOnHand: 142, reorderPoint: 50, supplierId: 'P-1003', designId: null, channels: ['Shopify', 'Etsy'], image: '', tags: ['Best seller'], updated: '2026-11-01' },
+   104→   104→  { id: 'ITM-002', name: 'Canvas Tote Bag', sku: 'TOTE-014', type: 'Product', category: 'Accessories > Bags', status: 'Published', price: 18.00, cost: 6.00, description: 'Heavyweight canvas tote', incomeAccount: '4000 Product Sales', expenseAccount: '5000 COGS', taxable: true, trackInventory: true, fulfillmentType: 'Stock', stockOnHand: 78, reorderPoint: 30, supplierId: 'P-1009', designId: null, channels: ['Shopify'], image: '', tags: [], updated: '2026-10-28' },
+   105→   105→  { id: 'ITM-003', name: 'Custom Design Print (POD)', sku: 'POD-DESIGN-001', type: 'Design-linked', category: 'Apparel > Custom', status: 'Published', price: 29.99, cost: 12.00, description: 'Print-on-demand custom design', incomeAccount: '4000 Product Sales', expenseAccount: '5000 COGS', taxable: true, trackInventory: false, fulfillmentType: 'POD', stockOnHand: 0, reorderPoint: 0, supplierId: 'P-1003', designId: 'D-001', channels: ['Shopify', 'TikTok', 'Etsy'], image: '', tags: ['POD'], updated: '2026-11-02' },
+   106→   106→  { id: 'ITM-004', name: 'Graphic Design Service', sku: 'SVC-DESIGN', type: 'Service', category: 'Services > Design', status: 'Published', price: 75.00, cost: 0, description: 'Hourly graphic design service', incomeAccount: '4100 Service Income', expenseAccount: '', taxable: false, trackInventory: false, fulfillmentType: 'Digital', stockOnHand: 0, reorderPoint: 0, supplierId: null, designId: null, channels: [], image: '', tags: [], updated: '2026-09-15' },
+   107→   107→  { id: 'ITM-005', name: 'Holiday Bundle (Tee + Tote)', sku: 'BND-HOL-001', type: 'Bundle', category: 'Bundles', status: 'Published', price: 38.00, cost: 14.50, description: 'Classic tee + canvas tote bundle', incomeAccount: '4000 Product Sales', expenseAccount: '5000 COGS', taxable: true, trackInventory: false, fulfillmentType: 'Stock', stockOnHand: 0, reorderPoint: 0, supplierId: null, designId: null, channels: ['Shopify'], image: '', tags: ['Holiday'], updated: '2026-10-20' },
+   108→   108→  { id: 'ITM-006', name: 'Blank Tee — Premium', sku: 'BLK-TEE-PREM', type: 'Blank', category: 'Blanks > T-Shirts', status: 'Published', price: 0, cost: 7.50, description: 'Premium blank tee for printing', incomeAccount: '', expenseAccount: '5000 COGS', taxable: false, trackInventory: true, fulfillmentType: 'Stock', stockOnHand: 500, reorderPoint: 100, supplierId: 'P-1003', designId: null, channels: [], image: '', tags: ['Blank'], updated: '2026-10-01' },
+   109→   109→];
+   110→   110→
+   111→   111→/* ═══════════════════════════════════════════════════════════════
+   112→   112→   ENTITY 3: DOCUMENT (§1.1)
+   113→   113→   Any multi-line transaction. Invoice, Bill, PO, Estimate, etc.
+   114→   114→   All rendered by ONE Document Engine (§1.1 Rule).
+   115→   115→   ═══════════════════════════════════════════════════════════════ */
+   116→   116→
+   117→   117→export type DocumentType = 'Invoice' | 'Estimate' | 'Bill' | 'PurchaseOrder' | 'SalesReceipt' | 'CreditMemo' | 'SalesOrder' | 'VendorCredit' | 'JournalEntry' | 'RMA';
+   118→   118→
+   119→   119→export type DocumentStatus = 'Draft' | 'Sent' | 'Unpaid' | 'Overdue' | 'Paid' | 'Deposited' | 'ForReview' | 'Approved' | 'Shipped' | 'Delivered' | 'Returned' | 'PartiallyReceived' | 'Received' | 'Closed' | 'Void' | 'Open' | 'Converted' | 'Declined' | 'Pending' | 'Requested';
+   120→   120→
+   121→   121→export interface DocumentLine {
+   122→   122→  id: string;
+   123→   123→  itemId: string | null;
+   124→   124→  description: string;
+   125→   125→  qty: number;
+   126→   126→  rate: number;
+   127→   127→  amount: number;
+   128→   128→  taxRate: number;
+   129→   129→  account: string;
+   130→   130→  tags: string[];
+   131→   131→}
+   132→   132→
+   133→   133→export interface Document {
+   134→   134→  id: string;
+   135→   135→  type: DocumentType;
+   136→   136→  number: string;
+   137→   137→  partyId: string;
+   138→   138→  status: DocumentStatus;
+   139→   139→  date: string;
+   140→   140→  dueDate: string;
+   141→   141→  lines: DocumentLine[];
+   142→   142→  subtotal: number;
+   143→   143→  tax: number;
+   144→   144→  shipping: number;
+   145→   145→  total: number;
+   146→   146→  amountPaid: number;
+   147→   147→  balance: number;
+   148→   148→  memo: string;
+   149→   149→  notes: string;
+   150→   150→  tags: string[];
+   151→   151→  attachments: string[];
+   152→   152→  orderId: string | null;
+   153→   153→  poId: string | null;
+   154→   154→  channelId: string | null;
+   155→   155→  createdBy: string;
+   156→   156→  createdAt: string;
+   157→   157→  updatedAt: string;
+   158→   158→  activity: { date: string; type: string; text: string; actor: string }[];
+   159→   159→}
+   160→   160→
+   161→   161→const SEED_DOCUMENTS: Document[] = [
+   162→   162→  {
+   163→   163→    id: 'DOC-1001', type: 'Invoice', number: 'INV-1001', partyId: 'P-1001', status: 'Unpaid',
+   164→   164→    date: '2026-11-01', dueDate: '2026-12-01',
+   165→   165→    lines: [
+   166→   166→      { id: 'L1', itemId: 'ITM-001', description: 'Classic Tee — White', qty: 10, rate: 24.99, amount: 249.90, taxRate: 8.25, account: '4000 Product Sales', tags: [] },
+   167→   167→      { id: 'L2', itemId: 'ITM-002', description: 'Canvas Tote Bag', qty: 5, rate: 18.00, amount: 90.00, taxRate: 8.25, account: '4000 Product Sales', tags: [] },
+   168→   168→    ],
+   169→   169→    subtotal: 339.90, tax: 28.04, shipping: 12.00, total: 379.94, amountPaid: 0, balance: 379.94,
+   170→   170→    memo: '', notes: 'Thank you for your business.', tags: [], attachments: [],
+   171→   171→    orderId: null, poId: null, channelId: 'Shopify', createdBy: 'Jordan A.', createdAt: '2026-11-01', updatedAt: '2026-11-01',
+   172→   172→    activity: [{ date: '2026-11-01', type: 'created', text: 'Invoice created', actor: 'Jordan A.' }],
+   173→   173→  },
+   174→   174→  {
+   175→   175→    id: 'DOC-1002', type: 'Invoice', number: 'INV-1002', partyId: 'P-1008', status: 'Overdue',
+   176→   176→    date: '2026-10-02', dueDate: '2026-11-01',
+   177→   177→    lines: [
+   178→   178→      { id: 'L1', itemId: 'ITM-004', description: 'Graphic Design Service (10 hrs)', qty: 10, rate: 75.00, amount: 750.00, taxRate: 0, account: '4100 Service Income', tags: [] },
+   179→   179→    ],
+   180→   180→    subtotal: 750.00, tax: 0, shipping: 0, total: 750.00, amountPaid: 0, balance: 750.00,
+   181→   181→    memo: '', notes: '', tags: [], attachments: [],
+   182→   182→    orderId: null, poId: null, channelId: null, createdBy: 'Sarah A.', createdAt: '2026-10-02', updatedAt: '2026-10-02',
+   183→   183→    activity: [{ date: '2026-10-02', type: 'created', text: 'Invoice created', actor: 'Sarah A.' }, { date: '2026-10-03', type: 'sent', text: 'Invoice sent to customer', actor: 'Sarah A.' }],
+   184→   184→  },
+   185→   185→  {
+   186→   186→    id: 'DOC-1003', type: 'Invoice', number: 'INV-1003', partyId: 'P-1002', status: 'Paid',
+   187→   187→    date: '2026-09-15', dueDate: '2026-10-15',
+   188→   188→    lines: [
+   189→   189→      { id: 'L1', itemId: 'ITM-003', description: 'Custom Design Print (POD)', qty: 20, rate: 29.99, amount: 599.80, taxRate: 8.25, account: '4000 Product Sales', tags: ['POD'] },
+   190→   190→    ],
+   191→   191→    subtotal: 599.80, tax: 49.48, shipping: 15.00, total: 664.28, amountPaid: 664.28, balance: 0,
+   192→   192→    memo: '', notes: '', tags: [], attachments: [],
+   193→   193→    orderId: null, poId: null, channelId: 'Shopify', createdBy: 'Marcus L.', createdAt: '2026-09-15', updatedAt: '2026-09-20',
+   194→   194→    activity: [{ date: '2026-09-15', type: 'created', text: 'Invoice created', actor: 'Marcus L.' }, { date: '2026-09-16', type: 'sent', text: 'Invoice sent', actor: 'Marcus L.' }, { date: '2026-09-20', type: 'payment', text: 'Payment received $664.28', actor: 'System' }],
+   195→   195→  },
+   196→   196→  {
+   197→   197→    id: 'DOC-1004', type: 'Bill', number: 'BILL-2001', partyId: 'P-1003', status: 'ForReview',
+   198→   198→    date: '2026-10-28', dueDate: '2026-11-27',
+   199→   199→    lines: [
+   200→   200→      { id: 'L1', itemId: 'ITM-006', description: 'Blank Tee — Premium (500 units)', qty: 500, rate: 7.50, amount: 3750.00, taxRate: 0, account: '5000 COGS', tags: [] },
+   201→   201→    ],
+   202→   202→    subtotal: 3750.00, tax: 0, shipping: 45.00, total: 3795.00, amountPaid: 0, balance: 3795.00,
+   203→   203→    memo: '', notes: '', tags: [], attachments: [],
+   204→   204→    orderId: null, poId: 'PO-3001', channelId: null, createdBy: 'Marcus L.', createdAt: '2026-10-28', updatedAt: '2026-10-28',
+   205→   205→    activity: [{ date: '2026-10-28', type: 'created', text: 'Bill uploaded from email', actor: 'System' }],
+   206→   206→  },
+   207→   207→  {
+   208→   208→    id: 'DOC-1005', type: 'Estimate', number: 'EST-3001', partyId: 'P-1010', status: 'Sent',
+   209→   209→    date: '2026-10-28', dueDate: '2026-11-28',
+   210→   210→    lines: [
+   211→   211→      { id: 'L1', itemId: 'ITM-004', description: 'Brand identity design package', qty: 1, rate: 5000.00, amount: 5000.00, taxRate: 0, account: '4100 Service Income', tags: [] },
+   212→   212→    ],
+   213→   213→    subtotal: 5000.00, tax: 0, shipping: 0, total: 5000.00, amountPaid: 0, balance: 5000.00,
+   214→   214→    memo: '', notes: 'Includes logo, color palette, typography guide', tags: [], attachments: [],
+   215→   215→    orderId: null, poId: null, channelId: null, createdBy: 'Sarah A.', createdAt: '2026-10-28', updatedAt: '2026-10-28',
+   216→   216→    activity: [{ date: '2026-10-28', type: 'created', text: 'Estimate created', actor: 'Sarah A.' }, { date: '2026-10-29', type: 'sent', text: 'Estimate sent to customer', actor: 'Sarah A.' }],
+   217→   217→  },
+   218→   218→  {
+   219→   219→    id: 'DOC-1006', type: 'PurchaseOrder', number: 'PO-3001', partyId: 'P-1003', status: 'Open',
+   220→   220→    date: '2026-10-15', dueDate: '2026-10-22',
+   221→   221→    lines: [
+   222→   222→      { id: 'L1', itemId: 'ITM-006', description: 'Blank Tee — Premium', qty: 500, rate: 7.50, amount: 3750.00, taxRate: 0, account: '5000 COGS', tags: [] },
+   223→   223→      { id: 'L2', itemId: 'ITM-002', description: 'Canvas Tote Bag', qty: 50, rate: 6.00, amount: 300.00, taxRate: 0, account: '5000 COGS', tags: [] },
+   224→   224→    ],
+   225→   225→    subtotal: 4050.00, tax: 0, shipping: 45.00, total: 4095.00, amountPaid: 0, balance: 4095.00,
+   226→   226→    memo: 'Include packing slip with PO number', notes: '', tags: [], attachments: [],
+   227→   227→    orderId: null, poId: null, channelId: null, createdBy: 'Marcus L.', createdAt: '2026-10-15', updatedAt: '2026-10-15',
+   228→   228→    activity: [{ date: '2026-10-15', type: 'created', text: 'PO created', actor: 'Marcus L.' }, { date: '2026-10-16', type: 'sent', text: 'PO sent to supplier', actor: 'Marcus L.' }],
+   229→   229→  },
+   230→   230→];
+   231→   231→
+   232→   232→/* ═══════════════════════════════════════════════════════════════
+   233→   233→   ENTITY 4: MONEY MOVEMENT (§1.1)
+   234→   234→   Payment, Deposit, Transfer, Refund.
+   235→   235→   ═══════════════════════════════════════════════════════════════ */
+   236→   236→
+   237→   237→export type MoneyType = 'Payment' | 'Deposit' | 'Transfer' | 'Refund' | 'Settlement';
+   238→   238→
+   239→   239→export interface MoneyMovement {
+   240→   240→  id: string;
+   241→   241→  type: MoneyType;
+   242→   242→  amount: number;
+   243→   243→  date: string;
+   244→   244→  method: string; // Cash, Check, ACH, Card, PayPal, etc.
+   245→   245→  fromAccount: string;
+   246→   246→  toAccount: string;
+   247→   247→  partyId: string | null;
+   248→   248→  documentId: string | null; // linked invoice/bill
+   249→   249→  reference: string;
+   250→   250→  status: 'Pending' | 'Deposited' | 'Cleared' | 'Reversed';
+   251→   251→  memo: string;
+   252→   252→  createdBy: string;
+   253→   253→}
+   254→   254→
+   255→   255→const SEED_MONEY: MoneyMovement[] = [
+   256→   256→  { id: 'PAY-001', type: 'Payment', amount: 664.28, date: '2026-09-20', method: 'Card', fromAccount: 'Customer', toAccount: '1000 Checking', partyId: 'P-1002', documentId: 'DOC-1003', reference: 'ch_12345', status: 'Deposited', memo: 'Payment for INV-1003', createdBy: 'System' },
+   257→   257→];
+   258→   258→
+   259→   259→/* ═══════════════════════════════════════════════════════════════
+   260→   260→   ENTITY 5: ACCOUNT (§1.1)
+   261→   261→   Ledger node. Chart of Accounts, Bank, Credit card, etc.
+   262→   262→   ═══════════════════════════════════════════════════════════════ */
+   263→   263→
+   264→   264→export type AccountType = 'Asset' | 'Liability' | 'Equity' | 'Income' | 'COGS' | 'Expense' | 'Bank' | 'CreditCard';
+   265→   265→
+   266→   266→export interface Account {
+   267→   267→  id: string;
+   268→   268→  number: string;
+   269→   269→  name: string;
+   270→   270→  type: AccountType;
+   271→   271→  detailType: string;
+   272→   272→  balance: number;
+   273→   273→  bankBalance: number;
+   274→   274→  active: boolean;
+   275→   275→  parent: string | null;
+   276→   276→  description: string;
+   277→   277→}
+   278→   278→
+   279→   279→const SEED_ACCOUNTS: Account[] = [
+   280→   280→  { id: 'ACC-1000', number: '1000', name: 'Checking', type: 'Bank', detailType: 'Checking', balance: 48230.00, bankBalance: 48230.00, active: true, parent: null, description: 'Primary business checking' },
+   281→   281→  { id: 'ACC-1010', number: '1010', name: 'Savings', type: 'Bank', detailType: 'Savings', balance: 12500.00, bankBalance: 12500.00, active: true, parent: null, description: 'Business savings' },
+   282→   282→  { id: 'ACC-1200', number: '1200', name: 'Accounts Receivable', type: 'Asset', detailType: 'Accounts Receivable', balance: 3340.00, bankBalance: 0, active: true, parent: null, description: '' },
+   283→   283→  { id: 'ACC-1500', number: '1500', name: 'Inventory Asset', type: 'Asset', detailType: 'Inventory', balance: 8750.00, bankBalance: 0, active: true, parent: null, description: '' },
+   284→   284→  { id: 'ACC-2000', number: '2000', name: 'Accounts Payable', type: 'Liability', detailType: 'Accounts Payable', balance: -4762.50, bankBalance: 0, active: true, parent: null, description: '' },
+   285→   285→  { id: 'ACC-2100', number: '2100', name: 'Sales Tax Payable', type: 'Liability', detailType: 'Sales Tax', balance: -77.52, bankBalance: 0, active: true, parent: null, description: '' },
+   286→   286→  { id: 'ACC-3000', number: '3000', name: 'Owner\'s Equity', type: 'Equity', detailType: 'Owner\'s Equity', balance: 50000.00, bankBalance: 0, active: true, parent: null, description: '' },
+   287→   287→  { id: 'ACC-4000', number: '4000', name: 'Product Sales', type: 'Income', detailType: 'Sales Income', balance: -128950.00, bankBalance: 0, active: true, parent: null, description: '' },
+   288→   288→  { id: 'ACC-4100', number: '4100', name: 'Service Income', type: 'Income', detailType: 'Service Income', balance: -22500.00, bankBalance: 0, active: true, parent: null, description: '' },
+   289→   289→  { id: 'ACC-5000', number: '5000', name: 'COGS', type: 'COGS', detailType: 'Cost of Goods Sold', balance: 48230.00, bankBalance: 0, active: true, parent: null, description: '' },
+   290→   290→  { id: 'ACC-6000', number: '6000', name: 'Office Supplies', type: 'Expense', detailType: 'Office Supplies', balance: 1240.00, bankBalance: 0, active: true, parent: null, description: '' },
+   291→   291→  { id: 'ACC-6100', number: '6100', name: 'Advertising', type: 'Expense', detailType: 'Advertising', balance: 30820.00, bankBalance: 0, active: true, parent: null, description: '' },
+   292→   292→];
+   293→   293→
+   294→   294→/* ═══════════════════════════════════════════════════════════════
+   295→   295→   THE STORE
+   296→   296→   ═══════════════════════════════════════════════════════════════ */
+   297→   297→
+   298→   298→interface PlatformState {
+   299→   299→  // Entities
+   300→   300→  parties: Party[];
+   301→   301→  items: Item[];
+   302→   302→  documents: Document[];
+   303→   303→  moneyMovements: MoneyMovement[];
+   304→   304→  accounts: Account[];
+   305→   305→
+   306→   306→  // Context Envelope (§1.3)
+   307→   307→  envelope: {
+   308→   308→    originModule: string | null;
+   309→   309→    originRecordId: string | null;
+   310→   310→    partyId: string | null;
+   311→   311→    orderId: string | null;
+   312→   312→    itemId: string | null;
+   313→   313→    designId: string | null;
+   314→   314→    accountId: string | null;
+   315→   315→    channelId: string | null;
+   316→   316→    returnTo: string | null;
+   317→   317→  };
+   318→   318→
+   319→   319→  // Party CRUD
+   320→   320→  addParty: (party: Omit<Party, 'id' | 'added' | 'lastActivity'>) => string;
+   321→   321→  updateParty: (id: string, updates: Partial<Party>) => void;
+   322→   322→  deleteParty: (id: string) => void;
+   323→   323→  getParty: (id: string) => Party | undefined;
+   324→   324→  getPartiesByRole: (role: PartyRole) => Party[];
+   325→   325→
+   326→   326→  // Item CRUD
+   327→   327→  addItem: (item: Omit<Item, 'id' | 'updated'>) => string;
+   328→   328→  updateItem: (id: string, updates: Partial<Item>) => void;
+   329→   329→  deleteItem: (id: string) => void;
+   330→   330→  getItem: (id: string) => Item | undefined;
+   331→   331→
+   332→   332→  // Document CRUD
+   333→   333→  addDocument: (doc: Omit<Document, 'id' | 'createdAt' | 'updatedAt' | 'activity'>) => string;
+   334→   334→  updateDocument: (id: string, updates: Partial<Document>) => void;
+   335→   335→  deleteDocument: (id: string) => void;
+   336→   336→  getDocument: (id: string) => Document | undefined;
+   337→   337→  getDocumentsByType: (type: DocumentType) => Document[];
+   338→   338→  getDocumentsByParty: (partyId: string) => Document[];
+   339→   339→  recordPayment: (documentId: string, amount: number, method: string, fromAccount: string) => void;
+   340→   340→  changeDocumentStatus: (id: string, status: DocumentStatus) => void;
+   341→   341→  recalcDocument: (id: string) => void;
+   342→   342→
+   343→   343→  // Money movement CRUD
+   344→   344→  addMoney: (money: Omit<MoneyMovement, 'id'>) => string;
+   345→   345→
+   346→   346→  // Account CRUD
+   347→   347→  getAccount: (id: string) => Account | undefined;
+   348→   348→  getAccountsByType: (type: AccountType) => Account[];
+   349→   349→
+   350→   350→  // Envelope
+   351→   351→  setEnvelope: (env: Partial<PlatformState['envelope']>) => void;
+   352→   352→  clearEnvelope: () => void;
+   353→   353→}
+   354→   354→
+   355→   355→let idCounter = Date.now();
+   356→   356→const nextId = (prefix: string) => `${prefix}-${++idCounter}`;
+   357→   357→
+   358→   358→export const usePlatformStore = create<PlatformState>()(
+   359→   359→  persist(
+   360→   360→    (set, get) => ({
+   361→   361→      parties: SEED_PARTIES,
+   362→   362→      items: SEED_ITEMS,
+   363→   363→      documents: SEED_DOCUMENTS,
+   364→   364→      moneyMovements: SEED_MONEY,
+   365→   365→      accounts: SEED_ACCOUNTS,
+   366→   366→
+   367→   367→      envelope: {
+   368→   368→        originModule: null, originRecordId: null, partyId: null,
+   369→   369→        orderId: null, itemId: null, designId: null,
+   370→   370→        accountId: null, channelId: null, returnTo: null,
+   371→   371→      },
+   372→   372→
+   373→   373→      // ── Party CRUD ──
+   374→   374→      addParty: (party) => {
+   375→   375→        const id = nextId('P');
+   376→   376→        const newParty: Party = {
+   377→   377→          ...party, id, added: new Date().toISOString().slice(0, 10),
+   378→   378→          lastActivity: new Date().toISOString().slice(0, 10),
+   379→   379→        };
+   380→   380→        set(state => ({ parties: [newParty, ...state.parties] }));
+   381→   381→        return id;
+   382→   382→      },
+   383→   383→      updateParty: (id, updates) => {
+   384→   384→        set(state => ({
+   385→   385→          parties: state.parties.map(p => p.id === id ? { ...p, ...updates, lastActivity: new Date().toISOString().slice(0, 10) } : p),
+   386→   386→        }));
+   387→   387→      },
+   388→   388→      deleteParty: (id) => {
+   389→   389→        set(state => ({ parties: state.parties.filter(p => p.id !== id) }));
+   390→   390→      },
+   391→   391→      getParty: (id) => get().parties.find(p => p.id === id),
+   392→   392→      getPartiesByRole: (role) => get().parties.filter(p => p.roles.includes(role)),
+   393→   393→
+   394→   394→      // ── Item CRUD ──
+   395→   395→      addItem: (item) => {
+   396→   396→        const id = nextId('ITM');
+   397→   397→        const newItem: Item = { ...item, id, updated: new Date().toISOString().slice(0, 10) };
+   398→   398→        set(state => ({ items: [newItem, ...state.items] }));
+   399→   399→        return id;
+   400→   400→      },
+   401→   401→      updateItem: (id, updates) => {
+   402→   402→        set(state => ({
+   403→   403→          items: state.items.map(i => i.id === id ? { ...i, ...updates, updated: new Date().toISOString().slice(0, 10) } : i),
+   404→   404→        }));
+   405→   405→      },
+   406→   406→      deleteItem: (id) => {
+   407→   407→        set(state => ({ items: state.items.filter(i => i.id !== id) }));
+   408→   408→      },
+   409→   409→      getItem: (id) => get().items.find(i => i.id === id),
+   410→   410→
+   411→   411→      // ── Document CRUD ──
+   412→   412→      addDocument: (doc) => {
+   413→   413→        const id = nextId('DOC');
+   414→   414→        const now = new Date().toISOString();
+   415→   415→        const newDoc: Document = {
+   416→   416→          ...doc, id, createdAt: now, updatedAt: now,
+   417→   417→          activity: [{ date: now.slice(0, 10), type: 'created', text: `${doc.type} created`, actor: 'Current user' }],
+   418→   418→        };
+   419→   419→        set(state => ({ documents: [newDoc, ...state.documents] }));
+   420→   420→        return id;
+   421→   421→      },
+   422→   422→      updateDocument: (id, updates) => {
+   423→   423→        const now = new Date().toISOString();
+   424→   424→        set(state => ({
+   425→   425→          documents: state.documents.map(d => d.id === id ? { ...d, ...updates, updatedAt: now } : d),
+   426→   426→        }));
+   427→   427→      },
+   428→   428→      deleteDocument: (id) => {
+   429→   429→        set(state => ({ documents: state.documents.filter(d => d.id !== id) }));
+   430→   430→      },
+   431→   431→      getDocument: (id) => get().documents.find(d => d.id === id),
+   432→   432→      getDocumentsByType: (type) => get().documents.filter(d => d.type === type),
+   433→   433→      getDocumentsByParty: (partyId) => get().documents.filter(d => d.partyId === partyId),
+   434→   434→
+   435→   435→      recordPayment: (documentId, amount, method, fromAccount) => {
+   436→   436→        const doc = get().documents.find(d => d.id === documentId);
+   437→   437→        if (!doc) return;
+   438→   438→        const newAmountPaid = doc.amountPaid + amount;
+   439→   439→        const newBalance = doc.total - newAmountPaid;
+   440→   440→        const newStatus = newBalance <= 0 ? 'Paid' : 'Unpaid';
+   441→   441→        const now = new Date().toISOString();
+   442→   442→        const payId = nextId('PAY');
+   443→   443→        const payment: MoneyMovement = {
+   444→   444→          id: payId, type: 'Payment', amount, date: now.slice(0, 10),
+   445→   445→          method, fromAccount: fromAccount || 'Customer', toAccount: '1000 Checking',
+   446→   446→          partyId: doc.partyId, documentId, reference: '', status: 'Cleared',
+   447→   447→          memo: `Payment for ${doc.number}`, createdBy: 'Current user',
+   448→   448→        };
+   449→   449→        set(state => ({
+   450→   450→          documents: state.documents.map(d => d.id === documentId ? {
+   451→   451→            ...d, amountPaid: newAmountPaid, balance: newBalance, status: newStatus,
+   452→   452→            updatedAt: now,
+   453→   453→            activity: [...d.activity, { date: now.slice(0, 10), type: 'payment', text: `Payment received $${amount.toFixed(2)} via ${method}`, actor: 'Current user' }],
+   454→   454→          } : d),
+   455→   455→          moneyMovements: [payment, ...state.moneyMovements],
+   456→   456→          parties: state.parties.map(p => p.id === doc.partyId ? { ...p, balance: p.balance - amount } : p),
+   457→   457→        }));
+   458→   458→      },
+   459→   459→
+   460→   460→      changeDocumentStatus: (id, status) => {
+   461→   461→        const now = new Date().toISOString();
+   462→   462→        set(state => ({
+   463→   463→          documents: state.documents.map(d => d.id === id ? {
+   464→   464→            ...d, status, updatedAt: now,
+   465→   465→            activity: [...d.activity, { date: now.slice(0, 10), type: 'status', text: `Status changed to ${status}`, actor: 'Current user' }],
+   466→   466→          } : d),
+   467→   467→        }));
+   468→   468→      },
+   469→   469→
+   470→   470→      recalcDocument: (id) => {
+   471→   471→        set(state => ({
+   472→   472→          documents: state.documents.map(d => {
+   473→   473→            if (d.id !== id) return d;
+   474→   474→            const subtotal = d.lines.reduce((s, l) => s + l.amount, 0);
+   475→   475→            const tax = d.lines.reduce((s, l) => s + (l.amount * l.taxRate / 100), 0);
+   476→   476→            const total = subtotal + tax + d.shipping;
+   477→   477→            const balance = total - d.amountPaid;
+   478→   478→            return { ...d, subtotal, tax: Math.round(tax * 100) / 100, total, balance };
+   479→   479→          }),
+   480→   480→        }));
+   481→   481→      },
+   482→   482→
+   483→   483→      // ── Money movement ──
+   484→   484→      addMoney: (money) => {
+   485→   485→        const id = nextId('PAY');
+   486→   486→        set(state => ({ moneyMovements: [{ ...money, id }, ...state.moneyMovements] }));
+   487→   487→        return id;
+   488→   488→      },
+   489→   489→
+   490→   490→      // ── Account ──
+   491→   491→      getAccount: (id) => get().accounts.find(a => a.id === id),
+   492→   492→      getAccountsByType: (type) => get().accounts.filter(a => a.type === type),
+   493→   493→
+   494→   494→      // ── Envelope ──
+   495→   495→      setEnvelope: (env) => {
+   496→   496→        set(state => ({ envelope: { ...state.envelope, ...env } }));
+   497→   497→      },
+   498→   498→      clearEnvelope: () => {
+   499→   499→        set({
+   500→   500→          envelope: {
+   501→   501→            originModule: null, originRecordId: null, partyId: null,
+   502→   502→            orderId: null, itemId: null, designId: null,
+   503→   503→            accountId: null, channelId: null, returnTo: null,
+   504→   504→          },
+   505→   505→        });
+   506→   506→      },
+   507→   507→    }),
+   508→   508→    {
+   509→   509→      name: 'platform-store',
+   510→   510→      // Only persist the data, not the functions
+   511→   511→      partialize: (state) => ({
+   512→   512→        parties: state.parties,
+   513→   513→        items: state.items,
+   514→   514→        documents: state.documents,
+   515→   515→        moneyMovements: state.moneyMovements,
+   516→   516→        accounts: state.accounts,
+   517→   517→      }),
+   518→   518→    }
+   519→   519→  )
+   520→   520→);
+   521→   521→

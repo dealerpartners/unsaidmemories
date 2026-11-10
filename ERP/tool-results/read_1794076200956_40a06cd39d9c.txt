@@ -1,0 +1,643 @@
+     1→'use client';
+     2→/* ContactsParties — 1:1 port of upload/Contacts_extracted/Contacts/parties.html
+     3→   Global CSS classes from marketing.css + contacts.css.
+     4→   Row click → peek (View details). Name/avatar click → full profile view. */
+     5→import { useMemo, useState } from 'react';
+     6→import { exportToCsv } from '@/lib/csvExport';
+     7→import CustomersScreen from './CustomersScreen';
+     8→
+     9→interface ContactsPartiesProps {
+    10→  onToast: (m: string) => void;
+    11→  onNavigate?: (d: string, s: string) => void;
+    12→  initialRole?: string;
+    13→}
+    14→
+    15→/* ─── helpers ─── */
+    16→function fmt(n: number) { return (n || 0).toLocaleString('en-US', { style: 'currency', currency: 'USD' }); }
+    17→function initials(name: string) { return (name || '').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '??'; }
+    18→
+    19→/* ─── data ─── */
+    20→const ALL_ROLES = ['Customer', 'Vendor', 'Supplier', 'Contact', 'Lead'];
+    21→
+    22→interface Party {
+    23→  id: string; name: string; displayName: string; firstName: string; lastName: string;
+    24→  email: string; phone: string; roles: string[]; balance: number; added: string; address: string;
+    25→}
+    26→
+    27→const INITIAL_PARTIES: Party[] = [
+    28→  { id: 'P-1001', name: 'Acme Corp', displayName: 'Acme', firstName: 'John', lastName: 'Doe', email: 'john@acme.com', phone: '+1 (555) 111-2222', roles: ['Customer'], balance: 1240.00, added: '2026-10-15', address: '123 Main St, Springfield, IL 62701' },
+    29→  { id: 'P-1002', name: 'Blue Ridge Co.', displayName: 'Blue Ridge', firstName: 'Sarah', lastName: 'Smith', email: 'sarah@blueridge.co', phone: '+1 (555) 333-4444', roles: ['Customer', 'Vendor'], balance: 0, added: '2026-08-02', address: '456 Ridge Rd, Asheville, NC 28801' },
+    30→  { id: 'P-1003', name: 'Printful Inc.', displayName: 'Printful', firstName: 'Print', lastName: 'Fulfillment', email: 'support@printful.com', phone: '+1 (555) 000-1111', roles: ['Supplier'], balance: -2880.00, added: '2026-01-10', address: '789 Print Ave, Charlotte, NC 28202' },
+    31→  { id: 'P-1004', name: 'Gelato Pty Ltd', displayName: 'Gelato', firstName: 'Gelato', lastName: 'Support', email: 'help@gelato.com', phone: '+61 2 8000 0000', roles: ['Supplier'], balance: -1200.00, added: '2026-03-22', address: '10 George St, Sydney NSW 2000, Australia' },
+    32→  { id: 'P-1005', name: 'Jane Miller', displayName: 'Jane', firstName: 'Jane', lastName: 'Miller', email: 'jane.miller@email.com', phone: '+1 (555) 777-8888', roles: ['Contact'], balance: 0, added: '2026-09-01', address: '101 Elm St, Austin, TX 78701' },
+    33→  { id: 'P-1006', name: 'Staples', displayName: 'Staples', firstName: 'Office', lastName: 'Supplies', email: 'billing@staples.com', phone: '+1 (800) 333-3333', roles: ['Vendor'], balance: -142.50, added: '2026-05-14', address: '500 Staples Dr, Framingham, MA 01702' },
+    34→  { id: 'P-1007', name: 'Maple Supply', displayName: 'Maple', firstName: 'Maple', lastName: 'Co', email: 'ar@maplesupply.io', phone: '+1 (555) 774-9810', roles: ['Customer', 'Supplier'], balance: 890.00, added: '2026-02-11', address: '200 Maple Ln, Portland, OR 97201' },
+    35→  { id: 'P-1008', name: 'Northwind Labs', displayName: 'Northwind', firstName: 'North', lastName: 'Wind', email: 'marketing@northwindlabs.io', phone: '+1 (555) 310-8844', roles: ['Customer'], balance: 2100.00, added: '2025-11-20', address: '300 Wind St, Seattle, WA 98101' },
+    36→  { id: 'P-1009', name: 'Apex Manufacturing', displayName: 'Apex', firstName: 'Apex', lastName: 'Mfg', email: 'orders@apexmfg.com', phone: '+1 (555) 220-3344', roles: ['Vendor', 'Supplier'], balance: -540.00, added: '2026-04-03', address: '400 Apex Dr, Detroit, MI 48201' },
+    37→  { id: 'P-1010', name: 'Riverside Design Studio', displayName: 'Riverside', firstName: 'River', lastName: 'Side', email: 'hello@riverside.design', phone: '+1 (555) 661-7788', roles: ['Lead'], balance: 0, added: '2026-10-28', address: '55 River Rd, Denver, CO 80202' },
+    38→  { id: 'P-1011', name: 'Summit Apparel', displayName: 'Summit', firstName: 'Summit', lastName: 'Apparel', email: 'sales@summitapparel.com', phone: '+1 (555) 445-9911', roles: ['Lead'], balance: 0, added: '2026-11-01', address: '88 Summit Blvd, Salt Lake City, UT 84101' },
+    39→  { id: 'P-1012', name: 'Coastline Tees', displayName: 'Coastline', firstName: 'Coast', lastName: 'Line', email: 'info@coastlinetees.com', phone: '+1 (555) 332-1100', roles: ['Lead', 'Contact'], balance: 0, added: '2026-10-20', address: '12 Coast Hwy, San Diego, CA 92101' },
+    40→];
+    41→
+    42→interface SavedView { id: string; name: string; tab: string; q: string; roles: string[]; }
+    43→
+    44→const INITIAL_VIEWS: SavedView[] = [
+    45→  { id: 'sv-1', name: 'Customers', tab: 'Customers', q: '', roles: ['Customer'] },
+    46→  { id: 'sv-2', name: 'Suppliers', tab: 'Suppliers', q: '', roles: ['Supplier'] },
+    47→];
+    48→
+    49→function rolePill(r: string) {
+    50→  const cls = r === 'Customer' ? 'customer' : r === 'Vendor' ? 'vendor' : r === 'Supplier' ? 'supplier' : r === 'Lead' ? 'contact' : 'contact';
+    51→  return <span className={`pill role ${cls}`}>{r}</span>;
+    52→}
+    53→function avatarClass(roles: string[]) {
+    54→  if (roles.includes('Vendor')) return 'vendor';
+    55→  if (roles.includes('Supplier')) return 'supplier';
+    56→  if (roles.includes('Contact')) return 'contact';
+    57→  return '';
+    58→}
+    59→
+    60→const EMPTY_FORM = { name: '', display: '', first: '', last: '', email: '', phone: '', street1: '', street2: '', city: '', state: '', zip: '', country: 'United States', notes: '' };
+    61→
+    62→export default function ContactsParties({ onToast, onNavigate, initialRole }: ContactsPartiesProps) {
+    63→  const [items, setItems] = useState<Party[]>(INITIAL_PARTIES);
+    64→  const [savedViews, setSavedViews] = useState<SavedView[]>(INITIAL_VIEWS);
+    65→  const [q, setQ] = useState('');
+    66→  const [tab, setTab] = useState(initialRole ? (initialRole + 's') : 'All');
+    67→  const [roles, setRoles] = useState<Set<string>>(new Set(initialRole ? [initialRole] : ALL_ROLES));
+    68→  const [draftRoles, setDraftRoles] = useState<Set<string>>(new Set(ALL_ROLES));
+    69→  const [selected, setSelected] = useState<Set<string>>(new Set());
+    70→  const [peekId, setPeekId] = useState<string | null>(null);
+    71→  const [editingId, setEditingId] = useState<string | null>(null);
+    72→  const [drawerOpen, setDrawerOpen] = useState(false);
+    73→  const [rowMenuForId, setRowMenuForId] = useState<string | null>(null);
+    74→  const [createMenuOpen, setCreateMenuOpen] = useState(false);
+    75→  const [popRoleOpen, setPopRoleOpen] = useState(false);
+    76→  const [popSavedOpen, setPopSavedOpen] = useState(false);
+    77→  const [saveViewOpen, setSaveViewOpen] = useState(false);
+    78→  const [saveViewName, setSaveViewName] = useState('');
+    79→  const [form, setForm] = useState(EMPTY_FORM);
+    80→  const [currentDraftRoles, setCurrentDraftRoles] = useState<Set<string>>(new Set());
+    81→  // profileId: when set, render the full CustomersScreen profile view for this party.
+    82→  // Every party type (Customer, Vendor, Supplier, Contact) opens the same profile
+    83→  // because they're all parties with different role tags.
+    84→  const [profileId, setProfileId] = useState<string | null>(null);
+    85→
+    86→  const filtered = useMemo(() => items.filter(p => {
+    87→    const ql = q.toLowerCase();
+    88→    const qOK = !ql || (p.name + ' ' + p.email + ' ' + p.phone).toLowerCase().includes(ql);
+    89→    let tabOK = true;
+    90→    if (tab !== 'All') {
+    91→      const targetRole = tab.slice(0, -1);
+    92→      tabOK = p.roles.includes(targetRole) || p.roles.includes(tab);
+    93→    }
+    94→    const roleOK = p.roles.some(r => roles.has(r));
+    95→    return qOK && tabOK && roleOK;
+    96→  }), [items, q, tab, roles]);
+    97→
+    98→  // Full profile view — renders CustomersScreen in detail mode (full page, 8 tabs).
+    99→  // This must come AFTER all hooks (useState/useMemo) to satisfy React's rules-of-hooks.
+   100→  if (profileId) {
+   101→    return <CustomersScreen onToast={onToast} onNavigate={onNavigate} initialView="detail" />;
+   102→  }
+   103→
+   104→  const totalParties = items.length;
+   105→  const customerCount = items.filter(p => p.roles.includes('Customer')).length;
+   106→  const vendorCount = items.filter(p => p.roles.includes('Vendor') || p.roles.includes('Supplier')).length;
+   107→  const totalBalance = items.reduce((s, p) => s + p.balance, 0);
+   108→  const filtersActive = !!q || tab !== 'All' || roles.size !== ALL_ROLES.length;
+   109→  const allChecked = filtered.length > 0 && filtered.every(p => selected.has(p.id));
+   110→  const someChecked = filtered.some(p => selected.has(p.id));
+   111→
+   112→  function openPeek(id: string) { setPeekId(id); }
+   113→  function closePeek() { setPeekId(null); }
+   114→
+   115→  function openDrawer(id: string | null, preselectRole?: string) {
+   116→    const editing = id ? items.find(p => p.id === id) : null;
+   117→    setEditingId(id);
+   118→    setForm(editing ? { ...EMPTY_FORM, name: editing.name, display: editing.displayName, first: editing.firstName, last: editing.lastName, email: editing.email, phone: editing.phone, street1: editing.address } : EMPTY_FORM);
+   119→    setCurrentDraftRoles(new Set(preselectRole ? [preselectRole] : (editing ? editing.roles : [])));
+   120→    setDrawerOpen(true);
+   121→    setPeekId(null);
+   122→    setRowMenuForId(null);
+   123→    setCreateMenuOpen(false);
+   124→  }
+   125→  function closeDrawer() { setDrawerOpen(false); setEditingId(null); }
+   126→
+   127→  function toggleDraftRole(role: string) {
+   128→    setCurrentDraftRoles(prev => { const n = new Set(prev); if (n.has(role)) n.delete(role); else n.add(role); return n; });
+   129→  }
+   130→
+   131→  function collectParty(): Party | null {
+   132→    const name = form.name.trim();
+   133→    if (!name) { onToast('Company name is required'); return null; }
+   134→    if (currentDraftRoles.size === 0) { onToast('Select at least one role'); return null; }
+   135→    const editing = editingId ? items.find(p => p.id === editingId) : null;
+   136→    return {
+   137→      id: editing ? editing.id : 'P-' + String(items.length + 1001).slice(-4),
+   138→      name, displayName: form.display, firstName: form.first, lastName: form.last,
+   139→      email: form.email, phone: form.phone, roles: [...currentDraftRoles],
+   140→      address: form.street1 + (form.city ? ', ' + form.city : ''),
+   141→      balance: editing ? editing.balance : 0,
+   142→      added: editing ? editing.added : new Date().toISOString().slice(0, 10),
+   143→    };
+   144→  }
+   145→  function save() {
+   146→    const p = collectParty(); if (!p) return;
+   147→    setItems(prev => { if (editingId) { const i = prev.findIndex(x => x.id === editingId); if (i >= 0) { const n = [...prev]; n[i] = p; return n; } return prev; } return [p, ...prev]; });
+   148→    closeDrawer();
+   149→    onToast(editingId ? 'Party updated' : 'Party created');
+   150→  }
+   151→  function saveAndNew() {
+   152→    const p = collectParty(); if (!p) return;
+   153→    setItems(prev => { if (editingId) { const i = prev.findIndex(x => x.id === editingId); if (i >= 0) { const n = [...prev]; n[i] = p; return n; } return prev; } return [p, ...prev]; });
+   154→    setEditingId(null); setForm(EMPTY_FORM); setCurrentDraftRoles(new Set());
+   155→    onToast('Saved. New party form ready.');
+   156→  }
+   157→
+   158→  function rowAction(act: string, p: Party) {
+   159→    setRowMenuForId(null);
+   160→    switch (act) {
+   161→      case 'edit': openDrawer(p.id); break;
+   162→      case 'view': openPeek(p.id); break;
+   163→      case 'email': onToast(`Composing email to ${p.email}`); break;
+   164→      case 'add-role': openDrawer(p.id); break;
+   165→      case 'archive': if (confirm(`Archive "${p.name}"?`)) { setItems(prev => prev.filter(x => x.id !== p.id)); onToast(`Archived: ${p.name}`); } break;
+   166→    }
+   167→  }
+   168→
+   169→  function bulkAction(act: string) {
+   170→    if (act === 'close') { setSelected(new Set()); return; }
+   171→    const sel = [...selected]; const n = sel.length;
+   172→    if (act === 'email') { onToast(`Composing bulk email to ${n} parties`); }
+   173→    else if (act === 'merge') { onToast(`Merge ${n} parties… (requires selection of 2+)`); }
+   174→    else if (act === 'archive') { setItems(prev => prev.filter(p => !sel.includes(p.id))); onToast(`Archived ${n} parties`); }
+   175→    else if (act === 'delete') { if (confirm(`Delete ${n} parties?`)) { setItems(prev => prev.filter(p => !sel.includes(p.id))); onToast(`Deleted ${n} parties`); } }
+   176→    setSelected(new Set());
+   177→  }
+   178→
+   179→  function toggleRow(id: string) { setSelected(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; }); }
+   180→  function toggleAll() { if (allChecked) setSelected(new Set()); else setSelected(new Set(filtered.map(p => p.id))); }
+   181→  function clearAllFilters() { setQ(''); setTab('All'); setRoles(new Set(ALL_ROLES)); setDraftRoles(new Set(ALL_ROLES)); }
+   182→
+   183→  function applyView(v: SavedView) {
+   184→    setTab(v.tab); setQ(v.q); setRoles(new Set(v.roles));
+   185→    setPopSavedOpen(false);
+   186→    onToast('Applied view: ' + v.name);
+   187→  }
+   188→  function saveCurrentView() {
+   189→    const name = saveViewName.trim();
+   190→    if (!name) { onToast('Name is required'); return; }
+   191→    setSavedViews(prev => [...prev, { id: 'sv-' + Date.now(), name, tab, q, roles: [...roles] }]);
+   192→    setSaveViewOpen(false); setSaveViewName('');
+   193→    onToast('Saved view: ' + name);
+   194→  }
+   195→
+   196→  function handleExport() {
+   197→    exportToCsv(filtered as unknown as Record<string, unknown>[], [
+   198→      { key: 'id', label: 'Party ID' }, { key: 'name', label: 'Name' }, { key: 'email', label: 'Email' },
+   199→      { key: 'phone', label: 'Phone' }, { key: 'roles', label: 'Roles' }, { key: 'balance', label: 'Balance' },
+   200→      { key: 'address', label: 'Address' }, { key: 'added', label: 'Added' },
+   201→    ], 'parties');
+   202→    onToast(`Exported ${filtered.length} parties`);
+   203→  }
+   204→
+   205→  const peek = peekId ? items.find(p => p.id === peekId) : null;
+   206→  const editing = editingId ? items.find(p => p.id === editingId) : null;
+   207→
+   208→  return (
+   209→    <main className="px-6 pb-12">
+   210→      {/* BREADCRUMB */}
+   211→      <div className="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+   212→        <span>Contacts</span><span className="text-outline">/</span>
+   213→        <span className="text-on-surface font-semibold">Parties</span>
+   214→      </div>
+   215→
+   216→      {/* PAGE HEADER */}
+   217→      <div className="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+   218→        <div>
+   219→          <h1 className="text-headline-lg">Parties</h1>
+   220→          <p className="text-body-sm text-on-surface-variant mt-0.5">One unified list for Customers, Vendors, Suppliers, and Contacts. Filter by role.</p>
+   221→        </div>
+   222→        <div className="flex items-center gap-2 flex-wrap">
+   223→          <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" onClick={handleExport}><span className="material-symbols-outlined text-[16px]">download</span>Export</button>
+   224→          <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" onClick={() => onToast('Customize panel')}><span className="material-symbols-outlined text-[16px]">tune</span>Customize</button>
+   225→          <div className="flex">
+   226→            <button className="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" onClick={() => openDrawer(null)}><span className="material-symbols-outlined text-[16px]">add</span>New party</button>
+   227→            <button className="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" onClick={() => setCreateMenuOpen(v => !v)}><span className="material-symbols-outlined text-[16px]">expand_more</span></button>
+   228→          </div>
+   229→        </div>
+   230→      </div>
+   231→
+   232→      {/* KPI STRIP */}
+   233→      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+   234→        <div className="bg-white rounded-xl border border-surface-dim p-3">
+   235→          <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total parties</div>
+   236→          <div className="text-headline-sm mt-1 tabular-nums">{totalParties}</div>
+   237→          <div className="text-[11px] text-on-surface-variant mt-0.5">Across all roles</div>
+   238→        </div>
+   239→        <div className="bg-white rounded-xl border border-surface-dim p-3">
+   240→          <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Customers</div>
+   241→          <div className="text-headline-sm mt-1 tabular-nums text-secondary">{customerCount}</div>
+   242→          <div className="text-[11px] text-on-surface-variant mt-0.5">Active in CRM</div>
+   243→        </div>
+   244→        <div className="bg-white rounded-xl border border-surface-dim p-3">
+   245→          <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Vendors &amp; Suppliers</div>
+   246→          <div className="text-headline-sm mt-1 tabular-nums text-qb-blue">{vendorCount}</div>
+   247→          <div className="text-[11px] text-on-surface-variant mt-0.5">Bills &amp; purchasing</div>
+   248→        </div>
+   249→        <div className="bg-white rounded-xl border border-surface-dim p-3">
+   250→          <div className="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Outstanding balance</div>
+   251→          <div className="text-headline-sm mt-1 tabular-nums text-error">{fmt(totalBalance)}</div>
+   252→          <div className="text-[11px] text-on-surface-variant mt-0.5">AR + AP combined</div>
+   253→        </div>
+   254→      </div>
+   255→
+   256→      {/* CREATE ACTIONS ROW */}
+   257→      <div className="flex items-center gap-2 mb-3 flex-wrap">
+   258→        <span className="text-label-sm text-on-surface-variant uppercase tracking-wider font-bold mr-1">Create actions:</span>
+   259→        {[
+   260→          { role: 'Customer', icon: 'person_add', label: 'Add customer' },
+   261→          { role: 'Vendor', icon: 'storefront', label: 'Add vendor' },
+   262→          { role: 'Supplier', icon: 'factory', label: 'Add supplier' },
+   263→          { role: 'Contact', icon: 'contacts', label: 'Add contact' },
+   264→          { role: 'Lead', icon: 'flag', label: 'Add lead' },
+   265→        ].map(a => (
+   266→          <button key={a.role} className="h-8 px-3 rounded-lg bg-white border border-surface-dim hover:bg-primary hover:text-white text-on-surface text-label-sm flex items-center gap-1.5" onClick={() => openDrawer(null, a.role)}>
+   267→            <span className="material-symbols-outlined text-[16px]">{a.icon}</span>{a.label}
+   268→          </button>
+   269→        ))}
+   270→      </div>
+   271→
+   272→      {/* LIST CARD */}
+   273→      <div className="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden mb-4">
+   274→        {/* Role Tabs */}
+   275→        <div className="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+   276→          {['All', 'Customers', 'Vendors', 'Suppliers', 'Contacts', 'Leads'].map(t => (
+   277→            <button key={t} className={`h-full px-3 text-label-md tab-underline ${tab === t ? 'active' : 'text-on-surface-variant'}`} onClick={() => { setTab(t); setSelected(new Set()); }}>{t}</button>
+   278→          ))}
+   279→        </div>
+   280→
+   281→        {/* Filter bar */}
+   282→        <div className="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+   283→          <div className="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+   284→            <span className="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+   285→            <input className="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter by name, email, phone…" value={q} onChange={e => setQ(e.target.value)} />
+   286→          </div>
+   287→          {/* Role popover */}
+   288→          <div className="relative">
+   289→            <button className="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" onClick={e => { e.stopPropagation(); setPopRoleOpen(v => !v); setPopSavedOpen(false); }}>
+   290→              <span className="material-symbols-outlined text-[14px]">badge</span>Roles
+   291→            </button>
+   292→            {popRoleOpen && (
+   293→              <div className="row-menu open" style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, minWidth: 200 }} onClick={e => e.stopPropagation()}>
+   294→                <div className="menu-header">Filter by role</div>
+   295→                {ALL_ROLES.map(r => (
+   296→                  <label key={r} className="flex items-center gap-2 px-2 py-1 text-body-sm">
+   297→                    <input type="checkbox" checked={draftRoles.has(r)} onChange={() => { const n = new Set(draftRoles); if (n.has(r)) n.delete(r); else n.add(r); setDraftRoles(n); }} />{r}
+   298→                  </label>
+   299→                ))}
+   300→                <div className="sep"></div>
+   301→                <div className="flex justify-end gap-2 px-2 py-1">
+   302→                  <button className="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low" onClick={() => { setDraftRoles(new Set(ALL_ROLES)); }}>Clear</button>
+   303→                  <button className="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container" onClick={() => { setRoles(new Set(draftRoles)); setPopRoleOpen(false); }}>Apply</button>
+   304→                </div>
+   305→              </div>
+   306→            )}
+   307→          </div>
+   308→          {/* Saved views */}
+   309→          <div className="relative">
+   310→            <button className="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" onClick={e => { e.stopPropagation(); setPopSavedOpen(v => !v); setPopRoleOpen(false); }}>
+   311→              <span className="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+   312→            </button>
+   313→            {popSavedOpen && (
+   314→              <div className="row-menu open" style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, minWidth: 240 }} onClick={e => e.stopPropagation()}>
+   315→                <div className="menu-header">Saved views</div>
+   316→                <div className="max-h-[220px] overflow-y-auto">
+   317→                  {savedViews.length === 0 ? (
+   318→                    <div className="px-3 py-2 text-[11px] text-on-surface-variant">No saved views yet.</div>
+   319→                  ) : savedViews.map(v => (
+   320→                    <div key={v.id} className="w-full px-3 py-1.5 hover:bg-surface-container-low flex items-center gap-2">
+   321→                      <button className="flex-1 text-left flex items-center gap-2" onClick={() => applyView(v)}>
+   322→                        <span className="material-symbols-outlined text-[16px] text-on-surface-variant">bookmark</span>
+   323→                        <span className="truncate">{v.name}</span>
+   324→                      </button>
+   325→                      <button className="w-5 h-5 rounded hover:bg-surface-container flex items-center justify-center" onClick={e => { e.stopPropagation(); setSavedViews(prev => prev.filter(x => x.id !== v.id)); onToast('View deleted'); }}><span className="material-symbols-outlined text-[14px] text-outline">close</span></button>
+   326→                    </div>
+   327→                  ))}
+   328→                </div>
+   329→                <div className="sep"></div>
+   330→                <button className="w-full text-left px-3 py-1.5 text-body-sm hover:bg-surface-container-low flex items-center gap-2 text-primary font-semibold" onClick={() => { setPopSavedOpen(false); setSaveViewName(''); setSaveViewOpen(true); }}>
+   331→                  <span className="material-symbols-outlined text-[16px]">bookmark_add</span>Save current view…
+   332→                </button>
+   333→              </div>
+   334→            )}
+   335→          </div>
+   336→          <button className={`h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 ${filtersActive ? '' : 'hidden-imp'}`} onClick={clearAllFilters}>
+   337→            <span className="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+   338→          </button>
+   339→          <span className="ml-auto text-[11px] text-on-surface-variant">{filtered.length} of {items.length}</span>
+   340→        </div>
+   341→
+   342→        {/* Bulk bar */}
+   343→        {selected.size > 0 && (
+   344→          <div className="bulk-bar show">
+   345→            <span className="text-[12px] font-semibold">{selected.size} selected</span>
+   346→            <span className="w-px h-4 bg-white/30"></span>
+   347→            <button onClick={() => bulkAction('email')}><span className="material-symbols-outlined text-[14px] align-middle mr-1">mail</span>Email</button>
+   348→            <button onClick={() => bulkAction('merge')}><span className="material-symbols-outlined text-[14px] align-middle mr-1">call_merge</span>Merge</button>
+   349→            <button onClick={() => bulkAction('archive')}><span className="material-symbols-outlined text-[14px] align-middle mr-1">archive</span>Archive</button>
+   350→            <span className="w-px h-4 bg-white/30"></span>
+   351→            <button onClick={() => bulkAction('delete')}><span className="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+   352→            <button className="ml-auto" onClick={() => bulkAction('close')}><span className="material-symbols-outlined text-[16px]">close</span></button>
+   353→          </div>
+   354→        )}
+   355→
+   356→        {/* Table */}
+   357→        {filtered.length === 0 ? (
+   358→          <div className="py-12 px-6 text-center">
+   359→            <div className="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+   360→              <span className="material-symbols-outlined text-[28px] text-outline">groups</span>
+   361→            </div>
+   362→            <h3 className="text-headline-sm mb-1">No parties match</h3>
+   363→            <p className="text-body-sm text-on-surface-variant mb-3">Clear filters or add a new party.</p>
+   364→            <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={clearAllFilters}>Clear filters</button>
+   365→          </div>
+   366→        ) : (
+   367→          <table className="w-full text-left text-body-sm">
+   368→            <thead className="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+   369→              <tr>
+   370→                <th className="w-8 px-3 py-2"><input type="checkbox" className="row-check" checked={allChecked} ref={el => { if (el) el.indeterminate = someChecked && !allChecked; }} onChange={toggleAll} /></th>
+   371→                <th className="px-3 py-2">Name</th>
+   372→                <th className="px-3 py-2">Roles</th>
+   373→                <th className="px-3 py-2">Contact</th>
+   374→                <th className="px-3 py-2 text-right">Open balance</th>
+   375→                <th className="px-3 py-2">Added</th>
+   376→                <th className="w-10 px-2 py-2"></th>
+   377→              </tr>
+   378→            </thead>
+   379→            <tbody className="divide-y divide-surface-dim">
+   380→              {filtered.map(p => (
+   381→                <tr key={p.id} className="hover:bg-surface-container-low cursor-pointer" onClick={() => openPeek(p.id)}>
+   382→                  <td className="px-3 py-2"><input type="checkbox" className="row-check" checked={selected.has(p.id)} onClick={e => e.stopPropagation()} onChange={() => toggleRow(p.id)} /></td>
+   383→                  <td className="px-3 py-2">
+   384→                    <div className="flex items-center gap-3 min-w-0">
+   385→                      <button className={`avatar ${avatarClass(p.roles)} hover:opacity-80`} onClick={e => { e.stopPropagation(); setProfileId(p.id); }} title="Open profile">{initials(p.name)}</button>
+   386→                      <div className="min-w-0">
+   387→                        <button className="font-medium truncate text-primary hover:underline block text-left" onClick={e => { e.stopPropagation(); setProfileId(p.id); }} title="Open profile">{p.name}</button>
+   388→                        <div className="text-[11px] text-on-surface-variant truncate">{p.address}</div>
+   389→                      </div>
+   390→                    </div>
+   391→                  </td>
+   392→                  <td className="px-3 py-2"><div className="flex flex-wrap gap-1">{p.roles.map(r => rolePill(r))}</div></td>
+   393→                  <td className="px-3 py-2">
+   394→                    <div className="text-[12px] truncate">{p.email}</div>
+   395→                    <div className="text-[11px] text-on-surface-variant">{p.phone}</div>
+   396→                  </td>
+   397→                  <td className={`px-3 py-2 text-right tabular-nums ${p.balance > 0 ? 'text-error' : p.balance < 0 ? 'text-qb-blue' : 'text-on-surface'}`}>{p.balance !== 0 ? fmt(p.balance) : '—'}</td>
+   398→                  <td className="px-3 py-2 text-[11px]">{p.added}</td>
+   399→                  <td className="px-2 py-2 text-right relative">
+   400→                    <button className="w-7 h-7 rounded border border-surface-dim hover:bg-surface-container flex items-center justify-center mx-auto" onClick={e => { e.stopPropagation(); setRowMenuForId(rowMenuForId === p.id ? null : p.id); }} title="Row actions"><span className="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+   401→                    {rowMenuForId === p.id && (
+   402→                      <div className="row-menu open" style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4 }} onClick={e => e.stopPropagation()}>
+   403→                        <div className="menu-header">This party</div>
+   404→                        <button onClick={() => rowAction('edit', p)}><span className="material-symbols-outlined">edit</span>Edit party</button>
+   405→                        <button onClick={() => rowAction('view', p)}><span className="material-symbols-outlined">visibility</span>View details</button>
+   406→                        <button onClick={() => { setRowMenuForId(null); setProfileId(p.id); }}><span className="material-symbols-outlined">account_circle</span>Open profile</button>
+   407→                        <button onClick={() => rowAction('email', p)}><span className="material-symbols-outlined">mail</span>Email</button>
+   408→                        <div className="sep"></div>
+   409→                        <div className="menu-header">Roles</div>
+   410→                        <button onClick={() => rowAction('add-role', p)}><span className="material-symbols-outlined">add</span>Add role…</button>
+   411→                        <div className="sep"></div>
+   412→                        <button className="danger" onClick={() => rowAction('archive', p)}><span className="material-symbols-outlined">archive</span>Archive</button>
+   413→                      </div>
+   414→                    )}
+   415→                  </td>
+   416→                </tr>
+   417→              ))}
+   418→            </tbody>
+   419→          </table>
+   420→        )}
+   421→
+   422→        {/* Pagination */}
+   423→        <div className="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+   424→          <span>Rows per page:
+   425→            <select className="border border-surface-dim rounded px-1 py-0.5 bg-white" onChange={() => onToast('Rows per page updated')}><option>25</option><option>50</option><option>75</option><option>100</option></select>
+   426→          </span>
+   427→          <div className="flex items-center gap-2">
+   428→            <button className="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onClick={() => onToast('Previous page')}><span className="material-symbols-outlined text-[16px]">chevron_left</span></button>
+   429→            <span>Page 1 of 1</span>
+   430→            <button className="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" onClick={() => onToast('Next page')}><span className="material-symbols-outlined text-[16px]">chevron_right</span></button>
+   431→          </div>
+   432→        </div>
+   433→      </div>
+   434→
+   435→      {/* Click-away for row menu */}
+   436→      {rowMenuForId && <div style={{ position: 'fixed', inset: 0, zIndex: 150 }} onClick={() => setRowMenuForId(null)} />}
+   437→
+   438→      {/* Create split menu */}
+   439→      {createMenuOpen && (
+   440→        <div className="row-menu open" style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4 }} onClick={() => setCreateMenuOpen(false)}>
+   441→          <div className="menu-header">New party</div>
+   442→          {ALL_ROLES.map(r => (
+   443→            <button key={r} onClick={() => openDrawer(null, r)}>
+   444→              <span className="material-symbols-outlined">{r === 'Customer' ? 'person_add' : r === 'Vendor' ? 'storefront' : r === 'Supplier' ? 'factory' : r === 'Lead' ? 'flag' : 'contacts'}</span>{r}
+   445→            </button>
+   446→          ))}
+   447→        </div>
+   448→      )}
+   449→
+   450→      {/* Peek drawer */}
+   451→      {peek && (
+   452→        <>
+   453→          <div className="drawer-scrim open" onClick={() => setPeekId(null)} />
+   454→          <div className="peek open">
+   455→            <div className="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+   456→              <div className="flex items-center gap-2 min-w-0">
+   457→                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">person</span>
+   458→                <span className="text-headline-sm truncate">{peek.name}</span>
+   459→              </div>
+   460→              <div className="flex items-center gap-1">
+   461→                <button className="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1" onClick={() => { const id = peek.id; setPeekId(null); setProfileId(id); }}><span className="material-symbols-outlined text-[14px]">account_circle</span>Open</button>
+   462→                <button className="h-7 px-2.5 rounded border border-surface-dim text-label-sm hover:bg-surface-container-low flex items-center gap-1" onClick={() => { const id = peek.id; setPeekId(null); openDrawer(id); }}><span className="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+   463→                <button className="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" onClick={() => setPeekId(null)}><span className="material-symbols-outlined text-[18px]">close</span></button>
+   464→              </div>
+   465→            </div>
+   466→            <div className="flex-1 overflow-y-auto p-5 text-body-sm">
+   467→              <div className="mb-4 flex items-center gap-2">{peek.roles.map(r => rolePill(r))}</div>
+   468→              <dl className="text-body-sm mb-4">
+   469→                <div className="kv"><dt>Company</dt><dd>{peek.name}</dd></div>
+   470→                <div className="kv"><dt>Contact name</dt><dd>{peek.firstName} {peek.lastName}</dd></div>
+   471→                <div className="kv"><dt>Email</dt><dd><a href={`mailto:${peek.email}`} className="text-primary hover:underline">{peek.email}</a></dd></div>
+   472→                <div className="kv"><dt>Phone</dt><dd>{peek.phone}</dd></div>
+   473→                <div className="kv"><dt>Address</dt><dd className="text-right">{peek.address}</dd></div>
+   474→                <div className="kv"><dt>Open balance</dt><dd className={peek.balance > 0 ? 'text-error' : peek.balance < 0 ? 'text-qb-blue' : ''}>{peek.balance !== 0 ? fmt(peek.balance) : '—'}</dd></div>
+   475→                <div className="kv"><dt>Added</dt><dd>{peek.added}</dd></div>
+   476→              </dl>
+   477→              <div className="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+   478→                <button className="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" onClick={() => { const id = peek.id; setPeekId(null); setProfileId(id); }}><span className="material-symbols-outlined text-[16px]">account_circle</span>Open profile</button>
+   479→                <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" onClick={() => { const id = peek.id; setPeekId(null); openDrawer(id); }}><span className="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+   480→                <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1 col-span-2" onClick={() => onToast(`Composing email to ${peek.email}`)}><span className="material-symbols-outlined text-[16px]">mail</span>Email</button>
+   481→              </div>
+   482→            </div>
+   483→          </div>
+   484→        </>
+   485→      )}
+   486→
+   487→      {/* Party Drawer */}
+   488→      {drawerOpen && (
+   489→        <>
+   490→          <div className="drawer-scrim open" onClick={closeDrawer} />
+   491→          <div className="drawer open">
+   492→            <div className="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+   493→              <div className="flex items-center gap-2 min-w-0">
+   494→                <span className="material-symbols-outlined text-[20px] text-primary">groups</span>
+   495→                <div className="min-w-0">
+   496→                  <div className="text-headline-sm truncate">{editingId ? 'Edit party' : 'New party'}</div>
+   497→                  <div className="text-[11px] text-on-surface-variant">{editingId ? editingId : 'Add details and assign roles.'}</div>
+   498→                </div>
+   499→              </div>
+   500→              <button className="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" onClick={closeDrawer}><span className="material-symbols-outlined text-[18px]">close</span></button>
+   501→            </div>
+   502→
+   503→            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+   504→              {/* Role Chips */}
+   505→              <section>
+   506→                <div className="section-h">Roles</div>
+   507→                <div className="flex flex-wrap gap-2">
+   508→                  {ALL_ROLES.map(r => (
+   509→                    <button key={r} className={`role-chip-btn ${currentDraftRoles.has(r) ? 'selected' : ''}`} onClick={() => toggleDraftRole(r)}>
+   510→                      <span className="material-symbols-outlined text-[16px]">{r === 'Customer' ? 'person' : r === 'Vendor' ? 'storefront' : r === 'Supplier' ? 'factory' : r === 'Lead' ? 'flag' : 'contacts'}</span>{r}
+   511→                    </button>
+   512→                  ))}
+   513→                </div>
+   514→              </section>
+   515→
+   516→              {/* Names & Contact */}
+   517→              <section>
+   518→                <div className="section-h">Names &amp; contact</div>
+   519→                <div className="space-y-3">
+   520→                  <div className="grid grid-cols-2 gap-3">
+   521→                    <div><label className="field-label">Company name</label><input className="field-input" placeholder="e.g. Acme Corp" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} /></div>
+   522→                    <div><label className="field-label">Display name</label><input className="field-input" placeholder="e.g. Acme" value={form.display} onChange={e => setForm(p => ({ ...p, display: e.target.value }))} /></div>
+   523→                  </div>
+   524→                  <div className="grid grid-cols-2 gap-3">
+   525→                    <div><label className="field-label">First name</label><input className="field-input" placeholder="First" value={form.first} onChange={e => setForm(p => ({ ...p, first: e.target.value }))} /></div>
+   526→                    <div><label className="field-label">Last name</label><input className="field-input" placeholder="Last" value={form.last} onChange={e => setForm(p => ({ ...p, last: e.target.value }))} /></div>
+   527→                  </div>
+   528→                  <div className="grid grid-cols-2 gap-3">
+   529→                    <div><label className="field-label">Email</label><input className="field-input" type="email" placeholder="name@company.com" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} /></div>
+   530→                    <div><label className="field-label">Phone</label><input className="field-input" type="tel" placeholder="+1 (555) 000-0000" value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} /></div>
+   531→                  </div>
+   532→                </div>
+   533→              </section>
+   534→
+   535→              {/* Address */}
+   536→              <section>
+   537→                <div className="section-h">Address</div>
+   538→                <div className="grid grid-cols-2 gap-3">
+   539→                  <div><label className="field-label">Street 1</label><input className="field-input" placeholder="Street 1" value={form.street1} onChange={e => setForm(p => ({ ...p, street1: e.target.value }))} /></div>
+   540→                  <div><label className="field-label">Street 2</label><input className="field-input" placeholder="Street 2" value={form.street2} onChange={e => setForm(p => ({ ...p, street2: e.target.value }))} /></div>
+   541→                  <div><label className="field-label">City</label><input className="field-input" placeholder="City" value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} /></div>
+   542→                  <div><label className="field-label">State / Province</label><input className="field-input" placeholder="State" value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} /></div>
+   543→                  <div><label className="field-label">ZIP / Postal</label><input className="field-input" placeholder="ZIP" value={form.zip} onChange={e => setForm(p => ({ ...p, zip: e.target.value }))} /></div>
+   544→                  <div><label className="field-label">Country</label><select className="field-input" value={form.country} onChange={e => setForm(p => ({ ...p, country: e.target.value }))}><option>United States</option><option>Canada</option><option>United Kingdom</option><option>Australia</option></select></div>
+   545→                </div>
+   546→              </section>
+   547→
+   548→              {/* Role-specific sections */}
+   549→              {currentDraftRoles.has('Customer') && (
+   550→                <div className="role-section">
+   551→                  <div className="text-label-sm font-bold text-primary mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">person</span>Customer details</div>
+   552→                  <div className="grid grid-cols-2 gap-3">
+   553→                    <div><label className="field-label">Terms</label><select className="field-input"><option>Net 30</option><option>Net 15</option><option>Due on receipt</option></select></div>
+   554→                    <div><label className="field-label">Credit limit</label><input className="field-input" placeholder="$0.00" /></div>
+   555→                  </div>
+   556→                  <label className="flex items-center gap-2 mt-3 text-body-sm"><input type="checkbox" className="row-check" /> Marketing consent</label>
+   557→                </div>
+   558→              )}
+   559→              {currentDraftRoles.has('Vendor') && (
+   560→                <div className="role-section">
+   561→                  <div className="text-label-sm font-bold text-qb-blue mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">storefront</span>Vendor details</div>
+   562→                  <div className="grid grid-cols-2 gap-3">
+   563→                    <div><label className="field-label">Terms</label><select className="field-input"><option>Net 30</option><option>Net 15</option><option>Due on receipt</option></select></div>
+   564→                    <div><label className="field-label">Default expense account</label><input className="field-input" placeholder="Select account…" /></div>
+   565→                  </div>
+   566→                  <div className="grid grid-cols-2 gap-3 mt-3">
+   567→                    <div><label className="field-label">Tax ID</label><input className="field-input code-mono" placeholder="XX-XXXXXXX" /></div>
+   568→                    <div className="flex items-end"><label className="flex items-center gap-2 text-body-sm"><input type="checkbox" className="row-check" /> Track for 1099</label></div>
+   569→                  </div>
+   570→                </div>
+   571→              )}
+   572→              {currentDraftRoles.has('Supplier') && (
+   573→                <div className="role-section">
+   574→                  <div className="text-label-sm font-bold text-error mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">factory</span>Supplier details</div>
+   575→                  <div className="grid grid-cols-2 gap-3">
+   576→                    <div><label className="field-label">Account no.</label><input className="field-input code-mono" placeholder="SUP-000" /></div>
+   577→                    <div><label className="field-label">Lead time (days)</label><input className="field-input" placeholder="e.g. 7" /></div>
+   578→                  </div>
+   579→                  <div className="mt-3"><label className="field-label">Catalog / API URL</label><input className="field-input code-mono" placeholder="https://supplier.com/api" /></div>
+   580→                </div>
+   581→              )}
+   582→              {currentDraftRoles.has('Contact') && (
+   583→                <div className="role-section">
+   584→                  <div className="text-label-sm font-bold text-qb-maroon mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">contacts</span>Contact details</div>
+   585→                  <div className="grid grid-cols-2 gap-3">
+   586→                    <div><label className="field-label">Company</label><input className="field-input" placeholder="Company name" /></div>
+   587→                    <div><label className="field-label">Title</label><input className="field-input" placeholder="Job title" /></div>
+   588→                  </div>
+   589→                </div>
+   590→              )}
+   591→
+   592→              {currentDraftRoles.has('Lead') && (
+   593→                <div className="role-section">
+   594→                  <div className="text-label-sm font-bold text-qb-maroon mb-2 flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">flag</span>Lead details</div>
+   595→                  <div className="grid grid-cols-2 gap-3">
+   596→                    <div><label className="field-label">Lead source</label><select className="field-input"><option>Website</option><option>Referral</option><option>Cold outreach</option><option>Event</option><option>Social media</option></select></div>
+   597→                    <div><label className="field-label">Status</label><select className="field-input"><option>New</option><option>Contacted</option><option>Qualified</option><option>Proposal sent</option><option>Negotiation</option><option>Won</option><option>Lost</option></select></div>
+   598→                    <div><label className="field-label">Assigned to</label><select className="field-input"><option>Jordan A.</option><option>Sarah A.</option><option>Marcus L.</option></select></div>
+   599→                    <div><label className="field-label">Estimated value</label><input className="field-input" placeholder="$0.00" /></div>
+   600→                  </div>
+   601→                  <div className="mt-3"><label className="field-label">Next step</label><input className="field-input" placeholder="e.g. Schedule demo call" /></div>
+   602→                </div>
+   603→              )}
+   604→
+   605→              {/* Notes */}
+   606→              <section>
+   607→                <div className="section-h">Notes &amp; attachments</div>
+   608→                <textarea className="field-textarea" placeholder="Add any notes about this party…" value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+   609→                <div className="mt-2 border border-dashed border-surface-dim rounded-lg p-3 text-center cursor-pointer hover:bg-surface-container-low" onClick={() => onToast('Attach a file — file picker')}>
+   610→                  <div className="text-[12px] font-semibold text-primary">Attach a file</div>
+   611→                </div>
+   612→              </section>
+   613→            </div>
+   614→
+   615→            <div className="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+   616→              <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={closeDrawer}>Cancel</button>
+   617→              <div className="flex items-center gap-2">
+   618→                <button className="h-8 px-3 border border-surface-dim rounded text-body-md font-semibold hover:bg-surface-container-low" onClick={saveAndNew}>Save and new</button>
+   619→                <button className="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" onClick={save}>Save and close</button>
+   620→              </div>
+   621→            </div>
+   622→          </div>
+   623→        </>
+   624→      )}
+   625→
+   626→      {/* Save view modal */}
+   627→      {saveViewOpen && (
+   628→        <div className="modal-scrim open" onClick={() => setSaveViewOpen(false)}>
+   629→          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-5" onClick={e => e.stopPropagation()}>
+   630→            <h3 className="text-headline-sm mb-1">Save current view</h3>
+   631→            <p className="text-body-sm text-on-surface-variant mb-3">Name this combination of filters so you can reuse it.</p>
+   632→            <input className="field-input mb-3" placeholder="e.g. Vendors with open bills" value={saveViewName} onChange={e => setSaveViewName(e.target.value)} autoFocus />
+   633→            <div className="flex justify-end gap-2">
+   634→              <button className="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" onClick={() => setSaveViewOpen(false)}>Cancel</button>
+   635→              <button className="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container" onClick={saveCurrentView}>Save view</button>
+   636→            </div>
+   637→          </div>
+   638→        </div>
+   639→      )}
+   640→    </main>
+   641→  );
+   642→}
+   643→

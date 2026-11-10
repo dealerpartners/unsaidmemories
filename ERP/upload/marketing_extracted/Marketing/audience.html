@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Advertising — Audiences</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme:{ extend:{
+    colors:{
+      "surface-dim":"#dad9dd","surface-container-lowest":"#ffffff","surface-container-low":"#f4f3f7",
+      "surface-container":"#eeedf1","surface-container-high":"#e9e8eb","surface-container-highest":"#e3e2e6",
+      "on-surface":"#1a1c1e","on-surface-variant":"#5a6355","outline":"#6f7a69","outline-variant":"#becab6",
+      "primary":"#0a6400","primary-container":"#108000","on-primary":"#ffffff","on-primary-container":"#cfffbc",
+      "secondary":"#006c47","secondary-container":"#8af5be","on-secondary-container":"#00714b",
+      "tertiary":"#0055a5","tertiary-container":"#1e6dc9","error":"#ba1a1a","error-container":"#ffdad6",
+      "on-error-container":"#93000a","background":"#faf9fc",
+      "qb-blue":"#0077c5","qb-navy":"#1f2937","qb-maroon":"#6b1e28","qb-green":"#1e5a38","qb-teal":"#0e5e6f"
+    },
+    fontFamily:{ sans:["Inter"] },
+    fontSize:{
+      "label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.02em",fontWeight:"600"}],
+      "label-md":["12px",{lineHeight:"16px",fontWeight:"500"}],
+      "body-sm":["12px",{lineHeight:"16px"}],
+      "body-md":["14px",{lineHeight:"20px"}],
+      "headline-sm":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"600"}],
+      "headline-md":["20px",{lineHeight:"28px",letterSpacing:"-0.01em",fontWeight:"600"}],
+      "headline-lg":["24px",{lineHeight:"32px",letterSpacing:"-0.015em",fontWeight:"600"}]
+    }
+  }}
+}
+</script>
+<style>
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-thumb{background:#dad9dd;border-radius:3px}
+  body{overscroll-behavior:none}
+  .hidden-imp{display:none!important}
+  .row-check{accent-color:#0077c5}
+  .tab-underline{border-bottom:2px solid transparent}
+  .tab-underline.active{border-bottom-color:#0077c5;color:#0077c5;font-weight:600}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1c1e;color:#fff;padding:10px 16px;border-radius:8px;font:500 13px Inter;z-index:400;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.show{opacity:1}
+  .split-btn-main{border-radius:4px 0 0 4px}
+  .split-btn-arrow{border-radius:0 4px 4px 0;border-left:1px solid rgba(0,0,0,.08)}
+  .bulk-bar{display:none;background:#0077c5;color:#fff;padding:8px 16px;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:30;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+  .bulk-bar.show{display:flex}
+  .bulk-bar button{color:#fff;font-weight:600;font-size:12px;padding:4px 10px;border-radius:4px}
+  .bulk-bar button:hover{background:rgba(255,255,255,.15)}
+  .stat{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+  .stat.ready{background:#8af5be;color:#00714b}
+  .stat.building{background:#eaf3fb;color:#4e7b9d}
+  .stat.draft{background:#f4f3f7;color:#5a6355}
+  .stat.expired{background:#fbf5ec;color:#98713e}
+  .row-menu{position:fixed;background:#fff;border:1px solid #dad9dd;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);min-width:250px;padding:4px;z-index:200;display:none}
+  .row-menu.open{display:block}
+  .row-menu .menu-header{padding:6px 10px 4px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5a6355}
+  .row-menu button{display:flex;align-items:center;gap:8px;width:100%;padding:6px 10px;font-size:13px;border-radius:4px;text-align:left;color:#1a1c1e}
+  .row-menu button:hover{background:#f4f3f7}
+  .row-menu button .material-symbols-outlined{font-size:16px;color:#5a6355;flex-shrink:0}
+  .row-menu button.danger{color:#ba1a1a}
+  .row-menu button.danger .material-symbols-outlined{color:#ba1a1a}
+  .row-menu button.danger:hover{background:#ffdad6}
+  .row-menu .sep{height:1px;background:#eeedf1;margin:4px 0}
+  .drawer-scrim{position:fixed;inset:0;background:rgba(26,28,30,.35);z-index:80;display:none}
+  .drawer-scrim.open{display:block}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease}
+  .drawer.open{transform:translateX(0)}
+  .peek{position:fixed;top:0;right:0;bottom:0;width:480px;max-width:96vw;background:#fff;z-index:81;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s ease;box-shadow:-8px 0 24px rgba(0,0,0,.06)}
+  .peek.open{transform:translateX(0)}
+  .modal-scrim{position:fixed;inset:0;background:rgba(26,28,30,.4);z-index:110;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-scrim.open{display:flex}
+  .field-label{display:block;font:600 11px Inter;letter-spacing:.04em;text-transform:uppercase;color:#5a6355;margin-bottom:6px}
+  .field-input{width:100%;height:36px;padding:0 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff}
+  .field-input:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .field-textarea{width:100%;padding:8px 10px;border:1px solid #dad9dd;border-radius:6px;font-size:13px;background:#fff;min-height:70px;resize:vertical}
+  .field-textarea:focus{outline:none;border-color:#0077c5;box-shadow:0 0 0 3px rgba(0,119,197,.1)}
+  .section-h{font:700 11px Inter;letter-spacing:.08em;text-transform:uppercase;color:#1a1c1e;padding-bottom:8px;border-bottom:1px solid #dad9dd;margin-bottom:12px}
+  .code-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;letter-spacing:.02em}
+  .net-chip{display:inline-flex;align-items:center;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600}
+  .net-Meta{background:#edf3fc;color:#4b77b8}
+  .net-TikTok{background:#eef1f2;color:#27353a}
+  .net-Google{background:#f8f0ee;color:#c45c5b}
+  .net-Pinterest{background:#f9eeee;color:#bd5558}
+  .kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f2f3}
+  .kv:last-child{border-bottom:0}
+  .kv dt{color:#5a6355;font-size:12px}
+  .kv dd{font-size:12px;font-weight:500}
+  .aud-preview{border:1px solid #dad9dd;border-radius:10px;padding:12px;background:#fafbfc}
+  .aud-preview .bar{height:8px;border-radius:10px;background:#edf0f1;overflow:hidden}
+  .aud-preview .bar span{display:block;height:100%;background:#0077c5;border-radius:10px}
+  .aud-card{background:#fff;border:1px solid #dad9dd;border-radius:8px;padding:10px;display:flex;align-items:center;gap:10px}
+  .aud-icon{width:32px;height:32px;border-radius:6px;background:#f0f6f5;color:#0a6400;display:grid;place-items:center;flex-shrink:0}
+  .aud-icon.retarget{background:#edf3fc;color:#4b77b8}
+  .aud-icon.lookalike{background:#f9eeee;color:#bd5558}
+  .aud-icon.custom{background:#f2f1f8;color:#6e6596}
+  .rule-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #dad9dd;border-radius:8px;background:#fff}
+  .rule-row select,.rule-row input{height:30px;padding:0 8px;border:1px solid #dad9dd;border-radius:6px;font-size:12px;background:#fff}
+</style>
+</head>
+<body class="bg-background font-sans text-body-md text-on-surface antialiased">
+
+<main class="px-6 pb-12">
+
+  <!-- ─── BREADCRUMB ─── -->
+  <div class="flex items-center gap-2 text-label-sm text-on-surface-variant mt-4 mb-2">
+    <span>Advertising</span><span class="text-outline">/</span>
+    <span class="text-on-surface font-semibold">Audiences</span>
+  </div>
+
+  <!-- ─── PAGE HEADER ─── -->
+  <div class="flex items-start justify-between gap-4 py-3 mb-4 flex-wrap">
+    <div>
+      <h1 class="text-headline-lg">Audiences</h1>
+      <p class="text-body-sm text-on-surface-variant mt-0.5">Custom, retargeting, and lookalike audiences — reusable across campaigns and networks.</p>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="export">
+        <span class="material-symbols-outlined text-[16px]">download</span>Export
+      </button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center gap-1" data-action="customize">
+        <span class="material-symbols-outlined text-[16px]">tune</span>Customize
+      </button>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container flex items-center gap-1 split-btn-main" data-new-audience>
+          <span class="material-symbols-outlined text-[16px]">add</span>New audience
+        </button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow" id="createArrow">
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── KPI STRIP ─── -->
+  <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total audiences</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statTotal">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across all networks</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Ready to use</div>
+      <div class="text-headline-sm mt-1 tabular-nums text-secondary" id="statReady">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Synced and deliverable</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Total reach</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statReach">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Sum of unique sizes</div>
+    </div>
+    <div class="bg-white rounded-xl border border-surface-dim p-3">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Used in campaigns</div>
+      <div class="text-headline-sm mt-1 tabular-nums" id="statUsed">—</div>
+      <div class="text-[11px] text-on-surface-variant mt-0.5">Across all ad sets</div>
+    </div>
+  </div>
+
+  <!-- ─── LIST CARD ─── -->
+  <div class="bg-white rounded-xl shadow-sm border border-surface-dim overflow-hidden">
+
+    <!-- Status tabs -->
+    <div class="flex items-center gap-1 px-4 h-11 border-b border-surface-dim overflow-x-auto">
+      <button class="h-full px-3 text-label-md tab-underline active" data-viewtab="All">All</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Ready">Ready</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Building">Building</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Draft">Draft</button>
+      <button class="h-full px-3 text-label-md tab-underline text-on-surface-variant" data-viewtab="Expired">Expired</button>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="px-4 py-2 flex items-center gap-2 border-b border-surface-dim flex-wrap">
+      <div class="relative flex items-center flex-1 max-w-sm min-w-[180px]">
+        <span class="material-symbols-outlined absolute left-2 text-[15px] text-outline">search</span>
+        <input class="w-full h-7 pl-7 pr-2 bg-surface-container-low border border-surface-dim rounded text-body-sm focus:outline-none focus:border-primary" placeholder="Filter audiences…" data-filter/>
+      </div>
+      <div class="relative">
+        <button id="btnKind" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">category</span>Kind
+        </button>
+        <div id="popKind" class="row-menu" style="min-width:200px">
+          <div class="menu-header">Filter by kind</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-kind" value="Custom" checked/>Custom</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-kind" value="Retargeting" checked/>Retargeting</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-kind" value="Lookalike" checked/>Lookalike</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="kindClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="kindApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <div class="relative">
+        <button id="btnNetwork" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px]">hub</span>Network
+        </button>
+        <div id="popNetwork" class="row-menu" style="min-width:220px">
+          <div class="menu-header">Filter by network</div>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Meta" checked/>Meta Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="TikTok" checked/>TikTok Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Google" checked/>Google Ads</label>
+          <label class="flex items-center gap-2 px-2 py-1 text-body-sm"><input type="checkbox" class="filter-network" value="Pinterest" checked/>Pinterest Ads</label>
+          <div class="sep"></div>
+          <div class="flex justify-end gap-2 px-2 py-1">
+            <button id="networkClear" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low">Clear</button>
+            <button id="networkApply" class="h-7 px-2 bg-primary text-white rounded text-label-sm font-semibold hover:bg-primary-container">Apply</button>
+          </div>
+        </div>
+      </div>
+      <button id="btnSaved" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">bookmark</span>Saved views
+      </button>
+      <button id="btnClearAll" class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1 hidden-imp">
+        <span class="material-symbols-outlined text-[14px]">filter_alt_off</span>Clear all
+      </button>
+      <span class="ml-auto text-[11px] text-on-surface-variant" data-b-count>—</span>
+    </div>
+
+    <!-- Bulk bar -->
+    <div class="bulk-bar" data-bulk-bar>
+      <span class="text-[12px] font-semibold" data-bulk-count>0 selected</span>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="sync"><span class="material-symbols-outlined text-[14px] align-middle mr-1">sync</span>Sync</button>
+      <button data-bulk="export"><span class="material-symbols-outlined text-[14px] align-middle mr-1">download</span>Export</button>
+      <span class="w-px h-4 bg-white/30"></span>
+      <button data-bulk="archive"><span class="material-symbols-outlined text-[14px] align-middle mr-1">archive</span>Archive</button>
+      <button data-bulk="delete"><span class="material-symbols-outlined text-[14px] align-middle mr-1">delete</span>Delete</button>
+      <button class="ml-auto" data-bulk="close"><span class="material-symbols-outlined text-[16px]">close</span></button>
+    </div>
+
+    <!-- Table -->
+    <table class="w-full text-left text-body-sm">
+      <thead class="bg-surface-container-low text-label-sm text-on-surface-variant uppercase tracking-wider">
+        <tr>
+          <th class="w-8 px-3 py-2"><input type="checkbox" class="row-check" data-check-all/></th>
+          <th class="px-3 py-2">Audience</th>
+          <th class="px-3 py-2">Kind</th>
+          <th class="px-3 py-2">Source</th>
+          <th class="px-3 py-2">Networks</th>
+          <th class="px-3 py-2 text-right">Size</th>
+          <th class="px-3 py-2">Used in</th>
+          <th class="px-3 py-2">Last sync</th>
+          <th class="px-3 py-2">Status</th>
+          <th class="w-8"></th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-surface-dim" data-aud-tbody></tbody>
+    </table>
+
+    <!-- Empty state -->
+    <div class="hidden-imp py-12 px-6 text-center" data-aud-empty>
+      <div class="w-14 h-14 mx-auto rounded-full bg-surface-container-low flex items-center justify-center mb-3">
+        <span class="material-symbols-outlined text-[28px] text-outline">groups</span>
+      </div>
+      <h3 class="text-headline-sm mb-1">No audiences match</h3>
+      <p class="text-body-sm text-on-surface-variant mb-3">Clear filters or create a new audience.</p>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="emptyClear">Clear filters</button>
+    </div>
+
+    <!-- Pagination -->
+    <div class="px-4 py-2 flex items-center justify-between border-t border-surface-dim text-[11px] text-on-surface-variant">
+      <span>Rows per page:
+        <select class="border border-surface-dim rounded px-1 py-0.5 bg-white" id="rowsPerPage">
+          <option>25</option><option>50</option><option>75</option><option>100</option>
+        </select>
+      </span>
+      <div class="flex items-center gap-2">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pagePrev"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+        <span id="pageLabel">Page 1 of 1</span>
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" id="pageNext"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     OVERLAYS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="drawer-scrim" id="scrim"></div>
+
+<!-- Create split menu -->
+<div class="row-menu" id="createMenu">
+  <div class="menu-header">New</div>
+  <button data-create-kind="audience"><span class="material-symbols-outlined">groups</span>Audience</button>
+  <button data-create-kind="lookalike"><span class="material-symbols-outlined">share</span>Lookalike</button>
+  <button data-create-kind="campaign"><span class="material-symbols-outlined">campaign</span>Campaign</button>
+  <button data-create-kind="creative"><span class="material-symbols-outlined">perm_media</span>Creative</button>
+</div>
+
+<!-- Row ⋯ menu -->
+<div class="row-menu" id="rowMenu">
+  <div class="menu-header">This audience</div>
+  <button data-row-act="edit"><span class="material-symbols-outlined">edit</span>Edit audience</button>
+  <button data-row-act="view"><span class="material-symbols-outlined">visibility</span>View details</button>
+  <button data-row-act="duplicate"><span class="material-symbols-outlined">content_copy</span>Duplicate</button>
+  <div class="sep"></div>
+  <div class="menu-header">Operations</div>
+  <button data-row-act="sync"><span class="material-symbols-outlined">sync</span>Sync now</button>
+  <button data-row-act="export"><span class="material-symbols-outlined">download</span>Export members</button>
+  <button data-row-act="archive"><span class="material-symbols-outlined">archive</span>Archive</button>
+  <div class="sep"></div>
+  <button class="danger" data-row-act="delete"><span class="material-symbols-outlined">delete</span>Delete</button>
+</div>
+
+<!-- Peek drawer -->
+<div class="peek" id="peek">
+  <div class="flex items-center justify-between px-4 h-12 border-b border-surface-dim bg-surface-container-low shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[18px] text-on-surface-variant">groups</span>
+      <span id="peekTitle" class="text-headline-sm truncate">Audience</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="peekEdit" class="h-7 px-2.5 rounded bg-primary text-white text-label-sm hover:bg-primary-container flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">edit</span>Edit</button>
+      <button id="peekClose" class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center"><span class="material-symbols-outlined text-[18px]">close</span></button>
+    </div>
+  </div>
+  <div id="peekBody" class="flex-1 overflow-y-auto p-5 text-body-sm"></div>
+</div>
+
+<!-- Audience drawer -->
+<div class="drawer" id="audDrawer">
+  <div class="flex items-center justify-between px-5 h-14 border-b border-surface-dim shrink-0">
+    <div class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[20px] text-primary">groups</span>
+      <div class="min-w-0">
+        <div class="text-headline-sm truncate" id="audDrawerTitle">New audience</div>
+        <div class="text-[11px] text-on-surface-variant" id="audDrawerSub">Draft · not yet built</div>
+      </div>
+    </div>
+    <button class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center" id="audDrawerClose"><span class="material-symbols-outlined text-[18px]">close</span></button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-5 space-y-5">
+
+    <!-- Basics -->
+    <section>
+      <div class="section-h">Audience basics</div>
+      <div class="space-y-3">
+        <div>
+          <label class="field-label">Audience name</label>
+          <input class="field-input" id="auName" placeholder="e.g. Site visitors 30d"/>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Kind</label>
+            <select class="field-input" id="auKind">
+              <option>Custom</option>
+              <option>Retargeting</option>
+              <option>Lookalike</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Status</label>
+            <select class="field-input" id="auStatus">
+              <option>Draft</option>
+              <option>Building</option>
+              <option>Ready</option>
+              <option>Expired</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="field-label">Source</label>
+          <select class="field-input" id="auSource">
+            <option>CRM</option>
+            <option>Meta Pixel</option>
+            <option>TikTok Pixel</option>
+            <option>Shopify + Meta</option>
+            <option>VIP segment</option>
+            <option>Customer list (CSV)</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rules -->
+    <section>
+      <div class="section-h">
+        <span>Rules</span>
+        <button class="h-7 px-2 border border-surface-dim rounded text-label-sm hover:bg-surface-container-low flex items-center gap-1" id="addRuleBtn">
+          <span class="material-symbols-outlined text-[14px]">add</span>Add rule
+        </button>
+      </div>
+      <div id="rulesHost" class="space-y-2"></div>
+      <div class="text-[10px] text-on-surface-variant mt-2">Rules combine with AND. Members who match every rule enter the audience.</div>
+    </section>
+
+    <!-- Lookalike -->
+    <section id="lookalikeSection" class="hidden-imp">
+      <div class="section-h">Lookalike config</div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="field-label">Seed audience</label>
+          <select class="field-input" id="auSeed">
+            <option>VIP customers</option>
+            <option>Site visitors 30d</option>
+            <option>Abandoned cart 7d</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Country</label>
+          <select class="field-input" id="auLookCountry">
+            <option>United States</option>
+            <option>Canada</option>
+            <option>United Kingdom</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Similarity (%)</label>
+          <input type="number" class="field-input" id="auSimilarity" value="2"/>
+        </div>
+        <div>
+          <label class="field-label">Size estimate</label>
+          <input class="field-input" id="auSizeEstimate" value="1.8M" readonly/>
+        </div>
+      </div>
+    </section>
+
+    <!-- Networks -->
+    <section>
+      <div class="section-h">Target networks</div>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="text-body-sm">Meta Ads</span>
+          <input type="checkbox" class="row-check au-network" data-network="Meta" checked/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="text-body-sm">TikTok Ads</span>
+          <input type="checkbox" class="row-check au-network" data-network="TikTok" checked/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="text-body-sm">Google Ads</span>
+          <input type="checkbox" class="row-check au-network" data-network="Google"/>
+        </label>
+        <label class="flex items-center justify-between p-2 rounded border border-surface-dim">
+          <span class="text-body-sm">Pinterest Ads</span>
+          <input type="checkbox" class="row-check au-network" data-network="Pinterest"/>
+        </label>
+      </div>
+    </section>
+
+    <!-- Live preview -->
+    <section>
+      <div class="section-h">Live preview</div>
+      <div class="aud-preview" id="audPreview"></div>
+    </section>
+  </div>
+
+  <div class="h-14 border-t border-surface-dim px-4 flex items-center justify-between shrink-0">
+    <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low" id="auCancel">Cancel</button>
+    <div class="flex items-center gap-2">
+      <div class="flex">
+        <button class="h-8 px-3 bg-white border border-surface-dim text-body-md font-semibold hover:bg-surface-container-low split-btn-main" id="auSaveNew">Save and new</button>
+        <button class="h-8 px-1.5 bg-white border border-surface-dim hover:bg-surface-container-low split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+      <div class="flex">
+        <button class="h-8 px-3 bg-primary text-white text-body-md font-semibold hover:bg-primary-container split-btn-main" id="auSave">Save and close</button>
+        <button class="h-8 px-1.5 bg-primary text-white hover:bg-primary-container split-btn-arrow"><span class="material-symbols-outlined text-[16px]">expand_more</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ─── helpers ─── */
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),1800);}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pillFor(status){
+  const cls = status==="Ready"?"ready":status==="Building"?"building":status==="Draft"?"draft":"expired";
+  return `<span class="stat ${cls}">${status}</span>`;
+}
+function netChip(n){ return `<span class="net-chip net-${n}">${n}</span>`; }
+function iconFor(kind){ return kind==="Retargeting"?"history":kind==="Lookalike"?"share":"groups"; }
+function classFor(kind){ return kind==="Retargeting"?"retarget":kind==="Lookalike"?"lookalike":"custom"; }
+function fmtDate(iso){
+  if (!iso || iso==="—") return "—";
+  try{ return new Date(iso).toLocaleString("en-US",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }catch(e){ return iso; }
+}
+
+/* ─── data ─── */
+const NETWORKS = ["Meta","TikTok","Google","Pinterest"];
+const KINDS = ["Custom","Retargeting","Lookalike"];
+const RULE_FIELDS = ["Visited page","Added to cart","Purchased","Order total","Days since last order","Country","Email exists","Phone exists","Consent (marketing)"];
+const RULE_OPS = ["equals","does not equal","contains","is greater than","is less than","is at least","is at most","is one of"];
+
+let AUDIENCES = [
+  { id:"AU-8001", name:"Site visitors 30d", kind:"Retargeting", source:"Meta Pixel", networks:["Meta"], size:12400, usedIn:2, lastSync:"2026-11-02T08:10", status:"Ready",
+    rules:[{field:"Visited page", op:"is one of", value:"/product/*, /collections/*"},{field:"Days since last order", op:"is at most", value:"30"}],
+    seed:"—", country:"—", similarity:"—" },
+  { id:"AU-8002", name:"Abandoned cart 7d", kind:"Retargeting", source:"Shopify + Meta", networks:["Meta","TikTok"], size:2100, usedIn:1, lastSync:"2026-11-02T07:42", status:"Ready",
+    rules:[{field:"Added to cart", op:"equals", value:"true"},{field:"Purchased", op:"equals", value:"false"},{field:"Days since last order", op:"is at most", value:"7"}],
+    seed:"—", country:"—", similarity:"—" },
+  { id:"AU-8003", name:"Lookalike — VIPs", kind:"Lookalike", source:"VIP segment", networks:["Meta"], size:1800000, usedIn:1, lastSync:"2026-10-28T15:30", status:"Ready",
+    rules:[],
+    seed:"VIP customers", country:"United States", similarity:"2%" },
+  { id:"AU-8004", name:"TikTok engagement 90d", kind:"Retargeting", source:"TikTok Pixel", networks:["TikTok"], size:42000, usedIn:1, lastSync:"2026-10-30T18:22", status:"Ready",
+    rules:[{field:"Visited page", op:"contains", value:"/tiktok"},{field:"Days since last order", op:"is at most", value:"90"}],
+    seed:"—", country:"—", similarity:"—" },
+  { id:"AU-8005", name:"New customers", kind:"Custom", source:"CRM", networks:["Google","Meta"], size:312, usedIn:0, lastSync:"2026-10-15T09:00", status:"Draft",
+    rules:[{field:"Email exists", op:"equals", value:"true"},{field:"Days since last order", op:"is at most", value:"0"}],
+    seed:"—", country:"—", similarity:"—" },
+  { id:"AU-8006", name:"High-value purchasers", kind:"Custom", source:"Customer list (CSV)", networks:["Meta","Google"], size:842, usedIn:0, lastSync:"2026-11-01T12:00", status:"Building",
+    rules:[{field:"Order total", op:"is greater than", value:"$500"}],
+    seed:"—", country:"—", similarity:"—" },
+  { id:"AU-8007", name:"Holiday lookalike", kind:"Lookalike", source:"VIP segment", networks:["Meta"], size:2400000, usedIn:0, lastSync:"2026-10-05T10:00", status:"Expired",
+    rules:[],
+    seed:"VIP customers", country:"United States", similarity:"1%" }
+];
+
+/* ─── state ─── */
+const filters = {
+  q:"",
+  tab:"All",
+  kinds:new Set(KINDS),
+  networks:new Set(NETWORKS)
+};
+let editing = null;
+let peekId = null;
+let rowMenuForId = null;
+let draftRules = [];
+
+/* ─── render ─── */
+function filteredAudiences(){
+  return AUDIENCES.filter(a=>{
+    const q = filters.q.toLowerCase();
+    const qOK = !q || (a.id + " " + a.name + " " + a.kind + " " + a.source + " " + a.networks.join(" ")).toLowerCase().includes(q);
+    const tabOK = filters.tab === "All" || a.status === filters.tab;
+    const kindOK = filters.kinds.has(a.kind);
+    const netOK = a.networks.some(n=>filters.networks.has(n));
+    return qOK && tabOK && kindOK && netOK;
+  });
+}
+
+function renderTable(){
+  const rows = filteredAudiences();
+  const tbody = document.querySelector("[data-aud-tbody]");
+  tbody.innerHTML = rows.map(a=>`
+    <tr class="hover:bg-surface-container-low cursor-pointer" data-row="${a.id}">
+      <td class="px-3 py-2"><input type="checkbox" class="row-check aud-check" onclick="event.stopPropagation()"/></td>
+      <td class="px-3 py-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="aud-icon ${classFor(a.kind)}"><span class="material-symbols-outlined text-[16px]">${iconFor(a.kind)}</span></div>
+          <div class="min-w-0">
+            <div class="font-medium truncate">${esc(a.name)}</div>
+            <div class="text-[11px] text-on-surface-variant">${a.id}</div>
+          </div>
+        </div>
+      </td>
+      <td class="px-3 py-2">${esc(a.kind)}</td>
+      <td class="px-3 py-2 text-[12px]">${esc(a.source)}</td>
+      <td class="px-3 py-2"><div class="flex items-center gap-1 flex-wrap">${a.networks.map(netChip).join("")}</div></td>
+      <td class="px-3 py-2 text-right tabular-nums">${a.size.toLocaleString()}</td>
+      <td class="px-3 py-2 tabular-nums">${a.usedIn} campaign${a.usedIn===1?"":"s"}</td>
+      <td class="px-3 py-2 text-[11px]">${fmtDate(a.lastSync)}</td>
+      <td class="px-3 py-2">${pillFor(a.status)}</td>
+      <td class="px-2 py-2 text-right">
+        <button class="w-6 h-6 rounded hover:bg-surface-container flex items-center justify-center" data-row-menu="${a.id}"><span class="material-symbols-outlined text-[16px] text-on-surface-variant">more_horiz</span></button>
+      </td>
+    </tr>
+  `).join("");
+
+  document.querySelector("[data-b-count]").textContent = `${rows.length} of ${AUDIENCES.length}`;
+  document.querySelector("[data-aud-empty]").classList.toggle("hidden-imp", rows.length > 0);
+  tbody.classList.toggle("hidden-imp", rows.length === 0);
+  syncCounts();
+  syncSelectAll();
+  syncBulk();
+  syncClearAll();
+}
+
+function syncCounts(){
+  const ready = AUDIENCES.filter(a=>a.status === "Ready");
+  const reach = AUDIENCES.reduce((s,a)=>s + a.size, 0);
+  const usedIn = AUDIENCES.reduce((s,a)=>s + a.usedIn, 0);
+  document.getElementById("statTotal").textContent = AUDIENCES.length;
+  document.getElementById("statReady").textContent = ready.length;
+  document.getElementById("statReach").textContent = reach.toLocaleString();
+  document.getElementById("statUsed").textContent = usedIn;
+}
+
+/* ─── row click → peek ─── */
+document.querySelector("[data-aud-tbody]").addEventListener("click", e=>{
+  const row = e.target.closest("[data-row]");
+  if (!row) return;
+  if (e.target.closest("button") || e.target.closest("input")) return;
+  openPeek(row.dataset.row);
+});
+
+/* ─── row ⋯ menu ─── */
+const rowMenu = document.getElementById("rowMenu");
+document.querySelector("[data-aud-tbody]").addEventListener("click", e=>{
+  const btn = e.target.closest("[data-row-menu]");
+  if (!btn) return;
+  e.stopPropagation();
+  rowMenuForId = btn.dataset.rowMenu;
+  const r = btn.getBoundingClientRect();
+  rowMenu.style.top = (r.bottom + 4) + "px";
+  rowMenu.style.left = Math.min(r.right - 250, window.innerWidth - 270) + "px";
+  rowMenu.classList.add("open");
+});
+rowMenu.querySelectorAll("[data-row-act]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.rowAct;
+  const a = AUDIENCES.find(x=>x.id === rowMenuForId);
+  rowMenu.classList.remove("open");
+  if (!a) return;
+  switch(act){
+    case "edit": openAudDrawer(a.id); break;
+    case "view": openPeek(a.id); break;
+    case "duplicate":
+      AUDIENCES.unshift({...a, id:"AU-" + (8000 + AUDIENCES.length + 1), name:a.name + " (copy)", status:"Draft", usedIn:0, lastSync:null});
+      renderTable(); toast(`Duplicated: ${a.name}`); break;
+    case "sync": a.lastSync = new Date().toISOString(); a.status = "Ready"; renderTable(); toast(`Synced: ${a.name}`); break;
+    case "export": toast(`Exported members of ${a.name}`); break;
+    case "archive": a.status = "Expired"; renderTable(); toast(`Archived: ${a.name}`); break;
+    case "delete":
+      if (confirm(`Delete audience "${a.name}"?`)){
+        const idx = AUDIENCES.findIndex(x=>x.id === a.id);
+        if (idx >= 0) AUDIENCES.splice(idx, 1);
+        renderTable(); toast(`Deleted: ${a.name}`);
+      }
+      break;
+  }
+}));
+
+/* ─── outside click ─── */
+document.addEventListener("click", e=>{
+  if (!e.target.closest("#rowMenu") && !e.target.closest("[data-row-menu]")) rowMenu.classList.remove("open");
+  if (!e.target.closest("#createMenu") && !e.target.closest("#createArrow")) createMenu.classList.remove("open");
+  if (!e.target.closest("#popKind") && !e.target.closest("#btnKind")) popKind.classList.remove("open");
+  if (!e.target.closest("#popNetwork") && !e.target.closest("#btnNetwork")) popNetwork.classList.remove("open");
+});
+
+/* ─── tabs ─── */
+document.querySelectorAll("[data-viewtab]").forEach(b=>b.addEventListener("click", ()=>{
+  document.querySelectorAll("[data-viewtab]").forEach(x=>x.classList.toggle("active", x===b));
+  filters.tab = b.dataset.viewtab;
+  renderTable();
+}));
+
+/* ─── search ─── */
+document.querySelector("[data-filter]").addEventListener("input", e=>{ filters.q = e.target.value; renderTable(); });
+
+/* ─── popovers ─── */
+const popKind = document.getElementById("popKind");
+const popNetwork = document.getElementById("popNetwork");
+function openPop(pop, btn){
+  const r = btn.getBoundingClientRect();
+  [popKind, popNetwork].forEach(p=>{ if (p !== pop) p.classList.remove("open"); });
+  pop.style.top = (r.bottom + 4) + "px";
+  pop.style.left = Math.min(r.left, window.innerWidth - 240) + "px";
+  pop.classList.toggle("open");
+}
+document.getElementById("btnKind").addEventListener("click", e=>{e.stopPropagation(); openPop(popKind, e.currentTarget);});
+document.getElementById("btnNetwork").addEventListener("click", e=>{e.stopPropagation(); openPop(popNetwork, e.currentTarget);});
+document.getElementById("kindApply").addEventListener("click", ()=>{
+  filters.kinds = new Set([...document.querySelectorAll(".filter-kind:checked")].map(cb=>cb.value));
+  popKind.classList.remove("open");
+  renderTable();
+});
+document.getElementById("kindClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-kind").forEach(cb=>cb.checked = true);
+  filters.kinds = new Set(KINDS);
+  popKind.classList.remove("open");
+  renderTable();
+});
+document.getElementById("networkApply").addEventListener("click", ()=>{
+  filters.networks = new Set([...document.querySelectorAll(".filter-network:checked")].map(cb=>cb.value));
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+document.getElementById("networkClear").addEventListener("click", ()=>{
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked = true);
+  filters.networks = new Set(NETWORKS);
+  popNetwork.classList.remove("open");
+  renderTable();
+});
+
+/* ─── clear all ─── */
+function syncClearAll(){
+  const active = filters.q || filters.tab !== "All" || filters.kinds.size !== KINDS.length || filters.networks.size !== NETWORKS.length;
+  document.getElementById("btnClearAll").classList.toggle("hidden-imp", !active);
+}
+document.getElementById("btnClearAll").addEventListener("click", ()=>{
+  filters.q = ""; document.querySelector("[data-filter]").value = "";
+  filters.tab = "All";
+  document.querySelectorAll("[data-viewtab]").forEach(b=>b.classList.toggle("active", b.dataset.viewtab === "All"));
+  filters.kinds = new Set(KINDS);
+  filters.networks = new Set(NETWORKS);
+  document.querySelectorAll(".filter-kind").forEach(cb=>cb.checked = true);
+  document.querySelectorAll(".filter-network").forEach(cb=>cb.checked = true);
+  renderTable();
+});
+document.getElementById("emptyClear").addEventListener("click", ()=>document.getElementById("btnClearAll").click());
+document.getElementById("btnSaved").addEventListener("click", ()=>toast("Saved views — pick or save current filters"));
+
+/* ─── bulk ─── */
+function syncSelectAll(){
+  const all = document.querySelector("[data-check-all]");
+  const rows = [...document.querySelectorAll(".aud-check")].filter(cb=>cb.closest("tr").style.display !== "none");
+  const checked = rows.filter(cb=>cb.checked);
+  all.checked = rows.length > 0 && checked.length === rows.length;
+  all.indeterminate = checked.length > 0 && checked.length < rows.length;
+}
+function syncBulk(){
+  const n = [...document.querySelectorAll(".aud-check")].filter(cb=>cb.checked).length;
+  const bar = document.querySelector("[data-bulk-bar]");
+  bar.classList.toggle("show", n > 0);
+  document.querySelector("[data-bulk-count]").textContent = `${n} selected`;
+}
+document.addEventListener("change", e=>{
+  if (e.target.classList.contains("aud-check")) syncBulk();
+  if (e.target.matches("[data-check-all]")){
+    const on = e.target.checked;
+    document.querySelectorAll(".aud-check").forEach(cb=>{
+      if (cb.closest("tr").style.display !== "none") cb.checked = on;
+    });
+    syncBulk();
+  }
+});
+document.querySelectorAll("[data-bulk]").forEach(b=>b.addEventListener("click", ()=>{
+  const act = b.dataset.bulk;
+  if (act === "close"){
+    document.querySelectorAll(".aud-check").forEach(cb=>cb.checked = false);
+    document.querySelector("[data-check-all]").checked = false;
+    syncBulk(); return;
+  }
+  const selected = [...document.querySelectorAll(".aud-check:checked")].map(cb=>cb.closest("tr").dataset.row);
+  const n = selected.length;
+  if (act === "sync"){ selected.forEach(id=>{ const a = AUDIENCES.find(x=>x.id===id); if (a){ a.lastSync = new Date().toISOString(); a.status = "Ready"; } }); toast(`Synced ${n} audience(s)`); }
+  else if (act === "export"){ toast(`Exported ${n} audience(s)`); }
+  else if (act === "archive"){ selected.forEach(id=>{ const a = AUDIENCES.find(x=>x.id===id); if (a) a.status = "Expired"; }); toast(`Archived ${n} audience(s)`); }
+  else if (act === "delete"){
+    if (confirm(`Delete ${n} audience(s)?`)){
+      selected.forEach(id=>{
+        const idx = AUDIENCES.findIndex(x=>x.id===id);
+        if (idx >= 0) AUDIENCES.splice(idx, 1);
+      });
+      toast(`Deleted ${n} audience(s)`);
+    }
+  }
+  renderTable();
+  document.querySelectorAll(".aud-check").forEach(cb=>cb.checked = false);
+  document.querySelector("[data-check-all]").checked = false;
+  syncBulk();
+}));
+
+/* ─── peek ─── */
+function openPeek(id){
+  peekId = id;
+  const a = AUDIENCES.find(x=>x.id === id);
+  if (!a) return;
+  document.getElementById("peekTitle").textContent = a.name;
+  document.getElementById("peekBody").innerHTML = `
+    <div class="mb-3 flex items-center gap-2">${pillFor(a.status)}<span class="text-[11px] text-on-surface-variant">${esc(a.kind)}</span></div>
+    <div class="mb-3 flex items-center gap-1 flex-wrap">${a.networks.map(netChip).join("")}</div>
+    <div class="bg-surface-container-low rounded-lg p-3 mb-3 text-center">
+      <div class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold mb-1">Audience size</div>
+      <div class="text-headline-md tabular-nums">${a.size.toLocaleString()}</div>
+    </div>
+    <dl class="text-body-sm">
+      <div class="kv"><dt>Audience ID</dt><dd class="code-mono">${a.id}</dd></div>
+      <div class="kv"><dt>Kind</dt><dd>${esc(a.kind)}</dd></div>
+      <div class="kv"><dt>Source</dt><dd>${esc(a.source)}</dd></div>
+      <div class="kv"><dt>Used in</dt><dd>${a.usedIn} campaign(s)</dd></div>
+      <div class="kv"><dt>Last sync</dt><dd>${fmtDate(a.lastSync)}</dd></div>
+      ${a.kind === "Lookalike" ? `<div class="kv"><dt>Seed</dt><dd>${esc(a.seed)}</dd></div><div class="kv"><dt>Country</dt><dd>${esc(a.country)}</dd></div><div class="kv"><dt>Similarity</dt><dd>${esc(a.similarity)}</dd></div>` : ""}
+    </dl>
+    ${a.rules.length ? `
+      <div class="mt-4 pt-3 border-t border-surface-dim">
+        <div class="text-[11px] text-on-surface-variant uppercase tracking-wider font-bold mb-2">Rules</div>
+        <div class="space-y-1">
+          ${a.rules.map(r=>`<div class="text-body-sm"><span class="font-medium">${esc(r.field)}</span> <span class="text-on-surface-variant">${esc(r.op)}</span> <span class="font-medium">${esc(r.value)}</span></div>`).join("")}
+        </div>
+      </div>
+    ` : ""}
+    <div class="mt-4 pt-3 border-t border-surface-dim grid grid-cols-2 gap-2">
+      <button class="h-8 px-3 bg-primary text-white rounded text-body-md font-semibold hover:bg-primary-container flex items-center justify-center gap-1" data-peek="edit"><span class="material-symbols-outlined text-[16px]">edit</span>Edit</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="sync"><span class="material-symbols-outlined text-[16px]">sync</span>Sync</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="duplicate"><span class="material-symbols-outlined text-[16px]">content_copy</span>Duplicate</button>
+      <button class="h-8 px-3 border border-surface-dim rounded text-body-md hover:bg-surface-container-low flex items-center justify-center gap-1" data-peek="archive"><span class="material-symbols-outlined text-[16px]">archive</span>Archive</button>
+    </div>
+  `;
+  document.getElementById("peek").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+
+  document.querySelectorAll("#peekBody [data-peek]").forEach(b=>b.addEventListener("click", ()=>{
+    const act = b.dataset.peek;
+    if (act === "edit"){ closePeek(); openAudDrawer(a.id); }
+    else if (act === "sync"){ a.lastSync = new Date().toISOString(); a.status = "Ready"; closePeek(); renderTable(); toast("Synced"); }
+    else if (act === "duplicate"){
+      AUDIENCES.unshift({...a, id:"AU-" + (8000 + AUDIENCES.length + 1), name:a.name + " (copy)", status:"Draft", usedIn:0, lastSync:null});
+      closePeek(); renderTable(); toast("Duplicated");
+    }
+    else if (act === "archive"){ a.status = "Expired"; closePeek(); renderTable(); toast("Archived"); }
+  }));
+}
+function closePeek(){
+  document.getElementById("peek").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  peekId = null;
+}
+document.getElementById("peekClose").addEventListener("click", closePeek);
+document.getElementById("scrim").addEventListener("click", ()=>{
+  if (document.getElementById("audDrawer").classList.contains("open")) return;
+  closePeek();
+});
+document.getElementById("peekEdit").addEventListener("click", ()=>{
+  if (!peekId) return;
+  const id = peekId; closePeek(); openAudDrawer(id);
+});
+
+/* ─── drawer ─── */
+function openAudDrawer(id){
+  editing = id ? AUDIENCES.find(a=>a.id === id) : null;
+  document.getElementById("audDrawerTitle").textContent = editing ? "Edit audience" : "New audience";
+  document.getElementById("audDrawerSub").textContent = editing ? editing.status + " · " + editing.id : "Draft · not yet built";
+
+  document.getElementById("auName").value = editing ? editing.name : "";
+  document.getElementById("auKind").value = editing ? editing.kind : "Custom";
+  document.getElementById("auStatus").value = editing ? editing.status : "Draft";
+  document.getElementById("auSource").value = editing ? editing.source : "CRM";
+
+  document.querySelectorAll(".au-network").forEach(cb=>{
+    cb.checked = editing ? editing.networks.includes(cb.dataset.network) : ["Meta","TikTok"].includes(cb.dataset.network);
+  });
+
+  draftRules = editing ? JSON.parse(JSON.stringify(editing.rules)) : [];
+  renderRules();
+  toggleLookalike();
+  renderPreview();
+
+  document.getElementById("audDrawer").classList.add("open");
+  document.getElementById("scrim").classList.add("open");
+}
+function closeAudDrawer(){
+  document.getElementById("audDrawer").classList.remove("open");
+  document.getElementById("scrim").classList.remove("open");
+  editing = null;
+}
+document.getElementById("audDrawerClose").addEventListener("click", closeAudDrawer);
+document.getElementById("auCancel").addEventListener("click", closeAudDrawer);
+
+function toggleLookalike(){
+  const kind = document.getElementById("auKind").value;
+  document.getElementById("lookalikeSection").classList.toggle("hidden-imp", kind !== "Lookalike");
+}
+document.getElementById("auKind").addEventListener("change", ()=>{ toggleLookalike(); renderPreview(); });
+
+/* rules */
+function renderRules(){
+  const host = document.getElementById("rulesHost");
+  host.innerHTML = draftRules.map((r, i)=>`
+    <div class="rule-row">
+      <select data-field="${i}" class="flex-1">
+        ${RULE_FIELDS.map(f=>`<option ${f===r.field?"selected":""}>${f}</option>`).join("")}
+      </select>
+      <select data-op="${i}" class="flex-1">
+        ${RULE_OPS.map(o=>`<option ${o===r.op?"selected":""}>${o}</option>`).join("")}
+      </select>
+      <input data-value="${i}" class="flex-1" value="${esc(r.value)}"/>
+      <button class="w-7 h-7 rounded hover:bg-surface-container flex items-center justify-center" data-remove-rule="${i}"><span class="material-symbols-outlined text-[14px] text-error">close</span></button>
+    </div>
+  `).join("") || `<div class="text-[11px] text-on-surface-variant">No rules yet. Add one to define the audience.</div>`;
+
+  host.querySelectorAll("[data-field]").forEach(sel=>sel.addEventListener("change", ()=> { draftRules[parseInt(sel.dataset.field,10)].field = sel.value; renderPreview(); }));
+  host.querySelectorAll("[data-op]").forEach(sel=>sel.addEventListener("change", ()=> { draftRules[parseInt(sel.dataset.op,10)].op = sel.value; renderPreview(); }));
+  host.querySelectorAll("[data-value]").forEach(inp=>inp.addEventListener("input", ()=> { draftRules[parseInt(inp.dataset.value,10)].value = inp.value; renderPreview(); }));
+  host.querySelectorAll("[data-remove-rule]").forEach(b=>b.addEventListener("click", ()=>{
+    draftRules.splice(parseInt(b.dataset.removeRule,10), 1);
+    renderRules(); renderPreview();
+  }));
+}
+document.getElementById("addRuleBtn").addEventListener("click", ()=>{
+  draftRules.push({field:"Visited page", op:"contains", value:"/product"});
+  renderRules(); renderPreview();
+});
+
+/* preview */
+function renderPreview(){
+  const kind = document.getElementById("auKind").value;
+  const name = document.getElementById("auName").value || "Untitled audience";
+  const nets = [...document.querySelectorAll(".au-network:checked")].map(cb=>cb.dataset.network);
+  const ruleCount = draftRules.length;
+  const estSize = (()=>{
+    if (kind === "Lookalike") return document.getElementById("auSizeEstimate").value || "1.8M";
+    return Math.max(50, Math.round(10000 * Math.pow(0.55, ruleCount))).toLocaleString();
+  })();
+  document.getElementById("audPreview").innerHTML = `
+    <div class="flex items-center gap-2 mb-2">
+      <div class="aud-icon ${classFor(kind)}"><span class="material-symbols-outlined text-[16px]">${iconFor(kind)}</span></div>
+      <div class="min-w-0 flex-1">
+        <div class="text-body-sm font-semibold truncate">${esc(name)}</div>
+        <div class="text-[11px] text-on-surface-variant">${kind} · ${nets.length ? nets.join(", ") : "no networks"}</div>
+      </div>
+    </div>
+    <div class="text-[11px] text-on-surface-variant mb-1">Estimated size</div>
+    <div class="text-body-md font-semibold tabular-nums mb-2">${estSize}</div>
+    <div class="bar"><span style="width:${Math.min(100, ruleCount*22 + 20)}%"></span></div>
+    <div class="text-[10px] text-on-surface-variant mt-2">${ruleCount} rule(s) · ${kind === "Lookalike" ? "seed: " + (document.getElementById("auSeed")?.value || "—") : "matching members"}</div>
+  `;
+}
+["auName","auSizeEstimate"].forEach(id=>{ const el=document.getElementById(id); if (el) el.addEventListener("input", renderPreview); });
+["auSeed","auLookCountry","auSimilarity"].forEach(id=>{ const el=document.getElementById(id); if (el) el.addEventListener("change", renderPreview); });
+document.querySelectorAll(".au-network").forEach(cb=>cb.addEventListener("change", renderPreview));
+
+/* save */
+function collectAudience(){
+  const name = document.getElementById("auName").value.trim();
+  if (!name){ toast("Audience name is required"); return null; }
+  const networks = [...document.querySelectorAll(".au-network:checked")].map(cb=>cb.dataset.network);
+  const kind = document.getElementById("auKind").value;
+  const lookalike = kind === "Lookalike";
+  return {
+    id: editing ? editing.id : "AU-" + (8000 + AUDIENCES.length + 1),
+    name,
+    kind,
+    source: document.getElementById("auSource").value,
+    networks,
+    size: editing ? editing.size : (lookalike ? 1800000 : Math.max(50, Math.round(10000 * Math.pow(0.55, draftRules.length)))),
+    usedIn: editing ? editing.usedIn : 0,
+    lastSync: new Date().toISOString(),
+    status: document.getElementById("auStatus").value,
+    rules: JSON.parse(JSON.stringify(draftRules)),
+    seed: lookalike ? (document.getElementById("auSeed")?.value || "—") : "—",
+    country: lookalike ? (document.getElementById("auLookCountry")?.value || "—") : "—",
+    similarity: lookalike ? (document.getElementById("auSimilarity")?.value || "—") + "%" : "—"
+  };
+}
+document.getElementById("auSave").addEventListener("click", ()=>{
+  const a = collectAudience(); if (!a) return;
+  if (editing){ const idx = AUDIENCES.findIndex(x=>x.id === editing.id); if (idx >= 0) AUDIENCES[idx] = a; }
+  else AUDIENCES.unshift(a);
+  closeAudDrawer(); renderTable();
+  toast(editing ? "Audience updated" : "Audience created");
+});
+document.getElementById("auSaveNew").addEventListener("click", ()=>{
+  const a = collectAudience(); if (!a) return;
+  if (editing){ const idx = AUDIENCES.findIndex(x=>x.id === editing.id); if (idx >= 0) AUDIENCES[idx] = a; }
+  else AUDIENCES.unshift(a);
+  editing = null;
+  document.getElementById("audDrawerTitle").textContent = "New audience";
+  document.getElementById("audDrawerSub").textContent = "Draft · not yet built";
+  document.getElementById("auName").value = "";
+  draftRules = []; renderRules(); renderPreview();
+  renderTable();
+  toast("Saved. New audience form ready.");
+});
+
+/* ─── create menu ─── */
+const createMenu = document.getElementById("createMenu");
+document.getElementById("createArrow").addEventListener("click", e=>{
+  e.stopPropagation();
+  const r = e.currentTarget.getBoundingClientRect();
+  createMenu.style.top = (r.bottom + 4) + "px";
+  createMenu.style.left = Math.min(r.right - 260, window.innerWidth - 280) + "px";
+  createMenu.classList.toggle("open");
+});
+document.querySelectorAll("[data-new-audience]").forEach(b=>b.addEventListener("click", ()=>openAudDrawer(null)));
+document.querySelectorAll("[data-create-kind]").forEach(b=>b.addEventListener("click", ()=>{
+  const kind = b.dataset.createKind;
+  createMenu.classList.remove("open");
+  if (kind === "audience"){ openAudDrawer(null); }
+  else if (kind === "lookalike"){
+    openAudDrawer(null);
+    document.getElementById("auKind").value = "Lookalike";
+    toggleLookalike();
+    renderPreview();
+  }
+  else toast("Create " + kind + " — will route to that dedicated page");
+}));
+
+/* ─── toolbar ─── */
+document.querySelector("[data-action='export']").addEventListener("click", ()=>toast("Exporting audiences…"));
+document.querySelector("[data-action='customize']").addEventListener("click", ()=>toast("Customize panel — Data / Visual tabs"));
+
+/* ─── pagination ─── */
+document.getElementById("rowsPerPage").addEventListener("change", ()=>toast("Rows per page updated"));
+document.getElementById("pagePrev").addEventListener("click", ()=>toast("Previous page"));
+document.getElementById("pageNext").addEventListener("click", ()=>toast("Next page"));
+
+/* ─── boot ─── */
+renderTable();
+</script>
+</body>
+</html>
