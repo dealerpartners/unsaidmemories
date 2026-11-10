@@ -188,15 +188,23 @@ const getHomeFeatured = unstable_cache(
         for (const deptId of deptOrder) {
           const ids = idsByDept.get(deptId);
           if (!ids || ids.length === 0) continue;
-          const { data: rows } = await sb
-            .from("supplier_catalog_products")
-            .select(cols)
-            .eq("is_hidden", false)
-            .not("image_url", "is", null)
-            .in("category_id", ids)
-            .order("created_at", { ascending: false })
-            .limit(1);
-          if (rows && rows[0]) picks.push(rows[0] as FeaturedRow);
+          // Retry once on error: this result is cached until the next
+          // write bust, so a transient query failure must not bake a
+          // missing department into the homepage.
+          let rows: FeaturedRow[] | null = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const res = await sb
+              .from("supplier_catalog_products")
+              .select(cols)
+              .eq("is_hidden", false)
+              .not("image_url", "is", null)
+              .in("category_id", ids)
+              .order("created_at", { ascending: false })
+              .limit(1);
+            if (!res.error) { rows = (res.data ?? []) as FeaturedRow[]; break; }
+            if (attempt === 0) await new Promise((r) => setTimeout(r, 400));
+          }
+          if (rows && rows[0]) picks.push(rows[0]);
         }
         const priced = await withPrices(sb, picks);
         const seenIds = new Set(featured.map((f) => f.id));
@@ -205,7 +213,7 @@ const getHomeFeatured = unstable_cache(
     }
     return featured.slice(0, 13);
   },
-  ["home-featured-v5"],
+  ["home-featured-v6"],
   { tags: ["home-featured"] },
 );
 
