@@ -1,5 +1,6 @@
 import { createServerClient as createSSRClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { sessionCookieDomain } from "@/lib/google-auth";
 
 /**
  * Server-side Supabase client for auth (uses anon key, respects RLS,
@@ -11,6 +12,7 @@ import { cookies } from "next/headers";
  */
 export async function createAuthClient() {
   const cookieStore = await cookies();
+  const domain = sessionCookieDomain((await headers()).get("host"));
 
   return createSSRClient(
     process.env.SUPABASE_URL!,
@@ -23,7 +25,7 @@ export async function createAuthClient() {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, domain ? { ...options, domain } : options)
             );
           } catch {
             // Called from a Server Component — cookies can only be

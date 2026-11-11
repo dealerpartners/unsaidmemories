@@ -7,6 +7,7 @@ import {
   googleCredentials,
   hashBrowserBinding,
   newBrowserBinding,
+  publicOrigin,
   sanitizeNext,
 } from "@/lib/google-auth";
 
@@ -28,15 +29,16 @@ export async function GET(req: NextRequest) {
   const next = sanitizeNext(req.nextUrl.searchParams.get("next"));
   const { clientId, clientSecret } = await googleCredentials();
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL("/login?error=google_not_configured", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/login?error=google_not_configured", publicOrigin(req)));
   }
 
-  const portal = req.nextUrl.searchParams.get("portal") === "advertiser" ? "advertiser" : "customer";
-  const redirectUri = `${req.nextUrl.origin}${GOOGLE_CALLBACK_PATH}`;
+  const portalParam = req.nextUrl.searchParams.get("portal");
+  const portal = portalParam === "advertiser" ? "advertiser" : portalParam === "admin" ? "admin" : "customer";
+  const redirectUri = `${publicOrigin(req)}${GOOGLE_CALLBACK_PATH}`;
   const binding = newBrowserBinding();
   const state = await createOAuthState(next, redirectUri, hashBrowserBinding(binding), portal);
   if (!state) {
-    return NextResponse.redirect(new URL("/login?error=google_unavailable", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/login?error=google_unavailable", publicOrigin(req)));
   }
 
   const res = NextResponse.redirect(googleAuthUrl(clientId, redirectUri, state));

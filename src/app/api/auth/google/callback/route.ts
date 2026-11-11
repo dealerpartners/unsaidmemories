@@ -12,6 +12,7 @@ import {
   findAuthUserByEmail,
   getGoogleAdmin,
   hashBrowserBinding,
+  publicOrigin,
   sanitizeNext,
 } from "@/lib/google-auth";
 
@@ -30,7 +31,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function bounce(req: NextRequest, error?: string): NextResponse {
-  const url = new URL("/login", req.nextUrl.origin);
+  const url = new URL("/login", publicOrigin(req));
   if (error) url.searchParams.set("error", error);
   return NextResponse.redirect(url);
 }
@@ -74,7 +75,7 @@ export async function GET(req: NextRequest) {
   // 3. Exchange the code for the Google profile — against the same
   //    redirect_uri the initiator sent to Google.
   const redirectUri =
-    stateRow.redirect_uri || `${req.nextUrl.origin}/api/auth/google/callback`;
+    stateRow.redirect_uri || `${publicOrigin(req)}/api/auth/google/callback`;
   const { profile, error: exchangeError, accessToken } = await exchangeGoogleCode(code, redirectUri);
   if (!profile) {
     console.warn(`[auth/google/callback] bounce: exchange failed — ${exchangeError || "unknown"}`);
@@ -94,7 +95,8 @@ export async function GET(req: NextRequest) {
   }
 
   let createdNew = false;
-  const audience = stateRow.portal === "advertiser" ? "advertiser" : "customer";
+  const isAdmin = stateRow.portal === "admin";
+  const audience = stateRow.portal === "advertiser" ? "advertiser" : isAdmin ? "admin" : "customer";
   if (!authUser) {
     const { data: created, error: createError } = await admin.auth.admin.createUser({
       email: profile.email,
@@ -140,7 +142,7 @@ export async function GET(req: NextRequest) {
   //     where the completion form pre-fills from it. Inert until the
   //     consent screen grants the People scopes; every failure is
   //     swallowed — capture never breaks a sign-in.
-  if (accessToken && authUser) {
+  if (accessToken && authUser && !isAdmin) {
     try {
       const capture = await fetchGooglePeople(accessToken);
       if (capture) {
@@ -215,6 +217,20 @@ export async function GET(req: NextRequest) {
     return bounce(req, "session_failed");
   }
 
+  // Admin portal: the session is minted; the dashboard's own gate
+  // (staff check) decides entry on arrival. None of the customer
+  // chain (confirmation email, phone step, advertiser activation)
+  // applies — land on the dashboard host at the carried destination.
+  if (isAdmin) {
+    const dest =
+      stateRow.redirect_to && stateRow.redirect_to.startsWith("/") && !stateRow.redirect_to.startsWith("//")
+        ? stateRow.redirect_to
+        : "/";
+    const res = NextResponse.redirect(new URL(dest, "https://admin.unsaidmemories.com"));
+    res.cookies.delete(OAUTH_BROWSER_COOKIE);
+    return res;
+  }
+
   // A brand-new advertiser gets the same activation the email signup
   //    route performs, and starts at the advertiser onboarding —
   //    unless the flow carried its own destination.
@@ -246,7 +262,7 @@ export async function GET(req: NextRequest) {
   } catch {
     // non-fatal — the checkout backstop still gates unverified users
   }
-  const res = NextResponse.redirect(new URL(destination, req.nextUrl.origin));
+  const res = NextResponse.redirect(new URL(destination, publicOrigin(req)));
   res.cookies.delete(OAUTH_BROWSER_COOKIE);
   return res;
 }

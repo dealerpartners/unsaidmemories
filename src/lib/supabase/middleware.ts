@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { sessionCookieDomain } from "@/lib/google-auth";
 
 /**
  * Refreshes the Supabase auth session on every request and returns the
@@ -22,8 +23,9 @@ export async function updateSession(request: NextRequest) {
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({ request });
+          const domain = sessionCookieDomain(request.nextUrl.host);
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, domain ? { ...options, domain } : options)
           );
         },
       },

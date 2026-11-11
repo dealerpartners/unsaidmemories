@@ -298,3 +298,25 @@ export function sanitizeNext(next: string | null | undefined): string {
   if (!next || !next.startsWith("/") || next.startsWith("//")) return "/account";
   return next;
 }
+
+/**
+ * The public origin of this deployment, from the proxy's forwarded
+ * headers. Behind the Lightsail reverse proxy the route handlers
+ * otherwise see the internal listen address (0.0.0.0:3000) as the
+ * request origin, which poisons the OAuth redirect_uri — Google's
+ * registered callback is the public one. (On Vercel the platform
+ * supplied the public origin directly, which is why this worked
+ * there unchanged.)
+ */
+export function publicOrigin(req: { headers: Headers; url: string }): string {
+  const host = req.headers.get("x-forwarded-host") || req.headers.get("host");
+  const proto = req.headers.get("x-forwarded-proto") || "https";
+  if (host) return `${proto}://${host}`;
+  return new URL(req.url).origin;
+}
+
+/** Session cookies are shared across the platform's hosts (store +
+ * admin subdomain) so one sign-in covers both. */
+export function sessionCookieDomain(host: string | null | undefined): string | undefined {
+  return host && host.endsWith("unsaidmemories.com") ? ".unsaidmemories.com" : undefined;
+}
