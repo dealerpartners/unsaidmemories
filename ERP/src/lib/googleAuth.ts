@@ -176,6 +176,19 @@ export async function findAuthUserByEmail(admin: any, email: string): Promise<an
   return null;
 }
 
+/**
+ * The public origin of this deployment, from the proxy's forwarded
+ * headers. Behind the reverse proxy the route handlers otherwise see
+ * the internal listen address (0.0.0.0:3001) as the request origin,
+ * which would poison the OAuth redirect_uri.
+ */
+export function publicOrigin(req: { headers: Headers; url: string }): string {
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
+  const proto = req.headers.get('x-forwarded-proto') || 'https';
+  if (host) return `${proto}://${host}`;
+  return new URL(req.url).origin;
+}
+
 /** Only same-site paths may be a post-sign-in destination. */
 export function sanitizeNext(next: string | null | undefined): string {
   if (!next || !next.startsWith('/') || next.startsWith('//')) return '/';

@@ -10,6 +10,7 @@ import {
   exchangeGoogleCode,
   findAuthUserByEmail,
   hashBrowserBinding,
+  publicOrigin,
   sanitizeNext,
 } from '@/lib/googleAuth';
 
@@ -25,7 +26,7 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 function bounce(req: NextRequest, error?: string): NextResponse {
-  const url = new URL('/login', req.nextUrl.origin);
+  const url = new URL('/login', publicOrigin(req));
   if (error) url.searchParams.set('error', error);
   return NextResponse.redirect(url);
 }
@@ -47,7 +48,7 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = supabaseAdmin();
-  const redirectUri = stateRow.redirect_uri || `${req.nextUrl.origin}${GOOGLE_CALLBACK_PATH}`;
+  const redirectUri = stateRow.redirect_uri || `${publicOrigin(req)}${GOOGLE_CALLBACK_PATH}`;
   const { profile, error: exchangeError } = await exchangeGoogleCode(code, redirectUri);
   if (!profile) {
     console.warn(`[auth/google/callback] exchange failed — ${exchangeError || 'unknown'}`);
@@ -110,5 +111,5 @@ export async function GET(req: NextRequest) {
   if (verifyError) return bounce(req, 'session_failed');
 
   const destination = sanitizeNext(stateRow.redirect_to);
-  return NextResponse.redirect(new URL(destination, req.nextUrl.origin));
+  return NextResponse.redirect(new URL(destination, publicOrigin(req)));
 }

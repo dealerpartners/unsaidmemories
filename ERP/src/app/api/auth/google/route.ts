@@ -7,6 +7,7 @@ import {
   googleCredentials,
   hashBrowserBinding,
   newBrowserBinding,
+  publicOrigin,
   sanitizeNext,
 } from '@/lib/googleAuth';
 
@@ -23,20 +24,20 @@ export async function GET(req: NextRequest) {
   const next = sanitizeNext(req.nextUrl.searchParams.get('next'));
   const { clientId, clientSecret } = await googleCredentials();
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL('/login?error=google_not_configured', req.nextUrl.origin));
+    return NextResponse.redirect(new URL('/login?error=google_not_configured', publicOrigin(req)));
   }
 
-  const redirectUri = `${req.nextUrl.origin}${GOOGLE_CALLBACK_PATH}`;
+  const redirectUri = `${publicOrigin(req)}${GOOGLE_CALLBACK_PATH}`;
   const binding = newBrowserBinding();
   const state = await createOAuthState(next, redirectUri, hashBrowserBinding(binding));
   if (!state) {
-    return NextResponse.redirect(new URL('/login?error=google_unavailable', req.nextUrl.origin));
+    return NextResponse.redirect(new URL('/login?error=google_unavailable', publicOrigin(req)));
   }
 
   const res = NextResponse.redirect(googleAuthUrl(clientId, redirectUri, state));
   res.cookies.set(OAUTH_BROWSER_COOKIE, binding, {
     httpOnly: true,
-    secure: req.nextUrl.protocol === 'https:',
+    secure: publicOrigin(req).startsWith('https:'),
     sameSite: 'lax',
     path: '/',
     maxAge: 600,
