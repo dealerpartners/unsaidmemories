@@ -11,7 +11,10 @@ git reset --hard origin/main
 
 bun install
 # The previous deploy's staged standalone bundle lives inside .next/;
-# the build's cleanup chokes on it (ENOTEMPTY). Remove it first.
+# the build's cleanup chokes on it (ENOTEMPTY). Remove it first — with
+# the service stopped, because the running server writes its cache into
+# the bundle and the delete fails partway, corrupting it.
+sudo systemctl stop unsaid || true
 rm -rf .next/standalone
 bun run build
 
