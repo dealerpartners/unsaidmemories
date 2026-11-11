@@ -1,42 +1,21 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createAuthBrowserClient } from '@/lib/supabase/client';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-function LoginForm() {
-  const router = useRouter();
+const ERRORS: Record<string, string> = {
+  staff: 'That account is signed in but has no staff access to this dashboard.',
+  google_not_configured: 'Google sign-in is not configured yet.',
+  google_unavailable: 'Google sign-in could not start. Try again.',
+  google_failed: 'Google sign-in failed. Try again.',
+  session_failed: 'Your session could not be started. Try again.',
+};
+
+function LoginCard() {
   const params = useSearchParams();
   const next = params.get('next') || '/';
   const error = params.get('error');
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Already signed in (staff session) — go straight through.
-    createAuthBrowserClient()
-      .auth.getUser()
-      .then(({ data }) => {
-        if (data.user && !error) router.replace(next);
-      })
-      .catch(() => {});
-  }, [router, next, error]);
-
-  async function signInWithGoogle() {
-    setBusy(true);
-    setFailed(null);
-    const supabase = createAuthBrowserClient();
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
-    });
-    if (oauthError) {
-      setFailed(oauthError.message);
-      setBusy(false);
-    }
-  }
+  const href = `/api/auth/google?next=${encodeURIComponent(next)}`;
 
   return (
     <main
@@ -64,33 +43,26 @@ function LoginForm() {
         <p style={{ color: '#5a655e', fontSize: 14, margin: '8px 0 24px' }}>
           Admin sign-in. Staff only.
         </p>
-        {error === 'staff' && (
-          <p style={{ color: '#b3261e', fontSize: 13, margin: '0 0 16px' }}>
-            That account is signed in but has no staff access to this dashboard.
-          </p>
+        {error && ERRORS[error] && (
+          <p style={{ color: '#b3261e', fontSize: 13, margin: '0 0 16px' }}>{ERRORS[error]}</p>
         )}
-        {failed && (
-          <p style={{ color: '#b3261e', fontSize: 13, margin: '0 0 16px' }}>{failed}</p>
-        )}
-        <button
-          type="button"
-          onClick={signInWithGoogle}
-          disabled={busy}
+        <a
+          href={href}
           style={{
+            display: 'block',
             width: '100%',
             padding: '12px 16px',
             fontSize: 15,
             fontWeight: 600,
             color: '#fff',
             background: '#1a7f37',
-            border: 'none',
             borderRadius: 8,
-            cursor: busy ? 'wait' : 'pointer',
-            opacity: busy ? 0.7 : 1,
+            textDecoration: 'none',
+            boxSizing: 'border-box',
           }}
         >
-          {busy ? 'Opening Google…' : 'Sign in with Google'}
-        </button>
+          Sign in with Google
+        </a>
       </div>
     </main>
   );
@@ -99,7 +71,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense>
-      <LoginForm />
+      <LoginCard />
     </Suspense>
   );
 }

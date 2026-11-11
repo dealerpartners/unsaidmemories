@@ -12,7 +12,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabaseConfig';
  * - Signed out, API   -> 401 JSON
  * - Signed in, not staff -> /login?error=staff (page) or 403 JSON (API)
  */
-const PUBLIC_PREFIXES = ['/login', '/auth/callback'];
+const PUBLIC_PREFIXES = ['/login', '/api/auth/google'];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
