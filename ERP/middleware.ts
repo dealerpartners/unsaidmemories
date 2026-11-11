@@ -12,7 +12,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabaseConfig';
  * - Signed out, API   -> 401 JSON
  * - Signed in, not staff -> /login?error=staff (page) or 403 JSON (API)
  */
-const PUBLIC_PREFIXES = ['/login', '/api/auth/google'];
+const PUBLIC_PREFIXES = ['/login'];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -30,8 +30,11 @@ export async function middleware(req: NextRequest) {
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
         res = NextResponse.next({ request: req });
+        const domain = req.nextUrl.host.endsWith('unsaidmemories.com')
+          ? '.unsaidmemories.com'
+          : undefined;
         cookiesToSet.forEach(({ name, value, options }) =>
-          res.cookies.set(name, value, options),
+          res.cookies.set(name, value, domain ? { ...options, domain } : options),
         );
       },
     },

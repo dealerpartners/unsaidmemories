@@ -15,7 +15,7 @@ function LoginCard() {
   const params = useSearchParams();
   const next = params.get('next') || '/';
   const error = params.get('error');
-  const href = `/api/auth/google?next=${encodeURIComponent(next)}`;
+  const href = `https://unsaidmemories.com/api/auth/google?portal=admin&next=${encodeURIComponent(next)}`;
 
   return (
     <main
