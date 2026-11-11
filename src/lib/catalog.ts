@@ -84,13 +84,12 @@ export const helpArticles: { slug: string; title: string; question: string; answ
   { slug: "accessibility", title: "Accessibility", question: "Using this shop, comfortably.", answer: ["We want everyone to be able to gather, preserve and share their stories here. The shop is built to work with keyboards and screen readers: pages have clear headings, images carry descriptions, and interactive elements can be reached and used without a mouse.", "Text is set in sizes and contrasts chosen to stay readable, and the layout adapts from large screens down to a phone without hiding content.", "If anything here is hard to use — a page you cannot read, a form you cannot complete, a step that only works one way — please tell us through the contact page. Accessibility reports go to the same support team as everything else, and we will help you complete whatever you were trying to do while we fix the barrier.", "We review accessibility as the shop changes, and we treat a barrier you report as a bug, not a suggestion."] },
 ];
 
-// Mega menu config — Shop = ALL 13 top-level departments across 4 columns
-// (3 + 3 + 3 + 4; no nested children; each link routes straight to the
+// Mega menu config — Shop = the store's top-level departments across
+// 4 columns (no nested children; each link routes straight to the
 // department page). The 4-column layout + arrow icons render via the
-// existing `.mega-groups` CSS. Slugs are the static-taxonomy slugs — the
-// shop route resolves them against Supabase by slug first, then by NAME
-// (the DB slugs differ: wall-art-2, cards-stationery, games,
-// collections-occasions…), so every department resolves.
+// existing `.mega-groups` CSS. Every href below is a path in the
+// store's own category tree (src/lib/taxonomy-data.ts, generated from
+// the `categories` table on every deploy).
 export const menus: Record<string, { eyebrow: string; groups: { title: string; links: { label: string; href: string }[] }[]; feature: string; cta: { label: string; href: string } }> = {
   Shop: {
     eyebrow: "Shop all departments",
@@ -99,22 +98,23 @@ export const menus: Record<string, { eyebrow: string; groups: { title: string; l
         { label: "Apparel", href: "/shop/apparel" },
         { label: "Accessories", href: "/shop/accessories" },
         { label: "Headwear", href: "/shop/headwear" },
+        { label: "Children", href: "/shop/children" },
       ] },
       { title: "Art & Decor", links: [
-        { label: "Wall Art", href: "/shop/wall-art" },
+        { label: "Wall Art", href: "/shop/wall-art-2" },
         { label: "Home & Living", href: "/shop/home-and-living" },
         { label: "Wellness", href: "/shop/wellness" },
       ] },
       { title: "Everyday", links: [
         { label: "Drinkware", href: "/shop/drinkware" },
         { label: "Technology", href: "/shop/technology" },
-        { label: "Games & Puzzles", href: "/shop/games-and-puzzles" },
+        { label: "Games & Puzzles", href: "/shop/games" },
       ] },
       { title: "Paper, Gifting & Business", links: [
-        { label: "Cards & stationery", href: "/shop/cards-and-stationery" },
+        { label: "Cards & stationery", href: "/shop/cards-stationery" },
         { label: "Keepsakes", href: "/shop/keepsakes" },
-        { label: "Collections & Occasions", href: "/shop/collections-and-occasions" },
-        { label: "Business & commercial", href: "/shop/business-and-commercial" },
+        { label: "Collections & Occasions", href: "/shop/collections-occasions" },
+        { label: "Business & commercial", href: "/shop/business-commercial" },
       ] },
     ],
     feature: "Thoughtful things. Everyday meaning.",
@@ -133,13 +133,13 @@ export const menus: Record<string, { eyebrow: string; groups: { title: string; l
         { label: "Mentor", href: "/relationships/mentor" },
         { label: "Godparent", href: "/relationships/godparent" },
         { label: "Sister-Friend", href: "/relationships/sister-friend" },
-        { label: "Ride or Die", href: "/relationships" },
+        { label: "Ride or Die", href: "/collections/ride-or-die" },
       ] },
       { title: "Shop by feeling", links: [
-        { label: "I see you", href: "/relationships" },
-        { label: "Thank you for showing up", href: "/relationships" },
+        { label: "I see you", href: "/collections/i-see-you" },
+        { label: "Thank you for showing up", href: "/collections/thank-you-for-showing-up" },
         { label: "Just because", href: "/collections/just-because" },
-        { label: "A little encouragement", href: "/relationships" },
+        { label: "A little encouragement", href: "/collections/a-little-encouragement" },
       ] },
       { title: "Explore", links: [
         { label: "Shop all relationships", href: "/relationships" },
@@ -158,9 +158,9 @@ export const menus: Record<string, { eyebrow: string; groups: { title: string; l
         { label: "Day Ones", href: "/collections/day-ones" },
       ] },
       { title: "Seasonal edits", links: [
-        { label: "UnSaid Holidays", href: "/shop/collections-and-occasions/unsaid-holidays" },
-        { label: "Celebration moments", href: "/shop/cards-and-stationery/celebrations" },
-        { label: "New season, new meaning", href: "/collections" },
+        { label: "UnSaid Holidays", href: "/shop/collections-occasions/unsaid-holidays" },
+        { label: "Celebration moments", href: "/shop/cards-stationery/celebrations" },
+        { label: "New season, new meaning", href: "/collections/new-seasons" },
         { label: "Gift-ready bundles", href: "/shop/keepsakes/bundles" },
       ] },
       { title: "Explore", links: [

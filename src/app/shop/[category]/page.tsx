@@ -1,24 +1,16 @@
 /**
  * /shop/<single segment> — department & top-level category pages.
  *
- * This route used to render a demo-era static file (src/lib/catalog.ts:
- * 3 departments, 6 categories, 8 baked products) and 404'd every other
- * slug — which is why /shop/headwear, /shop/wall-art, /shop/wellness
- * and seven more departments 404'd while their subcategories rendered,
- * and why /shop/apparel served the same 8 demo products on the old
- * template with no sidebar (menu audit 2026-11-01: 17 hard 404s,
- * 4 old-template pages).
- *
- * A single-segment shop address is just a depth-1 taxonomy path, so
- * this route now delegates to the [...slug] category page, which
- * resolves the static taxonomy tree and renders the live catalog
- * through ShopApp (sidebar + real products) at every depth. Slugs
- * that are not in the tree 404 from that page, as before.
+ * A single-segment shop address is just a depth-1 category path, so
+ * this route delegates to the [...slug] category page, which
+ * resolves the store's own category tree (generated from the
+ * `categories` table) and renders the live catalog through ShopApp.
+ * Slugs that are not categories 404 from that page.
  *
  * The demo-era slugs from lib/catalog are folded into their real
- * taxonomy homes (Sunny's fold-in principle — existing URLs never
- * die): the three old department slugs and six old category slugs
- * redirect to the department that carries their products today.
+ * homes — existing URLs never die: the three old department slugs
+ * and six old category slugs redirect to the department that
+ * carries their products today.
  */
 
 import { redirect } from "next/navigation";

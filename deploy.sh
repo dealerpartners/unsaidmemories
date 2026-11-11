@@ -10,6 +10,7 @@ git fetch origin main
 git reset --hard origin/main
 
 bun install
+node scripts/gen-taxonomy.mjs
 # The previous deploy's staged standalone bundle lives inside .next/;
 # the build's cleanup chokes on it (ENOTEMPTY). Remove it first — with
 # the service stopped, because the running server writes its cache into

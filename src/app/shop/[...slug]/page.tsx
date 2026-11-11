@@ -1,27 +1,19 @@
 /**
- * /shop/[...slug] — category pages, STATIC taxonomy only.
+ * /shop/[...slug] — category pages.
  *
- * The render source is the static client-side taxonomy
- * (src/lib/taxonomy.ts — Sunny's re-parented spec: 13 departments, 251
- * nodes, no nodes dropped). A path that is not in the static tree 404s;
- * the DB `categories` table is used ONLY to map the static node to the
- * DB categories holding its products (src/lib/static-catalog.ts —
- * name-path walk, same-name-in-department union for the re-parented
- * merges, children union for grouping nodes). Because resolution is by
- * the static tree, every node — all four levels, including the
- * restored Apparel breakouts /shop/apparel/men and
- * /shop/apparel/apparel-for-babies — is a real page.
+ * The render source is the store's own category tree
+ * (src/lib/taxonomy.ts over src/lib/taxonomy-data.ts — GENERATED
+ * from the `categories` table on every deploy). A path that is not
+ * a category path in the database 404s. Products come from the
+ * categories' own placements via src/lib/static-catalog.ts.
  *
- * Products are server-fetched (unstable_cache, 5-min revalidate) and
- * passed as props; the client grid seeds useState from them — no
- * fetch, no "Loading…" state on first paint. The page and per-page
- * come from the URL (?page=, ?perPage= 25/50/100, clamped to the
- * last page); page changes fetch that page via /api/products, which
- * hits the same static mapping as the server first page.
+ * Products are server-fetched and passed as props; the client grid
+ * seeds useState from them. The page and per-page come from the URL
+ * (?page=, ?perPage= 25/50/100, clamped to the last page); page
+ * changes fetch that page via /api/products.
  *
  * The sidebar is SCOPED to the current category (ShopApp) — the
  * current node plus its children only, never all departments.
- * It is still static-tree rendered, never DB-rendered.
  */
 
 import ShopApp from "../shop-app";
